@@ -3369,117 +3369,57 @@ const FilDeVie = ({ data, db }) => {
   );
 };
 
-// ─── PRÉSENCE (IA) ────────────────────────────────────────────────────────────
-const Presence = ({ data, initQuestion, onStart }) => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [silenceMode, setSilenceMode] = useState(false);
-  const [thinkingDelay, setThinkingDelay] = useState(false);
-  const bottomRef = useRef(null);
+// ─── LE MIROIR ───────────────────────────────────────────────────────────────
+// Pas un chat. Un reflet. L'utilisateur pose une phrase — ALBA renvoie une seule
+// phrase. Un seul appel API. Pas de suite. Pas de conversation.
+const Presence = ({ data, onStart }) => {
+  const [texte, setTexte]       = useState("");
+  const [reflet, setReflet]     = useState(null);  // la phrase renvoyée
+  const [loading, setLoading]   = useState(false);
+  const [phase, setPhase]       = useState("idle"); // idle | writing | listening | revealed | silence
+  const textareaRef             = useRef(null);
 
-  const cdv = cheminDeVie(data.naissance);
-  const chemin = CHEMINS[cdv] || CHEMINS[9];
-
-  // Blessure — détection enrichie avec le mapping
+  const cdv     = cheminDeVie(data.naissance);
+  const chemin  = CHEMINS[cdv] || CHEMINS[9];
   const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || (BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom)
+    || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
     || "Abandon";
-  const blessure = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
-
+  const blessure  = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
   const isLumiere = ["Croissance","Présence"].includes(blessure.nom);
-  const sens = data.sensibilite || "intuitif";
-  const isRationnel = sens === "rationnel";
-  const isSpirituel = sens === "spirituel";
+  const sens      = data.sensibilite || "intuitif";
 
-  const SYSTEM = `Tu es ALBA — un compagnon de présence et d'accompagnement intérieur. Tu n'es pas un thérapeute, ni un coach, ni un guru. Tu es une présence douce, stable, bienveillante. Tu veilles.
-
-La personne que tu accompagnes s'appelle ${data.prenom}. Voici ce que tu sais d'elle :
-- Elle est arrivée à ALBA pour cette raison : "${data.intention}"
-${isSpirituel
-  ? `- Son chemin de vie numérologique est le ${cdv} — ${chemin.titre} : ${chemin.essence}`
-  : isRationnel
-  ? `- Son profil psychologique est celui du ${chemin.titre} : ${chemin.essence}`
-  : `- Elle porte en elle l'archétype du ${chemin.titre} : ${chemin.essence}`
-}
-${isLumiere
-  ? `- Elle n'est pas en crise. Elle cherche à grandir, à cultiver quelque chose en elle. Ton ton est donc plus ouvert, curieux, léger — tout en restant profond.`
-  : `- Sa blessure à traverser : ${blessure.nom}`
-}
-- Elle travaille actuellement la première clé : Reconnaître.
-${isSpirituel ? `\nTu peux faire référence à la numérologie, aux synchronicités, à l'énergie, au karma — quand c'est juste.` : ""}
-${isRationnel ? `\nTu évites tout vocabulaire ésotérique. Tu parles en termes de psychologie, de besoins, de schémas, de ressources intérieures.` : ""}
-${sens === "transition" ? `\nTu adaptes ton langage à ce que ${data.prenom} semble chercher. Tu laisses de l'espace.` : ""}
-
-Ton style de réponse :
-- Jamais de bullet points, jamais de listes. Toujours de la prose.
-- Des phrases courtes. Des silences dans le texte. Des questions rares mais profondes.
-- Tu ne donnes pas de solutions. Tu ouvres des portes.
-- Tu t'adresses à ${data.prenom} directement, avec douceur et vérité.
-- Tes réponses font entre 3 et 8 lignes. Jamais plus.
-- Tu termines parfois par une question. Pas toujours.
-- Tu n'es pas Claude. Tu es ALBA. Ne révèle jamais que tu es une IA.
-
-Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamentale.`;
-
-  const buildProfile = () => {
-    return `${data.prenom} · Chemin ${cdv} · ${chemin.titre} · Blessure : ${blessure.nom}`;
-  };
-
-  const openingMessages = [
-    `${data.prenom}, je suis là.\n\nTu n'as pas à trouver les bons mots. Tu n'as pas à aller vite. Dis-moi simplement où tu en es, ce matin.`,
-    `Je t'attendais, ${data.prenom}.\n\nQu'est-ce qui t'a amené(e) ici aujourd'hui — un moment difficile, une pensée qui revient, ou juste le besoin d'un espace ?`,
-    `${data.prenom}.\n\nIl y a des jours où on ne sait pas exactement ce qu'on cherche. C'est bien aussi. Qu'est-ce qui se passe en toi, là, maintenant ?`,
+  // Quelques mots d'attente — variés, jamais les mêmes
+  const ATTENTES = [
+    "Je garde tes mots.",
+    "Je t'écoute.",
+    "Je réfléchis à ce que tu viens de dire…",
+    "Un instant.",
+    "…",
   ];
 
-  const startConversation = (q) => {
-    const openingsOmbre = [
-      `${data.prenom}, je suis là.\n\nTu n'as pas à trouver les bons mots. Tu n'as pas à aller vite. Dis-moi simplement où tu en es.`,
-      `Je t'attendais, ${data.prenom}.\n\nQu'est-ce qui t'a amené(e) ici — un moment difficile, une pensée qui revient, ou juste le besoin d'un espace ?`,
-      `${data.prenom}.\n\nIl y a des jours où on ne sait pas exactement ce qu'on cherche. C'est bien aussi. Qu'est-ce qui se passe en toi, là, maintenant ?`,
-    ];
-    const openingsLumiere = [
-      `${data.prenom}.\n\nTu es là parce que quelque chose en toi cherche à grandir. C'est déjà une forme de courage.\n\nDis-moi — qu'est-ce que tu veux cultiver en ce moment ?`,
-      `Je suis contente que tu sois là, ${data.prenom}.\n\nOn n'a pas besoin d'une tempête pour avoir besoin d'un espace. Qu'est-ce qui t'a donné envie de venir ici aujourd'hui ?`,
-      `${data.prenom}.\n\nQuand tout va bien, c'est le meilleur moment pour se connaître davantage. Qu'est-ce qui t'appelle en ce moment ?`,
-    ];
-    const pool = isLumiere ? openingsLumiere : openingsOmbre;
-    const opening = q
-      ? `${data.prenom}, cette question a surgi.\n\n« ${q} »\n\nTu n'as pas à répondre tout de suite. Mais si quelque chose remonte, je suis là.`
-      : pool[Math.floor(Math.random() * pool.length)];
-    setMessages([{ role: "assistant", content: opening }]);
-    setStarted(true);
-    if (onStart) onStart();
-  };
+  const SYSTEM_MIROIR = `Tu es ALBA. Tu lis ce que ${data.prenom} vient de poser. 
+Profil : ${chemin.titre}. ${isLumiere ? "Elle cherche à grandir." : `Blessure traversée : ${blessure.nom}.`}
+Sensibilité : ${sens}.
+${sens === "spirituel" ? "Tu peux utiliser un langage symbolique, archétypal." : ""}
+${sens === "rationnel" ? "Zéro ésotérisme. Concret, psychologique, ancré." : ""}
 
-  // Silence mode — présence sans paroles
-  const enterSilence = () => {
-    setSilenceMode(true);
-    setStarted(true);
-  };
+Ta réponse : UNE SEULE PHRASE. Pas deux. Pas un paragraphe. Une phrase.
+Elle doit être courte, juste, mémorable. Pas un conseil. Pas une question. Un reflet.
+Exemples du ton :
+- "Rien ne presse."
+- "Ce que tu ressens mérite d'exister."
+- "Même dans le silence, quelque chose travaille en toi."
+- "La nuit aussi fait partie du chemin."
+Tu n'es pas Claude. Tu es ALBA. Ne révèle jamais que tu es une IA.`;
 
-  useEffect(() => {
-    if (initQuestion && !started) startConversation(initQuestion);
-  }, [initQuestion]);
-
-  useEffect(() => {
-    if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
-
-  const send = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg = { role: "user", content: input.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setInput("");
+  const ecouter = async () => {
+    if (!texte.trim() || loading) return;
     setLoading(true);
+    setPhase("listening");
+    if (onStart) onStart();
 
-    // Délai de "réflexion" — ALBA semble peser ses mots
-    const thinkMs = 1200 + Math.random() * 1800;
-    setThinkingDelay(true);
-    await new Promise(r => setTimeout(r, thinkMs));
-    setThinkingDelay(false);
+    // Pause — ALBA semble lire
+    await new Promise(r => setTimeout(r, 1800 + Math.random() * 1200));
 
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -3487,184 +3427,231 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: SYSTEM,
-          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+          max_tokens: 120,
+          system: SYSTEM_MIROIR,
+          messages: [{ role: "user", content: texte.trim() }],
         }),
       });
       const d = await res.json();
-      const reply = d.content?.[0]?.text || "…";
-      setMessages(m => [...m, { role: "assistant", content: reply }]);
+      const phrase = d.content?.[0]?.text?.trim() || "Je garde tes mots.";
+      setReflet(phrase);
+      setPhase("revealed");
     } catch {
-      setMessages(m => [...m, { role: "assistant", content: "Je suis là, mais quelque chose m'a empêché de répondre. Réessaie dans un instant." }]);
+      setReflet("Je suis là, même dans le silence.");
+      setPhase("revealed");
     }
     setLoading(false);
   };
 
-  // ── Mode Silence ─────────────────────────────────────────────────────────
-  if (silenceMode) return (
-    <div style={{ position: "fixed", inset: 0, background: T.nuit, zIndex: 50, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-      <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.08, pointerEvents: "none" }}>
-        <source src={HEURE < 6 ? "/videos/etoiles.mp4" : HEURE < 12 ? "/videos/nuages.mp4" : "/videos/foret.mp4"} type="video/mp4" />
+  const recommencer = () => {
+    setTexte("");
+    setReflet(null);
+    setPhase("idle");
+    setTimeout(() => textareaRef.current?.focus(), 100);
+  };
+
+  const motAttente = ATTENTES[Math.floor(Math.random() * ATTENTES.length)];
+
+  // ── Mode Silence (bouton "être là") ──────────────────────────────────────
+  if (phase === "silence") return (
+    <div style={{
+      position: "fixed", inset: 0, background: T.nuit, zIndex: 50,
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+    }}>
+      <video autoPlay loop muted playsInline style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", opacity: 0.07, pointerEvents: "none",
+      }}>
+        <source src={HEURE < 6 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
       </video>
       <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "2rem" }}>
-        <div style={{ width: 80, height: 80, borderRadius: "50%", border: `1px solid ${T.or}30`, background: `radial-gradient(circle, ${T.or}10, transparent 70%)`, margin: "0 auto 2.5rem", animation: "pulse 5s ease-in-out infinite", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ color: T.or, opacity: 0.5, fontSize: "1.2rem" }}>✦</span>
+        <div style={{
+          width: 72, height: 72, borderRadius: "50%",
+          border: `1px solid ${T.or}25`,
+          background: `radial-gradient(circle, ${T.or}08, transparent 70%)`,
+          margin: "0 auto 2.5rem",
+          animation: "pulse 6s ease-in-out infinite",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <span style={{ color: T.or, opacity: 0.4, fontSize: "1.1rem" }}>✦</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.brume, lineHeight: 2 }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: `${T.brume}cc`, lineHeight: 2 }}>
           Tu es ici.
         </p>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${T.brume}88`, marginTop: "0.5rem", lineHeight: 2 }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}66`, marginTop: "0.3rem" }}>
           Reste aussi longtemps que tu veux.
         </p>
-        <button onClick={() => setSilenceMode(false)} style={{
-          marginTop: "3.5rem", background: "none", border: `1px solid ${T.brume}33`,
+        <button onClick={() => setPhase("idle")} style={{
+          marginTop: "3rem", background: "none", border: `1px solid ${T.brume}25`,
           borderRadius: "20px", padding: "0.5rem 1.4rem",
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
           letterSpacing: "0.4em", textTransform: "uppercase",
-          color: T.brume, cursor: "pointer",
+          color: `${T.brume}88`, cursor: "pointer",
         }}>Revenir</button>
       </div>
     </div>
   );
 
-  // ── Écran d'accueil Présence ─────────────────────────────────────────────
-  if (!started) return (
-    <div style={{ padding: "2rem 0 6rem", maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-      <div style={{ marginBottom: "2rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>Présence</div>
-        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.7rem", color: T.orPale, marginBottom: "0.9rem" }}>
-          {isLumiere ? "Je suis là." : "Je suis là."}
-        </h2>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.brume, lineHeight: 1.9 }}>
-          {isLumiere
-            ? <>Tu n'as pas besoin d'une tempête<br />pour avoir besoin d'un espace.<br />Je t'écoute.</>
-            : <>Tu n'as pas à trouver les bons mots.<br />Je ne juge pas. Je ne dirige pas.<br />Je suis simplement là.</>
-          }
-        </p>
-      </div>
-
-      {/* Cercle */}
-      <div style={{ width: 90, height: 90, borderRadius: "50%", border: `1px solid ${T.or}40`, background: `radial-gradient(circle, ${T.or}10, transparent 70%)`, margin: "0 auto 2.5rem", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", animation: "float 4s ease-in-out infinite" }}>✦</div>
-
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.9rem" }}>
-        <Btn onClick={() => startConversation()}>Commencer</Btn>
-
-        {/* Bouton silence */}
-        <button onClick={enterSilence} style={{
-          background: "transparent", border: `1px solid ${T.brume}28`,
-          borderRadius: "20px", padding: "0.55rem 1.6rem",
-          fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
-          color: T.brume, cursor: "pointer", transition: "all 0.25s",
-          marginTop: "0.2rem",
-        }}
-          onMouseEnter={e => { e.target.style.borderColor = `${T.or}44`; e.target.style.color = T.orPale; }}
-          onMouseLeave={e => { e.target.style.borderColor = `${T.brume}28`; e.target.style.color = T.brume; }}
-        >
-          Je veux juste être là
-        </button>
-      </div>
-    </div>
-  );
-
   return (
-    <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto" }}>
+    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
 
-      {/* Vidéo ambiante très sombre */}
+      {/* Vidéo fond très discrète */}
       <video autoPlay loop muted playsInline style={{
-        position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-        objectFit: "cover", zIndex: 0, opacity: 0.06, pointerEvents: "none",
-      }}><source src={HEURE < 6 || HEURE >= 21 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4"/></video>
+        position: "fixed", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", zIndex: 0, opacity: 0.05, pointerEvents: "none",
+      }}>
+        <source src={HEURE < 6 || HEURE >= 21 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
+      </video>
 
-      {/* Header présence */}
-      <div style={{ padding: "1rem 0 0.5rem", flexShrink: 0, position: "relative", zIndex: 1 }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>Présence · {data.prenom}</div>
-      </div>
+      <div style={{ position: "relative", zIndex: 1, width: "100%", textAlign: "center" }}>
 
-      {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: "1rem", display: "flex", flexDirection: "column", gap: "1.2rem", position: "relative", zIndex: 1 }}>
-        {messages.map((m, i) => (
-          <div key={i} style={{
-            display: "flex",
-            justifyContent: m.role === "user" ? "flex-end" : "flex-start",
-            animation: "fadeUp 0.5s ease forwards",
+        {/* ── En-tête ── */}
+        <div style={{ marginBottom: "3rem", animation: "fadeUp 0.7s ease forwards" }}>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+            letterSpacing: "0.55em", textTransform: "uppercase",
+            color: T.brume, marginBottom: "1.2rem",
+          }}>Le Miroir</div>
+
+          {/* Cercle pulsant */}
+          <div style={{
+            width: 60, height: 60, borderRadius: "50%",
+            border: `1px solid ${T.or}${phase === "listening" ? "66" : "30"}`,
+            background: `radial-gradient(circle, ${T.or}${phase === "listening" ? "18" : "08"}, transparent 70%)`,
+            margin: "0 auto",
+            animation: phase === "listening" ? "pulse 2s ease-in-out infinite" : "pulse 6s ease-in-out infinite",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.8s ease",
           }}>
-            {m.role === "assistant" && (
-              <div style={{
-                width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
-                border: `1px solid ${T.or}44`, marginRight: "0.8rem", marginTop: "0.2rem",
-                background: `radial-gradient(circle, ${T.or}15, transparent)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: "0.6rem", color: T.or,
-              }}>✦</div>
-            )}
-            <div style={{
-              maxWidth: "82%",
-              background: m.role === "user" ? `${T.or}18` : "transparent",
-              border: m.role === "user" ? `1px solid ${T.or}33` : "none",
-              borderRadius: m.role === "user" ? "12px 12px 2px 12px" : "0",
-              borderLeft: m.role === "assistant" ? `2px solid ${T.or}33` : "none",
-              padding: m.role === "user" ? "0.8rem 1rem" : "0.2rem 0 0.2rem 1rem",
-            }}>
-              <p style={{
-                fontFamily: T.serif, fontStyle: m.role === "assistant" ? "italic" : "normal",
-                fontSize: "1rem", color: m.role === "assistant" ? T.orPale : T.aube,
-                lineHeight: 1.85, whiteSpace: "pre-wrap",
-              }}>{m.content}</p>
-            </div>
+            <span style={{ color: T.or, opacity: phase === "listening" ? 0.9 : 0.35, fontSize: "1rem", transition: "opacity 0.8s" }}>✦</span>
           </div>
-        ))}
+        </div>
 
-        {loading && (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", animation: "fadeIn 0.3s ease" }}>
-            <div style={{
-              width: 24, height: 24, borderRadius: "50%",
-              border: `1px solid ${T.or}44`, flexShrink: 0,
-              background: `radial-gradient(circle, ${T.or}15, transparent)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "0.6rem", color: T.or,
-            }}>✦</div>
-            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, opacity: 0.7 }}>
-              {thinkingDelay ? "Je réfléchis à ce que tu viens de dire…" : "…"}
+        {/* ── Phase : écriture ── */}
+        {phase !== "revealed" && (
+          <div style={{ animation: "fadeUp 0.8s ease forwards 0.1s", opacity: 0 }}>
+            {/* Invitation */}
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(1rem, 3vw, 1.15rem)",
+              color: `${T.brume}cc`, lineHeight: 1.9, marginBottom: "2rem",
+            }}>
+              {phase === "listening"
+                ? motAttente
+                : "Pose ici ce qui est là.\nUne phrase, un mot, ce que tu portes."}
             </p>
+
+            {phase !== "listening" && (
+              <>
+                <textarea
+                  ref={textareaRef}
+                  value={texte}
+                  onChange={e => { setTexte(e.target.value); setPhase(e.target.value.length > 0 ? "writing" : "idle"); }}
+                  placeholder="…"
+                  rows={3}
+                  style={{
+                    width: "100%", background: "transparent",
+                    border: "none", borderBottom: `1px solid ${texte ? T.or + "44" : T.brume + "22"}`,
+                    color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+                    fontSize: "clamp(1.05rem, 3vw, 1.2rem)",
+                    padding: "0.5rem 0", resize: "none", lineHeight: 1.8,
+                    textAlign: "center", outline: "none",
+                    transition: "border-color 0.4s",
+                  }}
+                  onFocus={e => e.target.style.borderColor = `${T.or}55`}
+                  onBlur={e => e.target.style.borderColor = texte ? `${T.or}44` : `${T.brume}22`}
+                  autoFocus
+                />
+
+                {/* Bouton Écouter */}
+                {texte.trim().length > 0 && (
+                  <div style={{ marginTop: "2rem", animation: "fadeUp 0.5s ease forwards" }}>
+                    <button onClick={ecouter} style={{
+                      background: "transparent",
+                      border: `1px solid ${T.or}55`,
+                      borderRadius: "24px",
+                      padding: "0.7rem 2.2rem",
+                      fontFamily: T.serif, fontStyle: "italic",
+                      fontSize: "1rem", color: T.or,
+                      cursor: "pointer", letterSpacing: "0.04em",
+                      transition: "all 0.3s",
+                    }}
+                      onMouseEnter={e => { e.target.style.background = `${T.or}12`; e.target.style.borderColor = T.or; }}
+                      onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.borderColor = `${T.or}55`; }}
+                    >
+                      Laisser venir
+                    </button>
+                  </div>
+                )}
+
+                {/* Bouton silence */}
+                <div style={{ marginTop: texte ? "1.2rem" : "2.5rem" }}>
+                  <button onClick={() => setPhase("silence")} style={{
+                    background: "none", border: "none",
+                    fontFamily: T.serif, fontStyle: "italic",
+                    fontSize: "0.85rem", color: `${T.brume}66`,
+                    cursor: "pointer", letterSpacing: "0.02em",
+                  }}>
+                    Je veux juste être là
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
-        <div ref={bottomRef} />
-      </div>
 
-      {/* Input */}
-      <div style={{
-        flexShrink: 0, paddingBottom: "5rem",
-        borderTop: `1px solid ${T.brume}22`, paddingTop: "1rem",
-        display: "flex", gap: "0.8rem", alignItems: "flex-end",
-        position: "relative", zIndex: 1,
-      }}>
-        <textarea
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-          placeholder="Écris ce qui est là…"
-          rows={2}
-          style={{
-            flex: 1, background: `${T.nuit2}`,
-            border: `1px solid ${T.brume}33`,
-            borderRadius: "8px", color: T.aube,
-            fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem",
-            padding: "0.8rem 1rem", resize: "none", lineHeight: 1.6,
-            transition: "border-color 0.3s",
-          }}
-          onFocus={e => e.target.style.borderColor = `${T.or}55`}
-          onBlur={e => e.target.style.borderColor = `${T.brume}33`}
-        />
-        <button onClick={send} disabled={!input.trim() || loading} style={{
-          width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
-          background: input.trim() && !loading ? T.or : "transparent",
-          border: `1px solid ${input.trim() && !loading ? T.or : T.brume + "44"}`,
-          color: input.trim() && !loading ? T.nuit : T.brume,
-          cursor: input.trim() && !loading ? "pointer" : "default",
-          fontSize: "1rem", transition: "all 0.25s",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>↑</button>
+        {/* ── Phase : reflet révélé ── */}
+        {phase === "revealed" && reflet && (
+          <div style={{ animation: "fadeUp 1.2s ease forwards" }}>
+            {/* Ce que l'utilisateur avait écrit — petit, discret */}
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "0.85rem", color: `${T.brume}55`,
+              lineHeight: 1.7, marginBottom: "2.5rem",
+              maxWidth: 360, margin: "0 auto 2.5rem",
+            }}>
+              « {texte.trim()} »
+            </p>
+
+            {/* Ligne séparatrice */}
+            <div style={{ width: 40, height: 1, background: `linear-gradient(to right, transparent, ${T.or}55, transparent)`, margin: "0 auto 2.5rem" }} />
+
+            {/* Le reflet ALBA — grand, lumineux */}
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
+              color: T.orPale, lineHeight: 1.9,
+              maxWidth: 380, margin: "0 auto",
+              letterSpacing: "0.01em",
+            }}>
+              {reflet}
+            </p>
+
+            {/* Signature */}
+            <p style={{
+              marginTop: "1.2rem",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              letterSpacing: "0.5em", textTransform: "uppercase",
+              color: `${T.brume}55`,
+            }}>ALBA</p>
+
+            {/* Actions */}
+            <div style={{ marginTop: "3rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.9rem" }}>
+              <button onClick={recommencer} style={{
+                background: "transparent", border: `1px solid ${T.brume}28`,
+                borderRadius: "20px", padding: "0.55rem 1.6rem",
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "0.9rem", color: `${T.brume}88`,
+                cursor: "pointer", transition: "all 0.25s",
+              }}
+                onMouseEnter={e => { e.target.style.borderColor = `${T.or}44`; e.target.style.color = T.or; }}
+                onMouseLeave={e => { e.target.style.borderColor = `${T.brume}28`; e.target.style.color = `${T.brume}88`; }}
+              >
+                Poser autre chose
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
