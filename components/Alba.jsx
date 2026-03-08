@@ -1684,7 +1684,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const miroirMots = getMiroirSemaine();
 
   const ENTREES = [
-    { id: "presence", label: "Présence",  desc: "Parler à ALBA",         couleur: "#7B9EA8" },
+    { id: "presence", label: "Présence",  desc: "Un reflet intérieur",         couleur: "#7B9EA8" },
     { id: "ardoise",  label: "Ardoise",   desc: "Poser ce qui traverse", couleur: "#C8A96E" },
     { id: "evasion",  label: "Évasion",   desc: "Un espace de beauté",   couleur: "#9EC8B4" },
     { id: "souffle",  label: "Souffle",   desc: "Respirer",              couleur: "#D4856A" },
@@ -4032,7 +4032,7 @@ export default function Alba() {
 
   const TABS = [
     { id: "compagnon", label: "Jour" },
-    { id: "presence",  label: "Présence" },
+    { id: "presence",  label: "Miroir" },
     { id: "ardoise",   label: "Ardoise" },
     { id: "evasion",   label: "Évasion" },
     { id: "souffle",   label: "Souffle" },
