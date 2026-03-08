@@ -326,6 +326,60 @@ const CLES = [
   { num: "VI",  nom: "Devenir",     desc: "Qui tu es quand tu n'as plus rien à prouver.", couleur: T.or },
 ];
 
+// ─── PHRASES DU MATIN ────────────────────────────────────────────────────────
+// 30 phrases — une par jour (cyclique), selon la clé active
+const PHRASES_MATIN = {
+  default: [
+    "Quelque chose en toi sait déjà.",
+    "Aujourd'hui, tu n'as rien à prouver.",
+    "Ce que tu traverses te traverse pour une raison.",
+    "Tu as survécu à tout ce que tu pensais ne pas pouvoir surmonter.",
+    "La douceur n'est pas une faiblesse. C'est une forme de courage.",
+    "Ce matin existe. C'est suffisant.",
+    "Il y a une lumière en toi que personne ne peut éteindre.",
+    "Tu peux commencer là où tu es.",
+    "Quelque chose commence doucement.",
+    "Ce que tu ressens est réel. Et ça passera aussi.",
+    "Aujourd'hui, laisse entrer ce qui veut entrer.",
+    "Il n'y a rien à réparer. Il y a juste à être.",
+    "Tu mérites la même douceur que tu donnes aux autres.",
+    "Ce silence en toi n'est pas du vide. C'est de l'espace.",
+    "Respire. Tu es encore là.",
+    "Ce que tu portes a un poids. Pose-le un instant.",
+    "Rien ne t'oblige à aller vite.",
+    "Ton histoire n'est pas terminée.",
+    "Ce matin est une page blanche. Pas une obligation.",
+    "Il est permis de ne pas savoir.",
+    "La nuit a fait son travail. Le jour commence.",
+    "Ce que tu crois impossible a déjà commencé à changer.",
+    "Tu n'as pas besoin de tout comprendre aujourd'hui.",
+    "Quelque chose de doux t'attend dans cette journée.",
+    "Ta présence suffit.",
+    "Ce matin, accorde-toi une seule chose : être.",
+    "Tout ne doit pas être résolu. Certaines choses demandent juste du temps.",
+    "Tu es en train de traverser quelque chose. Pas de t'y noyer.",
+    "L'aube revient toujours.",
+    "Ce que tu cherches, tu le portes déjà.",
+  ],
+  // Variantes selon la clé active
+  cle: {
+    0: "Aujourd'hui, regarde ce qui est là — sans chercher à le changer.",        // Reconnaître
+    1: "Derrière chaque répétition, il y a une leçon qui attend d'être vue.",     // Comprendre
+    2: "Ce que tu évites de ressentir prend de la place. Laisse-le exister.",     // Ressentir
+    3: "Qu'est-ce que tu portes pour quelqu'un d'autre depuis trop longtemps ?",  // Lâcher
+    4: "Tu as le droit de recevoir. Sans mérite, sans raison.",                   // Recevoir
+    5: "Qui es-tu quand tu n'as plus rien à prouver ?",                          // Devenir
+  },
+};
+
+const getPhraseduJour = (cleActive = 0) => {
+  const jour = new Date().getDay(); // 0–6
+  // 1 fois sur 4 : phrase liée à la clé. Les autres fois : phrase du pool
+  if (jour % 4 === 0) return PHRASES_MATIN.cle[cleActive] || PHRASES_MATIN.default[0];
+  const idx = (new Date().getDate() + cleActive) % PHRASES_MATIN.default.length;
+  return PHRASES_MATIN.default[idx];
+};
+
 // ─── GRAIN OVERLAY ────────────────────────────────────────────────────────────
 const Grain = () => (
   <div style={{
@@ -1517,6 +1571,8 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const heure = new Date().getHours();
   const salut = heure < 6 ? "Tu veilles encore" : heure < 12 ? "Bonjour" : heure < 18 ? "Bon après-midi" : "Bonsoir";
   const momentLabel = heure < 6 ? "En pleine nuit" : heure < 12 ? "Ce matin" : heure < 18 ? "Cet après-midi" : "Ce soir";
+  const isMatin = heure >= 5 && heure < 12;
+  const phraseDuJour = getPhraseduJour(cleActive);
 
   const ENTREES = [
     { id: "presence", label: "Présence",  desc: "Parler à ALBA",         couleur: "#7B9EA8" },
@@ -1587,6 +1643,48 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           opacity: 0,
         }}>
           <CarteAme data={data} small />
+        </div>
+      </div>
+
+      {/* ── PHRASE DU JOUR / RITUEL DU MATIN ── */}
+      <div style={{
+        margin: "1.2rem 1.5rem 0",
+        position: "relative",
+        animation: "fadeUp 0.7s ease forwards 0.25s", opacity: 0,
+      }}>
+        {/* Fond avec shimmer */}
+        <div style={{
+          background: `linear-gradient(135deg, ${T.nuit2}cc, #1A1410cc)`,
+          border: `1px solid ${T.or}28`,
+          borderRadius: "8px",
+          padding: "1.5rem 1.6rem",
+          overflow: "hidden",
+          position: "relative",
+        }}>
+          {/* Ligne dorée horizontale shimmer */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(to right, transparent, ${T.or}55, transparent)` }} />
+
+          {/* Label */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem",
+          }}>
+            <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.or, opacity: 0.7 }} />
+            <span style={{
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+              letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
+            }}>{isMatin ? "Rituel du matin" : "Pour ce moment"}</span>
+          </div>
+
+          {/* La phrase — grande, italique, présente */}
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1.05rem, 3.2vw, 1.25rem)",
+            color: T.orPale, lineHeight: 1.85,
+            margin: 0,
+            letterSpacing: "0.01em",
+          }}>
+            {phraseDuJour}
+          </p>
         </div>
       </div>
 
