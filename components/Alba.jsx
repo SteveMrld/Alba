@@ -1846,41 +1846,16 @@ const Souffle = ({ onComplete }) => {
 
 // ─── ARDOISE ──────────────────────────────────────────────────────────────────
 
-// Icônes SVG inline — ADN ALBA, trait fin doré
+// Icônes SVG — pack ALBA custom
 const ICONS = {
-  pensee: (c="#C8A96E") => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2C8 2 5 5 5 9c0 2.5 1.2 4.7 3 6.1V18h8v-2.9c1.8-1.4 3-3.6 3-6.1 0-4-3-7-7-7z"/>
-      <path d="M9 21h6M10 18v3M14 18v3"/>
-    </svg>
-  ),
-  emotion: (c="#D4856A") => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
-      <path d="M2 12 Q6 6 10 12 Q14 18 18 12 Q20 9 22 12"/>
-      <path d="M2 17 Q6 11 10 17 Q14 23 18 17" opacity="0.5"/>
-    </svg>
-  ),
-  gratitude: (c="#7BA88A") => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3 Q18 3 18 9 Q18 15 12 21 Q6 15 6 9 Q6 3 12 3Z"/>
-      <path d="M12 7v10M8 12h8" opacity="0.5"/>
-    </svg>
-  ),
-  question: (c="#7B9EA8") => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
-      <path d="M5 8 A7 7 0 1 1 19 8 Q19 13 12 14"/>
-      <circle cx="12" cy="19" r="1" fill={c}/>
-    </svg>
-  ),
-  victoire: (c="#A87BC8") => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
-      <path d="M12 2 L12 22M2 12 L22 12M5 5 L19 19M19 5 L5 19"/>
-    </svg>
-  ),
+  pensee:    (c="#C8A96E") => <img src="/icons/ardoise_pensee.svg"    width="16" height="16" style={{ filter: c !== "#C8A96E" ? "none" : "none", opacity: 0.9 }} />,
+  emotion:   (c="#D4856A") => <img src="/icons/ardoise_emotion.svg"   width="16" height="16" style={{ opacity: 0.9 }} />,
+  gratitude: (c="#7BA88A") => <img src="/icons/ardoise_gratitude.svg" width="16" height="16" style={{ opacity: 0.9 }} />,
+  question:  (c="#7B9EA8") => <img src="/icons/ardoise_question.svg"  width="16" height="16" style={{ opacity: 0.9 }} />,
+  victoire:  (c="#A87BC8") => <img src="/icons/ardoise_victoire.svg"  width="16" height="16" style={{ opacity: 0.9 }} />,
   bilan: (c="#C8A96E") => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
-      <circle cx="12" cy="12" r="9"/>
-      <path d="M8 12l3 3 5-5"/>
+      <circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/>
     </svg>
   ),
   plus: (c="#8C7F74") => (
@@ -1888,11 +1863,7 @@ const ICONS = {
       <path d="M12 5v14M5 12h14"/>
     </svg>
   ),
-  fermer: (c="#8C7F74") => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
-      <path d="M18 6L6 18M6 6l12 12"/>
-    </svg>
-  ),
+  fermer: (c="#8C7F74") => <img src="/icons/general_fermer.svg" width="14" height="14" style={{ opacity: 0.7 }} />,
 };
 
 const POSTIT_TYPES = [
@@ -2813,16 +2784,28 @@ export default function Alba() {
 
   // Icônes nav SVG
   const NavIcon = ({ id, active }) => {
-    const c = active ? T.or : T.brume;
-    const w = active ? "1.4" : "1";
-    const icons = {
-      compagnon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><path d="M12 3 L14.5 9H21L16 13.5 18 20 12 16 6 20 8 13.5 3 9H9.5Z"/></svg>,
-      presence:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>,
-      ardoise:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>,
-      evasion:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><path d="M3 17 Q7 8 12 10 Q17 12 21 5"/><path d="M3 20h18"/></svg>,
-      souffle:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><path d="M12 3 Q18 3 18 8 Q18 13 12 13 Q6 13 6 8 Q6 3 12 3Z" opacity="0.6"/><path d="M8 13 Q8 20 12 20 Q16 20 16 13"/></svg>,
+    const map = {
+      compagnon: "/icons/navigation_jour.svg",
+      presence:  "/icons/navigation_presence.svg",
+      ardoise:   "/icons/navigation_ardoise.svg",
+      evasion:   "/icons/navigation_evasion.svg",
+      souffle:   "/icons/navigation_souffle.svg",
     };
-    return icons[id] || null;
+    const src = map[id];
+    if (!src) return null;
+    return (
+      <img
+        src={src}
+        width={22} height={22}
+        style={{
+          opacity: active ? 1 : 0.4,
+          filter: active
+            ? "brightness(1.2) sepia(1) saturate(3) hue-rotate(5deg)"
+            : "brightness(0.6) grayscale(1)",
+          transition: "all 0.25s",
+        }}
+      />
+    );
   };
 
   return (
