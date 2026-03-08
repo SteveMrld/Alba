@@ -965,155 +965,334 @@ const CarteAme = ({ data, small }) => {
 const Portrait = ({ data, onContinue }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
-  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
-  const livre = LIVRES[blessure.nom];
-  const citation = CITATIONS[cdv % CITATIONS.length];
-  const cle = CLES[0];
-  const sens = data.sensibilite || "intuitif";
+  const bIdx = Object.values(BLESSURES).findIndex(b =>
+    data.intention.toLowerCase().includes(b.nom.toLowerCase())
+  );
+  const blessure  = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const livre     = LIVRES[blessure.nom];
+  const citation  = CITATIONS[cdv % CITATIONS.length];
+  const cle       = CLES[0];
+  const sens      = data.sensibilite || "intuitif";
   const isRationnel = sens === "rationnel";
-
-  // Labels adaptatifs selon sensibilité
-  const labelChemin = isRationnel ? "Profil psychologique" : "Chemin de vie";
+  const labelChemin  = isRationnel ? "Profil psychologique" : "Chemin de vie";
   const labelBlessure = isRationnel ? "Zone de vulnérabilité" : "Blessure à traverser";
-  const cheminNum = isRationnel ? null : cdv; // Pas le chiffre pour les rationnels
 
-  return (
-    <Screen style={{ maxWidth: 560, margin: "0 auto", paddingTop: "8vh" }}>
-      <div style={{ animation: "fadeUp 1s ease forwards", textAlign: "center", marginBottom: "2rem" }}>
-        <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
-          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
-          marginBottom: "0.8rem",
-        }}>{isRationnel ? "Profil d'accompagnement" : "Portrait d'âme"}</div>
+  // ── Phases cinématiques ──────────────────────────────────────────────────
+  // 0 = écran noir avec "Attends un instant"
+  // 1 = prénom + étoile dorée  
+  // 2 = carte + archétype
+  // 3 = blessure
+  // 4 = citation
+  // 5 = portrait complet + bouton
+  const [phase, setPhase] = useState(0);
 
-        {/* Carte SVG — seulement pour intuitif/spirituel/transition */}
-        {!isRationnel && (
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem", animation: "fadeUp 1.2s ease forwards 0.2s", opacity: 0 }}>
-            <CarteAme data={data} />
+  useEffect(() => {
+    const delays = [2200, 2000, 2400, 2200, 2600];
+    let t;
+    const advance = (p) => {
+      t = setTimeout(() => {
+        setPhase(p + 1);
+        if (p + 1 < 5) advance(p + 1);
+      }, delays[p]);
+    };
+    advance(0);
+    return () => clearTimeout(t);
+  }, []);
+
+  const fade = (visible, delay = 0) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(18px)",
+    transition: `opacity 1.2s ease ${delay}s, transform 1.2s ease ${delay}s`,
+  });
+
+  // ── Phase 0–4 : révélation séquentielle plein écran ─────────────────────
+  if (phase < 5) return (
+    <div style={{
+      position: "fixed", inset: 0,
+      background: T.nuit,
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      zIndex: 100, overflow: "hidden",
+    }}>
+      {/* Vidéo ambiante très discrète */}
+      <video autoPlay loop muted playsInline style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", opacity: 0.05, pointerEvents: "none",
+      }}>
+        <source src={HEURE < 6 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
+      </video>
+
+      {/* Halo central doré, pulse très lent */}
+      <div style={{
+        position: "absolute",
+        width: 360, height: 360, borderRadius: "50%",
+        background: `radial-gradient(circle, ${T.or}0A 0%, transparent 70%)`,
+        animation: "pulse 4s ease-in-out infinite",
+        pointerEvents: "none",
+      }} />
+
+      <style>{`
+        @keyframes pulse { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.15);opacity:1} }
+        @keyframes shimmerLine { 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
+        @keyframes starSpin { 0%{transform:rotate(0deg) scale(1)} 50%{transform:rotate(180deg) scale(1.1)} 100%{transform:rotate(360deg) scale(1)} }
+      `}</style>
+
+      {/* ── PHASE 0 — "Attends un instant" ── */}
+      <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "2rem" }}>
+        <div style={{ ...fade(phase >= 0) }}>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
+            color: T.brume, letterSpacing: "0.03em", lineHeight: 1.9,
+          }}>
+            Attends un instant.
+          </p>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
+            color: T.brume, marginTop: "0.3rem",
+            ...fade(phase >= 0, 0.6),
+          }}>
+            ALBA t'écoute.
+          </p>
+        </div>
+
+        {/* ── PHASE 1 — Prénom + étoile ── */}
+        {phase >= 1 && (
+          <div style={{ marginTop: "3.5rem", ...fade(phase >= 1) }}>
+            {/* Étoile animée */}
+            <div style={{
+              fontSize: "1.4rem", color: T.or, marginBottom: "1.2rem",
+              animation: "starSpin 8s linear infinite",
+              display: "inline-block",
+            }}>✦</div>
+            <div style={{
+              fontFamily: T.serif, fontWeight: 300,
+              fontSize: "clamp(2.2rem, 9vw, 3.5rem)",
+              color: T.orPale, letterSpacing: "0.08em",
+              lineHeight: 1,
+            }}>
+              {data.prenom}
+            </div>
+            <div style={{
+              marginTop: "0.8rem",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+              letterSpacing: "0.6em", textTransform: "uppercase",
+              color: T.brume, ...fade(phase >= 1, 0.5),
+            }}>
+              {isRationnel ? "profil d'accompagnement" : "portrait d'âme"}
+            </div>
           </div>
         )}
 
-        {/* Pour les rationnels : un symbole sobre à la place */}
-        {isRationnel && (
-          <div style={{
-            display: "flex", justifyContent: "center", marginBottom: "1.5rem",
-            animation: "fadeUp 1.2s ease forwards 0.2s", opacity: 0,
-          }}>
+        {/* ── PHASE 2 — Archétype ── */}
+        {phase >= 2 && (
+          <div style={{ marginTop: "2.5rem", ...fade(phase >= 2) }}>
             <div style={{
-              width: 120, height: 120, borderRadius: "50%",
-              border: `2px solid ${T.brume}44`,
-              background: `radial-gradient(circle, ${T.or}12 0%, transparent 70%)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "inline-flex", alignItems: "baseline", gap: "1rem",
+              borderBottom: `1px solid ${T.or}33`, paddingBottom: "0.8rem",
             }}>
-              <span style={{ fontFamily: T.serif, fontSize: "2.5rem", color: T.or, opacity: 0.7 }}>◎</span>
+              {!isRationnel && (
+                <span style={{
+                  fontFamily: T.serif, fontSize: "3.5rem", fontWeight: 300,
+                  color: T.or, lineHeight: 1, opacity: 0.85,
+                }}>{cdv}</span>
+              )}
+              <span style={{
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "clamp(1.2rem, 4.5vw, 1.6rem)",
+                color: T.orPale,
+              }}>{chemin.titre}</span>
+            </div>
+            {sens === "spirituel" && !isRationnel && (
+              <div style={{
+                marginTop: "0.6rem",
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem",
+                color: T.brume, letterSpacing: "0.2em",
+                ...fade(phase >= 2, 0.4),
+              }}>
+                {CARTE_DATA[cdv]?.element || ""} · {CARTE_DATA[cdv]?.mot || ""}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PHASE 3 — Blessure ── */}
+        {phase >= 3 && (
+          <div style={{ marginTop: "2rem", ...fade(phase >= 3) }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: "0.7rem",
+            }}>
+              <div style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: blessure.couleur,
+                boxShadow: `0 0 8px ${blessure.couleur}`,
+              }} />
+              <span style={{
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "clamp(1rem, 3.5vw, 1.25rem)",
+                color: blessure.couleur, opacity: 0.9,
+              }}>
+                {isRationnel ? "Vulnérabilité · " : "Blessure · "}{blessure.nom}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* ── PHASE 4 — Citation ── */}
+        {phase >= 4 && (
+          <div style={{
+            marginTop: "2.5rem", maxWidth: 340, margin: "2.5rem auto 0",
+            ...fade(phase >= 4),
+          }}>
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(0.9rem, 3vw, 1.05rem)",
+              color: T.orPale, lineHeight: 1.9, opacity: 0.85,
+            }}>
+              « {citation.texte} »
+            </p>
+            <p style={{
+              marginTop: "0.6rem",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.35em", color: T.brume,
+            }}>— {citation.auteur}</p>
+
+            {/* Ligne shimmer sous la citation */}
+            <div style={{
+              marginTop: "2rem", height: "1px", width: "100%", overflow: "hidden",
+              background: `${T.or}22`, position: "relative",
+            }}>
+              <div style={{
+                position: "absolute", top: 0, left: 0, height: "100%", width: "30%",
+                background: `linear-gradient(to right, transparent, ${T.or}88, transparent)`,
+                animation: "shimmerLine 2.5s ease infinite",
+              }} />
             </div>
           </div>
         )}
       </div>
+    </div>
+  );
 
-      {/* Chemin de vie / Profil */}
-      <div style={{
-        background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
-        border: `1px solid ${T.or}33`,
-        borderRadius: "4px", padding: "2rem",
-        marginBottom: "1.2rem",
-        animation: "fadeUp 1s ease forwards 0.3s", opacity: 0,
-        position: "relative", overflow: "hidden",
-      }}>
-        <div style={{
-          position: "absolute", top: -30, right: -30, width: 120, height: 120,
-          borderRadius: "50%", background: `radial-gradient(circle, ${T.or}12, transparent 70%)`,
-        }} />
+  // ── Phase 5 : Portrait complet défilant ─────────────────────────────────
+  return (
+    <Screen style={{ maxWidth: 560, margin: "0 auto", paddingTop: "5vh" }}>
+      <style>{`
+        @keyframes cardReveal { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+        .portrait-card { animation: cardReveal 0.9s ease forwards; opacity: 0; }
+      `}</style>
+
+      {/* ── En-tête : prénom + carte ── */}
+      <div className="portrait-card" style={{ textAlign: "center", marginBottom: "2.5rem", animationDelay: "0s" }}>
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
-          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem",
-        }}>{labelChemin}</div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.6rem" }}>
-          {!isRationnel && <span style={{ fontFamily: T.serif, fontSize: "3rem", fontWeight: 300, color: T.or, lineHeight: 1 }}>{cdv}</span>}
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>{chemin.titre}</span>
+          letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem",
+        }}>{isRationnel ? "profil d'accompagnement" : "portrait d'âme"}</div>
+
+        {/* Carte ou symbole */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+          {!isRationnel
+            ? <CarteAme data={data} />
+            : (
+              <div style={{
+                width: 130, height: 130, borderRadius: "50%",
+                border: `1.5px solid ${T.brume}44`,
+                background: `radial-gradient(circle, ${T.or}10 0%, transparent 70%)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <span style={{ fontFamily: T.serif, fontSize: "2.8rem", color: T.or, opacity: 0.65 }}>◎</span>
+              </div>
+            )
+          }
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.aube, opacity: 0.8, lineHeight: 1.7 }}>{chemin.essence}</p>
-        {!isRationnel && sens === "spirituel" && (
-          <div style={{ marginTop: "0.8rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", color: T.brume, letterSpacing: "0.1em" }}>
-            Chemin {cdv} · {CARTE_DATA[cdv]?.element || ""} · {CARTE_DATA[cdv]?.mot || ""}
+
+        <div style={{
+          fontFamily: T.serif, fontWeight: 300,
+          fontSize: "clamp(2rem, 8vw, 2.8rem)",
+          color: T.orPale, letterSpacing: "0.06em",
+        }}>{data.prenom}</div>
+      </div>
+
+      {/* ── Chemin de vie ── */}
+      <div className="portrait-card" style={{
+        background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
+        border: `1px solid ${T.or}33`, borderRadius: "6px", padding: "1.8rem",
+        marginBottom: "1rem", position: "relative", overflow: "hidden",
+        animationDelay: "0.15s",
+      }}>
+        <div style={{ position: "absolute", top: -40, right: -40, width: 140, height: 140, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}10, transparent 70%)` }} />
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.7rem" }}>{labelChemin}</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "0.8rem", marginBottom: "0.5rem" }}>
+          {!isRationnel && <span style={{ fontFamily: T.serif, fontSize: "2.6rem", fontWeight: 300, color: T.or, lineHeight: 1 }}>{cdv}</span>}
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>{chemin.titre}</span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>{chemin.essence}</p>
+        {sens === "spirituel" && !isRationnel && (
+          <div style={{ marginTop: "0.7rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem", color: T.brume, letterSpacing: "0.15em" }}>
+            {CARTE_DATA[cdv]?.element || ""} · {CARTE_DATA[cdv]?.mot || ""}
           </div>
         )}
       </div>
 
-      {/* Blessure / Zone de vulnérabilité */}
-      <div style={{
+      {/* ── Blessure ── */}
+      <div className="portrait-card" style={{
         background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
-        border: `1px solid ${blessure.couleur}44`,
-        borderRadius: "4px", padding: "1.5rem",
-        marginBottom: "1.2rem",
-        animation: "fadeUp 1s ease forwards 0.6s", opacity: 0,
+        border: `1px solid ${blessure.couleur}44`, borderRadius: "6px", padding: "1.5rem",
+        marginBottom: "1rem", animationDelay: "0.3s",
       }}>
-        <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
-          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem",
-        }}>{labelBlessure}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.5rem" }}>
-          <div style={{ width: 8, height: 8, background: blessure.couleur, borderRadius: "50%" }} />
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>{blessure.nom}</span>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>{labelBlessure}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
+          <div style={{ width: 7, height: 7, background: blessure.couleur, borderRadius: "50%", boxShadow: `0 0 6px ${blessure.couleur}` }} />
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.15rem", color: T.orPale }}>{blessure.nom}</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.aube, opacity: 0.75, lineHeight: 1.7 }}>{blessure.question}</p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.aube, opacity: 0.75, lineHeight: 1.75 }}>{blessure.question}</p>
       </div>
 
-      {/* Citation */}
-      <div style={{
-        padding: "1.5rem",
-        borderLeft: `2px solid ${T.or}55`,
-        marginBottom: "1.2rem",
-        animation: "fadeUp 1s ease forwards 0.9s", opacity: 0,
+      {/* ── Citation ── */}
+      <div className="portrait-card" style={{
+        padding: "1.5rem", borderLeft: `2px solid ${T.or}55`,
+        marginBottom: "1rem", animationDelay: "0.45s",
       }}>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.8, marginBottom: "0.5rem" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.85, marginBottom: "0.5rem" }}>
           « {citation.texte} »
         </p>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", letterSpacing: "0.3em", color: T.brume }}>
-          — {citation.auteur}
-        </p>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem", letterSpacing: "0.3em", color: T.brume }}>— {citation.auteur}</p>
       </div>
 
-      {/* Livre recommandé */}
-      <div style={{
+      {/* ── Livre ── */}
+      <div className="portrait-card" style={{
         background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
-        border: `1px solid ${T.brume}22`,
-        borderRadius: "4px", padding: "1.5rem",
-        marginBottom: "1.2rem",
-        animation: "fadeUp 1s ease forwards 1.1s", opacity: 0,
+        border: `1px solid ${T.brume}22`, borderRadius: "6px", padding: "1.4rem",
+        marginBottom: "1rem", animationDelay: "0.6s",
         display: "flex", alignItems: "center", gap: "1.2rem",
       }}>
         <div style={{
-          width: 42, height: 56, flexShrink: 0,
+          width: 40, height: 54, flexShrink: 0,
           background: `linear-gradient(135deg, ${T.or}33, ${T.aurore}22)`,
           border: `1px solid ${T.or}44`, borderRadius: "2px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "1.2rem",
+          display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem",
         }}>📖</div>
         <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>Lecture pour toi</div>
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale }}>{livre.titre}</div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, marginTop: "0.2rem" }}>{livre.auteur} &nbsp;·&nbsp; {livre.mot}</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>Lecture pour toi</div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>{livre.titre}</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", color: T.brume, marginTop: "0.2rem" }}>{livre.auteur}</div>
         </div>
       </div>
 
-      {/* Première clé */}
-      <div style={{
-        border: `1px solid ${cle.couleur}55`,
-        borderRadius: "4px", padding: "1.5rem",
-        marginBottom: "2.5rem",
-        animation: "fadeUp 1s ease forwards 1.3s", opacity: 0,
-        background: `${cle.couleur}08`,
+      {/* ── Première Clé ── */}
+      <div className="portrait-card" style={{
+        border: `1px solid ${cle.couleur}44`, borderRadius: "6px", padding: "1.4rem",
+        marginBottom: "2.5rem", background: `${cle.couleur}08`, animationDelay: "0.75s",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.5rem" }}>
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: cle.couleur, opacity: 0.8 }}>Clé {cle.num}</span>
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.15rem", color: T.orPale }}>{cle.nom}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.8rem", color: cle.couleur, opacity: 0.8 }}>Clé {cle.num}</span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale }}>{cle.nom}</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8, lineHeight: 1.7 }}>{cle.desc}</p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>{cle.desc}</p>
       </div>
 
-      <div style={{ textAlign: "center", animation: "fadeUp 0.8s ease forwards 1.5s", opacity: 0 }}>
+      <div className="portrait-card" style={{ textAlign: "center", animationDelay: "0.9s" }}>
         <Btn onClick={onContinue}>Entrer dans ALBA</Btn>
       </div>
     </Screen>
