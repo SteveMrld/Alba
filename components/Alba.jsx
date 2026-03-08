@@ -2509,10 +2509,9 @@ const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) =
 };
 
 const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) => {
-  // Clé du jour courant : "2026-03-08"
   const todayKey = new Date().toISOString().split("T")[0];
   const [jourActif, setJourActif] = useState(todayKey);
-  const [allPostits, setAllPostits] = useState({}); // { "2026-03-08": [...] }
+  const [allPostits, setAllPostits] = useState({});
   const [texte, setTexte] = useState("");
   const [type, setType] = useState("pensee");
   const [loading, setLoading] = useState(false);
@@ -2522,6 +2521,58 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange
   const pressing = useRef(null);
   const pressTimer = useRef(null);
   const [deletingId, setDeletingId] = useState(null);
+
+  // ── Boîte des Tempêtes ───────────────────────────────────────────────────
+  const [tempetes, setTempetes] = useState([]); // [{ id, texte, date, vue }]
+  const [showTempeteForm, setShowTempeteForm] = useState(false);
+  const [tempeteTexte, setTempeteTexte] = useState("");
+  const [tempeteReveil, setTempeteReveil] = useState(null); // tempête à montrer
+
+  useEffect(() => {
+    const saved = localStorage.getItem("alba_tempetes");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setTempetes(parsed);
+        // Vérifier si une tempête doit "se réveiller"
+        const maintenant = new Date();
+        const aReveiller = parsed.find(t => {
+          if (t.vue) return false;
+          const dateT = new Date(t.date);
+          const joursEcoules = (maintenant - dateT) / (1000 * 60 * 60 * 24);
+          return joursEcoules >= (t.delaiJours || 21);
+        });
+        if (aReveiller) setTempeteReveil(aReveiller);
+      } catch {}
+    }
+  }, []);
+
+  const saveTempetes = (list) => {
+    setTempetes(list);
+    localStorage.setItem("alba_tempetes", JSON.stringify(list));
+  };
+
+  const fermerTempete = () => {
+    if (!tempeteTexte.trim()) return;
+    // Délai aléatoire entre 14 et 42 jours
+    const delaiJours = 14 + Math.floor(Math.random() * 28);
+    const nouvelle = {
+      id: Date.now(),
+      texte: tempeteTexte.trim(),
+      date: new Date().toISOString(),
+      delaiJours,
+      vue: false,
+    };
+    saveTempetes([...tempetes, nouvelle]);
+    setTempeteTexte("");
+    setShowTempeteForm(false);
+  };
+
+  const marquerTempeteVue = (id) => {
+    const updated = tempetes.map(t => t.id === id ? { ...t, vue: true } : t);
+    saveTempetes(updated);
+    setTempeteReveil(null);
+  };
 
   // Charger les post-its au montage
   useEffect(() => {
@@ -2623,6 +2674,69 @@ ${resume}
   return (
     <div style={{ padding: "0 0 6rem" }}>
 
+      {/* ── RÉVEIL D'UNE TEMPÊTE ── */}
+      {tempeteReveil && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(10,8,6,0.94)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          animation: "fadeIn 0.5s ease",
+          padding: "1.5rem",
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 480,
+            background: `linear-gradient(160deg, #1C1710, #141210)`,
+            border: `1px solid ${T.or}33`,
+            borderRadius: "12px",
+            padding: "2.5rem 2rem",
+            textAlign: "center",
+            boxShadow: "0 0 60px rgba(200,169,110,0.08)",
+          }}>
+            {/* Étoile pulsante */}
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%",
+              border: `1px solid ${T.or}44`,
+              background: `radial-gradient(circle, ${T.or}15, transparent 70%)`,
+              margin: "0 auto 2rem",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              animation: "pulse 3s ease-in-out infinite",
+            }}>
+              <span style={{ color: T.or, fontSize: "1.1rem" }}>✦</span>
+            </div>
+
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "1.5rem" }}>
+              ALBA se souvient
+            </div>
+
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.5rem" }}>
+              Il y a quelque temps, tu as fermé une tempête.
+            </p>
+
+            {/* La tempête */}
+            <div style={{
+              background: `${T.or}08`,
+              border: `1px solid ${T.or}22`,
+              borderRadius: "8px",
+              padding: "1.2rem 1.4rem",
+              marginBottom: "2rem",
+            }}>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.8 }}>
+                « {tempeteReveil.texte} »
+              </p>
+              <p style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", color: T.brume }}>
+                {new Date(tempeteReveil.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+              </p>
+            </div>
+
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.or, lineHeight: 1.9, marginBottom: "2rem" }}>
+              Tu l'as traversée.
+            </p>
+
+            <Btn onClick={() => marquerTempeteVue(tempeteReveil.id)}>Je vois ça</Btn>
+          </div>
+        </div>
+      )}
+
       {/* ── HEADER ── */}
       <div style={{ padding: "1.5rem 1.5rem 1rem", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
@@ -2633,19 +2747,99 @@ ${resume}
               : new Date(jourActif + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
           </div>
         </div>
-        {postits.length > 0 && jourActif === todayKey && (
-          <button onClick={genererBilan} style={{
-            display: "flex", alignItems: "center", gap: "0.5rem",
-            background: "transparent", border: `1px solid ${T.or}44`,
-            color: T.or, fontFamily: T.sans, fontWeight: 200,
-            fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase",
-            padding: "0.5rem 0.9rem", borderRadius: "2px", cursor: "pointer",
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          {/* Bouton Tempête */}
+          <button onClick={() => setShowTempeteForm(true)} title="Fermer une tempête" style={{
+            background: "transparent",
+            border: `1px solid ${T.brume}28`,
+            color: T.brume, width: 34, height: 34, borderRadius: "50%",
+            cursor: "pointer", fontSize: "0.9rem",
+            display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.25s",
-          }}>
-            {ICONS.bilan()} Bilan
-          </button>
-        )}
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = `${T.aurore}55`; e.currentTarget.style.color = T.aurore; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = `${T.brume}28`; e.currentTarget.style.color = T.brume; }}
+          >⛈</button>
+
+          {postits.length > 0 && jourActif === todayKey && (
+            <button onClick={genererBilan} style={{
+              display: "flex", alignItems: "center", gap: "0.5rem",
+              background: "transparent", border: `1px solid ${T.or}44`,
+              color: T.or, fontFamily: T.sans, fontWeight: 200,
+              fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase",
+              padding: "0.5rem 0.9rem", borderRadius: "2px", cursor: "pointer",
+              transition: "all 0.25s",
+            }}>
+              {ICONS.bilan()} Bilan
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* ── FORMULAIRE TEMPÊTE ── */}
+      {showTempeteForm && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(10,8,6,0.90)",
+          display: "flex", alignItems: "flex-end",
+          animation: "fadeIn 0.3s ease",
+        }} onClick={() => setShowTempeteForm(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 540, margin: "0 auto",
+            background: `linear-gradient(170deg, #1A1714, #141210)`,
+            borderTop: `1px solid ${T.brume}28`,
+            borderRadius: "16px 16px 0 0",
+            padding: "2rem 1.8rem 3rem",
+            animation: "fadeUp 0.35s ease forwards",
+          }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+              Boîte des Tempêtes
+            </div>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.5rem" }}>
+              Nomme ce que tu traverses. ALBA le garde.<br/>
+              Dans quelques semaines, elle te rappellera que tu l'as traversé.
+            </p>
+
+            <textarea
+              value={tempeteTexte}
+              onChange={e => setTempeteTexte(e.target.value)}
+              placeholder="Ce que je traverse en ce moment…"
+              rows={3}
+              autoFocus
+              style={{
+                width: "100%", background: `${T.nuit2}`,
+                border: `1px solid ${T.brume}33`,
+                borderRadius: "6px", color: T.aube,
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "1rem", padding: "0.9rem 1rem",
+                resize: "none", lineHeight: 1.7,
+                transition: "border-color 0.3s",
+              }}
+              onFocus={e => e.target.style.borderColor = `${T.aurore}55`}
+              onBlur={e => e.target.style.borderColor = `${T.brume}33`}
+            />
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.2rem" }}>
+              <button onClick={() => { setShowTempeteForm(false); setTempeteTexte(""); }} style={{
+                background: "none", border: "none", color: T.brume,
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+                letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+              }}>Annuler</button>
+
+              {tempeteTexte.trim().length > 3 && (
+                <button onClick={fermerTempete} style={{
+                  background: "transparent",
+                  border: `1px solid ${T.aurore}55`,
+                  borderRadius: "20px", padding: "0.6rem 1.5rem",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "0.95rem", color: T.aurore,
+                  cursor: "pointer", transition: "all 0.25s",
+                }}>Fermer cette tempête</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── CALENDRIER 7 JOURS ── */}
       <div style={{ padding: "0 1.5rem", marginBottom: "1rem" }}>
