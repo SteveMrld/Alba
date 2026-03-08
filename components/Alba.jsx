@@ -1547,27 +1547,28 @@ const getPhotos = (cdv, blessure) => {
 };
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
+const VIDEOS = [
+  { src: "/videos/vagues.mp4",  legende: "La mer reçoit tout. Elle ne retient rien.",   label: "Vagues" },
+  { src: "/videos/foret.mp4",   legende: "La forêt n'explique pas sa lumière.",          label: "Forêt" },
+  { src: "/videos/savane.mp4",  legende: "La savane sait attendre.",                     label: "Savane" },
+];
+
 const Evasion = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
   const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
   const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
-  const { all } = getPhotos(cdv, blessure.nom);
+  const { all, categorie } = getPhotos(cdv, blessure.nom);
+  const [mode, setMode] = useState("video"); // "photo" | "video"
   const [actif, setActif] = useState(0);
   const [loaded, setLoaded] = useState({});
-  const [direction, setDirection] = useState(1); // 1=next, -1=prev
-  const [animating, setAnimating] = useState(false);
   const touchStart = useRef(null);
+  const videoRef = useRef(null);
 
-  const photo = all[actif] || all[0];
+  const items = mode === "video" ? VIDEOS : all;
+  const item = items[actif] || items[0];
 
   const navigate = (dir) => {
-    if (animating) return;
-    setDirection(dir);
-    setAnimating(true);
-    setTimeout(() => {
-      setActif(a => (a + dir + all.length) % all.length);
-      setAnimating(false);
-    }, 300);
+    setActif(a => (a + dir + items.length) % items.length);
   };
 
   const handleTouchStart = (e) => { touchStart.current = e.touches[0].clientX; };
@@ -1588,99 +1589,105 @@ const Evasion = ({ data }) => {
     <div style={{ padding: "0 0 6rem" }}>
 
       {/* ── HEADER ── */}
-      <div style={{ padding: "1.5rem 1.5rem 1.2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+      <div style={{ padding: "1.5rem 1.5rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>
-            Évasion · {catLabel[getPhotos(cdv, blessure.nom).categorie] || ""}
+            Évasion · {mode === "video" ? "Ambiances" : catLabel[categorie] || ""}
           </div>
           <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>
             Laisse-les simplement être là.
           </div>
         </div>
-        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.3em", color: T.brume }}>
-          {actif + 1} / {all.length}
-        </span>
+        {/* Toggle Photo / Vidéo */}
+        <div style={{ display: "flex", gap: "4px", background: T.nuit2, borderRadius: "20px", padding: "3px" }}>
+          {["video","photo"].map(m => (
+            <button key={m} onClick={() => { setMode(m); setActif(0); }} style={{
+              background: mode === m ? T.or : "transparent",
+              color: mode === m ? "#000" : T.brume,
+              border: "none", borderRadius: "16px",
+              padding: "4px 10px", cursor: "pointer",
+              fontFamily: T.sans, fontWeight: 300,
+              fontSize: "0.6rem", letterSpacing: "0.15em",
+              textTransform: "uppercase", transition: "all 0.25s",
+            }}>{m === "video" ? "Vidéo" : "Photo"}</button>
+          ))}
+        </div>
       </div>
 
-      {/* ── IMAGE PRINCIPALE ── */}
+      {/* ── VIEWER PRINCIPAL ── */}
       <div
         style={{
           position: "relative", overflow: "hidden",
-          margin: "0 1.5rem", borderRadius: "8px",
-          aspectRatio: "3/4",
-          background: photo.gradient || T.nuit2,
-          transition: "background 0.5s ease",
-          cursor: "grab",
-          boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+          margin: "0 1.5rem", borderRadius: "10px",
+          aspectRatio: "9/16", maxHeight: "70vh",
+          background: T.nuit2,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
         }}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Image réelle si dispo */}
-        {photo.url && (
+        {/* VIDEO */}
+        {mode === "video" && item.src && (
+          <video
+            key={item.src}
+            ref={videoRef}
+            autoPlay loop muted playsInline
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+          >
+            <source src={item.src} type="video/mp4"/>
+          </video>
+        )}
+
+        {/* PHOTO */}
+        {mode === "photo" && item.url && (
           <img
             key={actif}
-            src={photo.url} alt=""
+            src={item.url} alt=""
             onLoad={() => setLoaded(l => ({...l, [actif]: true}))}
             style={{
               position: "absolute", inset: 0,
               width: "100%", height: "100%", objectFit: "cover",
               opacity: loaded[actif] ? 1 : 0,
-              transition: "opacity 0.7s ease",
+              transition: "opacity 0.6s ease",
             }}
           />
         )}
 
-        {/* Étoiles pour les gradients */}
-        {!photo.url && (
-          <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-            {[...Array(20)].map((_,i) => (
-              <div key={i} style={{
-                position: "absolute",
-                left: `${5 + (i * 73 + actif * 37) % 90}%`,
-                top: `${5 + (i * 89 + actif * 53) % 90}%`,
-                width: i % 4 === 0 ? 2.5 : 1,
-                height: i % 4 === 0 ? 2.5 : 1,
-                borderRadius: "50%",
-                background: i % 4 === 0 ? T.or : "rgba(255,255,255,0.4)",
-                opacity: 0.4 + (i % 5) * 0.12,
-              }}/>
-            ))}
-          </div>
-        )}
-
         {/* Gradient bas */}
         <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
-          background: "linear-gradient(to top, rgba(10,8,6,0.97) 0%, rgba(10,8,6,0.5) 50%, transparent 100%)",
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "55%",
+          background: "linear-gradient(to top, rgba(8,6,5,0.96) 0%, rgba(8,6,5,0.4) 55%, transparent 100%)",
           pointerEvents: "none",
         }}/>
 
         {/* Légende */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "1.8rem 1.5rem" }}>
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "2rem 1.5rem 1.5rem" }}>
           <p style={{
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "clamp(1rem, 3vw, 1.15rem)",
-            color: T.orPale, lineHeight: 1.65,
-            textShadow: "0 1px 4px rgba(0,0,0,0.5)",
-          }}>« {photo.legende} »</p>
+            fontSize: "clamp(1rem, 3vw, 1.1rem)",
+            color: T.orPale, lineHeight: 1.7,
+            textShadow: "0 1px 6px rgba(0,0,0,0.7)",
+          }}>« {item.legende} »</p>
         </div>
 
-        {/* Flèches latérales */}
+        {/* Compteur */}
+        <div style={{ position: "absolute", top: 12, right: 14, fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.3em", color: "rgba(255,255,255,0.5)" }}>
+          {actif + 1} / {items.length}
+        </div>
+
+        {/* Flèches */}
         <button onClick={() => navigate(-1)} style={{
-          position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-          background: "rgba(10,8,6,0.5)", border: `1px solid ${T.brume}30`,
-          borderRadius: "50%", width: 36, height: 36, cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
+          background: "rgba(0,0,0,0.4)", border: "none", borderRadius: "50%",
+          width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
           backdropFilter: "blur(8px)",
         }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.aube} strokeWidth="1.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <button onClick={() => navigate(1)} style={{
-          position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
-          background: "rgba(10,8,6,0.5)", border: `1px solid ${T.brume}30`,
-          borderRadius: "50%", width: 36, height: 36, cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+          background: "rgba(0,0,0,0.4)", border: "none", borderRadius: "50%",
+          width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
           backdropFilter: "blur(8px)",
         }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.aube} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -1689,30 +1696,32 @@ const Evasion = ({ data }) => {
 
       {/* ── MINIATURES ── */}
       <div style={{ display: "flex", gap: "0.5rem", margin: "1rem 1.5rem 0", overflowX: "auto", paddingBottom: "0.2rem" }}>
-        {all.map((p, i) => (
-          <button key={i} onClick={() => { setDirection(i > actif ? 1 : -1); setActif(i); }} style={{
-            flexShrink: 0, width: 52, height: 52, borderRadius: "6px",
+        {items.map((p, i) => (
+          <button key={i} onClick={() => setActif(i)} style={{
+            flexShrink: 0, width: 56, height: 56, borderRadius: "6px",
             border: `2px solid ${actif === i ? T.or : "transparent"}`,
-            background: p.gradient || T.nuit2,
-            cursor: "pointer", padding: 0, overflow: "hidden",
-            opacity: actif === i ? 1 : 0.45,
-            transition: "all 0.2s",
+            background: T.nuit2, cursor: "pointer", padding: 0, overflow: "hidden",
+            opacity: actif === i ? 1 : 0.4, transition: "all 0.2s",
+            display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            {p.url && <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>}
+            {mode === "photo" && p.url && <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>}
+            {mode === "video" && (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "1.2rem" }}>▶</div>
+                <div style={{ fontFamily: T.sans, fontSize: "0.45rem", color: T.brume, letterSpacing: "0.1em" }}>{p.label}</div>
+              </div>
+            )}
           </button>
         ))}
       </div>
 
       {/* ── NOTE PROFIL ── */}
-      <div style={{
-        margin: "1rem 1.5rem 0",
-        padding: "0.9rem 1.2rem",
-        borderLeft: `2px solid ${T.or}30`,
-        background: `${T.nuit2}`,
-        borderRadius: "0 4px 4px 0",
-      }}>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.7 }}>
-          Sélection pour chemin <span style={{ color: T.orPale }}>{cdv}</span> — en traversée de <span style={{ color: T.orPale }}>{blessure.nom.toLowerCase()}</span>.
+      <div style={{ margin: "1rem 1.5rem 0", padding: "0.9rem 1.2rem", borderLeft: `2px solid ${T.or}25`, background: T.nuit2, borderRadius: "0 4px 4px 0" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.7 }}>
+          {mode === "photo"
+            ? <>Sélection pour chemin <span style={{ color: T.orPale }}>{cdv}</span> — en traversée de <span style={{ color: T.orPale }}>{blessure.nom.toLowerCase()}</span>.</>
+            : <>Ambiances sonores et visuelles. Laisse le mouvement faire son travail.</>
+          }
         </p>
       </div>
     </div>
