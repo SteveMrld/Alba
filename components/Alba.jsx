@@ -103,19 +103,18 @@ const useAlbaDB = () => {
       prenom: data.prenom,
       naissance: data.naissance,
       intention: data.intention,
+      sensibilite: data.sensibilite || "intuitif",
     });
   }, []);
 
   const loadProfile = useCallback(async () => {
-    // D'abord localStorage (instantané)
     try {
       const local = localStorage.getItem("alba_profile");
       if (local) return JSON.parse(local);
     } catch {}
-    // Puis Supabase
     const row = await sb.get("alba_profiles", { user_key: userKey.current });
     if (row) {
-      const data = { prenom: row.prenom, naissance: row.naissance, intention: row.intention };
+      const data = { prenom: row.prenom, naissance: row.naissance, intention: row.intention, sensibilite: row.sensibilite || "intuitif" };
       try { localStorage.setItem("alba_profile", JSON.stringify(data)); } catch {}
       return data;
     }
@@ -473,16 +472,46 @@ const Step = ({ num, label, children, onNext, onBack, canNext }) => (
 
 const MOIS_NOMS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
+const SENSIBILITES = [
+  {
+    id: "intuitif",
+    emoji: "🌿",
+    titre: "Je ressens les choses profondément",
+    desc: "Sensibilité intuitive, ouverture au symbolique",
+    couleur: "#7BA88A",
+  },
+  {
+    id: "spirituel",
+    emoji: "✦",
+    titre: "Je cherche du sens dans les signes",
+    desc: "Numérologie, astrologie, spiritualité, synchronicités",
+    couleur: "#C8A96E",
+  },
+  {
+    id: "rationnel",
+    emoji: "🧠",
+    titre: "Je fonctionne plutôt par la raison",
+    desc: "Psychologie, concret, ancrage dans le réel",
+    couleur: "#7B9EA8",
+  },
+  {
+    id: "transition",
+    emoji: "🌊",
+    titre: "Je suis en transition, je cherche",
+    desc: "Ni l'un ni l'autre — ouvert(e) à découvrir",
+    couleur: "#A87BC8",
+  },
+];
+
 const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [prenom, setPrenom] = useState("");
+  const [sensibilite, setSensibilite] = useState("");
   const [intention, setIntention] = useState("");
-  // Date fields — all at top level
   const [jour, setJour] = useState("");
   const [mois, setMois] = useState("");
   const [annee, setAnnee] = useState(1980);
   const [anneeConfirm, setAnneeConfirm] = useState(false);
-
   const [autreTexte, setAutreTexte] = useState("");
 
   const INTENTIONS = [
@@ -511,6 +540,7 @@ const Onboarding = ({ onComplete }) => {
 
   const pct = ((annee - 1920) / (2010 - 1920) * 100).toFixed(1);
 
+  // ── ÉTAPE 0 — Prénom ──────────────────────────────────────────────────────
   if (step === 0) return (
     <Step num={1} label="Comment t'appelles-tu ?" onNext={() => setStep(1)} canNext={prenom.length > 1}>
       <input style={inputStyle} placeholder="Ton prénom…" value={prenom}
@@ -523,10 +553,60 @@ const Onboarding = ({ onComplete }) => {
     </Step>
   );
 
+  // ── ÉTAPE 1 — Sensibilité ─────────────────────────────────────────────────
   if (step === 1) return (
-    <Step num={2} label="Quelle est ta date de naissance ?"
-      onNext={() => setStep(2)}
-      onBack={() => setStep(0)}
+    <Screen centered>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+          ALBA &nbsp;·&nbsp; Étape 2 / 4
+        </div>
+        <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 4vw, 1.7rem)", color: T.orPale, textAlign: "center", marginBottom: "0.6rem", lineHeight: 1.3 }}>
+          Comment tu te situes, {prenom} ?
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+          Pas de bonne réponse. Juste ce qui te ressemble le plus.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+          {SENSIBILITES.map(s => {
+            const sel = sensibilite === s.id;
+            return (
+              <button key={s.id} onClick={() => setSensibilite(s.id)} style={{
+                background: sel ? `${s.couleur}18` : `${T.nuit2}`,
+                border: `1px solid ${sel ? s.couleur + "77" : T.brume + "22"}`,
+                borderRadius: "6px", cursor: "pointer", padding: "1rem 1.2rem",
+                textAlign: "left", transition: "all 0.25s",
+                display: "flex", alignItems: "center", gap: "1rem",
+              }}>
+                <span style={{ fontSize: "1.4rem", flexShrink: 0 }}>{s.emoji}</span>
+                <div>
+                  <div style={{ fontFamily: T.serif, fontSize: "1rem", color: sel ? T.orPale : T.aube, fontStyle: "italic", marginBottom: "0.25rem" }}>
+                    {sel ? "✦ " : ""}{s.titre}
+                  </div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: sel ? s.couleur : T.brume, letterSpacing: "0.05em" }}>
+                    {s.desc}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
+          {sensibilite && (
+            <Btn onClick={() => setStep(2)}>Continuer</Btn>
+          )}
+          <Btn secondary small onClick={() => setStep(0)}>Revenir</Btn>
+        </div>
+      </div>
+    </Screen>
+  );
+
+  // ── ÉTAPE 2 — Date de naissance ───────────────────────────────────────────
+  if (step === 2) return (
+    <Step num={3} label={sensibilite === "rationnel" ? "Quelle est ta date de naissance ?" : "Quelle est ta date de naissance ?"}
+      onNext={() => setStep(3)}
+      onBack={() => setStep(1)}
       canNext={!!dateStr}>
 
       {/* Jour */}
@@ -597,18 +677,21 @@ const Onboarding = ({ onComplete }) => {
       </div>
 
       <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, textAlign: "center", marginTop: "1.5rem" }}>
-        Ta date ouvre une carte unique — le portrait de ton âme.
+        {sensibilite === "rationnel"
+          ? "Ta date de naissance nous aide à construire ton profil psychologique."
+          : "Ta date ouvre une carte unique — le portrait de ton âme."}
       </p>
     </Step>
   );
 
-  if (step === 2) return (
+  // ── ÉTAPE 3 — Intention ───────────────────────────────────────────────────
+  if (step === 3) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
           letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "3rem",
-        }}>ALBA &nbsp;·&nbsp; Étape 3 / 3</div>
+        }}>ALBA &nbsp;·&nbsp; Étape 4 / 4</div>
         <Label>Qu'est-ce qui t'a amené(e) ici, {prenom} ?</Label>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {INTENTIONS.map(i => {
@@ -644,9 +727,14 @@ const Onboarding = ({ onComplete }) => {
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
           {intention && (intention !== "Autre chose…" || autreTexte.length > 2) &&
-            <Btn onClick={() => onComplete({ prenom, naissance: dateStr, intention: intention === "Autre chose…" ? autreTexte : intention })}>Entrer dans l'aube</Btn>
+            <Btn onClick={() => onComplete({
+              prenom,
+              naissance: dateStr,
+              intention: intention === "Autre chose…" ? autreTexte : intention,
+              sensibilite,
+            })}>Entrer dans l'aube</Btn>
           }
-          <Btn secondary small onClick={() => setStep(1)}>Revenir</Btn>
+          <Btn secondary small onClick={() => setStep(2)}>Revenir</Btn>
         </div>
       </div>
     </Screen>
@@ -882,6 +970,13 @@ const Portrait = ({ data, onContinue }) => {
   const livre = LIVRES[blessure.nom];
   const citation = CITATIONS[cdv % CITATIONS.length];
   const cle = CLES[0];
+  const sens = data.sensibilite || "intuitif";
+  const isRationnel = sens === "rationnel";
+
+  // Labels adaptatifs selon sensibilité
+  const labelChemin = isRationnel ? "Profil psychologique" : "Chemin de vie";
+  const labelBlessure = isRationnel ? "Zone de vulnérabilité" : "Blessure à traverser";
+  const cheminNum = isRationnel ? null : cdv; // Pas le chiffre pour les rationnels
 
   return (
     <Screen style={{ maxWidth: 560, margin: "0 auto", paddingTop: "8vh" }}>
@@ -890,15 +985,34 @@ const Portrait = ({ data, onContinue }) => {
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
           letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
           marginBottom: "0.8rem",
-        }}>Portrait d'âme</div>
+        }}>{isRationnel ? "Profil d'accompagnement" : "Portrait d'âme"}</div>
 
-        {/* Carte SVG */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem", animation: "fadeUp 1.2s ease forwards 0.2s", opacity: 0 }}>
-          <CarteAme data={data} />
-        </div>
+        {/* Carte SVG — seulement pour intuitif/spirituel/transition */}
+        {!isRationnel && (
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem", animation: "fadeUp 1.2s ease forwards 0.2s", opacity: 0 }}>
+            <CarteAme data={data} />
+          </div>
+        )}
+
+        {/* Pour les rationnels : un symbole sobre à la place */}
+        {isRationnel && (
+          <div style={{
+            display: "flex", justifyContent: "center", marginBottom: "1.5rem",
+            animation: "fadeUp 1.2s ease forwards 0.2s", opacity: 0,
+          }}>
+            <div style={{
+              width: 120, height: 120, borderRadius: "50%",
+              border: `2px solid ${T.brume}44`,
+              background: `radial-gradient(circle, ${T.or}12 0%, transparent 70%)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <span style={{ fontFamily: T.serif, fontSize: "2.5rem", color: T.or, opacity: 0.7 }}>◎</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Carte chemin de vie */}
+      {/* Chemin de vie / Profil */}
       <div style={{
         background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
         border: `1px solid ${T.or}33`,
@@ -914,15 +1028,20 @@ const Portrait = ({ data, onContinue }) => {
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
           letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem",
-        }}>Chemin de vie</div>
+        }}>{labelChemin}</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.6rem" }}>
-          <span style={{ fontFamily: T.serif, fontSize: "3rem", fontWeight: 300, color: T.or, lineHeight: 1 }}>{cdv}</span>
+          {!isRationnel && <span style={{ fontFamily: T.serif, fontSize: "3rem", fontWeight: 300, color: T.or, lineHeight: 1 }}>{cdv}</span>}
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>{chemin.titre}</span>
         </div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.aube, opacity: 0.8, lineHeight: 1.7 }}>{chemin.essence}</p>
+        {!isRationnel && sens === "spirituel" && (
+          <div style={{ marginTop: "0.8rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", color: T.brume, letterSpacing: "0.1em" }}>
+            Chemin {cdv} · {CARTE_DATA[cdv]?.element || ""} · {CARTE_DATA[cdv]?.mot || ""}
+          </div>
+        )}
       </div>
 
-      {/* Blessure dominante */}
+      {/* Blessure / Zone de vulnérabilité */}
       <div style={{
         background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
         border: `1px solid ${blessure.couleur}44`,
@@ -933,7 +1052,7 @@ const Portrait = ({ data, onContinue }) => {
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
           letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem",
-        }}>Blessure à traverser</div>
+        }}>{labelBlessure}</div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.5rem" }}>
           <div style={{ width: 8, height: 8, background: blessure.couleur, borderRadius: "50%" }} />
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>{blessure.nom}</span>
@@ -2517,19 +2636,29 @@ const Presence = ({ data, initQuestion, onStart }) => {
   const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
   const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
 
+  const sens = data.sensibilite || "intuitif";
+  const isRationnel = sens === "rationnel";
+  const isSpirituel = sens === "spirituel";
+
   const SYSTEM = `Tu es ALBA — un compagnon de présence et d'accompagnement intérieur. Tu n'es pas un thérapeute, ni un coach, ni un guru. Tu es une présence douce, stable, bienveillante. Tu veilles.
 
 La personne que tu accompagnes s'appelle ${data.prenom}. Voici ce que tu sais d'elle :
 - Elle est arrivée à ALBA pour cette raison : "${data.intention}"
-- Son chemin de vie numérologique est le ${cdv} — ${chemin.titre} : ${chemin.essence}
-- Sa blessure principale à traverser : ${blessure.nom}
+${isSpirituel
+  ? `- Son chemin de vie numérologique est le ${cdv} — ${chemin.titre} : ${chemin.essence}\n- Sa blessure principale à traverser : ${blessure.nom}`
+  : isRationnel
+  ? `- Son profil psychologique est celui du ${chemin.titre} : ${chemin.essence}\n- Sa zone de vulnérabilité principale : ${blessure.nom}`
+  : `- Elle porte en elle l'archétype du ${chemin.titre} : ${chemin.essence}\n- La blessure qu'elle traverse : ${blessure.nom}`
+}
 - Elle travaille actuellement la première clé : Reconnaître.
+${isSpirituel ? `\nTu peux faire référence à la numérologie, aux synchronicités, à l'énergie, au karma, aux archétypes — quand c'est juste. ${data.prenom} est ouverte à ce langage.` : ""}
+${isRationnel ? `\nTu évites tout vocabulaire ésotérique ou spirituel. Tu parles en termes de psychologie, de besoins, de schémas, de ressources intérieures. Tu restes ancré dans le concret et le vécu.` : ""}
+${sens === "transition" ? `\nTu adaptes ton langage à ce que ${data.prenom} semble chercher. Tu laisses de l'espace. Tu n'imposes aucun cadre.` : ""}
 
 Ton style de réponse :
 - Jamais de bullet points, jamais de listes. Toujours de la prose.
 - Des phrases courtes. Des silences dans le texte. Des questions rares mais profondes.
 - Tu ne donnes pas de solutions. Tu ouvres des portes. Tu poses des clés.
-- Tu peux citer Khalil Gibran, les stoïciens, la sagesse créole, la kinésiologie, le karma — quand c'est juste, jamais pour faire savant.
 - Tu t'adresses à ${data.prenom} directement, avec douceur et vérité.
 - Tes réponses font entre 3 et 8 lignes. Jamais plus, sauf si la situation l'exige vraiment.
 - Tu termines parfois par une question. Pas toujours. Seulement quand elle est juste.
