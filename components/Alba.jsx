@@ -1659,6 +1659,30 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const isMatin = heure >= 5 && heure < 12;
   const phraseDuJour = getPhraseduJour(cleActive);
 
+  // ── Miroir hebdomadaire ──────────────────────────────────────────────────
+  // Analyse les mots des post-its des 7 derniers jours
+  const getMiroirSemaine = () => {
+    if (!progressStats?.allPostits) return null;
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+    const STOPS = new Set(["je","tu","il","elle","on","nous","vous","ils","elles","le","la","les","un","une","des","de","du","en","et","ou","à","au","aux","est","sont","était","ai","as","a","avons","avez","ont","me","te","se","ma","ta","sa","mon","ton","son","ce","qui","que","qu","ne","pas","plus","très","aussi","mais","donc","car","ni","pour","par","sur","sous","dans","avec","sans","ça","c","j","n","s","m","d","l","y","bien","même","tout","toujours","jamais","encore","quand","si","comme","où"]);
+    const freq = {};
+    Object.entries(progressStats.allPostits || {}).forEach(([dateKey, posts]) => {
+      if (new Date(dateKey + "T00:00:00") < cutoff) return;
+      posts.forEach(p => {
+        p.texte.toLowerCase()
+          .replace(/[^a-zàâäéèêëîïôùûüç\s]/g, " ")
+          .split(/\s+/)
+          .filter(w => w.length > 3 && !STOPS.has(w))
+          .forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+      });
+    });
+    const sorted = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,4);
+    const total = Object.values(progressStats.allPostits || {}).reduce((s, a) => s + a.length, 0);
+    if (sorted.length < 2 || total < 3) return null;
+    return sorted.map(([mot]) => mot);
+  };
+  const miroirMots = getMiroirSemaine();
+
   const ENTREES = [
     { id: "presence", label: "Présence",  desc: "Parler à ALBA",         couleur: "#7B9EA8" },
     { id: "ardoise",  label: "Ardoise",   desc: "Poser ce qui traverse", couleur: "#C8A96E" },
@@ -1772,6 +1796,65 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           </p>
         </div>
       </div>
+
+      {/* ── MIROIR DE LA SEMAINE ── (visible uniquement si assez de données) */}
+      {miroirMots && (
+        <div style={{
+          margin: "1rem 1.5rem 0",
+          background: `linear-gradient(135deg, ${T.nuit2}ee, #191510ee)`,
+          border: `1px solid ${T.or}22`,
+          borderRadius: "8px",
+          padding: "1.4rem 1.6rem",
+          animation: "fadeUp 0.7s ease forwards 0.28s", opacity: 0,
+          position: "relative", overflow: "hidden",
+        }}>
+          {/* Ligne dorée top */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(to right, transparent, ${T.or}44, transparent)` }} />
+
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+            <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.or, opacity: 0.6 }} />
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+              Miroir de la semaine
+            </span>
+          </div>
+
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.95rem", color: `${T.aube}cc`,
+            lineHeight: 1.8, marginBottom: "1rem",
+          }}>
+            Cette semaine, {miroirMots.length === 1 ? "un mot" : `${miroirMots.length} mots`} {miroirMots.length === 1 ? "revient" : "reviennent"} dans ce que tu poses :
+          </p>
+
+          {/* Mots clés */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem" }}>
+            {miroirMots.map((mot, i) => (
+              <div key={mot} style={{
+                border: `1px solid ${T.or}${i === 0 ? "55" : "28"}`,
+                borderRadius: "20px",
+                padding: "0.3rem 0.9rem",
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "0.95rem",
+                color: i === 0 ? T.or : `${T.orPale}99`,
+                background: i === 0 ? `${T.or}08` : "transparent",
+                transition: "all 0.2s",
+              }}>
+                {mot}
+              </div>
+            ))}
+          </div>
+
+          {/* Phrase de reflet */}
+          <p style={{
+            marginTop: "1rem",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.82rem", color: `${T.brume}88`,
+            lineHeight: 1.7,
+          }}>
+            Ce n'est pas un jugement. C'est simplement ce que tu portes en ce moment.
+          </p>
+        </div>
+      )}
 
       {/* ── CLÉ DU JOUR ── */}
       <div style={{
@@ -2393,8 +2476,8 @@ const POSTIT_TYPES = [
   { id: "victoire",  label: "Victoire",  couleur: "#A87BC8", papier: "#150E1E", bord: "#A87BC8" },
 ];
 
-const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere }) => {
-  const [sousOnglet, setSousOnglet] = useState("ardoise"); // "ardoise" | "fil"
+const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) => {
+  const [sousOnglet, setSousOnglet] = useState("ardoise");
   return (
     <div>
       {/* ── Sous-navigation ── */}
@@ -2419,13 +2502,13 @@ const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere }) => {
           }}>{o.label}</button>
         ))}
       </div>
-      {sousOnglet === "ardoise" && <ArdoiseInner data={data} db={db} onPostitAjoute={onPostitAjoute} onBilanGenere={onBilanGenere} />}
+      {sousOnglet === "ardoise" && <ArdoiseInner data={data} db={db} onPostitAjoute={onPostitAjoute} onBilanGenere={onBilanGenere} onPostitsChange={onPostitsChange} />}
       {sousOnglet === "fil"     && <FilDeVie data={data} db={db} />}
     </div>
   );
 };
 
-const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere }) => {
+const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) => {
   // Clé du jour courant : "2026-03-08"
   const todayKey = new Date().toISOString().split("T")[0];
   const [jourActif, setJourActif] = useState(todayKey);
@@ -2444,7 +2527,10 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere }) => {
   useEffect(() => {
     if (!db) return;
     db.loadAllPostits().then(saved => {
-      if (saved && Object.keys(saved).length > 0) setAllPostits(saved);
+      if (saved && Object.keys(saved).length > 0) {
+        setAllPostits(saved);
+        if (onPostitsChange) onPostitsChange(saved);
+      }
     });
   }, []);
 
@@ -2455,8 +2541,8 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere }) => {
       const prev = a[jourActif] || [];
       const next = typeof fn === "function" ? fn(prev) : fn;
       const updated = { ...a, [jourActif]: next };
-      // Sauvegarder en DB
       if (db) db.savePostits(jourActif, next);
+      if (onPostitsChange) onPostitsChange(updated);
       return updated;
     });
   };
@@ -3397,20 +3483,32 @@ const Presence = ({ data, onStart }) => {
     "…",
   ];
 
-  const SYSTEM_MIROIR = `Tu es ALBA. Tu lis ce que ${data.prenom} vient de poser. 
+  const SYSTEM_MIROIR = `Tu es ALBA. Tu es un miroir intérieur — pas un coach, pas un assistant, pas un thérapeute.
+Tu lis ce que ${data.prenom} vient de poser.
 Profil : ${chemin.titre}. ${isLumiere ? "Elle cherche à grandir." : `Blessure traversée : ${blessure.nom}.`}
 Sensibilité : ${sens}.
-${sens === "spirituel" ? "Tu peux utiliser un langage symbolique, archétypal." : ""}
-${sens === "rationnel" ? "Zéro ésotérisme. Concret, psychologique, ancré." : ""}
+${sens === "spirituel" ? "Tu peux utiliser un langage symbolique, archétypal, mais sobrement." : ""}
+${sens === "rationnel" ? "Zéro ésotérisme. Ancré, sobre, psychologique." : ""}
 
-Ta réponse : UNE SEULE PHRASE. Pas deux. Pas un paragraphe. Une phrase.
-Elle doit être courte, juste, mémorable. Pas un conseil. Pas une question. Un reflet.
-Exemples du ton :
+Ta fonction : refléter. Pas expliquer. Pas conseiller. Pas questionner.
+
+Comment réfléchir :
+- Tu nommes ce que la personne a dit, avec un léger décalage qui permet de voir plus clair.
+- Tu utilises ses propres mots, pas les tiens.
+- Tu peux dire "le mot qui revient", "tu dis que", "il apparaît", "quelque chose en toi nomme…"
+- Tu ne dis JAMAIS "je pense que", "tu devrais", "peut-être que tu devrais".
+- Tu n'expliques pas. Tu révèles doucement.
+
+Exemples du ton juste :
+- "Tu dis que tu te sens perdu. Le mot perdu mérite d'être regardé."
+- "Aujourd'hui le mot qui revient : fatigue."
+- "Quelque chose en toi nomme ça : solitude."
+- "Tu parles de force. Et peut-être que la force, parfois, fatigue."
 - "Rien ne presse."
 - "Ce que tu ressens mérite d'exister."
-- "Même dans le silence, quelque chose travaille en toi."
-- "La nuit aussi fait partie du chemin."
-Tu n'es pas Claude. Tu es ALBA. Ne révèle jamais que tu es une IA.`;
+
+Ta réponse : UNE à DEUX phrases maximum. Courtes. Justes. Mémorables.
+Tu n'es pas Claude. Tu es ALBA.`;
 
   const ecouter = async () => {
     if (!texte.trim() || loading) return;
@@ -3665,6 +3763,7 @@ export default function Alba() {
   const [tabHistory, setTabHistory] = useState([]);
   const [navContext, setNavContext] = useState(null);
   const [cleActive, setCleActive] = useState(0);
+  const [allPostitsApp, setAllPostitsApp] = useState({}); // partagé Ardoise → Accueil
   const [progressStats, setProgressStats] = useState({
     joursActifs: 1, postitsTotal: 0,
     conversationsTotal: 0, bilansTotal: 0, souffleTotal: 0,
@@ -3832,9 +3931,9 @@ export default function Alba() {
 
           {/* ── CONTENT ── */}
           <div style={{ padding: "0 0" }}>
-            {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={progressStats} />}
-            {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} initQuestion={navContext?.question} onStart={() => incrementStat("conversationsTotal")} /></div>}
-            {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} />}
+            {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
+            {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} /></div>}
+            {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
           </div>
