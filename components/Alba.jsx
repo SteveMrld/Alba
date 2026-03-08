@@ -670,17 +670,17 @@ const CARTE_DATA = {
 // 🔄 Sur Vercel : ajouter tes images GPT dans /public/cartes/
 // Nommer les fichiers : carte-1.jpg, carte-2.jpg ... carte-9.jpg, carte-11.jpg, carte-22.jpg
 const CARTE_IMAGES = {
-  // 1: "/cartes/carte-1.jpg",
-  // 2: "/cartes/carte-2.jpg",
-  // 3: "/cartes/carte-3.jpg",
-  // 4: "/cartes/carte-4.jpg",
-  // 5: "/cartes/carte-5.jpg",
-  // 6: "/cartes/carte-6.jpg",
-  // 7: "/cartes/carte-7.jpg",
-  // 8: "/cartes/carte-8.jpg",
-  // 9: "/cartes/carte-9.jpg",
-  // 11: "/cartes/carte-11.jpg",
-  // 22: "/cartes/carte-22.jpg",
+  1:  "/cartes/carte-1.jpg",
+  2:  "/cartes/carte-2.jpg",
+  3:  "/cartes/carte-3.jpg",
+  4:  "/cartes/carte-4.jpg",
+  5:  "/cartes/carte-5.jpg",
+  6:  "/cartes/carte-6.jpg",
+  7:  "/cartes/carte-7.jpg",
+  8:  "/cartes/carte-8.jpg",
+  9:  "/cartes/carte-9.jpg",
+  11: "/cartes/carte-11.jpg",
+  22: "/cartes/carte-22.jpg",
 };
 
 const CarteAme = ({ data, small }) => {
@@ -1478,49 +1478,49 @@ const CompagnonDuJour = ({ data }) => {
 // 🔄 Sur Vercel : remplacer `gradient` par `url: "/evasion/nom-fichier.jpg"`
 const PHOTOS = {
   puissance: [
-    { gradient: "linear-gradient(160deg,#1a0a00,#6b2d0a,#c45a1a)", legende: "Ce qui résiste finit par sculpter" },
-    { gradient: "linear-gradient(160deg,#0d0d1a,#1a1a4a,#4a3a7a)", legende: "La falaise ne recule pas devant la vague" },
-    { gradient: "linear-gradient(160deg,#1a0505,#6b1010,#c43030)", legende: "La force naît du silence des hauteurs" },
+    { url: "/evasion/puissance-1.jpg", legende: "Ce qui résiste finit par sculpter" },
+    { url: "/evasion/puissance-2.jpg", legende: "La falaise ne recule pas devant la vague" },
+    { url: "/evasion/puissance-3.jpg", legende: "La force naît du silence des hauteurs" },
   ],
   douceur: [
-    { gradient: "linear-gradient(160deg,#0a1a0a,#1a4a1a,#4a8a3a)", legende: "La forêt n'explique pas sa lumière" },
-    { gradient: "linear-gradient(160deg,#0a1520,#1a3a5a,#3a7aaa)", legende: "L'eau sait où elle va" },
-    { gradient: "linear-gradient(160deg,#1a1505,#4a3a10,#c8a050)", legende: "La douceur est une forme de courage" },
+    { url: "/evasion/douceur-1.jpg", legende: "La forêt n'explique pas sa lumière" },
+    { url: "/evasion/douceur-2.jpg", legende: "L'eau sait où elle va" },
+    { url: "/evasion/douceur-3.jpg", legende: "La douceur est une forme de courage" },
   ],
   liberte: [
-    { gradient: "linear-gradient(160deg,#05101a,#10304a,#1a6a9a)", legende: "Tout horizon est une invitation" },
-    { gradient: "linear-gradient(160deg,#001020,#004070,#0080c0)", legende: "La mer ne demande pas la permission" },
-    { gradient: "linear-gradient(160deg,#1a1200,#5a4000,#c8a030)", legende: "Le désert apprend à voyager léger" },
+    { url: "/evasion/liberte-1.jpg", legende: "Tout horizon est une invitation" },
+    { url: "/evasion/liberte-2.jpg", legende: "La mer ne demande pas la permission" },
+    { url: "/evasion/liberte-3.jpg", legende: "Le désert apprend à voyager léger" },
   ],
   ancrage: [
-    { gradient: "linear-gradient(160deg,#050f05,#1a3a1a,#2a6a2a)", legende: "Les racines profondes ne craignent pas le vent" },
-    { gradient: "linear-gradient(160deg,#0a0a15,#1a2a4a,#8aaad4)", legende: "La montagne n'a pas besoin qu'on la remarque" },
-    { gradient: "linear-gradient(160deg,#0f0a00,#3a2800,#8a6020)", legende: "Être là, simplement" },
+    { url: "/evasion/ancrage-1.jpg", legende: "Les racines profondes ne craignent pas le vent" },
+    { url: "/evasion/ancrage-2.jpg", legende: "La montagne n'a pas besoin qu'on la remarque" },
+    { url: "/evasion/ancrage-3.jpg", legende: "Être là, simplement" },
   ],
   mystere: [
-    { gradient: "linear-gradient(160deg,#000510,#001030,#0a2060)", legende: "Ce que l'on cherche cherche aussi" },
-    { gradient: "linear-gradient(160deg,#050010,#150030,#3a1070)", legende: "La brume cache ce qui n'est pas encore prêt" },
-    { gradient: "linear-gradient(160deg,#001010,#003030,#006060)", legende: "L'invisible est plus réel que le visible" },
+    { url: "/evasion/mystere-1.jpg", legende: "Ce que l'on cherche cherche aussi" },
+    { url: "/evasion/mystere-2.jpg", legende: "La brume cache ce qui n'est pas encore prêt" },
+    { url: "/evasion/mystere-3.jpg", legende: "L'invisible est plus réel que le visible" },
   ],
   savane: [
-    { gradient: "linear-gradient(160deg,#1a0800,#7a3000,#e87820)", legende: "La savane sait attendre" },
-    { gradient: "linear-gradient(160deg,#200a00,#8a3800,#f09030)", legende: "Chaque coucher de soleil est une permission de lâcher" },
-    { gradient: "linear-gradient(160deg,#150a00,#603000,#c06820)", legende: "L'Afrique garde les secrets des origines" },
+    { url: "/evasion/savane-1.jpg", legende: "La savane sait attendre" },
+    { url: "/evasion/savane-4.jpg", legende: "Chaque coucher de soleil est une permission de lâcher" },
+    { url: "/evasion/savane-5.jpg", legende: "L'Afrique garde les secrets des origines" },
   ],
   mer: [
-    { gradient: "linear-gradient(160deg,#001520,#003a5a,#00789a)", legende: "La mer des Caraïbes ne juge pas" },
-    { gradient: "linear-gradient(160deg,#001018,#002a40,#005880)", legende: "L'océan reçoit tout, retient rien" },
-    { gradient: "linear-gradient(160deg,#0a1520,#103858,#2078a8)", legende: "L'eau sait guérir ce que les mots ne peuvent pas" },
+    { url: "/evasion/mer-1.jpg", legende: "La mer des Caraïbes ne juge pas" },
+    { url: "/evasion/mer-2.jpg", legende: "L'océan reçoit tout, retient rien" },
+    { url: "/evasion/mer-3.jpg", legende: "L'eau sait guérir ce que les mots ne peuvent pas" },
   ],
   aube: [
-    { gradient: "linear-gradient(160deg,#100800,#5a2800,#e87030)", legende: "L'aube ne promet rien. Elle se lève, simplement." },
-    { gradient: "linear-gradient(160deg,#150503,#6a1a08,#e84818)", legende: "Chaque matin est une seconde chance" },
-    { gradient: "linear-gradient(160deg,#0a0810,#3a2040,#c87890)", legende: "Du chaos naît une étoile" },
+    { url: "/evasion/aube-1.jpg", legende: "L'aube ne promet rien. Elle se lève, simplement." },
+    { url: "/evasion/aube-2.jpg", legende: "Chaque matin est une seconde chance" },
+    { url: "/evasion/aube-3.jpg", legende: "Du chaos naît une étoile" },
   ],
   resilience: [
-    { gradient: "linear-gradient(160deg,#050f05,#1a4a10,#3a9a30)", legende: "Ce qui survit devient racine" },
-    { gradient: "linear-gradient(160deg,#100a00,#4a2800,#a06820)", legende: "Après la tempête, la lumière est différente" },
-    { gradient: "linear-gradient(160deg,#080f05,#203a15,#508a30)", legende: "La vie repousse toujours" },
+    { url: "/evasion/resilience-1.jpg", legende: "Ce qui survit devient racine" },
+    { url: "/evasion/resilience-2.jpg", legende: "Après la tempête, la lumière est différente" },
+    { url: "/evasion/savane-2.jpg", legende: "La vie repousse toujours" },
   ],
 };
 
