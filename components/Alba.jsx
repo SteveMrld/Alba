@@ -254,6 +254,7 @@ const FontLoader = () => (
 );
 
 // ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
+const HEURE = new Date().getHours();
 const T = {
   nuit:    "#1A1714",
   nuit2:   "#211E1A",
@@ -1227,8 +1228,8 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   ];
 
   // Vidéo selon l'heure
-  const heroVideo = heure < 6 ? "/videos/nuages.mp4"
-                  : heure < 12 ? "/videos/desert.mp4"
+  const heroVideo = heure < 6 ? "/videos/etoiles.mp4"
+                  : heure < 12 ? "/videos/caraibe.mp4"
                   : heure < 17 ? "/videos/foret.mp4"
                   : "/videos/savane2.mp4";
 
@@ -1561,13 +1562,14 @@ const getPhotos = (cdv, blessure) => {
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
 const VIDEOS = [
-  { src: "/videos/chutes.mp4",  legende: "Ce qui tombe n'est pas perdu. Il se transforme.",  label: "Chutes" },
-  { src: "/videos/vagues.mp4",  legende: "La mer reçoit tout. Elle ne retient rien.",         label: "Vagues" },
-  { src: "/videos/desert.mp4",  legende: "Marcher dans le vide apprend à porter le silence.", label: "Désert" },
-  { src: "/videos/nuages.mp4",  legende: "Au-dessus des nuages, il fait toujours beau.",      label: "Nuages" },
-  { src: "/videos/savane2.mp4", legende: "La savane brûle. Et elle renaît.",                  label: "Savane" },
-  { src: "/videos/foret.mp4",   legende: "La forêt n'explique pas sa lumière.",               label: "Forêt" },
-  { src: "/videos/savane.mp4",  legende: "Chaque coucher de soleil est une permission de lâcher.", label: "Crépuscule" },
+  { src: "/videos/etoiles.mp4",  legende: "Le silence des étoiles répond à tous les silences.",      label: "Étoiles" },
+  { src: "/videos/caraibe.mp4",  legende: "La mer des Caraïbes ne juge pas. Elle accueille.",         label: "Caraïbes" },
+  { src: "/videos/vagues.mp4",   legende: "La mer reçoit tout. Elle ne retient rien.",                label: "Vagues" },
+  { src: "/videos/desert.mp4",   legende: "Marcher dans le vide apprend à porter le silence.",        label: "Désert" },
+  { src: "/videos/nuages.mp4",   legende: "Au-dessus des nuages, il fait toujours beau.",             label: "Nuages" },
+  { src: "/videos/savane2.mp4",  legende: "La savane brûle. Et elle renaît.",                         label: "Savane" },
+  { src: "/videos/foret.mp4",    legende: "La forêt n'explique pas sa lumière.",                      label: "Forêt" },
+  { src: "/videos/savane.mp4",   legende: "Chaque coucher de soleil est une permission de lâcher.",   label: "Crépuscule" },
 ];
 
 const Evasion = ({ data }) => {
@@ -2636,7 +2638,7 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
       <video autoPlay loop muted playsInline style={{
         position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
         objectFit: "cover", zIndex: 0, opacity: 0.06, pointerEvents: "none",
-      }}><source src="/videos/nuages.mp4" type="video/mp4"/></video>
+      }}><source src={HEURE < 6 || HEURE >= 21 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4"/></video>
 
       {/* Header présence */}
       <div style={{ padding: "1rem 0 0.5rem", flexShrink: 0, position: "relative", zIndex: 1 }}>
