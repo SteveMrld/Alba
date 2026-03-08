@@ -1226,6 +1226,12 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
     { id: "souffle",  label: "Souffle",   desc: "Respirer",              couleur: "#D4856A" },
   ];
 
+  // Vidéo selon l'heure
+  const heroVideo = heure < 6 ? "/videos/nuages.mp4"
+                  : heure < 12 ? "/videos/desert.mp4"
+                  : heure < 17 ? "/videos/foret.mp4"
+                  : "/videos/savane2.mp4";
+
   return (
     <div style={{ paddingBottom: "6rem" }}>
 
@@ -1236,12 +1242,18 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         background: `linear-gradient(160deg, #1A1510, ${T.nuit})`,
         borderBottom: `1px solid ${T.brume}15`,
       }}>
+        {/* Vidéo de fond hero */}
+        <video autoPlay loop muted playsInline style={{
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", zIndex: 0, opacity: 0.09,
+        }}><source src={heroVideo} type="video/mp4"/></video>
+
         {/* Halo arrière-plan */}
         <div style={{
           position: "absolute", top: -40, right: -40,
           width: 200, height: 200, borderRadius: "50%",
           background: `radial-gradient(circle, ${cle.couleur}10 0%, transparent 70%)`,
-          pointerEvents: "none",
+          pointerEvents: "none", zIndex: 1,
         }}/>
 
         {/* Moment du jour */}
@@ -1250,6 +1262,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           letterSpacing: "0.55em", textTransform: "uppercase",
           color: T.brume, marginBottom: "0.6rem",
           animation: "fadeUp 0.6s ease forwards",
+          position: "relative", zIndex: 1,
         }}>{momentLabel} · {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
 
         {/* Salutation */}
@@ -1788,8 +1801,17 @@ const Souffle = ({ onComplete }) => {
   const expanding = phase === "inspire" || phase === "retiens";
   const phaseLabel = phases.find(p => p.nom === phase)?.label || "";
 
+  const SOUFFLE_VIDEOS = ["/videos/vagues.mp4", "/videos/desert.mp4", "/videos/foret.mp4"];
+  const videoSrc = SOUFFLE_VIDEOS[mode];
+
   return (
-    <div style={{ padding: "2rem 0 6rem", maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
+    <div style={{ position: "relative", minHeight: "100vh", padding: "2rem 0 6rem", maxWidth: 520, margin: "0 auto", textAlign: "center", overflow: "hidden" }}>
+      <video key={videoSrc} autoPlay loop muted playsInline style={{
+        position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+        objectFit: "cover", zIndex: 0,
+        opacity: active ? 0.18 : 0.07, transition: "opacity 2s ease",
+      }}><source src={videoSrc} type="video/mp4"/></video>
+      <div style={{ position: "relative", zIndex: 1 }}>
       <div style={{ marginBottom: "2rem" }}>
         <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Espace</div>
         <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>Le Souffle</h2>
@@ -1853,6 +1875,7 @@ const Souffle = ({ onComplete }) => {
           {active ? "Pause" : "Commencer"}
         </Btn>
       </div>
+      </div>{/* /zIndex wrapper */}
     </div>
   );
 };
@@ -2607,14 +2630,21 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto" }}>
+    <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto" }}>
+
+      {/* Vidéo ambiante très sombre */}
+      <video autoPlay loop muted playsInline style={{
+        position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+        objectFit: "cover", zIndex: 0, opacity: 0.06, pointerEvents: "none",
+      }}><source src="/videos/nuages.mp4" type="video/mp4"/></video>
+
       {/* Header présence */}
-      <div style={{ padding: "1rem 0 0.5rem", flexShrink: 0 }}>
+      <div style={{ padding: "1rem 0 0.5rem", flexShrink: 0, position: "relative", zIndex: 1 }}>
         <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>Présence · {data.prenom}</div>
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", paddingBottom: "1rem", display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+      <div style={{ flex: 1, overflowY: "auto", paddingBottom: "1rem", display: "flex", flexDirection: "column", gap: "1.2rem", position: "relative", zIndex: 1 }}>
         {messages.map((m, i) => (
           <div key={i} style={{
             display: "flex",
@@ -2675,6 +2705,7 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
         flexShrink: 0, paddingBottom: "5rem",
         borderTop: `1px solid ${T.brume}22`, paddingTop: "1rem",
         display: "flex", gap: "0.8rem", alignItems: "flex-end",
+        position: "relative", zIndex: 1,
       }}>
         <textarea
           value={input}
