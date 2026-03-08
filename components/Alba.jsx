@@ -2797,6 +2797,116 @@ const Evasion = ({ data }) => {
 };
 
 // ─── SOUFFLE ──────────────────────────────────────────────────────────────────
+// ─── SOUFFLE INLINE (pour Profil) ────────────────────────────────────────────
+const SouffleInline = () => {
+  const [mode, setMode] = useState(0);
+  const [active, setActive] = useState(false);
+  const [phase, setPhase] = useState("inspire");
+  const [count, setCount] = useState(4);
+  const [cyclesDone, setCyclesDone] = useState(0);
+  const completedRef = useRef(false);
+
+  const MODES = [
+    { nom: "Ancrage",      inspire: 4, retiens: 4, expire: 4, retiens2: 4, couleur: "#7B9EA8" },
+    { nom: "Lâcher-prise", inspire: 4, retiens: 0, expire: 8, retiens2: 0, couleur: T.aurore },
+    { nom: "Présence",     inspire: 5, retiens: 2, expire: 7, retiens2: 0, couleur: "#8A7BA8" },
+  ];
+
+  const m = MODES[mode];
+  const phases = [
+    { nom: "inspire",  dur: m.inspire,  label: "Inspire",  show: m.inspire > 0 },
+    { nom: "retiens",  dur: m.retiens,  label: "Retiens",  show: m.retiens > 0 },
+    { nom: "expire",   dur: m.expire,   label: "Expire",   show: m.expire > 0 },
+    { nom: "retiens2", dur: m.retiens2, label: "Vide",     show: m.retiens2 > 0 },
+  ].filter(p => p.show);
+
+  useEffect(() => {
+    if (!active) return;
+    const idx = phases.findIndex(p => p.nom === phase);
+    const cur = phases[idx] || phases[0];
+    setCount(cur.dur);
+    const interval = setInterval(() => {
+      setCount(c => {
+        if (c <= 1) {
+          const nextIdx = (idx + 1) % phases.length;
+          setPhase(phases[nextIdx].nom);
+          if (nextIdx === 0) setCyclesDone(n => n + 1);
+          return phases[nextIdx].dur;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [active, phase, mode]);
+
+  const expanding = phase === "inspire" || phase === "retiens";
+  const phaseLabel = phases.find(p => p.nom === phase)?.label || "Inspire";
+
+  return (
+    <div style={{
+      background: T.nuit2,
+      border: `1px solid ${m.couleur}22`,
+      borderRadius: "8px",
+      padding: "1.5rem",
+    }}>
+      {/* Sélecteur de mode */}
+      <div style={{ display: "flex", gap: "0.4rem", marginBottom: "1.5rem" }}>
+        {MODES.map((mo, i) => (
+          <button key={i} onClick={() => { setMode(i); setActive(false); setPhase("inspire"); setCyclesDone(0); }} style={{
+            flex: 1, background: mode === i ? `${mo.couleur}15` : "transparent",
+            border: `1px solid ${mode === i ? mo.couleur + "55" : T.brume + "22"}`,
+            borderRadius: "4px", padding: "0.45rem 0.2rem",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem",
+            letterSpacing: "0.25em", textTransform: "uppercase",
+            color: mode === i ? mo.couleur : T.brume,
+            cursor: "pointer", transition: "all 0.2s",
+          }}>{mo.nom}</button>
+        ))}
+      </div>
+
+      {/* Orbe */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.2rem" }}>
+        <div style={{
+          width: active ? (expanding ? 90 : 60) : 70,
+          height: active ? (expanding ? 90 : 60) : 70,
+          borderRadius: "50%",
+          background: `radial-gradient(circle, ${m.couleur}33, ${m.couleur}08)`,
+          border: `1px solid ${m.couleur}${active ? "66" : "33"}`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "all 1s ease",
+          boxShadow: active ? `0 0 30px ${m.couleur}22` : "none",
+        }}>
+          {active ? (
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: T.serif, fontSize: "1.4rem", color: m.couleur, lineHeight: 1 }}>{count}</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.3em", textTransform: "uppercase", color: m.couleur, opacity: 0.8, marginTop: "0.2rem" }}>{phaseLabel}</div>
+            </div>
+          ) : (
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: m.couleur, opacity: 0.6 }} />
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: "0.8rem", alignItems: "center" }}>
+          <button onClick={() => { setActive(!active); if (!active) { setPhase("inspire"); setCount(m.inspire); } }} style={{
+            background: active ? `${m.couleur}15` : "transparent",
+            border: `1px solid ${m.couleur}44`,
+            borderRadius: "20px", padding: "0.5rem 1.4rem",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.9rem", color: m.couleur,
+            cursor: "pointer", transition: "all 0.3s",
+          }}>{active ? "Pause" : cyclesDone > 0 ? "Continuer" : "Commencer"}</button>
+
+          {cyclesDone > 0 && (
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", color: `${T.brume}88` }}>
+              {cyclesDone} cycle{cyclesDone > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Souffle = ({ onComplete }) => {
   const [phase, setPhase] = useState("inspire");
   const [count, setCount] = useState(4);
@@ -3885,6 +3995,14 @@ const Profil = ({ data, onUpdateData, progressStats }) => {
           </p>
         </div>
       )}
+
+      {/* ── Accès Souffle ── */}
+      <div style={{ marginTop: "1.5rem", marginBottom: "0.5rem", animation: "fadeUp 0.7s ease forwards 0.6s", opacity: 0 }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+          Prendre un moment
+        </div>
+        <SouffleInline />
+      </div>
 
       {/* ── Réinitialiser ── */}
       <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
