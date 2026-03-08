@@ -1548,9 +1548,13 @@ const getPhotos = (cdv, blessure) => {
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
 const VIDEOS = [
-  { src: "/videos/vagues.mp4",  legende: "La mer reçoit tout. Elle ne retient rien.",   label: "Vagues" },
-  { src: "/videos/foret.mp4",   legende: "La forêt n'explique pas sa lumière.",          label: "Forêt" },
-  { src: "/videos/savane.mp4",  legende: "La savane sait attendre.",                     label: "Savane" },
+  { src: "/videos/chutes.mp4",  legende: "Ce qui tombe n'est pas perdu. Il se transforme.",  label: "Chutes" },
+  { src: "/videos/vagues.mp4",  legende: "La mer reçoit tout. Elle ne retient rien.",         label: "Vagues" },
+  { src: "/videos/desert.mp4",  legende: "Marcher dans le vide apprend à porter le silence.", label: "Désert" },
+  { src: "/videos/nuages.mp4",  legende: "Au-dessus des nuages, il fait toujours beau.",      label: "Nuages" },
+  { src: "/videos/savane2.mp4", legende: "La savane brûle. Et elle renaît.",                  label: "Savane" },
+  { src: "/videos/foret.mp4",   legende: "La forêt n'explique pas sa lumière.",               label: "Forêt" },
+  { src: "/videos/savane.mp4",  legende: "Chaque coucher de soleil est une permission de lâcher.", label: "Crépuscule" },
 ];
 
 const Evasion = ({ data }) => {
