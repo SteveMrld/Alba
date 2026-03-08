@@ -420,6 +420,76 @@ const getPhraseduJour = (cleActive = 0) => {
   return PHRASES_MATIN.default[idx];
 };
 
+// ─── RECOMMANDATIONS ─────────────────────────────────────────────────────────
+const RECO_LIVRES = [
+  // Par blessure
+  { titre: "Le Prophète",                 auteur: "Khalil Gibran",          blessures: ["Abandon","Rejet"],        sensibilites: ["spirituel","intuitif","transition"], chemin: [] },
+  { titre: "Les Quatre Accords Toltèques",auteur: "Don Miguel Ruiz",        blessures: ["Trahison","Humiliation"], sensibilites: ["all"],                               chemin: [] },
+  { titre: "Mille Soleils Splendides",    auteur: "Khaled Hosseini",        blessures: ["Humiliation","Injustice"],sensibilites: ["intuitif","transition"],             chemin: [] },
+  { titre: "La Force de l'âme",           auteur: "Nelson Mandela",         blessures: ["Injustice"],              sensibilites: ["rationnel","transition"],            chemin: [] },
+  { titre: "Du chaos naît une étoile",    auteur: "Steve Moradel",          blessures: ["Rejet","Abandon"],        sensibilites: ["all"],                               chemin: [] },
+  { titre: "L'Homme en quête de sens",    auteur: "Viktor Frankl",          blessures: ["Croissance","Présence"],  sensibilites: ["rationnel","transition"],            chemin: [] },
+  { titre: "Le Pouvoir du moment présent",auteur: "Eckhart Tolle",          blessures: ["Croissance","Présence","Abandon"], sensibilites: ["spirituel","intuitif"],    chemin: [] },
+  { titre: "Les Cinq Blessures",          auteur: "Lise Bourbeau",          blessures: ["Abandon","Trahison","Rejet","Humiliation","Injustice"], sensibilites: ["spirituel","intuitif","transition"], chemin: [] },
+  { titre: "Osez vous faire du bien",     auteur: "Christophe André",       blessures: ["Humiliation","Rejet","Croissance"], sensibilites: ["rationnel","transition"],  chemin: [] },
+  { titre: "Imparfaits, libres et heureux",auteur: "Christophe André",      blessures: ["Humiliation","Rejet","Croissance"], sensibilites: ["rationnel"],              chemin: [] },
+  { titre: "Le Corps n'oublie rien",      auteur: "Bessel van der Kolk",    blessures: ["Trahison","Humiliation","Abandon"], sensibilites: ["rationnel","transition"],  chemin: [] },
+  { titre: "Conversations avec Dieu",     auteur: "Neale Donald Walsch",    blessures: ["Présence","Croissance"],  sensibilites: ["spirituel"],                        chemin: [] },
+  { titre: "La Nuit des temps",           auteur: "René Barjavel",          blessures: ["Abandon","Trahison"],     sensibilites: ["intuitif","transition","spirituel"], chemin: [] },
+  { titre: "L'Alchimiste",               auteur: "Paulo Coelho",            blessures: ["Croissance","Rejet"],     sensibilites: ["spirituel","intuitif"],              chemin: [5,3,9] },
+  { titre: "Le Petit Prince",             auteur: "Antoine de Saint-Exupéry",blessures: ["Abandon","Rejet"],      sensibilites: ["all"],                               chemin: [6,2,9] },
+  { titre: "Pensées pour moi-même",       auteur: "Marc Aurèle",            blessures: ["Injustice","Croissance"], sensibilites: ["rationnel"],                        chemin: [8,4,1] },
+  { titre: "Le Tao Te Ching",             auteur: "Lao Tseu",               blessures: ["Présence","Croissance"],  sensibilites: ["spirituel","intuitif"],              chemin: [7,9] },
+  { titre: "Brainstorm",                  auteur: "Daniel J. Siegel",       blessures: ["Rejet","Abandon"],        sensibilites: ["rationnel","transition"],            chemin: [] },
+];
+
+const RECO_PODCASTS = [
+  { titre: "Émotions",                   auteur: "Louie Media",             blessures: ["Abandon","Trahison","Humiliation","Rejet","Injustice"], sensibilites: ["all"] },
+  { titre: "Thinkerview",                auteur: "Thinkerview",             blessures: ["Croissance","Présence","Injustice"], sensibilites: ["rationnel","transition"] },
+  { titre: "Des Ondes Positives",        auteur: "Sébastien Night",         blessures: ["Croissance","Présence"],  sensibilites: ["spirituel","intuitif"] },
+  { titre: "Huberman Lab (FR)",          auteur: "Andrew Huberman",         blessures: ["Croissance","Présence"],  sensibilites: ["rationnel"] },
+  { titre: "Choses à Savoir Psycho",     auteur: "Choses à Savoir",        blessures: ["all"],                    sensibilites: ["rationnel","transition"] },
+  { titre: "La Poudre",                  auteur: "Lauren Bastide",          blessures: ["Humiliation","Injustice","Rejet"], sensibilites: ["intuitif","transition"] },
+  { titre: "Être et Savoir",             auteur: "France Culture",          blessures: ["Croissance","Présence"],  sensibilites: ["spirituel","rationnel"] },
+  { titre: "Métamorphose",               auteur: "Soundheart",              blessures: ["Abandon","Rejet","Croissance"], sensibilites: ["spirituel","intuitif"] },
+  { titre: "Le Coeur sur la Table",      auteur: "Victoire Tuaillon",       blessures: ["Abandon","Trahison"],     sensibilites: ["intuitif","transition","rationnel"] },
+  { titre: "Sens & Cohérence",           auteur: "Fabrice Midal",           blessures: ["Présence","Croissance"],  sensibilites: ["spirituel","intuitif"] },
+  { titre: "L'École du Bonheur",         auteur: "Frédéric Lenoir",         blessures: ["Croissance","Présence","Rejet"], sensibilites: ["spirituel","intuitif","transition"] },
+  { titre: "No Stupid Questions",        auteur: "Freakonomics Radio",      blessures: ["Croissance"],             sensibilites: ["rationnel"] },
+];
+
+const getRecommandations = (blessureNom, sens, cdv) => {
+  const score = (item) => {
+    let s = 0;
+    if (item.blessures.includes("all") || item.blessures.includes(blessureNom)) s += 3;
+    if (item.sensibilites?.includes("all") || item.sensibilites?.includes(sens)) s += 2;
+    if (item.chemin?.includes(cdv)) s += 1;
+    return s;
+  };
+  const livres = [...RECO_LIVRES].sort((a,b) => score(b)-score(a)).slice(0,3);
+  const podcasts = [...RECO_PODCASTS].sort((a,b) => score(b)-score(a)).slice(0,3);
+  return { livres, podcasts };
+};
+
+// ─── QUESTIONS DU CRÉPUSCULE ─────────────────────────────────────────────────
+const QUESTIONS_CREPUSCULE = [
+  "Qu'as-tu traversé aujourd'hui ?",
+  "Qu'est-ce que cette journée t'a appris ?",
+  "Quel moment aurait mérité plus d'attention ?",
+  "Qu'as-tu laissé derrière toi aujourd'hui ?",
+  "Quelle émotion a dominé cette journée ?",
+  "Qu'est-ce que tu ne veux pas emporter dans la nuit ?",
+  "Si cette journée avait un mot, lequel serait-il ?",
+  "Qu'as-tu donné aujourd'hui ? Qu'as-tu reçu ?",
+  "Qu'est-ce qui t'a pesé ? Qu'est-ce qui t'a soulagé ?",
+  "À quoi ressemblait ton silence aujourd'hui ?",
+];
+
+const getQuestionCrepuscule = () => {
+  const idx = new Date().getDate() % QUESTIONS_CREPUSCULE.length;
+  return QUESTIONS_CREPUSCULE[idx];
+};
+
 // ─── GRAIN OVERLAY ────────────────────────────────────────────────────────────
 const Grain = () => (
   <div style={{
@@ -2008,6 +2078,20 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         </p>
       </button>
 
+      {/* ── RITUEL DU CRÉPUSCULE ── (visible après 18h) */}
+      {heure >= 18 && <RituelCrepuscule data={data} onPoser={(txt) => {
+        // On stocke la réponse dans l'Ardoise du soir via localStorage
+        const key = new Date().toISOString().split("T")[0];
+        const saved = JSON.parse(localStorage.getItem("alba_postits") || "{}");
+        const existing = saved[key] || [];
+        const nouveau = { id: Date.now(), texte: txt, type: "bilan", heure: new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}) };
+        saved[key] = [nouveau, ...existing];
+        localStorage.setItem("alba_postits", JSON.stringify(saved));
+      }} />}
+
+      {/* ── RECOMMANDATIONS ── */}
+      <RecommandationsBlock data={data} />
+
       {/* ── PARCOURS DES CLÉS ── */}
       {progressStats && (
         <div style={{ margin: "1.5rem 0 0" }}>
@@ -2025,6 +2109,173 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         </div>
       )}
 
+    </div>
+  );
+};
+
+// ─── RITUEL DU CRÉPUSCULE ────────────────────────────────────────────────────
+const RituelCrepuscule = ({ data, onPoser }) => {
+  const [reponse, setReponse] = useState("");
+  const [pose, setPose] = useState(false);
+  const question = getQuestionCrepuscule();
+
+  if (pose) return (
+    <div style={{
+      margin: "1rem 1.5rem 0",
+      padding: "1.2rem 1.6rem",
+      background: `${T.or}06`,
+      border: `1px solid ${T.or}20`,
+      borderRadius: "8px",
+      animation: "fadeUp 0.6s ease forwards",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <span style={{ color: T.or, fontSize: "0.8rem" }}>✦</span>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume }}>
+          Posé dans ton ardoise. Bonne nuit, {data.prenom}.
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{
+      margin: "1rem 1.5rem 0",
+      background: `linear-gradient(135deg, #1A1510, #131008)`,
+      border: `1px solid ${T.aurore}22`,
+      borderRadius: "8px",
+      padding: "1.5rem 1.6rem",
+      animation: "fadeUp 0.7s ease forwards 0.5s", opacity: 0,
+      position: "relative", overflow: "hidden",
+    }}>
+      {/* Lueur chaude */}
+      <div style={{ position: "absolute", top: -30, right: -30, width: 120, height: 120, borderRadius: "50%", background: `radial-gradient(circle, ${T.aurore}12, transparent 70%)`, pointerEvents: "none" }} />
+
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+        <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.aurore, opacity: 0.7 }} />
+        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.aurore}99` }}>
+          Rituel du crépuscule
+        </span>
+      </div>
+
+      <p style={{
+        fontFamily: T.serif, fontStyle: "italic",
+        fontSize: "clamp(1rem, 3vw, 1.15rem)",
+        color: T.orPale, lineHeight: 1.85, marginBottom: "1.2rem",
+      }}>
+        {question}
+      </p>
+
+      <textarea
+        value={reponse}
+        onChange={e => setReponse(e.target.value)}
+        placeholder="Quelques mots suffisent…"
+        rows={2}
+        style={{
+          width: "100%", background: "transparent",
+          border: "none", borderBottom: `1px solid ${reponse ? T.aurore + "44" : T.brume + "22"}`,
+          color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "1rem", padding: "0.4rem 0",
+          resize: "none", lineHeight: 1.7, outline: "none",
+          transition: "border-color 0.3s",
+        }}
+        onFocus={e => e.target.style.borderColor = `${T.aurore}55`}
+        onBlur={e => e.target.style.borderColor = reponse ? `${T.aurore}44` : `${T.brume}22`}
+      />
+
+      {reponse.trim().length > 2 && (
+        <div style={{ marginTop: "1rem", display: "flex", justifyContent: "flex-end", animation: "fadeUp 0.4s ease forwards" }}>
+          <button onClick={() => { onPoser(reponse.trim()); setPose(true); }} style={{
+            background: "transparent",
+            border: `1px solid ${T.aurore}44`,
+            borderRadius: "20px", padding: "0.5rem 1.3rem",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.9rem", color: T.aurore,
+            cursor: "pointer", transition: "all 0.25s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${T.aurore}10`; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+          >
+            Poser pour la nuit
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── RECOMMANDATIONS ─────────────────────────────────────────────────────────
+const RecommandationsBlock = ({ data }) => {
+  const [onglet, setOnglet] = useState("livres");
+  const [ouvert, setOuvert] = useState(false);
+
+  const cdv = cheminDeVie(data.naissance);
+  const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
+    || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+    || "Abandon";
+  const sens = data.sensibilite || "intuitif";
+  const { livres, podcasts } = getRecommandations(nomBlessure, sens, cdv);
+  const items = onglet === "livres" ? livres : podcasts;
+
+  return (
+    <div style={{ margin: "1rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.7s", opacity: 0 }}>
+      {/* Titre cliquable pour ouvrir/fermer */}
+      <button onClick={() => setOuvert(v => !v)} style={{
+        width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+        background: "none", border: "none", cursor: "pointer",
+        padding: "0.8rem 0", borderBottom: `1px solid ${T.brume}15`,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.brume, opacity: 0.5 }} />
+          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+            Pour toi en ce moment
+          </span>
+        </div>
+        <span style={{ color: T.brume, fontSize: "0.7rem", opacity: 0.6, transition: "transform 0.3s", display: "inline-block", transform: ouvert ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
+      </button>
+
+      {ouvert && (
+        <div style={{ animation: "fadeUp 0.4s ease forwards" }}>
+          {/* Sous-onglets */}
+          <div style={{ display: "flex", gap: "0.3rem", margin: "0.8rem 0" }}>
+            {["livres","podcasts"].map(o => (
+              <button key={o} onClick={() => setOnglet(o)} style={{
+                background: onglet === o ? `${T.or}12` : "transparent",
+                border: `1px solid ${onglet === o ? T.or + "44" : T.brume + "22"}`,
+                borderRadius: "20px", padding: "0.35rem 0.9rem",
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+                letterSpacing: "0.3em", textTransform: "uppercase",
+                color: onglet === o ? T.or : T.brume,
+                cursor: "pointer", transition: "all 0.2s",
+              }}>{o === "livres" ? "📖 Livres" : "🎙 Podcasts"}</button>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+            {items.map((item, i) => (
+              <div key={i} style={{
+                background: `${T.nuit2}`,
+                border: `1px solid ${T.brume}15`,
+                borderRadius: "6px",
+                padding: "1rem 1.2rem",
+                display: "flex", alignItems: "center", gap: "1rem",
+                animation: `fadeUp 0.5s ease forwards ${i * 0.08}s`, opacity: 0,
+              }}>
+                <div style={{
+                  width: 36, height: 48, flexShrink: 0, borderRadius: "2px",
+                  background: `linear-gradient(135deg, ${T.or}22, ${T.aurore}12)`,
+                  border: `1px solid ${T.or}22`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1rem",
+                }}>{onglet === "livres" ? "📖" : "🎙"}</div>
+                <div>
+                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.98rem", color: T.orPale, lineHeight: 1.3 }}>{item.titre}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.62rem", color: T.brume, marginTop: "0.25rem" }}>{item.auteur}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
