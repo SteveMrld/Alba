@@ -3743,50 +3743,219 @@ const Journal = ({ data }) => {
 };
 
 // ─── PROFIL ────────────────────────────────────────────────────────────────────
-const Profil = ({ data }) => {
+const Profil = ({ data, onUpdateData, progressStats }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
-  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
+    || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+    || "Abandon";
+  const blessure = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
+  const isRationnel = data.sensibilite === "rationnel";
+
+  const [tempetes, setTempetes] = useState([]);
+  const [editIntention, setEditIntention] = useState(false);
+  const [resetConfirm, setResetConfirm] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("alba_tempetes");
+    if (saved) try { setTempetes(JSON.parse(saved)); } catch {}
+  }, []);
+
+  const nbJours = (() => {
+    const saved = localStorage.getItem("alba_first_day");
+    if (!saved) { localStorage.setItem("alba_first_day", new Date().toISOString()); return 1; }
+    const diff = (new Date() - new Date(saved)) / (1000 * 60 * 60 * 24);
+    return Math.max(1, Math.floor(diff) + 1);
+  })();
+
+  const INTENTIONS_TEMPETE = ["rupture","deuil","épuisement","trahison","perdu(e)","maladie","cherche qui je suis"];
+  const INTENTIONS_LUMIERE = ["je vais bien","grandir","explorer","espace à moi","mieux me connaître","autre"];
+
+  const SENS_LABELS = {
+    intuitif:   { emoji: "🌿", label: "Intuitif·ve" },
+    spirituel:  { emoji: "✦",  label: "Spirituel·le" },
+    rationnel:  { emoji: "🧠", label: "Rationnel·le" },
+    transition: { emoji: "🌊", label: "En transition" },
+  };
+  const sensInfo = SENS_LABELS[data.sensibilite] || SENS_LABELS.intuitif;
 
   return (
-    <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
-      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.2rem", animation: "fadeUp 0.8s ease forwards" }}>
+    <div style={{ padding: "0 1.5rem 6rem" }}>
+
+      {/* ── Portrait ── */}
+      <div style={{ textAlign: "center", padding: "2rem 0 1.5rem", animation: "fadeUp 0.7s ease forwards" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
           <CarteAme data={data} small />
         </div>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, marginTop: "0.5rem" }}>
-          Chemin {cdv} &nbsp;·&nbsp; {chemin.titre}
+        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.8rem", color: T.orPale, marginBottom: "0.3rem" }}>
+          {data.prenom}
+        </h2>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+          {isRationnel ? "Profil" : `Chemin ${cdv}`} · {chemin.titre}
         </p>
       </div>
 
-      <Ornement style={{ marginBottom: "2rem" }} />
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      {/* ── Stats ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem", marginBottom: "1.2rem" }}>
         {[
-          { label: "Clé actuelle", val: "I — Reconnaître", icon: "✦" },
-          { label: "Jours avec ALBA", val: "1er jour", icon: "◌" },
-          { label: "Blessure à traverser", val: blessure.nom, icon: "○" },
-          { label: "Entrées dans le journal", val: "0 page", icon: "◇" },
+          { label: "Jours avec ALBA", val: nbJours, icon: "◌" },
+          { label: "Sensibilité",     val: `${sensInfo.emoji} ${sensInfo.label}`, icon: "" },
+          { label: "Tempêtes fermées",val: tempetes.length, icon: "⛈" },
+          { label: "Traversées",      val: tempetes.filter(t => t.vue).length, icon: "✦" },
         ].map((item, i) => (
           <div key={i} style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "1rem 1.2rem",
-            border: `1px solid ${T.brume}22`, borderRadius: "3px",
-            animation: `fadeUp 0.7s ease forwards ${i * 0.1}s`, opacity: 0,
+            padding: "1rem", background: T.nuit2,
+            border: `1px solid ${T.brume}18`, borderRadius: "6px",
+            animation: `fadeUp 0.6s ease forwards ${i * 0.08}s`, opacity: 0,
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-              <span style={{ color: T.or, fontSize: "0.75rem", opacity: 0.7 }}>{item.icon}</span>
-              <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>{item.label}</span>
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+              {item.label}
             </div>
-            <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8 }}>{item.val}</span>
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>
+              {item.val}
+            </div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: "2.5rem", padding: "1.5rem", borderLeft: `2px solid ${T.or}44` }}>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.8 }}>{chemin.essence}</p>
+      {/* ── Intention / Blessure ── */}
+      <div style={{
+        padding: "1.2rem 1.4rem", marginBottom: "0.8rem",
+        background: `${blessure.couleur}08`,
+        border: `1px solid ${blessure.couleur}25`,
+        borderRadius: "6px",
+        animation: "fadeUp 0.7s ease forwards 0.3s", opacity: 0,
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: blessure.couleur }}>
+            Ce que tu traverses
+          </div>
+          <button onClick={() => setEditIntention(true)} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem",
+            letterSpacing: "0.3em", textTransform: "uppercase",
+            color: `${T.brume}88`,
+          }}>Changer →</button>
+        </div>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>
+          {data.intention}
+        </div>
       </div>
+
+      {/* ── Tempêtes archivées ── */}
+      {tempetes.length > 0 && (
+        <div style={{ marginBottom: "0.8rem", animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0 }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingTop: "0.4rem" }}>
+            Boîte des Tempêtes
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {tempetes.map(t => (
+              <div key={t.id} style={{
+                padding: "0.9rem 1.1rem",
+                background: t.vue ? `${T.or}06` : T.nuit2,
+                border: `1px solid ${t.vue ? T.or + "25" : T.brume + "15"}`,
+                borderRadius: "6px",
+                display: "flex", gap: "0.8rem", alignItems: "flex-start",
+              }}>
+                <span style={{ marginTop: "0.2rem", fontSize: "0.8rem", opacity: 0.6 }}>{t.vue ? "✦" : "⛈"}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.vue ? `${T.or}cc` : `${T.aube}88`, lineHeight: 1.7 }}>
+                    {t.texte}
+                  </p>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginTop: "0.4rem" }}>
+                    {new Date(t.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    {t.vue ? " · traversée" : ""}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Essence du chemin ── */}
+      {!isRationnel && (
+        <div style={{
+          padding: "1.3rem 1.5rem", marginBottom: "1rem",
+          borderLeft: `2px solid ${T.or}44`,
+          animation: "fadeUp 0.7s ease forwards 0.5s", opacity: 0,
+        }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.orPale, lineHeight: 1.9 }}>
+            {chemin.essence}
+          </p>
+        </div>
+      )}
+
+      {/* ── Réinitialiser ── */}
+      <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+        {!resetConfirm ? (
+          <button onClick={() => setResetConfirm(true)} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            letterSpacing: "0.4em", textTransform: "uppercase",
+            color: `${T.brume}44`,
+          }}>Recommencer depuis le début</button>
+        ) : (
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+            <button onClick={() => setResetConfirm(false)} style={{
+              background: "none", border: `1px solid ${T.brume}22`,
+              borderRadius: "20px", padding: "0.5rem 1rem",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              letterSpacing: "0.3em", color: T.brume, cursor: "pointer",
+            }}>Annuler</button>
+            <button onClick={() => {
+              localStorage.clear();
+              window.location.reload();
+            }} style={{
+              background: "none", border: `1px solid #A87B7B44`,
+              borderRadius: "20px", padding: "0.5rem 1rem",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              letterSpacing: "0.3em", color: "#A87B7B", cursor: "pointer",
+            }}>Oui, tout effacer</button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Panneau changement d'intention ── */}
+      {editIntention && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(10,8,6,0.92)",
+          display: "flex", alignItems: "flex-end",
+          animation: "fadeIn 0.3s ease",
+        }} onClick={() => setEditIntention(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 540, margin: "0 auto",
+            background: `linear-gradient(170deg, #1A1714, #141210)`,
+            borderTop: `1px solid ${T.brume}28`,
+            borderRadius: "16px 16px 0 0",
+            padding: "2rem 1.8rem 3rem",
+            animation: "fadeUp 0.35s ease forwards",
+          }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
+              Qu'est-ce qui t'amène en ce moment ?
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {[...INTENTIONS_TEMPETE, ...INTENTIONS_LUMIERE].map(intent => (
+                <button key={intent} onClick={() => {
+                  if (onUpdateData) onUpdateData({ ...data, intention: intent });
+                  setEditIntention(false);
+                }} style={{
+                  background: data.intention === intent ? `${T.or}10` : "transparent",
+                  border: `1px solid ${data.intention === intent ? T.or + "44" : T.brume + "18"}`,
+                  borderRadius: "6px", padding: "0.8rem 1rem",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "0.95rem",
+                  color: data.intention === intent ? T.or : `${T.aube}88`,
+                  cursor: "pointer", textAlign: "left",
+                  transition: "all 0.2s",
+                }}>{intent}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -4529,7 +4698,7 @@ export default function Alba() {
     { id: "presence",  label: "Miroir" },
     { id: "ardoise",   label: "Ardoise" },
     { id: "evasion",   label: "Évasion" },
-    { id: "souffle",   label: "Souffle" },
+    { id: "profil",    label: "Profil" },
   ];
 
   // Icônes nav SVG
@@ -4541,6 +4710,13 @@ export default function Alba() {
       evasion:   "/icons/navigation_evasion.svg",
       souffle:   "/icons/navigation_souffle.svg",
     };
+    if (id === "profil") return (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+        style={{ color: active ? "#C8A96E" : "#8C7F74", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    );
     const src = map[id];
     if (!src) return null;
     return (
@@ -4624,6 +4800,7 @@ export default function Alba() {
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
+            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} />}
           </div>
 
           {/* ── BOTTOM NAV ── */}
