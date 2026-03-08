@@ -2280,6 +2280,240 @@ const RecommandationsBlock = ({ data }) => {
   );
 };
 
+// ─── LETTRES D'ALBA ──────────────────────────────────────────────────────────
+const LettresAlba = ({ data, allPostits }) => {
+  const [lettres, setLettres] = useState([]);
+  const [generation, setGeneration] = useState(false);
+  const [lettreOuverte, setLettreOuverte] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("alba_lettres");
+    if (saved) try { setLettres(JSON.parse(saved)); } catch {}
+  }, []);
+
+  const saveLettres = (list) => {
+    setLettres(list);
+    localStorage.setItem("alba_lettres", JSON.stringify(list));
+  };
+
+  // Vérifie si une lettre a déjà été générée cette semaine
+  const lettreDejaGeneree = () => {
+    if (lettres.length === 0) return false;
+    const derniere = new Date(lettres[0].date);
+    const maintenant = new Date();
+    const joursEcoules = (maintenant - derniere) / (1000 * 60 * 60 * 24);
+    return joursEcoules < 7;
+  };
+
+  // Collecte tous les post-its des 7 derniers jours
+  const getPostits7Jours = () => {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+    const tous = [];
+    Object.entries(allPostits || {}).forEach(([dateKey, posts]) => {
+      if (new Date(dateKey + "T00:00:00") >= cutoff) {
+        posts.forEach(p => tous.push(p.texte));
+      }
+    });
+    return tous;
+  };
+
+  const genererLettre = async () => {
+    const fragments = getPostits7Jours();
+    if (fragments.length < 2) return;
+    setGeneration(true);
+
+    const cdv = cheminDeVie(data.naissance);
+    const chemin = CHEMINS[cdv] || CHEMINS[9];
+    const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
+      || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+      || "Abandon";
+    const sens = data.sensibilite || "intuitif";
+
+    const prompt = `Tu es ALBA. Tu écris une lettre à ${data.prenom}.
+Profil : Chemin ${cdv} — ${chemin.titre}. Blessure/Chemin : ${nomBlessure}. Sensibilité : ${sens}.
+
+Voici les fragments que ${data.prenom} a posés cette semaine sur son ardoise :
+${fragments.map((f,i) => `${i+1}. "${f}"`).join("\n")}
+
+Écris une vraie lettre — pas un résumé, pas une liste. Une lettre intime, douce, qui nomme ce que tu entends entre les lignes. 
+Pas de bullet points. De la prose uniquement. Entre 150 et 220 mots.
+Commence par "Chère ${data.prenom}," ou "${data.prenom},".
+Nomme un ou deux fils qui traversent la semaine sans tout expliquer.
+Laisse de l'espace. Termine par une phrase qui ouvre vers la semaine suivante.
+Signe simplement : ALBA`;
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 400,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const d = await res.json();
+      const texte = d.content?.[0]?.text?.trim() || "";
+      if (texte) {
+        const nouvelleLettres = [{
+          id: Date.now(),
+          texte,
+          date: new Date().toISOString(),
+          fragments: fragments.length,
+        }, ...lettres];
+        saveLettres(nouvelleLettres);
+        setLettreOuverte(nouvelleLettres[0]);
+      }
+    } catch {}
+    setGeneration(false);
+  };
+
+  const peutGenerer = getPostits7Jours().length >= 2 && !lettreDejaGeneree();
+  const semaineFmt = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  return (
+    <div style={{ padding: "0 1.5rem 6rem" }}>
+
+      {/* ── En-tête ── */}
+      <div style={{ padding: "1.5rem 0 1rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>
+          Lettres d'ALBA
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${T.brume}cc`, lineHeight: 1.8 }}>
+          Chaque semaine, ALBA lit ton ardoise et t'écrit une lettre.
+        </p>
+      </div>
+
+      {/* ── Bouton générer ── */}
+      {peutGenerer && (
+        <div style={{ marginBottom: "1.5rem" }}>
+          <button onClick={genererLettre} disabled={generation} style={{
+            width: "100%", padding: "1.1rem",
+            background: generation ? "transparent" : `${T.or}10`,
+            border: `1px solid ${generation ? T.brume + "22" : T.or + "44"}`,
+            borderRadius: "6px", cursor: generation ? "default" : "pointer",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1rem", color: generation ? T.brume : T.or,
+            transition: "all 0.3s",
+          }}>
+            {generation ? "ALBA écrit…" : "Recevoir la lettre de la semaine"}
+          </button>
+          {generation && (
+            <p style={{ textAlign: "center", marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88` }}>
+              Elle lit ton ardoise…
+            </p>
+          )}
+        </div>
+      )}
+
+      {!peutGenerer && !lettreDejaGeneree() && (
+        <div style={{
+          padding: "1.2rem", marginBottom: "1.5rem",
+          background: `${T.nuit2}`,
+          border: `1px solid ${T.brume}15`,
+          borderRadius: "6px",
+        }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}88`, lineHeight: 1.8 }}>
+            Pose encore quelques fragments dans ton ardoise — ALBA aura besoin d'au moins deux moments pour t'écrire.
+          </p>
+        </div>
+      )}
+
+      {lettreDejaGeneree() && (
+        <div style={{
+          padding: "0.8rem 1rem", marginBottom: "1.5rem",
+          border: `1px solid ${T.brume}15`, borderRadius: "6px",
+        }}>
+          <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.brume}66` }}>
+            Prochaine lettre disponible dans quelques jours
+          </p>
+        </div>
+      )}
+
+      {/* ── Bibliothèque de lettres ── */}
+      {lettres.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "3rem 0" }}>
+          <div style={{ fontSize: "1.5rem", marginBottom: "1rem", opacity: 0.3 }}>✉</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}55`, lineHeight: 1.8 }}>
+            Tes lettres apparaîtront ici.<br/>Elles resteront pour toi.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+          {lettres.map((l, i) => (
+            <button key={l.id} onClick={() => setLettreOuverte(l)} style={{
+              background: i === 0 ? `${T.or}06` : "transparent",
+              border: `1px solid ${i === 0 ? T.or + "28" : T.brume + "15"}`,
+              borderRadius: "6px", padding: "1.1rem 1.3rem",
+              cursor: "pointer", textAlign: "left",
+              transition: "all 0.25s",
+            }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = `${T.or}33`}
+              onMouseLeave={e => e.currentTarget.style.borderColor = i === 0 ? `${T.or}28` : `${T.brume}15`}
+            >
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>
+                {semaineFmt(l.date)} · {l.fragments} fragment{l.fragments > 1 ? "s" : ""}
+              </div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.orPale, lineHeight: 1.5 }}>
+                {l.texte.split("\n")[0].slice(0, 60)}…
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Lettre ouverte ── */}
+      {lettreOuverte && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(10,8,6,0.92)",
+          display: "flex", alignItems: "flex-end",
+          animation: "fadeIn 0.3s ease",
+        }} onClick={() => setLettreOuverte(null)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 560, margin: "0 auto",
+            background: `linear-gradient(170deg, #1C1810, #141210)`,
+            borderTop: `1px solid ${T.or}28`,
+            borderRadius: "16px 16px 0 0",
+            padding: "2rem 1.8rem 4rem",
+            maxHeight: "85vh", overflowY: "auto",
+            animation: "fadeUp 0.4s ease forwards",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem" }}>
+              <div>
+                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.3rem" }}>
+                  Lettre d'ALBA
+                </div>
+                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", color: `${T.brume}88` }}>
+                  {semaineFmt(lettreOuverte.date)}
+                </div>
+              </div>
+              <button onClick={() => setLettreOuverte(null)} style={{
+                background: "none", border: `1px solid ${T.brume}25`,
+                color: T.brume, width: 28, height: 28, borderRadius: "50%",
+                cursor: "pointer", fontSize: "0.7rem",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>✕</button>
+            </div>
+
+            {/* Ligne dorée */}
+            <div style={{ width: 40, height: 1, background: `linear-gradient(to right, ${T.or}, transparent)`, marginBottom: "1.8rem" }} />
+
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(1rem, 3vw, 1.1rem)",
+              color: T.orPale, lineHeight: 2,
+              whiteSpace: "pre-wrap",
+            }}>{lettreOuverte.texte}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── COMPAGNON DU JOUR (conservé pour compatibilité) ─────────────────────────
 const CompagnonDuJour = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
@@ -2729,6 +2963,13 @@ const POSTIT_TYPES = [
 
 const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) => {
   const [sousOnglet, setSousOnglet] = useState("ardoise");
+  const [allPostitsLocal, setAllPostitsLocal] = useState({});
+
+  const handlePostitsChange = (updated) => {
+    setAllPostitsLocal(updated);
+    if (onPostitsChange) onPostitsChange(updated);
+  };
+
   return (
     <div>
       {/* ── Sous-navigation ── */}
@@ -2740,21 +2981,23 @@ const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) =
       }}>
         {[
           { id: "ardoise", label: "Ardoise" },
-          { id: "fil",     label: "Fil de Vie" },
+          { id: "fil",     label: "Fil" },
+          { id: "lettres", label: "Lettres" },
         ].map(o => (
           <button key={o.id} onClick={() => setSousOnglet(o.id)} style={{
             flex: 1, background: "none", border: "none", cursor: "pointer",
             padding: "0.85rem 0",
             fontFamily: T.sans, fontWeight: 200,
-            fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase",
+            fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase",
             color: sousOnglet === o.id ? T.or : T.brume,
             borderBottom: `2px solid ${sousOnglet === o.id ? T.or : "transparent"}`,
             transition: "all 0.25s",
           }}>{o.label}</button>
         ))}
       </div>
-      {sousOnglet === "ardoise" && <ArdoiseInner data={data} db={db} onPostitAjoute={onPostitAjoute} onBilanGenere={onBilanGenere} onPostitsChange={onPostitsChange} />}
+      {sousOnglet === "ardoise" && <ArdoiseInner data={data} db={db} onPostitAjoute={onPostitAjoute} onBilanGenere={onBilanGenere} onPostitsChange={handlePostitsChange} />}
       {sousOnglet === "fil"     && <FilDeVie data={data} db={db} />}
+      {sousOnglet === "lettres" && <LettresAlba data={data} allPostits={allPostitsLocal} />}
     </div>
   );
 };
