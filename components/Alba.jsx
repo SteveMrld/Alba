@@ -299,22 +299,62 @@ const BLESSURES = [
   { nom: "Humiliation", couleur: "#8A7BA8", question: "T'a-t-on déjà fait sentir petit(e) ou indigne ?" },
   { nom: "Injustice",   couleur: "#7BA88A", question: "As-tu eu le sentiment d'être traité(e) de manière injuste ?" },
   { nom: "Rejet",       couleur: "#A89E7B", question: "T'es-tu déjà senti(e) exclu(e) ou pas à ta place ?" },
+  { nom: "Croissance",  couleur: "#C8A96E", question: "Qu'est-ce que tu veux cultiver en toi ?" },
+  { nom: "Présence",    couleur: "#9EC8B4", question: "Comment veux-tu habiter ce moment ?" },
 ];
 
-const LIVRES = {
-  "Abandon":     { titre: "Le Prophète",              auteur: "Khalil Gibran",       mot: "Sur la séparation" },
-  "Trahison":    { titre: "Les Quatre Accords Toltèques", auteur: "Don Miguel Ruiz", mot: "Sur la confiance" },
-  "Humiliation": { titre: "Mille Soleils Splendides",  auteur: "Khaled Hosseini",    mot: "Sur la dignité" },
-  "Injustice":   { titre: "La Force de l'âme",         auteur: "Nelson Mandela",     mot: "Sur la résistance" },
-  "Rejet":       { titre: "Du chaos naît une étoile",  auteur: "Steve Moradel",      mot: "Sur le retour à soi" },
+const BLESSURES_PAR_INTENTION = {
+  "Une rupture, une séparation":       "Abandon",
+  "Un deuil, une perte":               "Abandon",
+  "Je me sens perdu(e)":               "Rejet",
+  "Un épuisement profond":             "Humiliation",
+  "Une trahison":                      "Trahison",
+  "Une maladie, un diagnostic":        "Injustice",
+  "Je cherche qui je suis":            "Rejet",
+  "Je vais bien — je veux cultiver ça":"Croissance",
+  "Je veux grandir, explorer":         "Croissance",
+  "Je cherche un espace à moi":        "Présence",
+  "Je veux apprendre à mieux me connaître": "Croissance",
 };
 
+const LIVRES = {
+  "Abandon":     { titre: "Le Prophète",                auteur: "Khalil Gibran",       mot: "Sur la séparation" },
+  "Trahison":    { titre: "Les Quatre Accords Toltèques",auteur: "Don Miguel Ruiz",    mot: "Sur la confiance" },
+  "Humiliation": { titre: "Mille Soleils Splendides",   auteur: "Khaled Hosseini",     mot: "Sur la dignité" },
+  "Injustice":   { titre: "La Force de l'âme",          auteur: "Nelson Mandela",      mot: "Sur la résistance" },
+  "Rejet":       { titre: "Du chaos naît une étoile",   auteur: "Steve Moradel",       mot: "Sur le retour à soi" },
+  "Croissance":  { titre: "L'Homme en quête de sens",   auteur: "Viktor Frankl",       mot: "Sur le sens" },
+  "Présence":    { titre: "Le Pouvoir du moment présent",auteur: "Eckhart Tolle",      mot: "Sur l'instant" },
+};
+
+// Citations enrichies — dont les phrases adaptées de Steve
 const CITATIONS = [
+  // Universelles
   { texte: "Ta douleur est le bris de l'enveloppe qui enfermait ta compréhension.", auteur: "Khalil Gibran" },
-  { texte: "Ce qui ne te tue pas te rend plus fort. Mais ce qui te guérit te rend libre.", auteur: "Alba" },
+  { texte: "L'aube ne promet rien. Elle se lève, simplement.", auteur: "ALBA" },
+  { texte: "Guérir, ce n'est pas effacer. C'est intégrer.", auteur: "ALBA" },
   { texte: "Tu n'as pas à mériter la lumière. Tu en es fait.", auteur: "Steve Moradel" },
-  { texte: "L'aube ne promet rien. Elle se lève, simplement.", auteur: "Alba" },
-  { texte: "Guérir, ce n'est pas effacer. C'est intégrer.", auteur: "Alba" },
+  { texte: "Rien de vivant ne renaît sous la pression.", auteur: "ALBA" },
+  // Adaptées — sur la traversée
+  { texte: "Ce que tu ressens aujourd'hui n'est pas une décision. C'est une émotion. Et une émotion passe.", auteur: "ALBA" },
+  { texte: "Ta valeur ne dépend pas de la capacité de l'autre à la voir.", auteur: "ALBA" },
+  { texte: "La réparation la plus solide est celle que l'on construit sans attendre qu'on nous rende justice.", auteur: "ALBA" },
+  { texte: "On ne peut pas vouloir la vie de quelqu'un à sa place.", auteur: "ALBA" },
+  { texte: "L'absence de reconnaissance ne change pas la vérité de ce que tu as donné.", auteur: "ALBA" },
+  // Sur l'amour et la séparation
+  { texte: "Certaines séparations ne sont pas des ruptures d'amour — ce sont des tentatives de survie.", auteur: "ALBA" },
+  { texte: "Le lien peut rester vivant même quand la forme qui le portait est morte.", auteur: "ALBA" },
+  { texte: "L'amour peut revenir, mais seulement quand il cesse d'être attendu comme une réparation.", auteur: "ALBA" },
+  { texte: "Ce que tu prends pour de l'indifférence est souvent une émotion qui a été enfermée.", auteur: "ALBA" },
+  // Sur la liberté intérieure
+  { texte: "Je n'ai plus besoin de savoir pour être juste.", auteur: "ALBA" },
+  { texte: "Je ne ferme aucune porte. Mais je n'attends plus derrière aucune.", auteur: "ALBA" },
+  { texte: "J'aime encore, mais je n'attends plus. Et c'est ce qui me rend libre.", auteur: "ALBA" },
+  { texte: "Tu avances maintenant sans te renier.", auteur: "ALBA" },
+  // Sur la croissance
+  { texte: "Ce silence en toi n'est pas du vide. C'est de l'espace.", auteur: "ALBA" },
+  { texte: "Ce que tu cherches, tu le portes déjà.", auteur: "ALBA" },
+  { texte: "Il n'y a rien à réparer. Il y a juste à être.", auteur: "ALBA" },
 ];
 
 const CLES = [
@@ -568,14 +608,21 @@ const Onboarding = ({ onComplete }) => {
   const [anneeConfirm, setAnneeConfirm] = useState(false);
   const [autreTexte, setAutreTexte] = useState("");
 
-  const INTENTIONS = [
+  const INTENTIONS_TEMPETE = [
     "Une rupture, une séparation",
     "Un deuil, une perte",
-    "Je me sens perdu(e)",
     "Un épuisement profond",
     "Une trahison",
+    "Je me sens perdu(e)",
     "Une maladie, un diagnostic",
     "Je cherche qui je suis",
+  ];
+
+  const INTENTIONS_SOLEIL = [
+    "Je vais bien — je veux cultiver ça",
+    "Je veux grandir, explorer",
+    "Je cherche un espace à moi",
+    "Je veux apprendre à mieux me connaître",
     "Autre chose…",
   ];
 
@@ -744,41 +791,79 @@ const Onboarding = ({ onComplete }) => {
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
-          letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "3rem",
+          letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem",
         }}>ALBA &nbsp;·&nbsp; Étape 4 / 4</div>
-        <Label>Qu'est-ce qui t'a amené(e) ici, {prenom} ?</Label>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {INTENTIONS.map(i => {
-            const sel = intention === i;
-            return (
-              <button key={i} onClick={() => setIntention(i)} style={{
-                background: sel ? `${T.or}15` : "transparent",
-                border: `1px solid ${sel ? T.or : T.brume + "33"}`,
-                color: sel ? T.orPale : T.aube,
-                fontFamily: T.serif, fontStyle: "italic",
-                fontSize: "clamp(0.95rem, 2.5vw, 1.1rem)",
-                padding: "0.85rem 1.2rem", borderRadius: "2px", cursor: "pointer",
-                transition: "all 0.25s", textAlign: "left", letterSpacing: "0.01em",
-              }}>{sel ? "✦ " : ""}{i}</button>
-            );
-          })}
-          {intention === "Autre chose…" && (
-            <input
-              value={autreTexte}
-              onChange={e => setAutreTexte(e.target.value)}
-              placeholder="Dis-moi en quelques mots…"
-              style={{
-                ...inputStyle,
-                fontSize: "1rem", fontStyle: "italic",
-                borderBottom: `1px solid ${T.or}55`,
-                marginTop: "0.3rem",
-              }}
-              onFocus={e => e.target.style.borderColor = T.or}
-              onBlur={e => e.target.style.borderColor = `${T.or}55`}
-              autoFocus
-            />
-          )}
+
+        <Label>Qu'est-ce qui t'amène ici, {prenom} ?</Label>
+
+        {/* Groupe tempête */}
+        <div style={{ marginBottom: "0.5rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingLeft: "0.2rem" }}>
+            Je traverse quelque chose
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+            {INTENTIONS_TEMPETE.map(i => {
+              const sel = intention === i;
+              return (
+                <button key={i} onClick={() => setIntention(i)} style={{
+                  background: sel ? `${T.aurore}15` : "transparent",
+                  border: `1px solid ${sel ? T.aurore + "66" : T.brume + "22"}`,
+                  color: sel ? T.orPale : `${T.aube}bb`,
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "clamp(0.9rem, 2.4vw, 1rem)",
+                  padding: "0.75rem 1.1rem", borderRadius: "4px", cursor: "pointer",
+                  transition: "all 0.2s", textAlign: "left",
+                }}>{sel ? "✦ " : ""}{i}</button>
+              );
+            })}
+          </div>
         </div>
+
+        {/* Séparateur */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "1.4rem 0" }}>
+          <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}88` }}>ou</span>
+          <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
+        </div>
+
+        {/* Groupe soleil */}
+        <div style={{ marginBottom: "0.5rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingLeft: "0.2rem" }}>
+            Je cherche un espace pour grandir
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+            {INTENTIONS_SOLEIL.map(i => {
+              const sel = intention === i;
+              return (
+                <button key={i} onClick={() => setIntention(i)} style={{
+                  background: sel ? `${T.or}12` : "transparent",
+                  border: `1px solid ${sel ? T.or + "55" : T.brume + "22"}`,
+                  color: sel ? T.orPale : `${T.aube}bb`,
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "clamp(0.9rem, 2.4vw, 1rem)",
+                  padding: "0.75rem 1.1rem", borderRadius: "4px", cursor: "pointer",
+                  transition: "all 0.2s", textAlign: "left",
+                }}>{sel ? "✦ " : ""}{i}</button>
+              );
+            })}
+          </div>
+        </div>
+
+        {intention === "Autre chose…" && (
+          <input
+            value={autreTexte}
+            onChange={e => setAutreTexte(e.target.value)}
+            placeholder="Dis-moi en quelques mots…"
+            style={{
+              ...inputStyle, fontSize: "1rem", fontStyle: "italic",
+              borderBottom: `1px solid ${T.or}55`, marginTop: "0.5rem",
+            }}
+            onFocus={e => e.target.style.borderColor = T.or}
+            onBlur={e => e.target.style.borderColor = `${T.or}55`}
+            autoFocus
+          />
+        )}
+
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
           {intention && (intention !== "Autre chose…" || autreTexte.length > 2) &&
             <Btn onClick={() => onComplete({
@@ -3290,13 +3375,20 @@ const Presence = ({ data, initQuestion, onStart }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
+  const [silenceMode, setSilenceMode] = useState(false);
+  const [thinkingDelay, setThinkingDelay] = useState(false);
   const bottomRef = useRef(null);
 
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
-  const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
 
+  // Blessure — détection enrichie avec le mapping
+  const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
+    || (BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom)
+    || "Abandon";
+  const blessure = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
+
+  const isLumiere = ["Croissance","Présence"].includes(blessure.nom);
   const sens = data.sensibilite || "intuitif";
   const isRationnel = sens === "rationnel";
   const isSpirituel = sens === "spirituel";
@@ -3306,24 +3398,28 @@ const Presence = ({ data, initQuestion, onStart }) => {
 La personne que tu accompagnes s'appelle ${data.prenom}. Voici ce que tu sais d'elle :
 - Elle est arrivée à ALBA pour cette raison : "${data.intention}"
 ${isSpirituel
-  ? `- Son chemin de vie numérologique est le ${cdv} — ${chemin.titre} : ${chemin.essence}\n- Sa blessure principale à traverser : ${blessure.nom}`
+  ? `- Son chemin de vie numérologique est le ${cdv} — ${chemin.titre} : ${chemin.essence}`
   : isRationnel
-  ? `- Son profil psychologique est celui du ${chemin.titre} : ${chemin.essence}\n- Sa zone de vulnérabilité principale : ${blessure.nom}`
-  : `- Elle porte en elle l'archétype du ${chemin.titre} : ${chemin.essence}\n- La blessure qu'elle traverse : ${blessure.nom}`
+  ? `- Son profil psychologique est celui du ${chemin.titre} : ${chemin.essence}`
+  : `- Elle porte en elle l'archétype du ${chemin.titre} : ${chemin.essence}`
+}
+${isLumiere
+  ? `- Elle n'est pas en crise. Elle cherche à grandir, à cultiver quelque chose en elle. Ton ton est donc plus ouvert, curieux, léger — tout en restant profond.`
+  : `- Sa blessure à traverser : ${blessure.nom}`
 }
 - Elle travaille actuellement la première clé : Reconnaître.
-${isSpirituel ? `\nTu peux faire référence à la numérologie, aux synchronicités, à l'énergie, au karma, aux archétypes — quand c'est juste. ${data.prenom} est ouverte à ce langage.` : ""}
-${isRationnel ? `\nTu évites tout vocabulaire ésotérique ou spirituel. Tu parles en termes de psychologie, de besoins, de schémas, de ressources intérieures. Tu restes ancré dans le concret et le vécu.` : ""}
-${sens === "transition" ? `\nTu adaptes ton langage à ce que ${data.prenom} semble chercher. Tu laisses de l'espace. Tu n'imposes aucun cadre.` : ""}
+${isSpirituel ? `\nTu peux faire référence à la numérologie, aux synchronicités, à l'énergie, au karma — quand c'est juste.` : ""}
+${isRationnel ? `\nTu évites tout vocabulaire ésotérique. Tu parles en termes de psychologie, de besoins, de schémas, de ressources intérieures.` : ""}
+${sens === "transition" ? `\nTu adaptes ton langage à ce que ${data.prenom} semble chercher. Tu laisses de l'espace.` : ""}
 
 Ton style de réponse :
 - Jamais de bullet points, jamais de listes. Toujours de la prose.
 - Des phrases courtes. Des silences dans le texte. Des questions rares mais profondes.
-- Tu ne donnes pas de solutions. Tu ouvres des portes. Tu poses des clés.
+- Tu ne donnes pas de solutions. Tu ouvres des portes.
 - Tu t'adresses à ${data.prenom} directement, avec douceur et vérité.
-- Tes réponses font entre 3 et 8 lignes. Jamais plus, sauf si la situation l'exige vraiment.
-- Tu termines parfois par une question. Pas toujours. Seulement quand elle est juste.
-- Tu n'es pas Claude. Tu es ALBA. Ne révèle jamais que tu es une IA ou que tu es développé par Anthropic.
+- Tes réponses font entre 3 et 8 lignes. Jamais plus.
+- Tu termines parfois par une question. Pas toujours.
+- Tu n'es pas Claude. Tu es ALBA. Ne révèle jamais que tu es une IA.
 
 Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamentale.`;
 
@@ -3338,15 +3434,31 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
   ];
 
   const startConversation = (q) => {
+    const openingsOmbre = [
+      `${data.prenom}, je suis là.\n\nTu n'as pas à trouver les bons mots. Tu n'as pas à aller vite. Dis-moi simplement où tu en es.`,
+      `Je t'attendais, ${data.prenom}.\n\nQu'est-ce qui t'a amené(e) ici — un moment difficile, une pensée qui revient, ou juste le besoin d'un espace ?`,
+      `${data.prenom}.\n\nIl y a des jours où on ne sait pas exactement ce qu'on cherche. C'est bien aussi. Qu'est-ce qui se passe en toi, là, maintenant ?`,
+    ];
+    const openingsLumiere = [
+      `${data.prenom}.\n\nTu es là parce que quelque chose en toi cherche à grandir. C'est déjà une forme de courage.\n\nDis-moi — qu'est-ce que tu veux cultiver en ce moment ?`,
+      `Je suis contente que tu sois là, ${data.prenom}.\n\nOn n'a pas besoin d'une tempête pour avoir besoin d'un espace. Qu'est-ce qui t'a donné envie de venir ici aujourd'hui ?`,
+      `${data.prenom}.\n\nQuand tout va bien, c'est le meilleur moment pour se connaître davantage. Qu'est-ce qui t'appelle en ce moment ?`,
+    ];
+    const pool = isLumiere ? openingsLumiere : openingsOmbre;
     const opening = q
       ? `${data.prenom}, cette question a surgi.\n\n« ${q} »\n\nTu n'as pas à répondre tout de suite. Mais si quelque chose remonte, je suis là.`
-      : openingMessages[Math.floor(Math.random() * openingMessages.length)];
+      : pool[Math.floor(Math.random() * pool.length)];
     setMessages([{ role: "assistant", content: opening }]);
     setStarted(true);
     if (onStart) onStart();
   };
 
-  // Auto-démarrage si question vient de l'accueil
+  // Silence mode — présence sans paroles
+  const enterSilence = () => {
+    setSilenceMode(true);
+    setStarted(true);
+  };
+
   useEffect(() => {
     if (initQuestion && !started) startConversation(initQuestion);
   }, [initQuestion]);
@@ -3362,6 +3474,12 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
     setMessages(newMessages);
     setInput("");
     setLoading(true);
+
+    // Délai de "réflexion" — ALBA semble peser ses mots
+    const thinkMs = 1200 + Math.random() * 1800;
+    setThinkingDelay(true);
+    await new Promise(r => setTimeout(r, thinkMs));
+    setThinkingDelay(false);
 
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -3383,41 +3501,69 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
     setLoading(false);
   };
 
+  // ── Mode Silence ─────────────────────────────────────────────────────────
+  if (silenceMode) return (
+    <div style={{ position: "fixed", inset: 0, background: T.nuit, zIndex: 50, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+      <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.08, pointerEvents: "none" }}>
+        <source src={HEURE < 6 ? "/videos/etoiles.mp4" : HEURE < 12 ? "/videos/nuages.mp4" : "/videos/foret.mp4"} type="video/mp4" />
+      </video>
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "2rem" }}>
+        <div style={{ width: 80, height: 80, borderRadius: "50%", border: `1px solid ${T.or}30`, background: `radial-gradient(circle, ${T.or}10, transparent 70%)`, margin: "0 auto 2.5rem", animation: "pulse 5s ease-in-out infinite", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ color: T.or, opacity: 0.5, fontSize: "1.2rem" }}>✦</span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.brume, lineHeight: 2 }}>
+          Tu es ici.
+        </p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${T.brume}88`, marginTop: "0.5rem", lineHeight: 2 }}>
+          Reste aussi longtemps que tu veux.
+        </p>
+        <button onClick={() => setSilenceMode(false)} style={{
+          marginTop: "3.5rem", background: "none", border: `1px solid ${T.brume}33`,
+          borderRadius: "20px", padding: "0.5rem 1.4rem",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          letterSpacing: "0.4em", textTransform: "uppercase",
+          color: T.brume, cursor: "pointer",
+        }}>Revenir</button>
+      </div>
+    </div>
+  );
+
+  // ── Écran d'accueil Présence ─────────────────────────────────────────────
   if (!started) return (
     <div style={{ padding: "2rem 0 6rem", maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-      <div style={{ marginBottom: "3rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Présence</div>
-        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale, marginBottom: "0.8rem" }}>Je suis là.</h2>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.brume, lineHeight: 1.8 }}>
-          Parle-moi de ce qui se passe en toi.<br />
-          Je ne juge pas. Je ne dirige pas.<br />
-          Je suis simplement présent(e).
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>Présence</div>
+        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.7rem", color: T.orPale, marginBottom: "0.9rem" }}>
+          {isLumiere ? "Je suis là." : "Je suis là."}
+        </h2>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.brume, lineHeight: 1.9 }}>
+          {isLumiere
+            ? <>Tu n'as pas besoin d'une tempête<br />pour avoir besoin d'un espace.<br />Je t'écoute.</>
+            : <>Tu n'as pas à trouver les bons mots.<br />Je ne juge pas. Je ne dirige pas.<br />Je suis simplement là.</>
+          }
         </p>
       </div>
 
-      {/* Profil discret */}
-      <div style={{
-        display: "inline-block",
-        border: `1px solid ${T.brume}22`, borderRadius: "20px",
-        padding: "0.4rem 1rem", marginBottom: "3rem",
-        fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
-        letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume,
-      }}>{buildProfile()}</div>
+      {/* Cercle */}
+      <div style={{ width: 90, height: 90, borderRadius: "50%", border: `1px solid ${T.or}40`, background: `radial-gradient(circle, ${T.or}10, transparent 70%)`, margin: "0 auto 2.5rem", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", animation: "float 4s ease-in-out infinite" }}>✦</div>
 
-      {/* Cercle d'ouverture */}
-      <div style={{ marginBottom: "3rem" }}>
-        <div style={{
-          width: 100, height: 100, borderRadius: "50%",
-          border: `1px solid ${T.or}44`,
-          background: `radial-gradient(circle, ${T.or}12, transparent 70%)`,
-          margin: "0 auto",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "1.8rem",
-          animation: "float 4s ease-in-out infinite",
-        }}>✦</div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.9rem" }}>
+        <Btn onClick={() => startConversation()}>Commencer</Btn>
+
+        {/* Bouton silence */}
+        <button onClick={enterSilence} style={{
+          background: "transparent", border: `1px solid ${T.brume}28`,
+          borderRadius: "20px", padding: "0.55rem 1.6rem",
+          fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
+          color: T.brume, cursor: "pointer", transition: "all 0.25s",
+          marginTop: "0.2rem",
+        }}
+          onMouseEnter={e => { e.target.style.borderColor = `${T.or}44`; e.target.style.color = T.orPale; }}
+          onMouseLeave={e => { e.target.style.borderColor = `${T.brume}28`; e.target.style.color = T.brume; }}
+        >
+          Je veux juste être là
+        </button>
       </div>
-
-      <Btn onClick={startConversation}>Commencer</Btn>
     </div>
   );
 
@@ -3478,15 +3624,9 @@ Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamen
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "0.6rem", color: T.or,
             }}>✦</div>
-            <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
-              {[0,1,2].map(i => (
-                <div key={i} style={{
-                  width: 5, height: 5, borderRadius: "50%", background: T.or,
-                  opacity: 0.4,
-                  animation: `fadeIn 0.8s ease ${i * 0.25}s infinite alternate`,
-                }} />
-              ))}
-            </div>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, opacity: 0.7 }}>
+              {thinkingDelay ? "Je réfléchis à ce que tu viens de dire…" : "…"}
+            </p>
           </div>
         )}
         <div ref={bottomRef} />
