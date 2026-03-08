@@ -2309,6 +2309,38 @@ const POSTIT_TYPES = [
 ];
 
 const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere }) => {
+  const [sousOnglet, setSousOnglet] = useState("ardoise"); // "ardoise" | "fil"
+  return (
+    <div>
+      {/* ── Sous-navigation ── */}
+      <div style={{
+        display: "flex",
+        borderBottom: `1px solid ${T.brume}18`,
+        background: T.nuit,
+        position: "sticky", top: 52, zIndex: 40,
+      }}>
+        {[
+          { id: "ardoise", label: "Ardoise" },
+          { id: "fil",     label: "Fil de Vie" },
+        ].map(o => (
+          <button key={o.id} onClick={() => setSousOnglet(o.id)} style={{
+            flex: 1, background: "none", border: "none", cursor: "pointer",
+            padding: "0.85rem 0",
+            fontFamily: T.sans, fontWeight: 200,
+            fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase",
+            color: sousOnglet === o.id ? T.or : T.brume,
+            borderBottom: `2px solid ${sousOnglet === o.id ? T.or : "transparent"}`,
+            transition: "all 0.25s",
+          }}>{o.label}</button>
+        ))}
+      </div>
+      {sousOnglet === "ardoise" && <ArdoiseInner data={data} db={db} onPostitAjoute={onPostitAjoute} onBilanGenere={onBilanGenere} />}
+      {sousOnglet === "fil"     && <FilDeVie data={data} db={db} />}
+    </div>
+  );
+};
+
+const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere }) => {
   // Clé du jour courant : "2026-03-08"
   const todayKey = new Date().toISOString().split("T")[0];
   const [jourActif, setJourActif] = useState(todayKey);
@@ -3582,7 +3614,7 @@ export default function Alba() {
     { id: "compagnon", label: "Jour" },
     { id: "presence",  label: "Présence" },
     { id: "ardoise",   label: "Ardoise" },
-    { id: "fil",       label: "Fil" },
+    { id: "evasion",   label: "Évasion" },
     { id: "souffle",   label: "Souffle" },
   ];
 
@@ -3592,7 +3624,7 @@ export default function Alba() {
       compagnon: "/icons/navigation_jour.svg",
       presence:  "/icons/navigation_presence.svg",
       ardoise:   "/icons/navigation_ardoise.svg",
-      fil:       "/icons/navigation_fil.svg",
+      evasion:   "/icons/navigation_evasion.svg",
       souffle:   "/icons/navigation_souffle.svg",
     };
     const src = map[id];
@@ -3676,7 +3708,7 @@ export default function Alba() {
             {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={progressStats} />}
             {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} initQuestion={navContext?.question} onStart={() => incrementStat("conversationsTotal")} /></div>}
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} />}
-            {tab === "fil"       && <FilDeVie data={userData} db={db} />}
+            {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
           </div>
 
