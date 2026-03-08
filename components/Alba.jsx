@@ -3966,8 +3966,342 @@ const FilDeVie = ({ data, db }) => {
   const [ajout, setAjout] = useState(false);
   const [texte, setTexte] = useState("");
   const [type, setType] = useState("insight");
-  const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [carteOuverte, setCarteOuverte] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const pressTimer = useRef(null);
+
+  const TYPES = [
+    { id: "insight",   label: "Prise de conscience", couleur: "#C8A96E", symbole: "✦" },
+    { id: "emotion",   label: "Émotion traversée",   couleur: "#D4856A", symbole: "○" },
+    { id: "victoire",  label: "Victoire intérieure",  couleur: "#7BA88A", symbole: "◇" },
+    { id: "question",  label: "Question ouverte",     couleur: "#7B9EA8", symbole: "◎" },
+    { id: "passage",   label: "Moment de passage",    couleur: "#A87BC8", symbole: "◈" },
+  ];
+
+  const typeInfo = (id) => TYPES.find(t => t.id === id) || TYPES[0];
+  const formatDate = (iso) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("alba_fil");
+      if (stored) setMoments(JSON.parse(stored));
+    } catch {}
+    setLoaded(true);
+  }, []);
+
+  const saveMoments = (list) => {
+    setMoments(list);
+    try { localStorage.setItem("alba_fil", JSON.stringify(list)); } catch {}
+  };
+
+  const addMoment = () => {
+    if (!texte.trim()) return;
+    saveMoments([{ id: Date.now(), texte: texte.trim(), type, date: new Date().toISOString() }, ...moments]);
+    setTexte(""); setAjout(false);
+  };
+
+  const startPress = (id) => {
+    pressTimer.current = setTimeout(() => setDeletingId(id), 600);
+  };
+  const endPress = () => clearTimeout(pressTimer.current);
+
+  const DEMO = [
+    { id: -1, texte: "Quelque chose en moi commence à se poser. Je ne sais pas encore quoi.", type: "insight",  date: new Date(Date.now() - 14 * 86400000).toISOString() },
+    { id: -2, texte: "J'ai pleuré pour la première fois depuis longtemps. Ça a fait du bien.",  type: "emotion",  date: new Date(Date.now() - 9  * 86400000).toISOString() },
+    { id: -3, texte: "Est-ce que ma peur est vraiment la mienne, ou celle que j'ai héritée ?",  type: "question", date: new Date(Date.now() - 4  * 86400000).toISOString() },
+  ];
+  const affiche = moments.length > 0 ? moments : (loaded ? DEMO : []);
+
+  const W = 320; const CARD_H = 110; const GAP = 30;
+  const ENTRY_H = CARD_H + GAP;
+  const n = affiche.length;
+  const SVG_H = Math.max(500, n * ENTRY_H + 120);
+  const cx = W / 2; const amplitude = 52;
+  const nodeY = (i) => 80 + i * ENTRY_H + CARD_H / 2;
+  const nodeX = (i) => cx + (i % 2 === 0 ? -amplitude : amplitude);
+
+  const buildPath = () => {
+    if (n === 0) return `M ${cx} 40 L ${cx} ${SVG_H - 40}`;
+    let d = `M ${cx} 40`;
+    for (let i = 0; i < n; i++) {
+      const x = nodeX(i); const y = nodeY(i);
+      const prevX = i === 0 ? cx : nodeX(i - 1);
+      const prevY = i === 0 ? 40 : nodeY(i - 1);
+      const cpX = (prevX + x) / 2;
+      d += ` C ${cpX} ${prevY}, ${cpX} ${y}, ${x} ${y}`;
+    }
+    const lastX = nodeX(n - 1); const lastY = nodeY(n - 1);
+    d += ` C ${(lastX + cx) / 2} ${lastY}, ${(lastX + cx) / 2} ${SVG_H - 40}, ${cx} ${SVG_H - 40}`;
+    return d;
+  };
+
+  return (
+    <div style={{ padding: "1.5rem 0 8rem", maxWidth: 520, margin: "0 auto", minHeight: "100vh" }}>
+
+      {/* ── Carte ouverte en plein écran ── */}
+      {carteOuverte && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(10,8,6,0.92)",
+          display: "flex", alignItems: "flex-end",
+          animation: "fadeIn 0.3s ease",
+        }} onClick={() => setCarteOuverte(null)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 540, margin: "0 auto",
+            background: `linear-gradient(170deg, #1A1714, #141210)`,
+            borderTop: `1px solid ${typeInfo(carteOuverte.type).couleur}44`,
+            borderRadius: "16px 16px 0 0",
+            padding: "2rem 1.8rem 4rem",
+            animation: "fadeUp 0.35s ease forwards",
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <span style={{ fontSize: "0.9rem", color: typeInfo(carteOuverte.type).couleur }}>{typeInfo(carteOuverte.type).symbole}</span>
+                <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: typeInfo(carteOuverte.type).couleur }}>
+                  {typeInfo(carteOuverte.type).label}
+                </span>
+              </div>
+              <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", color: `${T.brume}77` }}>
+                {formatDate(carteOuverte.date)}
+              </span>
+            </div>
+            <div style={{ width: 30, height: 1, background: `linear-gradient(to right, ${typeInfo(carteOuverte.type).couleur}66, transparent)`, marginBottom: "1.5rem" }} />
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(1rem, 3vw, 1.15rem)",
+              color: T.orPale, lineHeight: 2,
+            }}>{carteOuverte.texte}</p>
+            {carteOuverte.id > 0 && (
+              <button onClick={() => {
+                saveMoments(moments.filter(m => m.id !== carteOuverte.id));
+                setCarteOuverte(null);
+              }} style={{
+                marginTop: "2rem", background: "none", border: "none",
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem",
+                letterSpacing: "0.4em", textTransform: "uppercase",
+                color: `${T.brume}44`, cursor: "pointer",
+              }}>Retirer ce moment</button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Suppression confirmée ── */}
+      {deletingId && (
+        <div style={{
+          position: "fixed", bottom: "5rem", left: "50%", transform: "translateX(-50%)",
+          zIndex: 100, background: T.nuit2,
+          border: `1px solid ${T.brume}33`, borderRadius: "8px",
+          padding: "0.8rem 1.2rem",
+          display: "flex", gap: "1rem", alignItems: "center",
+          animation: "fadeUp 0.3s ease forwards",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
+        }}>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume }}>Supprimer ce moment ?</span>
+          <button onClick={() => { saveMoments(moments.filter(m => m.id !== deletingId)); setDeletingId(null); }} style={{
+            background: "none", border: `1px solid #A87B7B44`, borderRadius: "4px",
+            padding: "0.3rem 0.7rem", color: "#A87B7B", fontFamily: T.sans, fontWeight: 200,
+            fontSize: "0.5rem", letterSpacing: "0.3em", cursor: "pointer",
+          }}>Oui</button>
+          <button onClick={() => setDeletingId(null)} style={{
+            background: "none", border: "none", color: T.brume,
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+            letterSpacing: "0.3em", cursor: "pointer",
+          }}>Non</button>
+        </div>
+      )}
+
+      {/* ── En-tête ── */}
+      <div style={{ textAlign: "center", marginBottom: "0.5rem", padding: "0 1.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+          Fil de Vie
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.8 }}>
+          Les moments qui t'ont traversé.
+        </p>
+        {moments.length === 0 && loaded && (
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.3rem" }}>
+            ↓ Trois instants à titre d'exemple — les tiens commenceront ici.
+          </p>
+        )}
+      </div>
+
+      {/* ── Bouton Ajouter ── */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+        <button onClick={() => setAjout(!ajout)} style={{
+          background: ajout ? `${T.or}18` : "transparent",
+          border: `1px solid ${ajout ? T.or + "77" : T.brume + "33"}`,
+          color: ajout ? T.or : T.brume,
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+          letterSpacing: "0.35em", textTransform: "uppercase",
+          padding: "0.55rem 1.4rem", borderRadius: "2px", cursor: "pointer",
+          transition: "all 0.25s",
+        }}>{ajout ? "✕ Annuler" : "+ Ajouter un moment"}</button>
+      </div>
+
+      {/* ── Panneau d'ajout ── */}
+      {ajout && (
+        <div style={{
+          margin: "0 1.5rem 2rem", background: T.nuit2,
+          border: `1px solid ${T.or}33`, borderRadius: "6px",
+          padding: "1.5rem", animation: "fadeUp 0.4s ease forwards",
+        }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
+            Quel moment veux-tu garder ?
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.2rem" }}>
+            {TYPES.map(t => (
+              <button key={t.id} onClick={() => setType(t.id)} style={{
+                background: type === t.id ? `${t.couleur}22` : "transparent",
+                border: `1px solid ${type === t.id ? t.couleur + "88" : T.brume + "33"}`,
+                color: type === t.id ? t.couleur : T.brume,
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem",
+                letterSpacing: "0.15em", padding: "0.4rem 0.8rem",
+                borderRadius: "2px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", alignItems: "center", gap: "0.4rem",
+              }}><span>{t.symbole}</span>{t.label}</button>
+            ))}
+          </div>
+          <textarea value={texte} onChange={e => setTexte(e.target.value)}
+            placeholder="Une phrase. Un fragment. Ce qui est vrai pour toi maintenant…"
+            rows={3} style={{
+              width: "100%", background: "transparent",
+              border: "none", borderBottom: `1px solid ${T.or}44`,
+              color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", resize: "none", outline: "none",
+              lineHeight: 1.7, padding: "0.5rem 0", boxSizing: "border-box",
+            }}/>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+            <button onClick={addMoment} style={{
+              background: texte.trim().length > 3 ? `${T.or}22` : "transparent",
+              border: `1px solid ${texte.trim().length > 3 ? T.or + "77" : T.brume + "33"}`,
+              color: texte.trim().length > 3 ? T.or : T.brume,
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.3em", textTransform: "uppercase",
+              padding: "0.55rem 1.4rem", borderRadius: "2px", cursor: "pointer",
+              transition: "all 0.25s",
+            }}>Garder ce moment</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Timeline SVG + cartes ── */}
+      <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+        <svg viewBox={`0 0 ${W} ${SVG_H}`} width="100%" height={SVG_H}
+          style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 0 }}
+          preserveAspectRatio="xMidYMin meet">
+          <defs>
+            <linearGradient id="filGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={T.or} stopOpacity="0.15"/>
+              <stop offset="30%"  stopColor={T.or} stopOpacity="0.6"/>
+              <stop offset="70%"  stopColor={T.or} stopOpacity="0.6"/>
+              <stop offset="100%" stopColor={T.or} stopOpacity="0.15"/>
+            </linearGradient>
+            <filter id="glowFil">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            {TYPES.map(t => (
+              <radialGradient key={t.id} id={`glow_${t.id}`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stopColor={t.couleur} stopOpacity="0.35"/>
+                <stop offset="100%" stopColor={t.couleur} stopOpacity="0"/>
+              </radialGradient>
+            ))}
+          </defs>
+          <path d={buildPath()} stroke="url(#filGradient)" strokeWidth="1.5" fill="none" filter="url(#glowFil)"/>
+          <path d={buildPath()} stroke={T.or} strokeWidth="0.5" fill="none" opacity="0.4"/>
+          {affiche.map((m, i) => {
+            const x = nodeX(i); const y = nodeY(i); const ti = typeInfo(m.type);
+            return (
+              <g key={m.id}>
+                <circle cx={x} cy={y} r={18} fill={`url(#glow_${m.type})`}/>
+                <circle cx={x} cy={y} r={5}  fill={ti.couleur} opacity="0.9"/>
+                <circle cx={x} cy={y} r={8}  fill="none" stroke={ti.couleur} strokeWidth="1" opacity="0.5"/>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* ── Cartes ── */}
+        <div style={{ position: "relative", zIndex: 1, height: SVG_H }}>
+          {affiche.map((m, i) => {
+            const ti = typeInfo(m.type);
+            const side = i % 2 === 0 ? "left" : "right";
+            const yPx = nodeY(i) - CARD_H / 2;
+            const isDemo = m.id < 0;
+            return (
+              <div key={m.id} style={{
+                position: "absolute", top: yPx,
+                left: side === "left" ? "2%" : "auto",
+                right: side === "right" ? "2%" : "auto",
+                width: "43%",
+                animation: `fadeUp 0.7s ease forwards ${i * 0.12}s`, opacity: 0,
+              }}>
+                <div style={{
+                  position: "absolute", top: "50%",
+                  [side === "left" ? "right" : "left"]: "-12%",
+                  width: "12%", height: "1px",
+                  background: `linear-gradient(${side === "left" ? "to right" : "to left"}, transparent, ${ti.couleur}66)`,
+                }}/>
+                <div
+                  onClick={() => !isDemo && setCarteOuverte(m)}
+                  onTouchStart={() => !isDemo && startPress(m.id)}
+                  onTouchEnd={endPress}
+                  onMouseDown={() => !isDemo && startPress(m.id)}
+                  onMouseUp={endPress}
+                  style={{
+                    background: `linear-gradient(135deg, ${T.nuit2}ee 0%, ${T.nuit}cc 100%)`,
+                    border: `1px solid ${ti.couleur}${isDemo ? "33" : "55"}`,
+                    borderRadius: "6px", padding: "0.9rem 1rem",
+                    backdropFilter: "blur(8px)",
+                    boxShadow: `0 4px 24px ${ti.couleur}18, 0 1px 6px rgba(0,0,0,0.4)`,
+                    opacity: isDemo ? 0.55 : 1,
+                    cursor: isDemo ? "default" : "pointer",
+                    transition: "transform 0.25s, box-shadow 0.25s",
+                    userSelect: "none",
+                  }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>
+                      {formatDate(m.date)}
+                    </span>
+                    <span style={{ fontSize: "0.65rem", color: ti.couleur, opacity: 0.8 }}>{ti.symbole}</span>
+                  </div>
+                  <p style={{
+                    fontFamily: T.serif, fontStyle: "italic",
+                    fontSize: "0.82rem", color: T.orPale,
+                    lineHeight: 1.65, margin: 0,
+                    display: "-webkit-box", WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical", overflow: "hidden",
+                  }}>{m.texte}</p>
+                  <div style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.46rem", letterSpacing: "0.25em", textTransform: "uppercase", color: ti.couleur, opacity: 0.7 }}>
+                    {ti.label}
+                  </div>
+                  {!isDemo && (
+                    <div style={{ marginTop: "0.3rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}44` }}>
+                      Appui long pour suppr.
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Bas du fil ── */}
+      {loaded && (
+        <div style={{ textAlign: "center", marginTop: "2rem", paddingBottom: "2rem" }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.8 }}>
+            {moments.length === 0
+              ? "Ton fil commence à la première phrase que tu gardes."
+              : `${moments.length} moment${moments.length > 1 ? "s" : ""} gardé${moments.length > 1 ? "s" : ""}.`}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
   const TYPES = [
     { id: "insight",   label: "Prise de conscience", couleur: "#C8A96E", symbole: "✦" },
