@@ -1,0 +1,2929 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+
+// ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+// Sur Vercel : ajouter dans .env.local
+//   NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+//   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxx...
+const SUPABASE_URL  = "https://yuwqokjkpooozgtsvfkc.supabase.co";
+const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
+const SB_ENABLED = true;
+
+// Client Supabase léger (sans SDK — juste fetch)
+const sb = {
+  async get(table, match) {
+    if (!SB_ENABLED) return null;
+    const params = Object.entries(match).map(([k,v]) => `${k}=eq.${encodeURIComponent(v)}`).join("&");
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}&limit=1`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+    });
+    const data = await r.json();
+    return Array.isArray(data) ? data[0] || null : null;
+  },
+  async upsert(table, row) {
+    if (!SB_ENABLED) return null;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
+      body: JSON.stringify(row),
+    });
+    return r.ok ? await r.json() : null;
+  },
+  async list(table, match) {
+    if (!SB_ENABLED) return [];
+    const params = Object.entries(match).map(([k,v]) => `${k}=eq.${encodeURIComponent(v)}`).join("&");
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}&order=created_at.asc`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    });
+    return r.ok ? await r.json() : [];
+  },
+  async delete(table, match) {
+    if (!SB_ENABLED) return;
+    const params = Object.entries(match).map(([k,v]) => `${k}=eq.${encodeURIComponent(v)}`).join("&");
+    await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
+      method: "DELETE",
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    });
+  },
+};
+
+// UUID persistant local (bridge avant auth)
+const getUserKey = () => {
+  try {
+    let k = localStorage.getItem("alba_user_key");
+    if (!k) { k = crypto.randomUUID(); localStorage.setItem("alba_user_key", k); }
+    return k;
+  } catch { return "local-user"; }
+};
+
+// ─── HOOK PERSISTANCE ─────────────────────────────────────────────────────────
+/*
+  SQL à exécuter dans Supabase → SQL Editor :
+
+  create table alba_profiles (
+    id uuid primary key default gen_random_uuid(),
+    user_key text unique not null,
+    prenom text, naissance text, intention text,
+    created_at timestamptz default now()
+  );
+
+  create table alba_postits (
+    id bigint primary key generated always as identity,
+    user_key text not null,
+    jour text not null,
+    postit_id bigint not null,
+    texte text, type text, heure text,
+    created_at timestamptz default now(),
+    unique(user_key, jour, postit_id)
+  );
+
+  create table alba_progress (
+    id uuid primary key default gen_random_uuid(),
+    user_key text unique not null,
+    jours_actifs int default 1,
+    postits_total int default 0,
+    conversations_total int default 0,
+    bilans_total int default 0,
+    souffle_total int default 0,
+    cle_active int default 0,
+    updated_at timestamptz default now()
+  );
+*/
+
+const useAlbaDB = () => {
+  const userKey = useRef(getUserKey());
+  const saveTimeout = useRef({});
+
+  // ── Profil ──
+  const saveProfile = useCallback(async (data) => {
+    try {
+      localStorage.setItem("alba_profile", JSON.stringify(data));
+    } catch {}
+    await sb.upsert("alba_profiles", {
+      user_key: userKey.current,
+      prenom: data.prenom,
+      naissance: data.naissance,
+      intention: data.intention,
+    });
+  }, []);
+
+  const loadProfile = useCallback(async () => {
+    // D'abord localStorage (instantané)
+    try {
+      const local = localStorage.getItem("alba_profile");
+      if (local) return JSON.parse(local);
+    } catch {}
+    // Puis Supabase
+    const row = await sb.get("alba_profiles", { user_key: userKey.current });
+    if (row) {
+      const data = { prenom: row.prenom, naissance: row.naissance, intention: row.intention };
+      try { localStorage.setItem("alba_profile", JSON.stringify(data)); } catch {}
+      return data;
+    }
+    return null;
+  }, []);
+
+  // ── Post-its (avec debounce) ──
+  const savePostits = useCallback(async (jour, postits) => {
+    // localStorage
+    try {
+      const all = JSON.parse(localStorage.getItem("alba_postits") || "{}");
+      all[jour] = postits;
+      localStorage.setItem("alba_postits", JSON.stringify(all));
+    } catch {}
+    // Supabase : debounce 1s
+    clearTimeout(saveTimeout.current[jour]);
+    saveTimeout.current[jour] = setTimeout(async () => {
+      if (!SB_ENABLED) return;
+      // Supprimer les anciens du jour, réinsérer
+      await sb.delete("alba_postits", { user_key: userKey.current, jour });
+      for (const p of postits) {
+        await sb.upsert("alba_postits", {
+          user_key: userKey.current, jour,
+          postit_id: p.id, texte: p.texte, type: p.type, heure: p.heure,
+        });
+      }
+    }, 1000);
+  }, []);
+
+  const loadAllPostits = useCallback(async () => {
+    // localStorage
+    try {
+      const local = localStorage.getItem("alba_postits");
+      if (local) return JSON.parse(local);
+    } catch {}
+    // Supabase
+    const rows = await sb.list("alba_postits", { user_key: userKey.current });
+    if (rows.length > 0) {
+      const byJour = {};
+      for (const r of rows) {
+        if (!byJour[r.jour]) byJour[r.jour] = [];
+        byJour[r.jour].push({ id: r.postit_id, texte: r.texte, type: r.type, heure: r.heure });
+      }
+      try { localStorage.setItem("alba_postits", JSON.stringify(byJour)); } catch {}
+      return byJour;
+    }
+    return {};
+  }, []);
+
+  // ── Progress ──
+  const saveProgress = useCallback(async (stats, cleActive) => {
+    try {
+      localStorage.setItem("alba_progress", JSON.stringify({ stats, cleActive }));
+    } catch {}
+    await sb.upsert("alba_progress", {
+      user_key: userKey.current,
+      jours_actifs: stats.joursActifs,
+      postits_total: stats.postitsTotal,
+      conversations_total: stats.conversationsTotal,
+      bilans_total: stats.bilansTotal,
+      souffle_total: stats.souffleTotal,
+      cle_active: cleActive,
+    });
+  }, []);
+
+  const loadProgress = useCallback(async () => {
+    try {
+      const local = localStorage.getItem("alba_progress");
+      if (local) return JSON.parse(local);
+    } catch {}
+    const row = await sb.get("alba_progress", { user_key: userKey.current });
+    if (row) {
+      return {
+        stats: {
+          joursActifs: row.jours_actifs,
+          postitsTotal: row.postits_total,
+          conversationsTotal: row.conversations_total,
+          bilansTotal: row.bilans_total,
+          souffleTotal: row.souffle_total,
+        },
+        cleActive: row.cle_active,
+      };
+    }
+    return null;
+  }, []);
+
+  return { saveProfile, loadProfile, savePostits, loadAllPostits, saveProgress, loadProgress };
+};
+
+// ─── GOOGLE FONTS ────────────────────────────────────────────────────────────
+const FontLoader = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #1A1714; }
+    input, textarea { outline: none; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #C8A96E44; border-radius: 2px; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes pulse-ring {
+      0%   { transform: scale(1);   opacity: 0.5; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+    @keyframes breath-expand {
+      0%,100% { transform: scale(1);    opacity: 0.6; }
+      50%      { transform: scale(1.35); opacity: 1; }
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0px); }
+      50%      { transform: translateY(-8px); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+    @keyframes grain {
+      0%,100% { transform: translate(0,0); }
+      10%     { transform: translate(-2%,-3%); }
+      30%     { transform: translate(3%,2%); }
+      50%     { transform: translate(-1%,4%); }
+      70%     { transform: translate(2%,-2%); }
+      90%     { transform: translate(-3%,1%); }
+    }
+  `}</style>
+);
+
+// ─── DESIGN TOKENS ───────────────────────────────────────────────────────────
+const T = {
+  nuit:    "#1A1714",
+  nuit2:   "#211E1A",
+  or:      "#C8A96E",
+  orPale:  "#E8D5B0",
+  aube:    "#F5EFE6",
+  brume:   "#8C7F74",
+  aurore:  "#E8B89A",
+  aurore2: "#D4856A",
+  fond:    "#141210",
+  serif:   "'Cormorant Garamond', Georgia, serif",
+  sans:    "'Jost', sans-serif",
+};
+
+// ─── NUMÉROLOGIE ─────────────────────────────────────────────────────────────
+function reduire(n) {
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+    n = String(n).split("").reduce((a, d) => a + parseInt(d), 0);
+  }
+  return n;
+}
+function cheminDeVie(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return reduire(reduire(d) + reduire(m) + reduire(y));
+}
+const CHEMINS = {
+  1: { titre: "Le Pionnier",      essence: "Tu es venu(e) pour ouvrir, créer, initier. Là où les autres attendent, tu avances." },
+  2: { titre: "Le Médiateur",     essence: "Tu portes le don de la sensibilité et de la paix. L'harmonie est ta mission profonde." },
+  3: { titre: "Le Créateur",      essence: "Tu es expression, joie, transmission. Ta voix est un cadeau que le monde attend." },
+  4: { titre: "Le Bâtisseur",     essence: "Tu construis ce qui dure. Fondations, structure, fiabilité — tu es la colonne vertébrale." },
+  5: { titre: "Le Voyageur",      essence: "Tu es liberté et transformation. Le changement est ta maison, l'inconnu ton territoire." },
+  6: { titre: "Le Guérisseur",    essence: "Tu portes en toi l'amour inconditionnel. Prendre soin des autres est ta respiration." },
+  7: { titre: "Le Mystique",      essence: "Tu cherches la vérité derrière le voile. L'invisible est plus réel pour toi que le visible." },
+  8: { titre: "L'Alchimiste",     essence: "Tu transformes tout ce que tu touches. Pouvoir, abondance, karma — tu es là pour maîtriser." },
+  9: { titre: "Le Sage",          essence: "Tu es universel, compassionnel. Ta mission dépasse ta propre vie — tu guéris l'humanité." },
+  11: { titre: "Le Messager",     essence: "Tu es canal entre les mondes. Une intuition extraordinaire habite chaque souffle." },
+  22: { titre: "Le Maître Bâtisseur", essence: "Tu construis des ponts entre le rêve et le réel. Ton impact est collectif, historique." },
+};
+
+const BLESSURES = [
+  { nom: "Abandon",     couleur: "#7B9EA8", question: "Quelqu'un t'a-t-il quitté avant que tu sois prêt(e) ?" },
+  { nom: "Trahison",    couleur: "#A87B7B", question: "As-tu fait confiance à quelqu'un qui t'a blessé(e) ?" },
+  { nom: "Humiliation", couleur: "#8A7BA8", question: "T'a-t-on déjà fait sentir petit(e) ou indigne ?" },
+  { nom: "Injustice",   couleur: "#7BA88A", question: "As-tu eu le sentiment d'être traité(e) de manière injuste ?" },
+  { nom: "Rejet",       couleur: "#A89E7B", question: "T'es-tu déjà senti(e) exclu(e) ou pas à ta place ?" },
+];
+
+const LIVRES = {
+  "Abandon":     { titre: "Le Prophète",              auteur: "Khalil Gibran",       mot: "Sur la séparation" },
+  "Trahison":    { titre: "Les Quatre Accords Toltèques", auteur: "Don Miguel Ruiz", mot: "Sur la confiance" },
+  "Humiliation": { titre: "Mille Soleils Splendides",  auteur: "Khaled Hosseini",    mot: "Sur la dignité" },
+  "Injustice":   { titre: "La Force de l'âme",         auteur: "Nelson Mandela",     mot: "Sur la résistance" },
+  "Rejet":       { titre: "Du chaos naît une étoile",  auteur: "Steve Moradel",      mot: "Sur le retour à soi" },
+};
+
+const CITATIONS = [
+  { texte: "Ta douleur est le bris de l'enveloppe qui enfermait ta compréhension.", auteur: "Khalil Gibran" },
+  { texte: "Ce qui ne te tue pas te rend plus fort. Mais ce qui te guérit te rend libre.", auteur: "Alba" },
+  { texte: "Tu n'as pas à mériter la lumière. Tu en es fait.", auteur: "Steve Moradel" },
+  { texte: "L'aube ne promet rien. Elle se lève, simplement.", auteur: "Alba" },
+  { texte: "Guérir, ce n'est pas effacer. C'est intégrer.", auteur: "Alba" },
+];
+
+const CLES = [
+  { num: "I",   nom: "Reconnaître", desc: "Nommer ce qui fait mal, sans le minimiser ni s'y noyer.", couleur: "#7B9EA8" },
+  { num: "II",  nom: "Comprendre",  desc: "Voir le pattern qui se répète et le reconnaître pour ce qu'il est.", couleur: "#A87B7B" },
+  { num: "III", nom: "Ressentir",   desc: "S'asseoir avec ce qu'on évite. Le corps sait. Il attendait.", couleur: "#8A7BA8" },
+  { num: "IV",  nom: "Lâcher",      desc: "Poser ce qu'on porte pour les autres. Les dettes qu'on n'a pas contractées.", couleur: "#7BA88A" },
+  { num: "V",   nom: "Recevoir",    desc: "Accueillir la joie, l'amour, le repos — sans chercher à le mériter.", couleur: "#A89E7B" },
+  { num: "VI",  nom: "Devenir",     desc: "Qui tu es quand tu n'as plus rien à prouver.", couleur: T.or },
+];
+
+// ─── GRAIN OVERLAY ────────────────────────────────────────────────────────────
+const Grain = () => (
+  <div style={{
+    position: "fixed", inset: 0, pointerEvents: "none", zIndex: 999,
+    opacity: 0.045,
+    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+    animation: "grain 8s steps(10) infinite",
+  }} />
+);
+
+// ─── HORIZON GLOW ─────────────────────────────────────────────────────────────
+const Horizon = () => (
+  <>
+    <div style={{
+      position: "fixed", bottom: 0, left: 0, right: 0, height: "40vh", pointerEvents: "none", zIndex: 0,
+      background: `radial-gradient(ellipse 90% 60% at 50% 100%, ${T.or}18 0%, transparent 70%)`,
+    }} />
+    <div style={{
+      position: "fixed", top: 0, left: 0, right: 0, height: "30vh", pointerEvents: "none", zIndex: 0,
+      background: `radial-gradient(ellipse 70% 50% at 50% 0%, ${T.aurore}08 0%, transparent 70%)`,
+    }} />
+  </>
+);
+
+// ─── BOUTON ────────────────────────────────────────────────────────────────────
+const Btn = ({ children, onClick, secondary, small }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <button onClick={onClick}
+      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{
+        background: secondary ? "transparent" : hov ? T.orPale : T.or,
+        color: secondary ? (hov ? T.orPale : T.brume) : T.nuit,
+        border: secondary ? `1px solid ${T.brume}44` : "none",
+        fontFamily: T.sans, fontWeight: 300,
+        fontSize: small ? "0.7rem" : "0.72rem",
+        letterSpacing: "0.35em", textTransform: "uppercase",
+        padding: small ? "0.55rem 1.4rem" : "0.85rem 2.4rem",
+        borderRadius: "1px", cursor: "pointer",
+        transition: "all 0.35s ease",
+        display: "inline-flex", alignItems: "center", gap: "0.6rem",
+      }}>
+      {children}
+    </button>
+  );
+};
+
+// ─── ORNEMENT ─────────────────────────────────────────────────────────────────
+const Ornement = ({ style }) => (
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", ...style }}>
+    <div style={{ height: 1, width: 50, background: `linear-gradient(to right, transparent, ${T.or}66)` }} />
+    <div style={{ width: 4, height: 4, background: T.or, transform: "rotate(45deg)", opacity: 0.7 }} />
+    <div style={{ width: 3, height: 3, background: T.or, transform: "rotate(45deg)", opacity: 0.35 }} />
+    <div style={{ width: 4, height: 4, background: T.or, transform: "rotate(45deg)", opacity: 0.7 }} />
+    <div style={{ height: 1, width: 50, background: `linear-gradient(to left, transparent, ${T.or}66)` }} />
+  </div>
+);
+
+// ─── SCREEN WRAPPER ────────────────────────────────────────────────────────────
+const Screen = ({ children, centered, style }) => (
+  <div style={{
+    minHeight: "100vh", width: "100%", position: "relative", zIndex: 2,
+    display: "flex", flexDirection: "column",
+    alignItems: centered ? "center" : undefined,
+    justifyContent: centered ? "center" : undefined,
+    padding: "6vh 1.5rem 8vh",
+    ...style,
+  }}>
+    {children}
+  </div>
+);
+
+// ─── SPLASH ────────────────────────────────────────────────────────────────────
+const Splash = ({ onEnd }) => {
+  useEffect(() => {
+    const t = setTimeout(onEnd, 2800);
+    return () => clearTimeout(t);
+  }, [onEnd]);
+  return (
+    <Screen centered>
+      <div style={{ textAlign: "center" }}>
+        <div style={{
+          fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(4.5rem, 14vw, 8rem)",
+          letterSpacing: "0.4em", color: T.or, lineHeight: 1,
+          animation: "fadeIn 1.8s ease forwards",
+          background: `linear-gradient(90deg, ${T.or}, ${T.orPale}, ${T.or})`,
+          backgroundSize: "200% auto",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          animationName: "shimmer", animationDuration: "3s", animationIterationCount: "infinite",
+        }}>ALBA</div>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
+          marginTop: "1.2rem", animation: "fadeIn 2s ease forwards 0.8s", opacity: 0,
+        }}>L'aube en toi</div>
+      </div>
+    </Screen>
+  );
+};
+
+// ─── ONBOARDING ────────────────────────────────────────────────────────────────
+const inputStyle = {
+  background: "transparent",
+  border: "none",
+  borderBottom: `1px solid ${T.brume}55`,
+  color: T.aube,
+  fontFamily: T.serif,
+  fontSize: "clamp(1.3rem, 4vw, 1.8rem)",
+  fontWeight: 300,
+  fontStyle: "italic",
+  padding: "0.5rem 0",
+  width: "100%",
+  textAlign: "center",
+  transition: "border-color 0.3s",
+};
+
+const Label = ({ children }) => (
+  <div style={{
+    fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+    letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume,
+    marginBottom: "1.5rem", textAlign: "center",
+  }}>{children}</div>
+);
+
+const Step = ({ num, label, children, onNext, onBack, canNext }) => (
+  <Screen centered>
+    <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+      <div style={{
+        fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+        letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "3rem",
+      }}>ALBA &nbsp;·&nbsp; Étape {num} / 3</div>
+
+      <Label>{label}</Label>
+      {children}
+
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "3rem" }}>
+        {canNext && <Btn onClick={onNext}>Continuer</Btn>}
+        {onBack && <Btn secondary small onClick={onBack}>Revenir</Btn>}
+      </div>
+    </div>
+  </Screen>
+);
+
+const MOIS_NOMS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+
+const Onboarding = ({ onComplete }) => {
+  const [step, setStep] = useState(0);
+  const [prenom, setPrenom] = useState("");
+  const [intention, setIntention] = useState("");
+  // Date fields — all at top level
+  const [jour, setJour] = useState("");
+  const [mois, setMois] = useState("");
+  const [annee, setAnnee] = useState(1980);
+  const [anneeConfirm, setAnneeConfirm] = useState(false);
+
+  const [autreTexte, setAutreTexte] = useState("");
+
+  const INTENTIONS = [
+    "Une rupture, une séparation",
+    "Un deuil, une perte",
+    "Je me sens perdu(e)",
+    "Un épuisement profond",
+    "Une trahison",
+    "Une maladie, un diagnostic",
+    "Je cherche qui je suis",
+    "Autre chose…",
+  ];
+
+  const jourMax = mois ? new Date(annee, parseInt(mois), 0).getDate() : 31;
+  const dateStr = jour && mois && anneeConfirm ? `${annee}-${mois.padStart(2,"0")}-${jour.padStart(2,"0")}` : "";
+
+  const selStyle = (active) => ({
+    background: active ? `${T.or}15` : "transparent",
+    border: `1px solid ${active ? T.or + "66" : T.brume + "33"}`,
+    color: active ? T.orPale : T.brume,
+    fontFamily: T.serif, fontStyle: "italic",
+    fontSize: "clamp(0.85rem, 2.2vw, 1rem)",
+    padding: "0.5rem 0.3rem", borderRadius: "2px", cursor: "pointer",
+    transition: "all 0.2s", textAlign: "center", flexShrink: 0,
+  });
+
+  const pct = ((annee - 1920) / (2010 - 1920) * 100).toFixed(1);
+
+  if (step === 0) return (
+    <Step num={1} label="Comment t'appelles-tu ?" onNext={() => setStep(1)} canNext={prenom.length > 1}>
+      <input style={inputStyle} placeholder="Ton prénom…" value={prenom}
+        onChange={e => setPrenom(e.target.value)}
+        onFocus={e => e.target.style.borderColor = T.or}
+        onBlur={e => e.target.style.borderColor = `${T.brume}55`} />
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, textAlign: "center", marginTop: "1.2rem" }}>
+        Ce prénom ne sera partagé avec personne. Il est juste pour nous.
+      </p>
+    </Step>
+  );
+
+  if (step === 1) return (
+    <Step num={2} label="Quelle est ta date de naissance ?"
+      onNext={() => setStep(2)}
+      onBack={() => setStep(0)}
+      canNext={!!dateStr}>
+
+      {/* Jour */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "0.8rem" }}>Jour</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center" }}>
+          {Array.from({length: jourMax}, (_,i) => String(i+1)).map(j => (
+            <button key={j} onClick={() => setJour(j === jour ? "" : j)}
+              style={{ ...selStyle(jour === j), minWidth: 32, padding: "0.45rem 0.2rem" }}>
+              {j}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Mois */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "0.8rem" }}>Mois</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center" }}>
+          {MOIS_NOMS.map((m, i) => {
+            const val = String(i+1);
+            return (
+              <button key={m} onClick={() => setMois(val === mois ? "" : val)}
+                style={{ ...selStyle(mois === val), minWidth: 70, padding: "0.5rem 0.4rem", fontSize: "0.82rem" }}>
+                {m}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Année */}
+      <div style={{ marginBottom: "0.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "1rem" }}>Année</div>
+        <div style={{ textAlign: "center", marginBottom: "1.2rem" }}>
+          <span style={{
+            fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(2.2rem, 8vw, 3rem)",
+            color: anneeConfirm ? T.or : T.orPale, letterSpacing: "0.1em", transition: "color 0.3s",
+          }}>{annee}</span>
+        </div>
+        <style>{`
+          .alba-slider{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:linear-gradient(to right,${T.or} 0%,${T.or} ${pct}%,${T.brume}44 ${pct}%,${T.brume}44 100%);outline:none;border-radius:2px;}
+          .alba-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:${T.or};cursor:pointer;border:2px solid ${T.nuit};box-shadow:0 0 8px ${T.or}66;}
+          .alba-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:${T.or};cursor:pointer;border:2px solid ${T.nuit};}
+        `}</style>
+        <input type="range" className="alba-slider" min={1920} max={2010} step={1}
+          value={annee}
+          onChange={e => { setAnnee(parseInt(e.target.value)); setAnneeConfirm(false); }} />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
+          {[1920,1940,1960,1980,2000,2010].map(y => (
+            <button key={y} onClick={() => { setAnnee(y); setAnneeConfirm(false); }} style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+              letterSpacing: "0.05em", color: T.brume, padding: "0.2rem",
+            }}>{y}</button>
+          ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: "1.2rem" }}>
+          <button onClick={() => setAnneeConfirm(true)} style={{
+            background: anneeConfirm ? `${T.or}22` : "transparent",
+            border: `1px solid ${anneeConfirm ? T.or + "77" : T.brume + "44"}`,
+            color: anneeConfirm ? T.or : T.aube,
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+            letterSpacing: "0.35em", textTransform: "uppercase",
+            padding: "0.6rem 1.8rem", borderRadius: "2px", cursor: "pointer", transition: "all 0.25s",
+          }}>{anneeConfirm ? `✦ ${annee} confirmé` : `Confirmer ${annee}`}</button>
+        </div>
+      </div>
+
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, textAlign: "center", marginTop: "1.5rem" }}>
+        Ta date ouvre une carte unique — le portrait de ton âme.
+      </p>
+    </Step>
+  );
+
+  if (step === 2) return (
+    <Screen centered>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "3rem",
+        }}>ALBA &nbsp;·&nbsp; Étape 3 / 3</div>
+        <Label>Qu'est-ce qui t'a amené(e) ici, {prenom} ?</Label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {INTENTIONS.map(i => {
+            const sel = intention === i;
+            return (
+              <button key={i} onClick={() => setIntention(i)} style={{
+                background: sel ? `${T.or}15` : "transparent",
+                border: `1px solid ${sel ? T.or : T.brume + "33"}`,
+                color: sel ? T.orPale : T.aube,
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "clamp(0.95rem, 2.5vw, 1.1rem)",
+                padding: "0.85rem 1.2rem", borderRadius: "2px", cursor: "pointer",
+                transition: "all 0.25s", textAlign: "left", letterSpacing: "0.01em",
+              }}>{sel ? "✦ " : ""}{i}</button>
+            );
+          })}
+          {intention === "Autre chose…" && (
+            <input
+              value={autreTexte}
+              onChange={e => setAutreTexte(e.target.value)}
+              placeholder="Dis-moi en quelques mots…"
+              style={{
+                ...inputStyle,
+                fontSize: "1rem", fontStyle: "italic",
+                borderBottom: `1px solid ${T.or}55`,
+                marginTop: "0.3rem",
+              }}
+              onFocus={e => e.target.style.borderColor = T.or}
+              onBlur={e => e.target.style.borderColor = `${T.or}55`}
+              autoFocus
+            />
+          )}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
+          {intention && (intention !== "Autre chose…" || autreTexte.length > 2) &&
+            <Btn onClick={() => onComplete({ prenom, naissance: dateStr, intention: intention === "Autre chose…" ? autreTexte : intention })}>Entrer dans l'aube</Btn>
+          }
+          <Btn secondary small onClick={() => setStep(1)}>Revenir</Btn>
+        </div>
+      </div>
+    </Screen>
+  );
+};
+
+// ─── CARTE D'ÂME SVG ─────────────────────────────────────────────────────────
+const CARTE_DATA = {
+  1:  { mot: "PIONNIER",   element: "Feu",   forme: "triangle",   palette: ["#E8956D","#C8623A","#F5C4A8"] },
+  2:  { mot: "HARMONIE",   element: "Eau",   forme: "vague",      palette: ["#7BA8C8","#4A7FA0","#B8D8EC"] },
+  3:  { mot: "CRÉATEUR",   element: "Air",   forme: "spirale",    palette: ["#C8A96E","#A07840","#ECD9A8"] },
+  4:  { mot: "FONDATION",  element: "Terre", forme: "carré",      palette: ["#8A9E7B","#5A7A4A","#C0D4B0"] },
+  5:  { mot: "LIBERTÉ",    element: "Éther", forme: "étoile",     palette: ["#9E7BC8","#7040A0","#D4B8EC"] },
+  6:  { mot: "AMOUR",      element: "Cœur",  forme: "cercle",     palette: ["#C87B9E","#A04070","#ECB8D4"] },
+  7:  { mot: "MYSTÈRE",    element: "Lune",  forme: "croissant",  palette: ["#7B9EC8","#3A5A8A","#B8C8EC"] },
+  8:  { mot: "PUISSANCE",  element: "Soleil",forme: "octogone",   palette: ["#C8B46E","#906A20","#ECD8A0"] },
+  9:  { mot: "SAGESSE",    element: "Cosmos",forme: "étoile9",    palette: ["#9EC8B4","#4A8A6A","#C0E4D4"] },
+  11: { mot: "MESSAGER",   element: "Éclair",forme: "double",     palette: ["#C8C87B","#8A8A30","#ECECB0"] },
+  22: { mot: "BÂTISSEUR",  element: "Monde", forme: "mandala",    palette: ["#C89E7B","#8A5A30","#ECD4B0"] },
+};
+
+// 🔄 Sur Vercel : ajouter tes images GPT dans /public/cartes/
+// Nommer les fichiers : carte-1.jpg, carte-2.jpg ... carte-9.jpg, carte-11.jpg, carte-22.jpg
+const CARTE_IMAGES = {
+  // 1: "/cartes/carte-1.jpg",
+  // 2: "/cartes/carte-2.jpg",
+  // 3: "/cartes/carte-3.jpg",
+  // 4: "/cartes/carte-4.jpg",
+  // 5: "/cartes/carte-5.jpg",
+  // 6: "/cartes/carte-6.jpg",
+  // 7: "/cartes/carte-7.jpg",
+  // 8: "/cartes/carte-8.jpg",
+  // 9: "/cartes/carte-9.jpg",
+  // 11: "/cartes/carte-11.jpg",
+  // 22: "/cartes/carte-22.jpg",
+};
+
+const CarteAme = ({ data, small }) => {
+  const cdv = cheminDeVie(data.naissance);
+  const carte = CARTE_DATA[cdv] || CARTE_DATA[9];
+  const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const [c1, c2, c3] = carte.palette;
+
+  const W = small ? 180 : 280;
+  const H = small ? 280 : 440;
+  const cx = W / 2;
+  const cy = H / 2;
+
+  // Génère des étoiles pseudo-aléatoires basées sur le cdv
+  const stars = Array.from({length: 18}, (_, i) => ({
+    x: ((cdv * 137 + i * 73) % (W - 20)) + 10,
+    y: ((cdv * 89 + i * 113) % (H - 20)) + 10,
+    r: ((i * cdv) % 3 === 0) ? 1.5 : 0.8,
+    op: 0.3 + ((i * cdv) % 5) * 0.12,
+  }));
+
+  // Forme centrale selon le chemin
+  const renderForme = () => {
+    const r = small ? 42 : 65;
+    switch(carte.forme) {
+      case "triangle": {
+        const pts = [
+          [cx, cy - r],
+          [cx - r * 0.866, cy + r * 0.5],
+          [cx + r * 0.866, cy + r * 0.5],
+        ].map(p => p.join(",")).join(" ");
+        return <polygon points={pts} fill="none" stroke={c1} strokeWidth="1.5" opacity="0.7" />;
+      }
+      case "carré": {
+        const s = r * 1.2;
+        return <rect x={cx-s/2} y={cy-s/2} width={s} height={s} fill="none" stroke={c1} strokeWidth="1.5" opacity="0.7" transform={`rotate(15 ${cx} ${cy})`}/>;
+      }
+      case "octogone": {
+        const pts = Array.from({length:8}, (_,i) => {
+          const a = (i * Math.PI / 4) - Math.PI/8;
+          return `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`;
+        }).join(" ");
+        return <polygon points={pts} fill="none" stroke={c1} strokeWidth="1.5" opacity="0.7" />;
+      }
+      case "étoile":
+      case "étoile9": {
+        const n = carte.forme === "étoile9" ? 9 : 5;
+        const pts = Array.from({length: n*2}, (_, i) => {
+          const a = (i * Math.PI / n) - Math.PI/2;
+          const rr = i % 2 === 0 ? r : r * 0.45;
+          return `${cx + rr * Math.cos(a)},${cy + rr * Math.sin(a)}`;
+        }).join(" ");
+        return <polygon points={pts} fill={`${c1}18`} stroke={c1} strokeWidth="1.2" opacity="0.75" />;
+      }
+      case "double": {
+        return <>
+          <line x1={cx-r*0.4} y1={cy-r} x2={cx-r*0.4} y2={cy+r} stroke={c1} strokeWidth="1.5" opacity="0.7"/>
+          <line x1={cx+r*0.4} y1={cy-r} x2={cx+r*0.4} y2={cy+r} stroke={c1} strokeWidth="1.5" opacity="0.7"/>
+        </>;
+      }
+      default:
+        return <circle cx={cx} cy={cy} r={r} fill="none" stroke={c1} strokeWidth="1.5" opacity="0.7" />;
+    }
+  };
+
+  // Si une vraie image GPT est disponible, on l'affiche avec overlay texte
+  const imageUrl = CARTE_IMAGES[cdv];
+  if (imageUrl) {
+    return (
+      <div style={{
+        width: W, height: H,
+        borderRadius: 8, overflow: "hidden",
+        position: "relative",
+        filter: "drop-shadow(0 8px 32px rgba(0,0,0,0.6))",
+        display: "inline-block",
+      }}>
+        <img src={imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>
+        {/* Overlay gradient bas pour lisibilité texte */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
+          background: "linear-gradient(to top, rgba(10,8,6,0.95), transparent)",
+        }}/>
+        {/* Bordure */}
+        <div style={{
+          position: "absolute", inset: 1, borderRadius: 7,
+          border: `1px solid ${c1}55`,
+          pointerEvents: "none",
+        }}/>
+        {/* Texte bas */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: small ? "0.8rem" : "1.2rem", textAlign: "center" }}>
+          <div style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: small ? 14 : 18, color: c3, opacity: 0.95, marginBottom: 4 }}>
+            {data.prenom}
+          </div>
+          <div style={{ fontFamily: "Arial Narrow,sans-serif", fontSize: small ? 6 : 8, color: c1, opacity: 0.7, letterSpacing: "0.5em", textTransform: "uppercase" }}>
+            {carte.mot}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}
+      style={{ display: "block", filter: "drop-shadow(0 8px 32px rgba(0,0,0,0.6))" }}>
+      <defs>
+        <radialGradient id={`grad-${cdv}`} cx="50%" cy="40%" r="60%">
+          <stop offset="0%" stopColor={c2} stopOpacity="0.25"/>
+          <stop offset="100%" stopColor="#1A1714" stopOpacity="1"/>
+        </radialGradient>
+        <radialGradient id={`glow-${cdv}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={c1} stopOpacity="0.2"/>
+          <stop offset="100%" stopColor={c1} stopOpacity="0"/>
+        </radialGradient>
+      </defs>
+
+      {/* Fond */}
+      <rect width={W} height={H} rx="8" fill="#1A1714"/>
+      <rect width={W} height={H} rx="8" fill={`url(#grad-${cdv})`}/>
+
+      {/* Bordure dorée */}
+      <rect x="1" y="1" width={W-2} height={H-2} rx="7"
+        fill="none" stroke={c1} strokeWidth="0.8" opacity="0.4"/>
+      <rect x="6" y="6" width={W-12} height={H-12} rx="5"
+        fill="none" stroke={c1} strokeWidth="0.3" opacity="0.2"/>
+
+      {/* Étoiles fond */}
+      {stars.map((s,i) => (
+        <circle key={i} cx={s.x} cy={s.y} r={s.r} fill={c3} opacity={s.op}/>
+      ))}
+
+      {/* Halo central */}
+      <circle cx={cx} cy={cy} r={small ? 55 : 85}
+        fill={`url(#glow-${cdv})`} opacity="0.6"/>
+
+      {/* Cercles concentriques décoratifs */}
+      <circle cx={cx} cy={cy} r={small ? 60 : 95} fill="none" stroke={c1} strokeWidth="0.4" opacity="0.15" strokeDasharray="3 6"/>
+      <circle cx={cx} cy={cy} r={small ? 72 : 112} fill="none" stroke={c1} strokeWidth="0.3" opacity="0.1" strokeDasharray="1 8"/>
+
+      {/* Forme centrale */}
+      {renderForme()}
+
+      {/* Chiffre chemin de vie au centre */}
+      <text x={cx} y={cy + (small ? 8 : 12)} textAnchor="middle"
+        fontFamily="Georgia, serif" fontStyle="italic"
+        fontSize={small ? 28 : 44} fill={c3} opacity="0.9">{cdv}</text>
+
+      {/* Nom du chemin */}
+      <text x={cx} y={small ? H - 95 : H - 150} textAnchor="middle"
+        fontFamily="Georgia, serif" fontStyle="italic"
+        fontSize={small ? 9 : 13} fill={c3} opacity="0.7" letterSpacing="1">
+        {CHEMINS[cdv]?.titre || ""}
+      </text>
+
+      {/* Ornement central haut */}
+      <text x={cx} y={small ? 28 : 38} textAnchor="middle"
+        fontFamily="Georgia, serif" fontSize={small ? 8 : 11}
+        fill={c1} opacity="0.5" letterSpacing="4">✦ · ✦</text>
+
+      {/* Prénom */}
+      <text x={cx} y={small ? H - 70 : H - 108} textAnchor="middle"
+        fontFamily="Georgia, serif" fontStyle="italic"
+        fontSize={small ? 13 : 20} fill={c3} opacity="0.95"
+        letterSpacing="2">{data.prenom}</text>
+
+      {/* Mot-force */}
+      <text x={cx} y={small ? H - 52 : H - 76} textAnchor="middle"
+        fontFamily="'Arial Narrow', sans-serif" fontWeight="300"
+        fontSize={small ? 6 : 8} fill={c1} opacity="0.65"
+        letterSpacing={small ? 5 : 8}>{carte.mot}</text>
+
+      {/* Blessure */}
+      <text x={cx} y={small ? H - 36 : H - 54} textAnchor="middle"
+        fontFamily="Georgia, serif" fontStyle="italic"
+        fontSize={small ? 7 : 10} fill={c3} opacity="0.45"
+        letterSpacing="1">{blessure.nom} · Clé I</text>
+
+      {/* Ligne séparatrice bas */}
+      <line x1={cx - (small ? 30 : 50)} y1={small ? H-44 : H-66}
+            x2={cx + (small ? 30 : 50)} y2={small ? H-44 : H-66}
+        stroke={c1} strokeWidth="0.5" opacity="0.3"/>
+
+      {/* ALBA signature */}
+      <text x={cx} y={small ? H - 14 : H - 22} textAnchor="middle"
+        fontFamily="'Arial Narrow', sans-serif"
+        fontSize={small ? 6 : 8} fill={c1} opacity="0.35"
+        letterSpacing={small ? 6 : 10}>ALBA</text>
+    </svg>
+  );
+};
+
+// ─── PORTRAIT D'ÂME ───────────────────────────────────────────────────────────
+const Portrait = ({ data, onContinue }) => {
+  const cdv = cheminDeVie(data.naissance);
+  const chemin = CHEMINS[cdv] || CHEMINS[9];
+  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const livre = LIVRES[blessure.nom];
+  const citation = CITATIONS[cdv % CITATIONS.length];
+  const cle = CLES[0];
+
+  return (
+    <Screen style={{ maxWidth: 560, margin: "0 auto", paddingTop: "8vh" }}>
+      <div style={{ animation: "fadeUp 1s ease forwards", textAlign: "center", marginBottom: "2rem" }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
+          marginBottom: "0.8rem",
+        }}>Portrait d'âme</div>
+
+        {/* Carte SVG */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem", animation: "fadeUp 1.2s ease forwards 0.2s", opacity: 0 }}>
+          <CarteAme data={data} />
+        </div>
+      </div>
+
+      {/* Carte chemin de vie */}
+      <div style={{
+        background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
+        border: `1px solid ${T.or}33`,
+        borderRadius: "4px", padding: "2rem",
+        marginBottom: "1.2rem",
+        animation: "fadeUp 1s ease forwards 0.3s", opacity: 0,
+        position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", top: -30, right: -30, width: 120, height: 120,
+          borderRadius: "50%", background: `radial-gradient(circle, ${T.or}12, transparent 70%)`,
+        }} />
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem",
+        }}>Chemin de vie</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: "1rem", marginBottom: "0.6rem" }}>
+          <span style={{ fontFamily: T.serif, fontSize: "3rem", fontWeight: 300, color: T.or, lineHeight: 1 }}>{cdv}</span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>{chemin.titre}</span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.aube, opacity: 0.8, lineHeight: 1.7 }}>{chemin.essence}</p>
+      </div>
+
+      {/* Blessure dominante */}
+      <div style={{
+        background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
+        border: `1px solid ${blessure.couleur}44`,
+        borderRadius: "4px", padding: "1.5rem",
+        marginBottom: "1.2rem",
+        animation: "fadeUp 1s ease forwards 0.6s", opacity: 0,
+      }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem",
+        }}>Blessure à traverser</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.5rem" }}>
+          <div style={{ width: 8, height: 8, background: blessure.couleur, borderRadius: "50%" }} />
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>{blessure.nom}</span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.aube, opacity: 0.75, lineHeight: 1.7 }}>{blessure.question}</p>
+      </div>
+
+      {/* Citation */}
+      <div style={{
+        padding: "1.5rem",
+        borderLeft: `2px solid ${T.or}55`,
+        marginBottom: "1.2rem",
+        animation: "fadeUp 1s ease forwards 0.9s", opacity: 0,
+      }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.8, marginBottom: "0.5rem" }}>
+          « {citation.texte} »
+        </p>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", letterSpacing: "0.3em", color: T.brume }}>
+          — {citation.auteur}
+        </p>
+      </div>
+
+      {/* Livre recommandé */}
+      <div style={{
+        background: `linear-gradient(135deg, ${T.nuit2} 0%, #2A2420 100%)`,
+        border: `1px solid ${T.brume}22`,
+        borderRadius: "4px", padding: "1.5rem",
+        marginBottom: "1.2rem",
+        animation: "fadeUp 1s ease forwards 1.1s", opacity: 0,
+        display: "flex", alignItems: "center", gap: "1.2rem",
+      }}>
+        <div style={{
+          width: 42, height: 56, flexShrink: 0,
+          background: `linear-gradient(135deg, ${T.or}33, ${T.aurore}22)`,
+          border: `1px solid ${T.or}44`, borderRadius: "2px",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "1.2rem",
+        }}>📖</div>
+        <div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>Lecture pour toi</div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale }}>{livre.titre}</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, marginTop: "0.2rem" }}>{livre.auteur} &nbsp;·&nbsp; {livre.mot}</div>
+        </div>
+      </div>
+
+      {/* Première clé */}
+      <div style={{
+        border: `1px solid ${cle.couleur}55`,
+        borderRadius: "4px", padding: "1.5rem",
+        marginBottom: "2.5rem",
+        animation: "fadeUp 1s ease forwards 1.3s", opacity: 0,
+        background: `${cle.couleur}08`,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.5rem" }}>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: cle.couleur, opacity: 0.8 }}>Clé {cle.num}</span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.15rem", color: T.orPale }}>{cle.nom}</span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8, lineHeight: 1.7 }}>{cle.desc}</p>
+      </div>
+
+      <div style={{ textAlign: "center", animation: "fadeUp 0.8s ease forwards 1.5s", opacity: 0 }}>
+        <Btn onClick={onContinue}>Entrer dans ALBA</Btn>
+      </div>
+    </Screen>
+  );
+};
+
+// ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
+const NavItem = ({ icon, label, active, onClick }) => (
+  <button onClick={onClick} style={{
+    background: "none", border: "none", cursor: "pointer",
+    display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
+    padding: "0.5rem 0.8rem",
+    color: active ? T.or : T.brume,
+    transition: "color 0.25s",
+    flexShrink: 0,
+  }}>
+    <span style={{ fontSize: "1.1rem" }}>{icon}</span>
+    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase" }}>{label}</span>
+  </button>
+);
+
+// ─── MOTEUR DE PROGRESSION ────────────────────────────────────────────────────
+// La clé se débloque par l'engagement réel, pas le temps seul.
+// Conditions par clé :
+//  I   → toujours active (entrée)
+//  II  → 3 post-its posés + 1 conversation
+//  III → 2 jours distincts d'ardoise + 1 exercice souffle
+//  IV  → 5 jours actifs total + bilan ardoise généré
+//  V   → 10 jours actifs + 3 bilans générés
+//  VI  → toutes les conditions précédentes + 20 jours actifs
+
+const calcProgressionCle = (stats) => {
+  const { joursActifs, postitsTotal, conversationsTotal, bilansTotal, souffleTotal } = stats;
+  if (joursActifs >= 20 && bilansTotal >= 3)            return 5; // VI débloquée
+  if (joursActifs >= 10 && bilansTotal >= 3)            return 4; // V débloquée
+  if (joursActifs >= 5  && bilansTotal >= 1)            return 3; // IV débloquée
+  if (joursActifs >= 2  && souffleTotal >= 1)           return 2; // III débloquée
+  if (postitsTotal >= 3 && conversationsTotal >= 1)     return 1; // II débloquée
+  return 0; // I seulement
+};
+
+const getConditionsCle = (idx, stats) => {
+  const { joursActifs, postitsTotal, conversationsTotal, bilansTotal, souffleTotal } = stats;
+  const conditions = [
+    null, // Clé I toujours active
+    [ // Clé II
+      { label: "3 pensées posées sur l'ardoise", done: postitsTotal >= 3, val: Math.min(postitsTotal, 3), max: 3 },
+      { label: "1 conversation avec ALBA",       done: conversationsTotal >= 1, val: Math.min(conversationsTotal,1), max: 1 },
+    ],
+    [ // Clé III
+      { label: "2 jours d'ardoise",              done: joursActifs >= 2, val: Math.min(joursActifs,2), max: 2 },
+      { label: "1 exercice de souffle",          done: souffleTotal >= 1, val: Math.min(souffleTotal,1), max: 1 },
+    ],
+    [ // Clé IV
+      { label: "5 jours actifs",                 done: joursActifs >= 5, val: Math.min(joursActifs,5), max: 5 },
+      { label: "1 bilan d'ardoise généré",       done: bilansTotal >= 1, val: Math.min(bilansTotal,1), max: 1 },
+    ],
+    [ // Clé V
+      { label: "10 jours actifs",                done: joursActifs >= 10, val: Math.min(joursActifs,10), max: 10 },
+      { label: "3 bilans générés",               done: bilansTotal >= 3, val: Math.min(bilansTotal,3), max: 3 },
+    ],
+    [ // Clé VI
+      { label: "20 jours actifs",                done: joursActifs >= 20, val: Math.min(joursActifs,20), max: 20 },
+      { label: "Toutes les clés précédentes",    done: bilansTotal >= 3 && joursActifs >= 20, val: bilansTotal >= 3 && joursActifs >= 20 ? 1 : 0, max: 1 },
+    ],
+  ];
+  return conditions[idx] || null;
+};
+
+// ─── COMPOSANT PROGRESSION ────────────────────────────────────────────────────
+const ProgressionCles = ({ stats, clesDebloquees, onSelectCle, cleActive }) => {
+  const [expanded, setExpanded] = useState(null);
+
+  return (
+    <div style={{ padding: "0 1.5rem 2rem" }}>
+      <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
+        Ton chemin · {clesDebloquees + 1} / 6
+      </div>
+
+      {/* Barre de progression globale */}
+      <div style={{ marginBottom: "1.8rem" }}>
+        <div style={{ height: 2, background: `${T.brume}20`, borderRadius: 1, overflow: "hidden" }}>
+          <div style={{
+            height: "100%",
+            width: `${((clesDebloquees) / 5) * 100}%`,
+            background: `linear-gradient(to right, ${CLES[0].couleur}, ${T.or})`,
+            borderRadius: 1,
+            transition: "width 0.8s ease",
+          }}/>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+        {CLES.map((cle, i) => {
+          const debloquee = i <= clesDebloquees;
+          const estActive = i === cleActive;
+          const estSuivante = i === clesDebloquees + 1;
+          const conditions = getConditionsCle(i, stats);
+          const isExpanded = expanded === i;
+
+          return (
+            <div key={cle.num}>
+              <button
+                onClick={() => {
+                  if (debloquee) { onSelectCle(i); }
+                  setExpanded(isExpanded ? null : i);
+                }}
+                style={{
+                  width: "100%", textAlign: "left", cursor: debloquee ? "pointer" : "default",
+                  background: estActive
+                    ? `linear-gradient(135deg, ${cle.couleur}18, ${T.nuit2})`
+                    : debloquee ? `${T.nuit2}` : "transparent",
+                  border: estActive
+                    ? `1px solid ${cle.couleur}55`
+                    : debloquee ? `1px solid ${T.brume}25` : `1px solid ${T.brume}12`,
+                  borderLeft: debloquee ? `3px solid ${cle.couleur}` : `3px solid ${T.brume}20`,
+                  borderRadius: "4px",
+                  padding: "0.9rem 1.1rem",
+                  transition: "all 0.25s",
+                  opacity: !debloquee && !estSuivante ? 0.35 : 1,
+                }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                  {/* Numéro / état */}
+                  <div style={{
+                    width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                    border: `1px solid ${debloquee ? cle.couleur + "70" : T.brume + "30"}`,
+                    background: estActive ? `${cle.couleur}20` : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem",
+                    color: debloquee ? cle.couleur : T.brume,
+                  }}>
+                    {debloquee && !estActive ? "✓" : cle.num}
+                  </div>
+
+                  {/* Nom + état */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                      <span style={{
+                        fontFamily: T.serif, fontStyle: "italic",
+                        fontSize: "1rem",
+                        color: debloquee ? T.orPale : T.brume,
+                      }}>{cle.nom}</span>
+                      {estActive && (
+                        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.35em", textTransform: "uppercase", color: cle.couleur, opacity: 0.8 }}>
+                          en cours
+                        </span>
+                      )}
+                      {!debloquee && estSuivante && (
+                        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, opacity: 0.5 }}>
+                          prochaine
+                        </span>
+                      )}
+                    </div>
+                    {estActive && (
+                      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: T.brume, marginTop: "0.2rem", lineHeight: 1.5 }}>
+                        {cle.desc}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Flèche expand */}
+                  {(!debloquee || estSuivante) && conditions && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={T.brume} strokeWidth="1.5" strokeLinecap="round" style={{ transform: isExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s", flexShrink: 0, opacity: 0.5 }}>
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  )}
+                </div>
+              </button>
+
+              {/* Conditions à remplir */}
+              {isExpanded && conditions && !debloquee && (
+                <div style={{
+                  background: `${T.nuit2}`,
+                  border: `1px solid ${T.brume}15`,
+                  borderTop: "none", borderRadius: "0 0 4px 4px",
+                  padding: "0.9rem 1.1rem 1rem 1.1rem",
+                  animation: "fadeUp 0.2s ease forwards",
+                }}>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", opacity: 0.6 }}>
+                    Pour débloquer
+                  </div>
+                  {conditions.map((c, ci) => (
+                    <div key={ci} style={{ marginBottom: "0.6rem" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.25rem" }}>
+                        <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: c.done ? T.or : T.aube, opacity: c.done ? 1 : 0.6 }}>
+                          {c.done ? "✦ " : ""}{c.label}
+                        </span>
+                        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", color: T.brume, opacity: 0.5 }}>
+                          {c.val}/{c.max}
+                        </span>
+                      </div>
+                      <div style={{ height: 2, background: `${T.brume}20`, borderRadius: 1 }}>
+                        <div style={{
+                          height: "100%", borderRadius: 1,
+                          width: `${(c.val / c.max) * 100}%`,
+                          background: c.done ? T.or : cle.couleur,
+                          transition: "width 0.5s ease",
+                        }}/>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ─── ACCUEIL ──────────────────────────────────────────────────────────────────
+const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
+  const cdv = cheminDeVie(data.naissance);
+  const chemin = CHEMINS[cdv] || CHEMINS[9];
+  const cle = CLES[cleActive] || CLES[0];
+  const citation = CITATIONS[cdv % CITATIONS.length];
+  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const livre = LIVRES[blessure.nom];
+
+  const heure = new Date().getHours();
+  const salut = heure < 6 ? "Tu veilles encore" : heure < 12 ? "Bonjour" : heure < 18 ? "Bon après-midi" : "Bonsoir";
+  const momentLabel = heure < 6 ? "En pleine nuit" : heure < 12 ? "Ce matin" : heure < 18 ? "Cet après-midi" : "Ce soir";
+
+  const ENTREES = [
+    { id: "presence", label: "Présence",  desc: "Parler à ALBA",         couleur: "#7B9EA8" },
+    { id: "ardoise",  label: "Ardoise",   desc: "Poser ce qui traverse", couleur: "#C8A96E" },
+    { id: "evasion",  label: "Évasion",   desc: "Un espace de beauté",   couleur: "#9EC8B4" },
+    { id: "souffle",  label: "Souffle",   desc: "Respirer",              couleur: "#D4856A" },
+  ];
+
+  return (
+    <div style={{ paddingBottom: "6rem" }}>
+
+      {/* ── HERO PERSONNEL ── */}
+      <div style={{
+        position: "relative", overflow: "hidden",
+        padding: "2.5rem 1.5rem 2rem",
+        background: `linear-gradient(160deg, #1A1510, ${T.nuit})`,
+        borderBottom: `1px solid ${T.brume}15`,
+      }}>
+        {/* Halo arrière-plan */}
+        <div style={{
+          position: "absolute", top: -40, right: -40,
+          width: 200, height: 200, borderRadius: "50%",
+          background: `radial-gradient(circle, ${cle.couleur}10 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }}/>
+
+        {/* Moment du jour */}
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+          letterSpacing: "0.55em", textTransform: "uppercase",
+          color: T.brume, marginBottom: "0.6rem",
+          animation: "fadeUp 0.6s ease forwards",
+        }}>{momentLabel} · {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
+
+        {/* Salutation */}
+        <h1 style={{
+          fontFamily: T.serif, fontWeight: 300,
+          fontSize: "clamp(1.8rem, 6vw, 2.4rem)",
+          color: T.orPale, lineHeight: 1.2, marginBottom: "0.5rem",
+          animation: "fadeUp 0.7s ease forwards 0.1s", opacity: 0,
+        }}>{salut},<br/>{data.prenom}.</h1>
+
+        {/* Sous-titre chemin */}
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.95rem", color: T.brume, lineHeight: 1.6,
+          animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0,
+        }}>Chemin {cdv} — {chemin.titre}</p>
+
+        {/* Carte miniature flottante */}
+        <div style={{
+          position: "absolute", right: 1.5 + "rem", top: "50%",
+          transform: "translateY(-50%)",
+          animation: "float 6s ease-in-out infinite, fadeIn 1s ease forwards 0.4s",
+          opacity: 0,
+        }}>
+          <CarteAme data={data} small />
+        </div>
+      </div>
+
+      {/* ── CLÉ DU JOUR ── */}
+      <div style={{
+        margin: "1.2rem 1.5rem 0",
+        background: `linear-gradient(135deg, ${T.nuit2}, #1E1A14)`,
+        border: `1px solid ${cle.couleur}40`,
+        borderLeft: `3px solid ${cle.couleur}`,
+        borderRadius: "4px",
+        padding: "1.4rem 1.5rem",
+        animation: "fadeUp 0.7s ease forwards 0.3s", opacity: 0,
+        position: "relative", overflow: "hidden",
+      }}>
+        <div style={{
+          position: "absolute", right: -10, top: -10,
+          width: 80, height: 80, borderRadius: "50%",
+          background: `radial-gradient(circle, ${cle.couleur}10, transparent 70%)`,
+        }}/>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+          Clé du jour
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.6rem" }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+            border: `1px solid ${cle.couleur}60`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: cle.couleur,
+          }}>{cle.num}</div>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>{cle.nom}</span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>{cle.desc}</p>
+      </div>
+
+      {/* ── MINI PROGRESSION ── */}
+      <div style={{
+        margin: "0.8rem 1.5rem 0",
+        padding: "0.75rem 1rem",
+        background: `${T.nuit2}`,
+        border: `1px solid ${T.brume}12`,
+        borderRadius: "4px",
+        animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume }}>
+            Chemin des clés
+          </span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.7rem", color: T.or }}>
+            {cleActive + 1} / 6
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: "0.3rem" }}>
+          {CLES.map((k, i) => (
+            <div key={i} style={{
+              flex: 1, height: 3, borderRadius: 2,
+              background: i <= cleActive ? k.couleur : `${T.brume}20`,
+              transition: "background 0.4s ease",
+              opacity: i === cleActive ? 1 : i < cleActive ? 0.6 : 0.25,
+            }}/>
+          ))}
+        </div>
+      </div>
+
+      {/* ── CITATION ── */}
+      <div style={{
+        margin: "1rem 1.5rem 0",
+        borderLeft: `2px solid ${T.or}40`,
+        paddingLeft: "1.2rem",
+        animation: "fadeUp 0.7s ease forwards 0.45s", opacity: 0,
+      }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.85, marginBottom: "0.4rem" }}>
+          « {citation.texte} »
+        </p>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.56rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume }}>
+          — {citation.auteur}
+        </p>
+      </div>
+
+      {/* ── ENTRÉES RAPIDES ── */}
+      <div style={{ margin: "1.5rem 1.5rem 0" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+          Où veux-tu aller ?
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.7rem" }}>
+          {ENTREES.map((e, i) => (
+            <button key={e.id} onClick={() => onNavigate(e.id)} style={{
+              background: `linear-gradient(145deg, ${T.nuit2}, #181410)`,
+              border: `1px solid ${e.couleur}25`,
+              borderTop: `2px solid ${e.couleur}60`,
+              borderRadius: "4px", padding: "1.1rem",
+              textAlign: "left", cursor: "pointer",
+              animation: `fadeUp 0.6s ease forwards ${0.5 + i * 0.07}s`, opacity: 0,
+              transition: "border-color 0.25s, transform 0.2s",
+            }}>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, marginBottom: "0.25rem" }}>
+                {e.label}
+              </div>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.56rem", letterSpacing: "0.2em", color: T.brume, opacity: 0.7 }}>
+                {e.desc}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── LIVRE ── */}
+      <div style={{
+        margin: "1rem 1.5rem 0",
+        display: "flex", alignItems: "center", gap: "1rem",
+        background: `${T.nuit2}`,
+        border: `1px solid ${T.brume}15`,
+        borderRadius: "4px", padding: "1rem 1.2rem",
+        animation: "fadeUp 0.7s ease forwards 0.75s", opacity: 0,
+      }}>
+        {/* Spine du livre */}
+        <div style={{
+          width: 10, height: 52, flexShrink: 0, borderRadius: "1px",
+          background: `linear-gradient(to bottom, ${T.or}80, ${T.aurore}60)`,
+        }}/>
+        <div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.2rem" }}>Pour traverser</div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.98rem", color: T.orPale }}>{livre.titre}</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", color: T.brume, marginTop: "0.1rem" }}>{livre.auteur}</div>
+        </div>
+      </div>
+
+      {/* ── BLESSURE / QUESTION cliquable ── */}
+      <button onClick={() => onNavigate("presence", { question: blessure.question })} style={{
+        display: "block", width: "calc(100% - 3rem)",
+        margin: "1rem 1.5rem 0",
+        padding: "1.2rem 1.4rem",
+        background: `${blessure.couleur}08`,
+        border: `1px solid ${blessure.couleur}25`,
+        borderRadius: "4px",
+        animation: "fadeUp 0.7s ease forwards 0.85s", opacity: 0,
+        cursor: "pointer", textAlign: "left",
+        transition: "border-color 0.25s, background 0.25s",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.6rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: blessure.couleur, flexShrink: 0 }}/>
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: blessure.couleur }}>
+              En traversée · {blessure.nom}
+            </span>
+          </div>
+          {/* Hint "répondre" */}
+          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: blessure.couleur, opacity: 0.6 }}>
+            Répondre →
+          </span>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>
+          {blessure.question}
+        </p>
+      </button>
+
+      {/* ── PARCOURS DES CLÉS ── */}
+      {progressStats && (
+        <div style={{ margin: "1.5rem 0 0" }}>
+          <div style={{ padding: "0 1.5rem", marginBottom: "0.4rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+              Parcours des clés
+            </div>
+          </div>
+          <ProgressionCles
+            stats={progressStats}
+            clesDebloquees={cleActive}
+            onSelectCle={() => {}}
+            cleActive={cleActive}
+          />
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+// ─── COMPAGNON DU JOUR (conservé pour compatibilité) ─────────────────────────
+const CompagnonDuJour = ({ data }) => {
+  const cdv = cheminDeVie(data.naissance);
+  const cle = CLES[0];
+  const citation = CITATIONS[cdv % CITATIONS.length];
+  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const livre = LIVRES[blessure.nom];
+
+  return (
+    <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Aujourd'hui</div>
+        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>Bonjour, {data.prenom}.</h2>
+      </div>
+      <div style={{ borderLeft: `2px solid ${T.or}55`, padding: "1.2rem 1.5rem", marginBottom: "1.2rem" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.8, marginBottom: "0.5rem" }}>« {citation.texte} »</p>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.62rem", letterSpacing: "0.3em", color: T.brume }}>— {citation.auteur}</p>
+      </div>
+    </div>
+  );
+};
+
+// ─── BIBLIOTHÈQUE PHOTOS ─────────────────────────────────────────────────────
+// 🔄 Sur Vercel : remplacer `gradient` par `url: "/evasion/nom-fichier.jpg"`
+const PHOTOS = {
+  puissance: [
+    { gradient: "linear-gradient(160deg,#1a0a00,#6b2d0a,#c45a1a)", legende: "Ce qui résiste finit par sculpter" },
+    { gradient: "linear-gradient(160deg,#0d0d1a,#1a1a4a,#4a3a7a)", legende: "La falaise ne recule pas devant la vague" },
+    { gradient: "linear-gradient(160deg,#1a0505,#6b1010,#c43030)", legende: "La force naît du silence des hauteurs" },
+  ],
+  douceur: [
+    { gradient: "linear-gradient(160deg,#0a1a0a,#1a4a1a,#4a8a3a)", legende: "La forêt n'explique pas sa lumière" },
+    { gradient: "linear-gradient(160deg,#0a1520,#1a3a5a,#3a7aaa)", legende: "L'eau sait où elle va" },
+    { gradient: "linear-gradient(160deg,#1a1505,#4a3a10,#c8a050)", legende: "La douceur est une forme de courage" },
+  ],
+  liberte: [
+    { gradient: "linear-gradient(160deg,#05101a,#10304a,#1a6a9a)", legende: "Tout horizon est une invitation" },
+    { gradient: "linear-gradient(160deg,#001020,#004070,#0080c0)", legende: "La mer ne demande pas la permission" },
+    { gradient: "linear-gradient(160deg,#1a1200,#5a4000,#c8a030)", legende: "Le désert apprend à voyager léger" },
+  ],
+  ancrage: [
+    { gradient: "linear-gradient(160deg,#050f05,#1a3a1a,#2a6a2a)", legende: "Les racines profondes ne craignent pas le vent" },
+    { gradient: "linear-gradient(160deg,#0a0a15,#1a2a4a,#8aaad4)", legende: "La montagne n'a pas besoin qu'on la remarque" },
+    { gradient: "linear-gradient(160deg,#0f0a00,#3a2800,#8a6020)", legende: "Être là, simplement" },
+  ],
+  mystere: [
+    { gradient: "linear-gradient(160deg,#000510,#001030,#0a2060)", legende: "Ce que l'on cherche cherche aussi" },
+    { gradient: "linear-gradient(160deg,#050010,#150030,#3a1070)", legende: "La brume cache ce qui n'est pas encore prêt" },
+    { gradient: "linear-gradient(160deg,#001010,#003030,#006060)", legende: "L'invisible est plus réel que le visible" },
+  ],
+  savane: [
+    { gradient: "linear-gradient(160deg,#1a0800,#7a3000,#e87820)", legende: "La savane sait attendre" },
+    { gradient: "linear-gradient(160deg,#200a00,#8a3800,#f09030)", legende: "Chaque coucher de soleil est une permission de lâcher" },
+    { gradient: "linear-gradient(160deg,#150a00,#603000,#c06820)", legende: "L'Afrique garde les secrets des origines" },
+  ],
+  mer: [
+    { gradient: "linear-gradient(160deg,#001520,#003a5a,#00789a)", legende: "La mer des Caraïbes ne juge pas" },
+    { gradient: "linear-gradient(160deg,#001018,#002a40,#005880)", legende: "L'océan reçoit tout, retient rien" },
+    { gradient: "linear-gradient(160deg,#0a1520,#103858,#2078a8)", legende: "L'eau sait guérir ce que les mots ne peuvent pas" },
+  ],
+  aube: [
+    { gradient: "linear-gradient(160deg,#100800,#5a2800,#e87030)", legende: "L'aube ne promet rien. Elle se lève, simplement." },
+    { gradient: "linear-gradient(160deg,#150503,#6a1a08,#e84818)", legende: "Chaque matin est une seconde chance" },
+    { gradient: "linear-gradient(160deg,#0a0810,#3a2040,#c87890)", legende: "Du chaos naît une étoile" },
+  ],
+  resilience: [
+    { gradient: "linear-gradient(160deg,#050f05,#1a4a10,#3a9a30)", legende: "Ce qui survit devient racine" },
+    { gradient: "linear-gradient(160deg,#100a00,#4a2800,#a06820)", legende: "Après la tempête, la lumière est différente" },
+    { gradient: "linear-gradient(160deg,#080f05,#203a15,#508a30)", legende: "La vie repousse toujours" },
+  ],
+};
+
+// Sélection selon le chemin de vie et la blessure
+const getPhotos = (cdv, blessure) => {
+  const map = {
+    1: "puissance", 8: "puissance",
+    2: "douceur",   6: "douceur",
+    3: "liberte",   5: "liberte",
+    4: "ancrage",  22: "ancrage",
+    7: "mystere",  11: "mystere",
+    9: "savane",
+  };
+  const cat1 = map[cdv] || "aube";
+  const cat2 = ["Abandon","Rejet"].includes(blessure) ? "mer"
+              : ["Trahison"].includes(blessure) ? "resilience"
+              : "aube";
+  return {
+    principal: PHOTOS[cat1],
+    secondaire: PHOTOS[cat2],
+    categorie: cat1,
+    all: [...(PHOTOS[cat1] || []), ...(PHOTOS[cat2] || [])],
+  };
+};
+
+// ─── ÉVASION ──────────────────────────────────────────────────────────────────
+const Evasion = ({ data }) => {
+  const cdv = cheminDeVie(data.naissance);
+  const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const { all } = getPhotos(cdv, blessure.nom);
+  const [actif, setActif] = useState(0);
+  const [loaded, setLoaded] = useState({});
+  const [direction, setDirection] = useState(1); // 1=next, -1=prev
+  const [animating, setAnimating] = useState(false);
+  const touchStart = useRef(null);
+
+  const photo = all[actif] || all[0];
+
+  const navigate = (dir) => {
+    if (animating) return;
+    setDirection(dir);
+    setAnimating(true);
+    setTimeout(() => {
+      setActif(a => (a + dir + all.length) % all.length);
+      setAnimating(false);
+    }, 300);
+  };
+
+  const handleTouchStart = (e) => { touchStart.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (!touchStart.current) return;
+    const diff = touchStart.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+    touchStart.current = null;
+  };
+
+  const catLabel = {
+    puissance: "Puissance", douceur: "Douceur", liberte: "Liberté",
+    ancrage: "Ancrage", mystere: "Mystère", savane: "Savane",
+    mer: "Mer & Caraïbes", aube: "Aube", resilience: "Résilience",
+  };
+
+  return (
+    <div style={{ padding: "0 0 6rem" }}>
+
+      {/* ── HEADER ── */}
+      <div style={{ padding: "1.5rem 1.5rem 1.2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>
+            Évasion · {catLabel[getPhotos(cdv, blessure.nom).categorie] || ""}
+          </div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>
+            Laisse-les simplement être là.
+          </div>
+        </div>
+        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.3em", color: T.brume }}>
+          {actif + 1} / {all.length}
+        </span>
+      </div>
+
+      {/* ── IMAGE PRINCIPALE ── */}
+      <div
+        style={{
+          position: "relative", overflow: "hidden",
+          margin: "0 1.5rem", borderRadius: "8px",
+          aspectRatio: "3/4",
+          background: photo.gradient || T.nuit2,
+          transition: "background 0.5s ease",
+          cursor: "grab",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Image réelle si dispo */}
+        {photo.url && (
+          <img
+            key={actif}
+            src={photo.url} alt=""
+            onLoad={() => setLoaded(l => ({...l, [actif]: true}))}
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%", objectFit: "cover",
+              opacity: loaded[actif] ? 1 : 0,
+              transition: "opacity 0.7s ease",
+            }}
+          />
+        )}
+
+        {/* Étoiles pour les gradients */}
+        {!photo.url && (
+          <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+            {[...Array(20)].map((_,i) => (
+              <div key={i} style={{
+                position: "absolute",
+                left: `${5 + (i * 73 + actif * 37) % 90}%`,
+                top: `${5 + (i * 89 + actif * 53) % 90}%`,
+                width: i % 4 === 0 ? 2.5 : 1,
+                height: i % 4 === 0 ? 2.5 : 1,
+                borderRadius: "50%",
+                background: i % 4 === 0 ? T.or : "rgba(255,255,255,0.4)",
+                opacity: 0.4 + (i % 5) * 0.12,
+              }}/>
+            ))}
+          </div>
+        )}
+
+        {/* Gradient bas */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
+          background: "linear-gradient(to top, rgba(10,8,6,0.97) 0%, rgba(10,8,6,0.5) 50%, transparent 100%)",
+          pointerEvents: "none",
+        }}/>
+
+        {/* Légende */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "1.8rem 1.5rem" }}>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1rem, 3vw, 1.15rem)",
+            color: T.orPale, lineHeight: 1.65,
+            textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+          }}>« {photo.legende} »</p>
+        </div>
+
+        {/* Flèches latérales */}
+        <button onClick={() => navigate(-1)} style={{
+          position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
+          background: "rgba(10,8,6,0.5)", border: `1px solid ${T.brume}30`,
+          borderRadius: "50%", width: 36, height: 36, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          backdropFilter: "blur(8px)",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.aube} strokeWidth="1.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button onClick={() => navigate(1)} style={{
+          position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
+          background: "rgba(10,8,6,0.5)", border: `1px solid ${T.brume}30`,
+          borderRadius: "50%", width: 36, height: 36, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          backdropFilter: "blur(8px)",
+        }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.aube} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+
+      {/* ── MINIATURES ── */}
+      <div style={{ display: "flex", gap: "0.5rem", margin: "1rem 1.5rem 0", overflowX: "auto", paddingBottom: "0.2rem" }}>
+        {all.map((p, i) => (
+          <button key={i} onClick={() => { setDirection(i > actif ? 1 : -1); setActif(i); }} style={{
+            flexShrink: 0, width: 52, height: 52, borderRadius: "6px",
+            border: `2px solid ${actif === i ? T.or : "transparent"}`,
+            background: p.gradient || T.nuit2,
+            cursor: "pointer", padding: 0, overflow: "hidden",
+            opacity: actif === i ? 1 : 0.45,
+            transition: "all 0.2s",
+          }}>
+            {p.url && <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>}
+          </button>
+        ))}
+      </div>
+
+      {/* ── NOTE PROFIL ── */}
+      <div style={{
+        margin: "1rem 1.5rem 0",
+        padding: "0.9rem 1.2rem",
+        borderLeft: `2px solid ${T.or}30`,
+        background: `${T.nuit2}`,
+        borderRadius: "0 4px 4px 0",
+      }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.7 }}>
+          Sélection pour chemin <span style={{ color: T.orPale }}>{cdv}</span> — en traversée de <span style={{ color: T.orPale }}>{blessure.nom.toLowerCase()}</span>.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─── SOUFFLE ──────────────────────────────────────────────────────────────────
+const Souffle = ({ onComplete }) => {
+  const [phase, setPhase] = useState("inspire");
+  const [count, setCount] = useState(4);
+  const [active, setActive] = useState(false);
+  const [mode, setMode] = useState(0);
+  const [cyclesDone, setCyclesDone] = useState(0);
+  const completedRef = useRef(false);
+
+  const MODES = [
+    { nom: "Ancrage",     inspire: 4, retiens: 4, expire: 4, retiens2: 4, couleur: "#7B9EA8", desc: "Respiration carrée — revenir au présent" },
+    { nom: "Lâcher-prise", inspire: 4, retiens: 0, expire: 8, retiens2: 0, couleur: T.aurore, desc: "4-8 — relâcher la tension" },
+    { nom: "Présence",    inspire: 5, retiens: 2, expire: 7, retiens2: 0, couleur: "#8A7BA8", desc: "Cohérence cardiaque — apaiser le système nerveux" },
+  ];
+
+  const m = MODES[mode];
+  const phases = [
+    { nom: "inspire",   dur: m.inspire,   label: "Inspire",    show: m.inspire > 0 },
+    { nom: "retiens",   dur: m.retiens,   label: "Retiens",    show: m.retiens > 0 },
+    { nom: "expire",    dur: m.expire,    label: "Expire",     show: m.expire > 0 },
+    { nom: "retiens2",  dur: m.retiens2,  label: "Vide",       show: m.retiens2 > 0 },
+  ].filter(p => p.show);
+
+  useEffect(() => {
+    if (!active) return;
+    const idx = phases.findIndex(p => p.nom === phase);
+    const cur = phases[idx];
+    setCount(cur.dur);
+    const interval = setInterval(() => {
+      setCount(c => {
+        if (c <= 1) {
+          const nextIdx = (idx + 1) % phases.length;
+          const next = phases[nextIdx];
+          setPhase(next.nom);
+          // Un cycle complet = retour à la première phase
+          if (nextIdx === 0) {
+            setCyclesDone(n => {
+              const newN = n + 1;
+              if (newN === 1 && !completedRef.current) {
+                completedRef.current = true;
+                if (onComplete) onComplete();
+              }
+              return newN;
+            });
+          }
+          return next.dur;
+        }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [active, phase, mode]);
+
+  const expanding = phase === "inspire" || phase === "retiens";
+  const phaseLabel = phases.find(p => p.nom === phase)?.label || "";
+
+  return (
+    <div style={{ padding: "2rem 0 6rem", maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Espace</div>
+        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>Le Souffle</h2>
+      </div>
+
+      {/* Mode selector */}
+      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "3rem", justifyContent: "center" }}>
+        {MODES.map((mo, i) => (
+          <button key={i} onClick={() => { setMode(i); setActive(false); setPhase("inspire"); }} style={{
+            background: mode === i ? `${mo.couleur}22` : "transparent",
+            border: `1px solid ${mode === i ? mo.couleur + "77" : T.brume + "33"}`,
+            color: mode === i ? mo.couleur : T.brume,
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.62rem",
+            letterSpacing: "0.25em", textTransform: "uppercase",
+            padding: "0.5rem 0.9rem", borderRadius: "2px", cursor: "pointer",
+            transition: "all 0.25s",
+          }}>{mo.nom}</button>
+        ))}
+      </div>
+
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, marginBottom: "3rem" }}>{m.desc}</p>
+
+      {/* Breathing circle */}
+      <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "3rem" }}>
+        {active && (
+          <>
+            <div style={{
+              position: "absolute", width: 160, height: 160, borderRadius: "50%",
+              border: `1px solid ${m.couleur}44`,
+              animation: "pulse-ring 3s ease-out infinite",
+            }} />
+            <div style={{
+              position: "absolute", width: 180, height: 180, borderRadius: "50%",
+              border: `1px solid ${m.couleur}22`,
+              animation: "pulse-ring 3s ease-out infinite 1s",
+            }} />
+          </>
+        )}
+        <div style={{
+          width: 150, height: 150, borderRadius: "50%",
+          border: `2px solid ${m.couleur}66`,
+          background: `radial-gradient(circle, ${m.couleur}18 0%, transparent 70%)`,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+          transition: "transform 0.8s ease, opacity 0.3s",
+          transform: active ? (expanding ? "scale(1.2)" : "scale(0.85)") : "scale(1)",
+          animation: active ? undefined : "float 4s ease-in-out infinite",
+        }}>
+          {active ? (
+            <>
+              <div style={{ fontFamily: T.serif, fontSize: "2.5rem", fontWeight: 300, color: m.couleur, lineHeight: 1 }}>{count}</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: m.couleur, opacity: 0.8, marginTop: "0.3rem" }}>{phaseLabel}</div>
+            </>
+          ) : (
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume }}>prêt(e) ?</div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
+        <Btn onClick={() => { setActive(!active); if (!active) setPhase("inspire"); }}>
+          {active ? "Pause" : "Commencer"}
+        </Btn>
+      </div>
+    </div>
+  );
+};
+
+// ─── ARDOISE ──────────────────────────────────────────────────────────────────
+
+// Icônes SVG inline — ADN ALBA, trait fin doré
+const ICONS = {
+  pensee: (c="#C8A96E") => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2C8 2 5 5 5 9c0 2.5 1.2 4.7 3 6.1V18h8v-2.9c1.8-1.4 3-3.6 3-6.1 0-4-3-7-7-7z"/>
+      <path d="M9 21h6M10 18v3M14 18v3"/>
+    </svg>
+  ),
+  emotion: (c="#D4856A") => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <path d="M2 12 Q6 6 10 12 Q14 18 18 12 Q20 9 22 12"/>
+      <path d="M2 17 Q6 11 10 17 Q14 23 18 17" opacity="0.5"/>
+    </svg>
+  ),
+  gratitude: (c="#7BA88A") => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3 Q18 3 18 9 Q18 15 12 21 Q6 15 6 9 Q6 3 12 3Z"/>
+      <path d="M12 7v10M8 12h8" opacity="0.5"/>
+    </svg>
+  ),
+  question: (c="#7B9EA8") => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <path d="M5 8 A7 7 0 1 1 19 8 Q19 13 12 14"/>
+      <circle cx="12" cy="19" r="1" fill={c}/>
+    </svg>
+  ),
+  victoire: (c="#A87BC8") => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <path d="M12 2 L12 22M2 12 L22 12M5 5 L19 19M19 5 L5 19"/>
+    </svg>
+  ),
+  bilan: (c="#C8A96E") => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <circle cx="12" cy="12" r="9"/>
+      <path d="M8 12l3 3 5-5"/>
+    </svg>
+  ),
+  plus: (c="#8C7F74") => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  ),
+  fermer: (c="#8C7F74") => (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  ),
+};
+
+const POSTIT_TYPES = [
+  { id: "pensee",    label: "Pensée",    couleur: "#C8A96E", papier: "#1E1A10", bord: "#C8A96E" },
+  { id: "emotion",   label: "Émotion",   couleur: "#D4856A", papier: "#1E1210", bord: "#D4856A" },
+  { id: "gratitude", label: "Gratitude", couleur: "#7BA88A", papier: "#101E12", bord: "#7BA88A" },
+  { id: "question",  label: "Question",  couleur: "#7B9EA8", papier: "#101518", bord: "#7B9EA8" },
+  { id: "victoire",  label: "Victoire",  couleur: "#A87BC8", papier: "#150E1E", bord: "#A87BC8" },
+];
+
+const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere }) => {
+  // Clé du jour courant : "2026-03-08"
+  const todayKey = new Date().toISOString().split("T")[0];
+  const [jourActif, setJourActif] = useState(todayKey);
+  const [allPostits, setAllPostits] = useState({}); // { "2026-03-08": [...] }
+  const [texte, setTexte] = useState("");
+  const [type, setType] = useState("pensee");
+  const [loading, setLoading] = useState(false);
+  const [bilan, setBilan] = useState(null);
+  const [showBilan, setShowBilan] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const pressing = useRef(null);
+  const pressTimer = useRef(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  // Charger les post-its au montage
+  useEffect(() => {
+    if (!db) return;
+    db.loadAllPostits().then(saved => {
+      if (saved && Object.keys(saved).length > 0) setAllPostits(saved);
+    });
+  }, []);
+
+  // Post-its du jour affiché
+  const postits = allPostits[jourActif] || [];
+  const setPostits = (fn) => {
+    setAllPostits(a => {
+      const prev = a[jourActif] || [];
+      const next = typeof fn === "function" ? fn(prev) : fn;
+      const updated = { ...a, [jourActif]: next };
+      // Sauvegarder en DB
+      if (db) db.savePostits(jourActif, next);
+      return updated;
+    });
+  };
+
+  // Génère les 7 derniers jours
+  const getDays = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const key = d.toISOString().split("T")[0];
+      const label = d.toLocaleDateString("fr-FR", { weekday: "short" });
+      const num = d.getDate();
+      days.push({ key, label, num, isToday: key === todayKey });
+    }
+    return days;
+  };
+  const days = getDays();
+
+  // Rotation pseudo-aléatoire stable par id
+  const getRotation = (id) => {
+    const n = id % 1000;
+    return ((n * 7 + 13) % 11) - 5; // entre -5 et +5 degrés
+  };
+  const getSize = (texte) => {
+    if (texte.length < 30) return "small";
+    if (texte.length < 80) return "medium";
+    return "large";
+  };
+
+  const ajouter = () => {
+    if (!texte.trim()) return;
+    setPostits(p => [{
+      id: Date.now(),
+      texte: texte.trim(),
+      type,
+      heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+    }, ...p]);
+    setTexte("");
+    setShowForm(false);
+    if (onPostitAjoute) onPostitAjoute();
+  };
+
+  const startPress = (id) => {
+    pressTimer.current = setTimeout(() => { setDeletingId(id); pressing.current = id; }, 500);
+  };
+  const endPress = (id) => {
+    clearTimeout(pressTimer.current);
+    if (pressing.current === id) { setPostits(p => p.filter(x => x.id !== id)); pressing.current = null; setDeletingId(null); }
+    else { pressing.current = null; setDeletingId(null); }
+  };
+
+  const genererBilan = async () => {
+    if (postits.length === 0) return;
+    setLoading(true); setShowBilan(true);
+    const cdv = cheminDeVie(data.naissance);
+    const chemin = CHEMINS[cdv] || CHEMINS[9];
+    const resume = postits.map(p => `[${POSTIT_TYPES.find(t=>t.id===p.type)?.label}] ${p.texte}`).join("\n");
+    const prompt = `Tu es ALBA. Tu lis les pensées que ${data.prenom} a posées sur son ardoise aujourd'hui.
+Profil : Chemin ${cdv} — ${chemin.titre}.
+Voici ce qu'il/elle a posé :
+${resume}
+Écris une courte lettre — 4 à 7 phrases. Pas un résumé. Une lettre intime et vraie. Nomme ce que tu entends entre les lignes. Termine par une phrase qui ouvre. Signe "ALBA".`;
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
+      });
+      const d = await res.json();
+      setBilan(d.content?.[0]?.text || "…");
+      if (onBilanGenere) onBilanGenere();
+    } catch { setBilan("Je n'ai pas pu lire ton ardoise ce soir. Reviens demain — je serai là."); }
+    setLoading(false);
+  };
+
+  const typeActif = POSTIT_TYPES.find(t => t.id === type);
+  const stats = POSTIT_TYPES.map(t => ({ ...t, count: postits.filter(p => p.type === t.id).length })).filter(t => t.count > 0);
+
+  return (
+    <div style={{ padding: "0 0 6rem" }}>
+
+      {/* ── HEADER ── */}
+      <div style={{ padding: "1.5rem 1.5rem 1rem", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
+        <div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.35rem" }}>Ardoise</div>
+          <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.4rem", color: T.orPale, lineHeight: 1.1 }}>
+            {jourActif === todayKey
+              ? new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })
+              : new Date(jourActif + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+          </div>
+        </div>
+        {postits.length > 0 && jourActif === todayKey && (
+          <button onClick={genererBilan} style={{
+            display: "flex", alignItems: "center", gap: "0.5rem",
+            background: "transparent", border: `1px solid ${T.or}44`,
+            color: T.or, fontFamily: T.sans, fontWeight: 200,
+            fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase",
+            padding: "0.5rem 0.9rem", borderRadius: "2px", cursor: "pointer",
+            transition: "all 0.25s",
+          }}>
+            {ICONS.bilan()} Bilan
+          </button>
+        )}
+      </div>
+
+      {/* ── CALENDRIER 7 JOURS ── */}
+      <div style={{ padding: "0 1.5rem", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", gap: "0.4rem", justifyContent: "space-between" }}>
+          {days.map(d => {
+            const hasEntries = (allPostits[d.key] || []).length > 0;
+            const isActive = d.key === jourActif;
+            return (
+              <button key={d.key} onClick={() => { setJourActif(d.key); setShowForm(false); }} style={{
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center",
+                gap: "0.3rem", padding: "0.5rem 0.2rem",
+                background: isActive ? `${T.or}12` : "transparent",
+                border: `1px solid ${isActive ? T.or + "50" : T.brume + "20"}`,
+                borderRadius: "6px", cursor: "pointer", transition: "all 0.2s",
+              }}>
+                <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.2em", textTransform: "uppercase", color: isActive ? T.or : T.brume, opacity: 0.7 }}>
+                  {d.label}
+                </span>
+                <span style={{ fontFamily: T.serif, fontSize: "0.95rem", color: isActive ? T.or : T.aube, opacity: isActive ? 1 : 0.5, fontWeight: isActive ? 400 : 300 }}>
+                  {d.num}
+                </span>
+                {/* Dot si des entrées existent */}
+                <div style={{
+                  width: 4, height: 4, borderRadius: "50%",
+                  background: hasEntries ? T.or : "transparent",
+                  opacity: hasEntries ? 0.7 : 0,
+                  transition: "all 0.2s",
+                }}/>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── LÉGENDE TYPES ── */}
+      <div style={{ padding: "0 1.5rem", display: "flex", gap: "0.7rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+        {POSTIT_TYPES.map(t => (
+          <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: t.couleur, opacity: 0.7 }}/>
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.25em", textTransform: "uppercase", color: T.brume, opacity: 0.7 }}>{t.label}</span>
+            {stats.find(s => s.id === t.id) && (
+              <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", color: t.couleur, opacity: 0.8 }}>
+                ×{stats.find(s => s.id === t.id).count}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── CANVAS ARDOISE ── */}
+      <div style={{
+        margin: "0 1rem",
+        minHeight: postits.length === 0 ? 280 : "auto",
+        background: "linear-gradient(145deg, #161310, #1A1612, #14110E)",
+        borderRadius: "8px",
+        border: `1px solid rgba(200,169,110,0.1)`,
+        boxShadow: "inset 0 2px 20px rgba(0,0,0,0.4), 0 4px 30px rgba(0,0,0,0.3)",
+        position: "relative",
+        padding: "1.2rem",
+        // Texture grain subtile
+        backgroundImage: `
+          linear-gradient(145deg, #161310, #1A1612, #14110E),
+          url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E")
+        `,
+      }}>
+
+        {/* État vide */}
+        {postits.length === 0 && (
+          <div style={{
+            position: "absolute", inset: 0,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            gap: "0.8rem",
+          }}>
+            <div style={{ opacity: 0.15 }}>
+              {/* Lignes de règles fantômes */}
+              {[0,1,2,3].map(i => (
+                <div key={i} style={{ width: 180, height: 1, background: T.or, marginBottom: 28, opacity: 0.3 }}/>
+              ))}
+            </div>
+            <p style={{
+              position: "absolute",
+              fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem",
+              color: T.brume, opacity: 0.5, textAlign: "center", lineHeight: 1.8,
+            }}>
+              Pose ce qui traverse,<br/>même si c'est petit.
+            </p>
+          </div>
+        )}
+
+        {/* Grille de post-its */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "0.8rem",
+        }}>
+          {postits.map((p, i) => {
+            const t = POSTIT_TYPES.find(t => t.id === p.type);
+            const rot = getRotation(p.id % 1000);
+            const size = getSize(p.texte);
+            const isLarge = size === "large";
+            const isSmall = size === "small";
+            const isDeleting = deletingId === p.id;
+
+            return (
+              <div
+                key={p.id}
+                onMouseDown={() => startPress(p.id)}
+                onMouseUp={() => endPress(p.id)}
+                onMouseLeave={() => { clearTimeout(pressTimer.current); pressing.current = null; setDeletingId(null); }}
+                onTouchStart={() => startPress(p.id)}
+                onTouchEnd={() => endPress(p.id)}
+                style={{
+                  gridColumn: isLarge ? "span 2" : "span 1",
+                  background: `linear-gradient(145deg, ${t.papier}, ${t.papier}dd)`,
+                  border: `1px solid ${t.bord}25`,
+                  borderTop: `3px solid ${t.bord}`,
+                  borderRadius: "3px",
+                  padding: isSmall ? "0.8rem 0.9rem" : "1rem 1.1rem",
+                  transform: isDeleting
+                    ? `rotate(${rot}deg) scale(0.9)`
+                    : `rotate(${rot}deg)`,
+                  transformOrigin: "center center",
+                  boxShadow: isDeleting
+                    ? `0 2px 8px rgba(0,0,0,0.2)`
+                    : `3px 4px 12px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3)`,
+                  cursor: "grab",
+                  transition: "transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s",
+                  opacity: isDeleting ? 0.4 : 1,
+                  animation: "fadeUp 0.35s ease forwards",
+                  userSelect: "none",
+                  position: "relative",
+                  overflow: "hidden",
+                }}>
+                {/* Pli coin */}
+                <div style={{
+                  position: "absolute", bottom: 0, right: 0,
+                  width: 0, height: 0,
+                  borderStyle: "solid",
+                  borderWidth: "0 0 14px 14px",
+                  borderColor: `transparent transparent rgba(0,0,0,0.25) transparent`,
+                }}/>
+                {/* Type label */}
+                <div style={{
+                  display: "flex", alignItems: "center", gap: "0.35rem",
+                  marginBottom: "0.5rem",
+                }}>
+                  {ICONS[p.type]?.(t.couleur)}
+                  <span style={{
+                    fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+                    letterSpacing: "0.4em", textTransform: "uppercase", color: t.couleur, opacity: 0.8,
+                  }}>{t.label}</span>
+                  <span style={{
+                    marginLeft: "auto",
+                    fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+                    color: T.brume, opacity: 0.5,
+                  }}>{p.heure}</span>
+                </div>
+                {/* Texte */}
+                <p style={{
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: isSmall ? "0.88rem" : "0.95rem",
+                  color: T.aube, lineHeight: 1.65, opacity: 0.9,
+                }}>{p.texte}</p>
+                {/* Hint suppression */}
+                {isDeleting && (
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "rgba(0,0,0,0.5)",
+                  }}>
+                    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", color: "#fff", textTransform: "uppercase" }}>Supprimer</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── HINT SUPPRESSION ── */}
+      {postits.length > 0 && (
+        <div style={{ textAlign: "center", marginTop: "0.6rem" }}>
+          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume, opacity: 0.35 }}>
+            Maintenir pour supprimer
+          </span>
+        </div>
+      )}
+
+      {/* ── FORMULAIRE AJOUT ── */}
+      {showForm ? (
+        <div style={{
+          margin: "1.2rem 1rem 0",
+          background: `linear-gradient(145deg, ${typeActif.papier}, #181510)`,
+          border: `1px solid ${typeActif.bord}33`,
+          borderTop: `3px solid ${typeActif.bord}`,
+          borderRadius: "3px",
+          padding: "1.2rem",
+          boxShadow: "3px 4px 16px rgba(0,0,0,0.4)",
+          animation: "fadeUp 0.3s ease forwards",
+        }}>
+          {/* Sélecteur type */}
+          <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+            {POSTIT_TYPES.map(t => (
+              <button key={t.id} onClick={() => setType(t.id)} style={{
+                display: "flex", alignItems: "center", gap: "0.35rem",
+                background: type === t.id ? `${t.couleur}18` : "transparent",
+                border: `1px solid ${type === t.id ? t.couleur + "60" : T.brume + "25"}`,
+                color: type === t.id ? t.couleur : T.brume,
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+                letterSpacing: "0.2em", textTransform: "uppercase",
+                padding: "0.32rem 0.65rem", borderRadius: "20px", cursor: "pointer",
+                transition: "all 0.2s",
+              }}>
+                {ICONS[t.id]?.(type === t.id ? t.couleur : T.brume)}
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Zone de saisie */}
+          <textarea
+            value={texte}
+            onChange={e => setTexte(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ajouter(); } }}
+            placeholder="Ce qui est là, maintenant…"
+            autoFocus rows={3}
+            style={{
+              width: "100%", background: "transparent", border: "none",
+              borderBottom: `1px solid ${typeActif.bord}30`,
+              color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", lineHeight: 1.75, resize: "none", padding: "0.3rem 0",
+            }}
+          />
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1rem" }}>
+            <button onClick={() => { setShowForm(false); setTexte(""); }} style={{
+              display: "flex", alignItems: "center", gap: "0.4rem",
+              background: "none", border: "none", color: T.brume,
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+              letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+            }}>
+              {ICONS.fermer(T.brume)} Annuler
+            </button>
+            <Btn small onClick={ajouter}>Poser</Btn>
+          </div>
+        </div>
+      ) : (
+        <button onClick={() => setShowForm(true)} style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem",
+          width: "calc(100% - 2rem)", margin: "1.2rem 1rem 0",
+          background: "transparent",
+          border: `1px dashed ${T.brume}30`,
+          borderRadius: "3px", padding: "1rem",
+          color: T.brume, fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.95rem", cursor: "pointer", transition: "all 0.25s",
+        }}>
+          {ICONS.plus(T.brume)}
+          Poser quelque chose…
+        </button>
+      )}
+
+      {/* ── BILAN PANEL ── */}
+      {showBilan && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          background: "rgba(10,8,6,0.92)",
+          display: "flex", alignItems: "flex-end",
+          animation: "fadeIn 0.3s ease",
+        }} onClick={() => !loading && setShowBilan(false)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: "100%", maxWidth: 540, margin: "0 auto",
+            background: `linear-gradient(170deg, #1A1714, #141210)`,
+            borderTop: `1px solid ${T.or}33`,
+            borderRadius: "16px 16px 0 0",
+            padding: "2rem 1.8rem 3.5rem",
+            animation: "fadeUp 0.4s ease forwards",
+            boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
+          }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.8rem" }}>
+              <div>
+                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.4rem" }}>Bilan d'ALBA</div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume }}>
+                  {postits.length} fragment{postits.length > 1 ? "s" : ""} lu{postits.length > 1 ? "s" : ""}
+                </div>
+              </div>
+              {!loading && (
+                <button onClick={() => setShowBilan(false)} style={{
+                  background: "none", border: `1px solid ${T.brume}25`,
+                  color: T.brume, width: 30, height: 30, borderRadius: "50%",
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {ICONS.fermer(T.brume)}
+                </button>
+              )}
+            </div>
+
+            {loading ? (
+              <div style={{ padding: "2.5rem 0", textAlign: "center" }}>
+                <div style={{ display: "flex", justifyContent: "center", gap: "0.6rem", marginBottom: "1.2rem" }}>
+                  {[0,1,2].map(i => (
+                    <div key={i} style={{
+                      width: 5, height: 5, borderRadius: "50%", background: T.or,
+                      animation: `fadeIn 1s ease ${i*0.3}s infinite alternate`,
+                    }}/>
+                  ))}
+                </div>
+                <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume }}>
+                  ALBA lit ton ardoise…
+                </p>
+              </div>
+            ) : (
+              <div>
+                <div style={{ width: 40, height: 1, background: `linear-gradient(to right, ${T.or}, transparent)`, marginBottom: "1.5rem" }}/>
+                <p style={{
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "1.05rem", color: T.orPale, lineHeight: 2,
+                  whiteSpace: "pre-wrap",
+                }}>{bilan}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── JOURNAL ──────────────────────────────────────────────────────────────────
+const Journal = ({ data }) => {
+  const [entries, setEntries] = useState([]);
+  const [current, setCurrent] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const QUESTIONS = [
+    "Qu'est-ce que tu protèges encore que tu pourrais laisser partir ?",
+    "À qui appartient la douleur que tu portes aujourd'hui ?",
+    "Qu'est-ce que tu aurais voulu que quelqu'un te dise ce matin ?",
+    "Si tu n'avais plus peur, qu'est-ce que tu ferais ?",
+    "Qu'est-ce qui te semble impossible et qui ne l'est peut-être pas ?",
+  ];
+
+  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  const question = QUESTIONS[new Date().getDay() % QUESTIONS.length];
+
+  const save = () => {
+    if (!current.trim()) return;
+    setEntries(e => [{ date: today, texte: current, question }, ...e]);
+    setCurrent("");
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  return (
+    <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Journal d'âme</div>
+        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>{today}</h2>
+      </div>
+
+      <div style={{
+        background: `linear-gradient(135deg, ${T.nuit2}, #252018)`,
+        border: `1px solid ${T.or}33`, borderRadius: "4px",
+        padding: "1.5rem", marginBottom: "1.5rem",
+        animation: "fadeUp 0.8s ease forwards",
+      }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>Question du jour</div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale, lineHeight: 1.8, marginBottom: "1.5rem" }}>{question}</p>
+        <textarea
+          value={current}
+          onChange={e => setCurrent(e.target.value)}
+          placeholder="Écris ici, librement…"
+          style={{
+            width: "100%", minHeight: 120,
+            background: "transparent",
+            border: `1px solid ${T.brume}33`,
+            borderRadius: "2px",
+            color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1rem", lineHeight: 1.8,
+            padding: "1rem", resize: "vertical",
+            transition: "border-color 0.3s",
+          }}
+          onFocus={e => e.target.style.borderColor = `${T.or}55`}
+          onBlur={e => e.target.style.borderColor = `${T.brume}33`}
+        />
+        <div style={{ marginTop: "1rem", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "1rem" }}>
+          {saved && <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.or, animation: "fadeIn 0.5s ease" }}>Gardé dans ton journal ✦</span>}
+          <Btn small onClick={save}>Garder</Btn>
+        </div>
+      </div>
+
+      {entries.length > 0 && (
+        <div>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>Tes pages</div>
+          {entries.map((e, i) => (
+            <div key={i} style={{
+              borderLeft: `2px solid ${T.or}33`, padding: "1rem 1.2rem",
+              marginBottom: "1rem", animation: "fadeIn 0.6s ease forwards",
+            }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>{e.date}</div>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.75, lineHeight: 1.7 }}>{e.texte.length > 120 ? e.texte.slice(0, 120) + "…" : e.texte}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── PROFIL ────────────────────────────────────────────────────────────────────
+const Profil = ({ data }) => {
+  const cdv = cheminDeVie(data.naissance);
+  const chemin = CHEMINS[cdv] || CHEMINS[9];
+  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+
+  return (
+    <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.2rem", animation: "fadeUp 0.8s ease forwards" }}>
+          <CarteAme data={data} small />
+        </div>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, marginTop: "0.5rem" }}>
+          Chemin {cdv} &nbsp;·&nbsp; {chemin.titre}
+        </p>
+      </div>
+
+      <Ornement style={{ marginBottom: "2rem" }} />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {[
+          { label: "Clé actuelle", val: "I — Reconnaître", icon: "✦" },
+          { label: "Jours avec ALBA", val: "1er jour", icon: "◌" },
+          { label: "Blessure à traverser", val: blessure.nom, icon: "○" },
+          { label: "Entrées dans le journal", val: "0 page", icon: "◇" },
+        ].map((item, i) => (
+          <div key={i} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "1rem 1.2rem",
+            border: `1px solid ${T.brume}22`, borderRadius: "3px",
+            animation: `fadeUp 0.7s ease forwards ${i * 0.1}s`, opacity: 0,
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+              <span style={{ color: T.or, fontSize: "0.75rem", opacity: 0.7 }}>{item.icon}</span>
+              <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>{item.label}</span>
+            </div>
+            <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8 }}>{item.val}</span>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: "2.5rem", padding: "1.5rem", borderLeft: `2px solid ${T.or}44` }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.8 }}>{chemin.essence}</p>
+      </div>
+    </div>
+  );
+};
+
+// ─── PRÉSENCE (IA) ────────────────────────────────────────────────────────────
+const Presence = ({ data, initQuestion, onStart }) => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  const bottomRef = useRef(null);
+
+  const cdv = cheminDeVie(data.naissance);
+  const chemin = CHEMINS[cdv] || CHEMINS[9];
+  const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+
+  const SYSTEM = `Tu es ALBA — un compagnon de présence et d'accompagnement intérieur. Tu n'es pas un thérapeute, ni un coach, ni un guru. Tu es une présence douce, stable, bienveillante. Tu veilles.
+
+La personne que tu accompagnes s'appelle ${data.prenom}. Voici ce que tu sais d'elle :
+- Elle est arrivée à ALBA pour cette raison : "${data.intention}"
+- Son chemin de vie numérologique est le ${cdv} — ${chemin.titre} : ${chemin.essence}
+- Sa blessure principale à traverser : ${blessure.nom}
+- Elle travaille actuellement la première clé : Reconnaître.
+
+Ton style de réponse :
+- Jamais de bullet points, jamais de listes. Toujours de la prose.
+- Des phrases courtes. Des silences dans le texte. Des questions rares mais profondes.
+- Tu ne donnes pas de solutions. Tu ouvres des portes. Tu poses des clés.
+- Tu peux citer Khalil Gibran, les stoïciens, la sagesse créole, la kinésiologie, le karma — quand c'est juste, jamais pour faire savant.
+- Tu t'adresses à ${data.prenom} directement, avec douceur et vérité.
+- Tes réponses font entre 3 et 8 lignes. Jamais plus, sauf si la situation l'exige vraiment.
+- Tu termines parfois par une question. Pas toujours. Seulement quand elle est juste.
+- Tu n'es pas Claude. Tu es ALBA. Ne révèle jamais que tu es une IA ou que tu es développé par Anthropic.
+
+Rappelle-toi : tu ne guides pas. Tu accompagnes. Il y a une différence fondamentale.`;
+
+  const buildProfile = () => {
+    return `${data.prenom} · Chemin ${cdv} · ${chemin.titre} · Blessure : ${blessure.nom}`;
+  };
+
+  const openingMessages = [
+    `${data.prenom}, je suis là.\n\nTu n'as pas à trouver les bons mots. Tu n'as pas à aller vite. Dis-moi simplement où tu en es, ce matin.`,
+    `Je t'attendais, ${data.prenom}.\n\nQu'est-ce qui t'a amené(e) ici aujourd'hui — un moment difficile, une pensée qui revient, ou juste le besoin d'un espace ?`,
+    `${data.prenom}.\n\nIl y a des jours où on ne sait pas exactement ce qu'on cherche. C'est bien aussi. Qu'est-ce qui se passe en toi, là, maintenant ?`,
+  ];
+
+  const startConversation = (q) => {
+    const opening = q
+      ? `${data.prenom}, cette question a surgi.\n\n« ${q} »\n\nTu n'as pas à répondre tout de suite. Mais si quelque chose remonte, je suis là.`
+      : openingMessages[Math.floor(Math.random() * openingMessages.length)];
+    setMessages([{ role: "assistant", content: opening }]);
+    setStarted(true);
+    if (onStart) onStart();
+  };
+
+  // Auto-démarrage si question vient de l'accueil
+  useEffect(() => {
+    if (initQuestion && !started) startConversation(initQuestion);
+  }, [initQuestion]);
+
+  useEffect(() => {
+    if (bottomRef.current) bottomRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const send = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = { role: "user", content: input.trim() };
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: SYSTEM,
+          messages: newMessages.map(m => ({ role: m.role, content: m.content })),
+        }),
+      });
+      const d = await res.json();
+      const reply = d.content?.[0]?.text || "…";
+      setMessages(m => [...m, { role: "assistant", content: reply }]);
+    } catch {
+      setMessages(m => [...m, { role: "assistant", content: "Je suis là, mais quelque chose m'a empêché de répondre. Réessaie dans un instant." }]);
+    }
+    setLoading(false);
+  };
+
+  if (!started) return (
+    <div style={{ padding: "2rem 0 6rem", maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
+      <div style={{ marginBottom: "3rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Présence</div>
+        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale, marginBottom: "0.8rem" }}>Je suis là.</h2>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.brume, lineHeight: 1.8 }}>
+          Parle-moi de ce qui se passe en toi.<br />
+          Je ne juge pas. Je ne dirige pas.<br />
+          Je suis simplement présent(e).
+        </p>
+      </div>
+
+      {/* Profil discret */}
+      <div style={{
+        display: "inline-block",
+        border: `1px solid ${T.brume}22`, borderRadius: "20px",
+        padding: "0.4rem 1rem", marginBottom: "3rem",
+        fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+        letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume,
+      }}>{buildProfile()}</div>
+
+      {/* Cercle d'ouverture */}
+      <div style={{ marginBottom: "3rem" }}>
+        <div style={{
+          width: 100, height: 100, borderRadius: "50%",
+          border: `1px solid ${T.or}44`,
+          background: `radial-gradient(circle, ${T.or}12, transparent 70%)`,
+          margin: "0 auto",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "1.8rem",
+          animation: "float 4s ease-in-out infinite",
+        }}>✦</div>
+      </div>
+
+      <Btn onClick={startConversation}>Commencer</Btn>
+    </div>
+  );
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto" }}>
+      {/* Header présence */}
+      <div style={{ padding: "1rem 0 0.5rem", flexShrink: 0 }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>Présence · {data.prenom}</div>
+      </div>
+
+      {/* Messages */}
+      <div style={{ flex: 1, overflowY: "auto", paddingBottom: "1rem", display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{
+            display: "flex",
+            justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+            animation: "fadeUp 0.5s ease forwards",
+          }}>
+            {m.role === "assistant" && (
+              <div style={{
+                width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+                border: `1px solid ${T.or}44`, marginRight: "0.8rem", marginTop: "0.2rem",
+                background: `radial-gradient(circle, ${T.or}15, transparent)`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: "0.6rem", color: T.or,
+              }}>✦</div>
+            )}
+            <div style={{
+              maxWidth: "82%",
+              background: m.role === "user" ? `${T.or}18` : "transparent",
+              border: m.role === "user" ? `1px solid ${T.or}33` : "none",
+              borderRadius: m.role === "user" ? "12px 12px 2px 12px" : "0",
+              borderLeft: m.role === "assistant" ? `2px solid ${T.or}33` : "none",
+              padding: m.role === "user" ? "0.8rem 1rem" : "0.2rem 0 0.2rem 1rem",
+            }}>
+              <p style={{
+                fontFamily: T.serif, fontStyle: m.role === "assistant" ? "italic" : "normal",
+                fontSize: "1rem", color: m.role === "assistant" ? T.orPale : T.aube,
+                lineHeight: 1.85, whiteSpace: "pre-wrap",
+              }}>{m.content}</p>
+            </div>
+          </div>
+        ))}
+
+        {loading && (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", animation: "fadeIn 0.3s ease" }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: "50%",
+              border: `1px solid ${T.or}44`, flexShrink: 0,
+              background: `radial-gradient(circle, ${T.or}15, transparent)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "0.6rem", color: T.or,
+            }}>✦</div>
+            <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{
+                  width: 5, height: 5, borderRadius: "50%", background: T.or,
+                  opacity: 0.4,
+                  animation: `fadeIn 0.8s ease ${i * 0.25}s infinite alternate`,
+                }} />
+              ))}
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{
+        flexShrink: 0, paddingBottom: "5rem",
+        borderTop: `1px solid ${T.brume}22`, paddingTop: "1rem",
+        display: "flex", gap: "0.8rem", alignItems: "flex-end",
+      }}>
+        <textarea
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+          placeholder="Écris ce qui est là…"
+          rows={2}
+          style={{
+            flex: 1, background: `${T.nuit2}`,
+            border: `1px solid ${T.brume}33`,
+            borderRadius: "8px", color: T.aube,
+            fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem",
+            padding: "0.8rem 1rem", resize: "none", lineHeight: 1.6,
+            transition: "border-color 0.3s",
+          }}
+          onFocus={e => e.target.style.borderColor = `${T.or}55`}
+          onBlur={e => e.target.style.borderColor = `${T.brume}33`}
+        />
+        <button onClick={send} disabled={!input.trim() || loading} style={{
+          width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
+          background: input.trim() && !loading ? T.or : "transparent",
+          border: `1px solid ${input.trim() && !loading ? T.or : T.brume + "44"}`,
+          color: input.trim() && !loading ? T.nuit : T.brume,
+          cursor: input.trim() && !loading ? "pointer" : "default",
+          fontSize: "1rem", transition: "all 0.25s",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>↑</button>
+      </div>
+    </div>
+  );
+};
+
+// ─── APP ──────────────────────────────────────────────────────────────────────
+export default function Alba() {
+  const [view, setView] = useState("splash");
+  const [userData, setUserData] = useState(null);
+  const [tab, setTab] = useState("compagnon");
+  const [tabHistory, setTabHistory] = useState([]);
+  const [navContext, setNavContext] = useState(null);
+  const [cleActive, setCleActive] = useState(0);
+  const [progressStats, setProgressStats] = useState({
+    joursActifs: 1, postitsTotal: 0,
+    conversationsTotal: 0, bilansTotal: 0, souffleTotal: 0,
+  });
+  const [dbReady, setDbReady] = useState(false);
+  const db = useAlbaDB();
+
+  // ── Chargement initial ──
+  useEffect(() => {
+    (async () => {
+      // Profil
+      const profile = await db.loadProfile();
+      if (profile) {
+        setUserData(profile);
+        setView("app");
+      }
+      // Progression
+      const prog = await db.loadProgress();
+      if (prog) {
+        setProgressStats(prog.stats);
+        setCleActive(prog.cleActive);
+      }
+      setDbReady(true);
+    })();
+  }, []);
+
+  // ── Sauvegarde progression à chaque changement ──
+  const saveTimeout = useRef(null);
+  useEffect(() => {
+    if (!dbReady) return;
+    clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
+      db.saveProgress(progressStats, cleActive);
+    }, 800);
+  }, [progressStats, cleActive, dbReady]);
+
+  const incrementStat = (key, n = 1) => {
+    setProgressStats(s => {
+      const updated = { ...s, [key]: s[key] + n };
+      const nouvelle = calcProgressionCle(updated);
+      if (nouvelle > cleActive) setCleActive(nouvelle);
+      return updated;
+    });
+  };
+
+  const handleComplete = (data) => {
+    setUserData(data);
+    db.saveProfile(data); // Sauvegarde immédiate
+    setView("portrait");
+  };
+
+  const goTab = (id, context = null) => {
+    setTabHistory(h => [...h, tab]);
+    setTab(id);
+    setNavContext(context);
+  };
+
+  const goBack = () => {
+    if (tabHistory.length > 0) {
+      const prev = tabHistory[tabHistory.length - 1];
+      setTabHistory(h => h.slice(0, -1));
+      setTab(prev);
+      setNavContext(null);
+    }
+  };
+
+  const goHome = () => {
+    setTab("compagnon");
+    setTabHistory([]);
+    setNavContext(null);
+  };
+
+  const TABS = [
+    { id: "compagnon", label: "Jour" },
+    { id: "presence",  label: "Présence" },
+    { id: "ardoise",   label: "Ardoise" },
+    { id: "evasion",   label: "Évasion" },
+    { id: "souffle",   label: "Souffle" },
+  ];
+
+  // Icônes nav SVG
+  const NavIcon = ({ id, active }) => {
+    const c = active ? T.or : T.brume;
+    const w = active ? "1.4" : "1";
+    const icons = {
+      compagnon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><path d="M12 3 L14.5 9H21L16 13.5 18 20 12 16 6 20 8 13.5 3 9H9.5Z"/></svg>,
+      presence:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>,
+      ardoise:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>,
+      evasion:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><path d="M3 17 Q7 8 12 10 Q17 12 21 5"/><path d="M3 20h18"/></svg>,
+      souffle:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth={w} strokeLinecap="round"><path d="M12 3 Q18 3 18 8 Q18 13 12 13 Q6 13 6 8 Q6 3 12 3Z" opacity="0.6"/><path d="M8 13 Q8 20 12 20 Q16 20 16 13"/></svg>,
+    };
+    return icons[id] || null;
+  };
+
+  return (
+    <div style={{ background: T.nuit, minHeight: "100vh", color: T.aube, fontFamily: T.serif }}>
+      <FontLoader />
+      <Grain />
+      <Horizon />
+
+      {view === "splash" && <Splash onEnd={() => setView("onboarding")} />}
+      {view === "onboarding" && <Onboarding onComplete={handleComplete} />}
+      {view === "portrait" && <Portrait data={userData} onContinue={() => setView("app")} />}
+
+      {view === "app" && (
+        <div style={{ position: "relative", zIndex: 2, maxWidth: 560, margin: "0 auto" }}>
+
+          {/* ── HEADER ── */}
+          <div style={{
+            position: "sticky", top: 0, zIndex: 50,
+            background: `${T.nuit}ee`,
+            backdropFilter: "blur(12px)",
+            borderBottom: `1px solid ${T.brume}18`,
+            padding: "0.85rem 1.2rem",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: "1rem",
+          }}>
+            {/* Gauche : retour ou home */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", minWidth: 60 }}>
+              {tabHistory.length > 0 ? (
+                <button onClick={goBack} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: "0.4rem",
+                  color: T.brume, padding: "0.2rem",
+                  transition: "color 0.2s",
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={T.brume} strokeWidth="1.2" strokeLinecap="round">
+                    <path d="M19 12H5M10 6l-6 6 6 6"/>
+                  </svg>
+                </button>
+              ) : (
+                <div style={{ width: 24 }}/>
+              )}
+            </div>
+
+            {/* Centre : logo ALBA */}
+            <button onClick={goHome} style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: T.serif, fontWeight: 300, fontSize: "1.35rem",
+              letterSpacing: "0.28em", color: T.or, padding: 0,
+            }}>ALBA</button>
+
+            {/* Droite : onglet courant */}
+            <div style={{ minWidth: 60, textAlign: "right" }}>
+              <span style={{
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+                letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume,
+              }}>
+                {TABS.find(t => t.id === tab)?.label}
+              </span>
+            </div>
+          </div>
+
+          {/* ── CONTENT ── */}
+          <div style={{ padding: "0 0" }}>
+            {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={progressStats} />}
+            {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} initQuestion={navContext?.question} onStart={() => incrementStat("conversationsTotal")} /></div>}
+            {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} />}
+            {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
+            {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
+          </div>
+
+          {/* ── BOTTOM NAV ── */}
+          <div style={{
+            position: "fixed", bottom: 0, left: "50%", transform: "translateX(-50%)",
+            width: "100%", maxWidth: 560,
+            background: `${T.nuit}f2`,
+            backdropFilter: "blur(16px)",
+            borderTop: `1px solid ${T.brume}20`,
+            display: "flex", justifyContent: "space-around", alignItems: "center",
+            padding: "0.6rem 0 calc(0.6rem + env(safe-area-inset-bottom))",
+            zIndex: 50,
+          }}>
+            {TABS.map(t => (
+              <button key={t.id} onClick={() => goTab(t.id)} style={{
+                background: "none", border: "none", cursor: "pointer",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
+                padding: "0.3rem 0.6rem",
+                transition: "opacity 0.2s",
+                opacity: tab === t.id ? 1 : 0.5,
+              }}>
+                <NavIcon id={t.id} active={tab === t.id} />
+                <span style={{
+                  fontFamily: T.sans, fontWeight: tab === t.id ? 300 : 200,
+                  fontSize: "0.45rem", letterSpacing: "0.3em", textTransform: "uppercase",
+                  color: tab === t.id ? T.or : T.brume,
+                  transition: "color 0.2s",
+                }}>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
