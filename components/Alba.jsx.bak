@@ -1675,24 +1675,14 @@ const NavItem = ({ icon, label, active, onClick }) => (
 //  V   → 10 jours actifs + 3 bilans générés
 //  VI  → toutes les conditions précédentes + 20 jours actifs
 
-const calcEclats = (stats) => {
-  return (
-    ((stats.joursActifs    || 0) * ECLATS_PAR_ACTE.jour_actif) +
-    ((stats.postitsTotal   || 0) * ECLATS_PAR_ACTE.fragment) +
-    ((stats.conversationsTotal || 0) * ECLATS_PAR_ACTE.miroir) +
-    ((stats.souffleTotal   || 0) * ECLATS_PAR_ACTE.souffle) +
-    ((stats.bilansTotal    || 0) * ECLATS_PAR_ACTE.bilan) +
-    ((stats.tempetesNommees  || 0) * ECLATS_PAR_ACTE.tempete_nommee) +
-    ((stats.tempetesTraversees || 0) * ECLATS_PAR_ACTE.tempete_traversee)
-  );
-};
-
 const calcProgressionCle = (stats) => {
-  const eclats = calcEclats(stats);
-  for (let i = SEUILS_PORTES.length - 1; i >= 0; i--) {
-    if (eclats >= SEUILS_PORTES[i]) return i;
-  }
-  return 0;
+  const { joursActifs, postitsTotal, conversationsTotal, bilansTotal, souffleTotal } = stats;
+  if (joursActifs >= 20 && bilansTotal >= 3)            return 5; // VI débloquée
+  if (joursActifs >= 10 && bilansTotal >= 3)            return 4; // V débloquée
+  if (joursActifs >= 5  && bilansTotal >= 1)            return 3; // IV débloquée
+  if (joursActifs >= 2  && souffleTotal >= 1)           return 2; // III débloquée
+  if (postitsTotal >= 3 && conversationsTotal >= 1)     return 1; // II débloquée
+  return 0; // I seulement
 };
 
 const getConditionsCle = (idx, stats) => {
@@ -1721,198 +1711,6 @@ const getConditionsCle = (idx, stats) => {
     ],
   ];
   return conditions[idx] || null;
-};
-
-// ─── ANIMATION PORTE ─────────────────────────────────────────────────────────
-// Deux battants qui s'ouvrent. De la lumière. Un symbole. Une phrase.
-// C'est le moment le plus important de l'application.
-const PorteAnimation = ({ cleIndex, onEnd }) => {
-  const [phase, setPhase] = useState("fermee"); // fermee → ouverture → lumiere → phrase → fondu
-  const lumiere = getLumierePorte();
-  const symbole = SYMBOLES_CLES[cleIndex];
-  const cle = CLES[cleIndex];
-  const isNuit = lumiere.name === "nuit";
-
-  useEffect(() => {
-    // Séquence cinématique
-    const t1 = setTimeout(() => setPhase("ouverture"), 400);
-    const t2 = setTimeout(() => setPhase("lumiere"),   1600);
-    const t3 = setTimeout(() => setPhase("phrase"),    2800);
-    const t4 = setTimeout(() => setPhase("fondu"),     5500);
-    const t5 = setTimeout(() => onEnd(),               6200);
-    return () => [t1,t2,t3,t4,t5].forEach(clearTimeout);
-  }, []);
-
-  return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: isNuit ? "#0A0806" : "#1A1208",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      overflow: "hidden",
-      opacity: phase === "fondu" ? 0 : 1,
-      transition: "opacity 0.7s ease",
-    }}>
-
-      {/* ── Lumière qui inonde depuis le centre ── */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: `radial-gradient(ellipse at center, ${lumiere.primary}${isNuit ? "55" : "88"} 0%, transparent 70%)`,
-        opacity: ["lumiere","phrase","fondu"].includes(phase) ? 1 : 0,
-        transition: "opacity 1.4s ease",
-      }}/>
-
-      {/* ── Battant gauche ── */}
-      <div style={{
-        position: "absolute",
-        left: 0, top: 0, width: "50%", height: "100%",
-        background: `linear-gradient(to right, #131110, #1E1A16)`,
-        borderRight: `1px solid ${lumiere.primary}30`,
-        transformOrigin: "left center",
-        transform: phase === "fermee" ? "rotateY(0deg)" : "rotateY(-42deg)",
-        transition: "transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        transformStyle: "preserve-3d",
-        boxShadow: "4px 0 30px #00000066",
-        // Texture bois/or sur le battant
-        backgroundImage: `repeating-linear-gradient(
-          180deg,
-          transparent 0px,
-          transparent 48px,
-          ${lumiere.primary}08 48px,
-          ${lumiere.primary}08 50px
-        )`,
-      }}>
-        {/* Poignée gauche */}
-        <div style={{
-          position: "absolute", right: "12%", top: "50%",
-          transform: "translateY(-50%)",
-          width: 8, height: 40, borderRadius: 4,
-          background: lumiere.primary, opacity: 0.6,
-        }}/>
-      </div>
-
-      {/* ── Battant droit ── */}
-      <div style={{
-        position: "absolute",
-        right: 0, top: 0, width: "50%", height: "100%",
-        background: `linear-gradient(to left, #131110, #1E1A16)`,
-        borderLeft: `1px solid ${lumiere.primary}30`,
-        transformOrigin: "right center",
-        transform: phase === "fermee" ? "rotateY(0deg)" : "rotateY(42deg)",
-        transition: "transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-        transformStyle: "preserve-3d",
-        boxShadow: "-4px 0 30px #00000066",
-        backgroundImage: `repeating-linear-gradient(
-          180deg,
-          transparent 0px,
-          transparent 48px,
-          ${lumiere.primary}08 48px,
-          ${lumiere.primary}08 50px
-        )`,
-      }}>
-        {/* Poignée droite */}
-        <div style={{
-          position: "absolute", left: "12%", top: "50%",
-          transform: "translateY(-50%)",
-          width: 8, height: 40, borderRadius: 4,
-          background: lumiere.primary, opacity: 0.6,
-        }}/>
-      </div>
-
-      {/* ── Contenu central (symbole + phrase) ── */}
-      <div style={{
-        position: "relative", zIndex: 10,
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        gap: "1.4rem",
-        opacity: ["phrase","fondu"].includes(phase) ? 1 : 0,
-        transform: ["phrase","fondu"].includes(phase) ? "translateY(0)" : "translateY(20px)",
-        transition: "opacity 1s ease, transform 1s ease",
-        padding: "0 2rem", textAlign: "center",
-      }}>
-        {/* Numéro de clé */}
-        <div style={{
-          fontFamily: "'Georgia', serif", fontStyle: "italic",
-          fontSize: "0.75rem", letterSpacing: "0.5em",
-          color: lumiere.primary, opacity: 0.7,
-          textTransform: "uppercase",
-        }}>
-          Clé {cle.num}
-        </div>
-
-        {/* Symbole */}
-        <div style={{
-          fontSize: "3.2rem",
-          filter: `drop-shadow(0 0 24px ${lumiere.primary}99)`,
-        }}>
-          {symbole.emoji}
-        </div>
-
-        {/* Nom de la Clé */}
-        <div style={{
-          fontFamily: "'Georgia', serif",
-          fontSize: "clamp(1.6rem, 5vw, 2.4rem)",
-          color: "#F5EFE6",
-          letterSpacing: "0.12em",
-        }}>
-          {cle.nom}
-        </div>
-
-        {/* Ligne d'or */}
-        <div style={{
-          width: 48, height: 1,
-          background: lumiere.primary,
-          opacity: 0.6,
-        }}/>
-
-        {/* Phrase ALBA */}
-        <div style={{
-          fontFamily: "'Georgia', serif", fontStyle: "italic",
-          fontSize: "clamp(0.95rem, 2.5vw, 1.15rem)",
-          color: "#8C7F74",
-          maxWidth: 280, lineHeight: 1.7,
-        }}>
-          {symbole.phrase}
-        </div>
-
-        {/* Mot d'ALBA */}
-        <div style={{
-          fontFamily: "'Georgia', serif",
-          fontSize: "0.65rem", letterSpacing: "0.45em",
-          color: lumiere.primary, opacity: 0.5,
-          textTransform: "uppercase", marginTop: "0.5rem",
-        }}>
-          ALBA
-        </div>
-      </div>
-
-      {/* ── Particules d'éclats ── */}
-      {["phrase","fondu"].includes(phase) && (
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
-          {[...Array(12)].map((_, i) => (
-            <div key={i} style={{
-              position: "absolute",
-              left: `${10 + (i * 7.2) % 80}%`,
-              top: `${15 + (i * 11.3) % 70}%`,
-              width: i % 3 === 0 ? 3 : 2,
-              height: i % 3 === 0 ? 3 : 2,
-              borderRadius: "50%",
-              background: lumiere.primary,
-              opacity: 0.15 + (i % 5) * 0.08,
-              animation: `pulse-eclat ${1.5 + (i % 4) * 0.4}s ease-in-out infinite`,
-              animationDelay: `${(i % 3) * 0.3}s`,
-            }}/>
-          ))}
-        </div>
-      )}
-
-      <style>{`
-        @keyframes pulse-eclat {
-          0%, 100% { opacity: 0.1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(1.6); }
-        }
-      `}</style>
-    </div>
-  );
 };
 
 // ─── COMPOSANT PROGRESSION ────────────────────────────────────────────────────
@@ -4272,52 +4070,6 @@ const Profil = ({ data, onUpdateData, progressStats }) => {
         ))}
       </div>
 
-      {/* ── Éclats d'aube ── discret, poétique, pas un score ── */}
-      {(() => {
-        const eclats = calcEclats(progressStats);
-        const cleIdx = progressStats ? (Array.isArray(progressStats.cleActive) ? 0 : (progressStats._cleActive || 0)) : 0;
-        const prochainSeuil = SEUILS_PORTES[Math.min(cleIdx + 1, SEUILS_PORTES.length - 1)];
-        const pct = prochainSeuil > 0 ? Math.min((eclats / prochainSeuil) * 100, 100) : 100;
-        const phrase = eclats < 5
-          ? "Le chemin commence."
-          : eclats < 20
-          ? "Quelque chose se met en mouvement."
-          : eclats < 50
-          ? "Le chemin continue."
-          : "Tu avances.";
-        return (
-          <div style={{
-            padding: "1.2rem 1.4rem", marginBottom: "0.8rem",
-            background: `${T.or}06`,
-            border: `1px solid ${T.or}18`,
-            borderRadius: "6px",
-            animation: "fadeUp 0.7s ease forwards 0.25s", opacity: 0,
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.9rem" }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.or }}>
-                Éclats d'aube
-              </div>
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.or}88` }}>
-                ✦
-              </div>
-            </div>
-            {/* Barre de progression — sans chiffre */}
-            <div style={{ height: 2, background: `${T.brume}20`, borderRadius: 1, overflow: "hidden", marginBottom: "0.9rem" }}>
-              <div style={{
-                height: "100%",
-                width: `${pct}%`,
-                background: `linear-gradient(to right, ${T.brume}60, ${T.or})`,
-                borderRadius: 1,
-                transition: "width 1.2s ease",
-              }}/>
-            </div>
-            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.orPale}88` }}>
-              {phrase}
-            </div>
-          </div>
-        );
-      })()}
-
       {/* ── Intention / Blessure ── */}
       <div style={{
         padding: "1.2rem 1.4rem", marginBottom: "0.8rem",
@@ -4811,6 +4563,348 @@ const FilDeVie = ({ data, db }) => {
   );
 };
 
+  const TYPES = [
+    { id: "insight",   label: "Prise de conscience", couleur: "#C8A96E", symbole: "✦" },
+    { id: "emotion",   label: "Émotion traversée",   couleur: "#D4856A", symbole: "○" },
+    { id: "victoire",  label: "Victoire intérieure",  couleur: "#7BA88A", symbole: "◇" },
+    { id: "question",  label: "Question ouverte",     couleur: "#7B9EA8", symbole: "◎" },
+    { id: "passage",   label: "Moment de passage",    couleur: "#A87BC8", symbole: "◈" },
+  ];
+
+  const typeInfo = (id) => TYPES.find(t => t.id === id) || TYPES[0];
+
+  const formatDate = (iso) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+  };
+
+  // Chargement depuis localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("alba_fil");
+      if (stored) setMoments(JSON.parse(stored));
+    } catch {}
+    setLoaded(true);
+  }, []);
+
+  const saveMoments = (list) => {
+    setMoments(list);
+    try { localStorage.setItem("alba_fil", JSON.stringify(list)); } catch {}
+  };
+
+  const addMoment = () => {
+    if (!texte.trim()) return;
+    const m = {
+      id: Date.now(),
+      texte: texte.trim(),
+      type,
+      date: new Date().toISOString(),
+    };
+    const updated = [m, ...moments];
+    saveMoments(updated);
+    setTexte(""); setAjout(false);
+  };
+
+  const deleteMoment = (id) => {
+    saveMoments(moments.filter(m => m.id !== id));
+  };
+
+  // Données de démo si vide
+  const DEMO = [
+    { id: -1, texte: "Quelque chose en moi commence à se poser. Je ne sais pas encore quoi.", type: "insight",  date: new Date(Date.now() - 14 * 86400000).toISOString() },
+    { id: -2, texte: "J'ai pleuré pour la première fois depuis longtemps. Ça a fait du bien.", type: "emotion",  date: new Date(Date.now() - 9  * 86400000).toISOString() },
+    { id: -3, texte: "Est-ce que ma peur est vraiment la mienne, ou celle que j'ai héritée ?",  type: "question", date: new Date(Date.now() - 4  * 86400000).toISOString() },
+  ];
+  const affiche = moments.length > 0 ? moments : (loaded ? DEMO : []);
+
+  // ── SVG sinueux ───────────────────────────────────────────────────────────
+  const W = 320;
+  const CARD_H = 110;
+  const GAP = 30;
+  const ENTRY_H = CARD_H + GAP;
+  const n = affiche.length;
+  const SVG_H = Math.max(500, n * ENTRY_H + 120);
+
+  // Le fil ondule de gauche à droite avec des courbes de Bézier
+  const cx = W / 2;
+  const amplitude = 52; // amplitude de l'ondulation
+
+  // Points de passage du fil — un nœud par moment + début/fin
+  const nodeY = (i) => 80 + i * ENTRY_H + CARD_H / 2;
+  const nodeX = (i) => cx + (i % 2 === 0 ? -amplitude : amplitude);
+
+  // Chemin SVG sinueux
+  const buildPath = () => {
+    if (n === 0) return `M ${cx} 40 L ${cx} ${SVG_H - 40}`;
+    let d = `M ${cx} 40`;
+    for (let i = 0; i < n; i++) {
+      const x = nodeX(i);
+      const y = nodeY(i);
+      const prevX = i === 0 ? cx : nodeX(i - 1);
+      const prevY = i === 0 ? 40 : nodeY(i - 1);
+      const cpX = (prevX + x) / 2;
+      d += ` C ${cpX} ${prevY}, ${cpX} ${y}, ${x} ${y}`;
+    }
+    // Fin : retour au centre
+    const lastX = nodeX(n - 1);
+    const lastY = nodeY(n - 1);
+    d += ` C ${(lastX + cx) / 2} ${lastY}, ${(lastX + cx) / 2} ${SVG_H - 40}, ${cx} ${SVG_H - 40}`;
+    return d;
+  };
+
+  // Côté de la carte (opposé au nœud)
+  const cardSide = (i) => i % 2 === 0 ? "left" : "right";
+
+  return (
+    <div style={{ padding: "1.5rem 0 8rem", maxWidth: 520, margin: "0 auto", minHeight: "100vh" }}>
+
+      {/* ── En-tête ── */}
+      <div style={{ textAlign: "center", marginBottom: "0.5rem", padding: "0 1.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+          Fil de Vie
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.8 }}>
+          Les moments qui t'ont traversé.
+        </p>
+        {moments.length === 0 && loaded && (
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.3rem" }}>
+            ↓ Trois instants à titre d'exemple — les tiens commenceront ici.
+          </p>
+        )}
+      </div>
+
+      {/* ── Bouton Ajouter ── */}
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
+        <button onClick={() => setAjout(!ajout)} style={{
+          background: ajout ? `${T.or}18` : "transparent",
+          border: `1px solid ${ajout ? T.or + "77" : T.brume + "33"}`,
+          color: ajout ? T.or : T.brume,
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+          letterSpacing: "0.35em", textTransform: "uppercase",
+          padding: "0.55rem 1.4rem", borderRadius: "2px", cursor: "pointer",
+          transition: "all 0.25s",
+        }}>{ajout ? "✕ Annuler" : "+ Ajouter un moment"}</button>
+      </div>
+
+      {/* ── Panneau d'ajout ── */}
+      {ajout && (
+        <div style={{
+          margin: "0 1.5rem 2rem",
+          background: `${T.nuit2}`,
+          border: `1px solid ${T.or}33`,
+          borderRadius: "6px", padding: "1.5rem",
+          animation: "fadeUp 0.4s ease forwards",
+        }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
+            Quel moment veux-tu garder ?
+          </div>
+
+          {/* Sélecteur de type */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.2rem" }}>
+            {TYPES.map(t => (
+              <button key={t.id} onClick={() => setType(t.id)} style={{
+                background: type === t.id ? `${t.couleur}22` : "transparent",
+                border: `1px solid ${type === t.id ? t.couleur + "88" : T.brume + "33"}`,
+                color: type === t.id ? t.couleur : T.brume,
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem",
+                letterSpacing: "0.15em", padding: "0.4rem 0.8rem",
+                borderRadius: "2px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", alignItems: "center", gap: "0.4rem",
+              }}>
+                <span>{t.symbole}</span> {t.label}
+              </button>
+            ))}
+          </div>
+
+          <textarea
+            value={texte}
+            onChange={e => setTexte(e.target.value)}
+            placeholder="Une phrase. Un fragment. Ce qui est vrai pour toi maintenant…"
+            rows={3}
+            style={{
+              width: "100%", background: "transparent",
+              border: "none", borderBottom: `1px solid ${T.or}44`,
+              color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", resize: "none", outline: "none",
+              lineHeight: 1.7, padding: "0.5rem 0",
+              boxSizing: "border-box",
+            }}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+            <button onClick={addMoment} style={{
+              background: texte.trim().length > 3 ? `${T.or}22` : "transparent",
+              border: `1px solid ${texte.trim().length > 3 ? T.or + "77" : T.brume + "33"}`,
+              color: texte.trim().length > 3 ? T.or : T.brume,
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.3em", textTransform: "uppercase",
+              padding: "0.55rem 1.4rem", borderRadius: "2px", cursor: "pointer",
+              transition: "all 0.25s",
+            }}>Garder ce moment</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Timeline SVG + cartes ── */}
+      <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+        <svg
+          viewBox={`0 0 ${W} ${SVG_H}`}
+          width="100%" height={SVG_H}
+          style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 0 }}
+          preserveAspectRatio="xMidYMin meet"
+        >
+          <defs>
+            <linearGradient id="filGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={T.or} stopOpacity="0.15" />
+              <stop offset="30%"  stopColor={T.or} stopOpacity="0.6"  />
+              <stop offset="70%"  stopColor={T.or} stopOpacity="0.6"  />
+              <stop offset="100%" stopColor={T.or} stopOpacity="0.15" />
+            </linearGradient>
+            <filter id="glowFil">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            {TYPES.map(t => (
+              <radialGradient key={t.id} id={`glow_${t.id}`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stopColor={t.couleur} stopOpacity="0.35"/>
+                <stop offset="100%" stopColor={t.couleur} stopOpacity="0"/>
+              </radialGradient>
+            ))}
+          </defs>
+
+          {/* Fil principal */}
+          <path
+            d={buildPath()}
+            stroke="url(#filGradient)"
+            strokeWidth="1.5"
+            fill="none"
+            filter="url(#glowFil)"
+          />
+          {/* Fil intérieur brillant */}
+          <path
+            d={buildPath()}
+            stroke={T.or}
+            strokeWidth="0.5"
+            fill="none"
+            opacity="0.4"
+          />
+
+          {/* Nœuds dorés + halo */}
+          {affiche.map((m, i) => {
+            const x = nodeX(i);
+            const y = nodeY(i);
+            const ti = typeInfo(m.type);
+            return (
+              <g key={m.id}>
+                <circle cx={x} cy={y} r={18} fill={`url(#glow_${m.type})`} />
+                <circle cx={x} cy={y} r={5}  fill={ti.couleur} opacity="0.9" />
+                <circle cx={x} cy={y} r={8}  fill="none" stroke={ti.couleur} strokeWidth="1" opacity="0.5" />
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* ── Cartes posées sur le fil ── */}
+        <div style={{ position: "relative", zIndex: 1, height: SVG_H }}>
+          {affiche.map((m, i) => {
+            const ti = typeInfo(m.type);
+            const side = cardSide(i);
+            const nodeXpx = `${(nodeX(i) / W * 100).toFixed(1)}%`;
+            const yPx = nodeY(i) - CARD_H / 2;
+            const isDemo = m.id < 0;
+
+            return (
+              <div
+                key={m.id}
+                style={{
+                  position: "absolute",
+                  top: yPx,
+                  left: side === "left" ? "2%" : "auto",
+                  right: side === "right" ? "2%" : "auto",
+                  width: "43%",
+                  animation: `fadeUp 0.7s ease forwards ${i * 0.12}s`,
+                  opacity: 0,
+                }}
+              >
+                {/* Ligne de connexion au fil (dessinée en CSS) */}
+                <div style={{
+                  position: "absolute",
+                  top: "50%",
+                  [side === "left" ? "right" : "left"]: "-12%",
+                  width: "12%",
+                  height: "1px",
+                  background: `linear-gradient(${side === "left" ? "to right" : "to left"}, transparent, ${ti.couleur}66)`,
+                }} />
+
+                {/* Carte */}
+                <div style={{
+                  background: `linear-gradient(135deg, ${T.nuit2}ee 0%, ${T.nuit}cc 100%)`,
+                  border: `1px solid ${ti.couleur}${isDemo ? "33" : "55"}`,
+                  borderRadius: "6px",
+                  padding: "0.9rem 1rem",
+                  backdropFilter: "blur(8px)",
+                  boxShadow: `0 4px 24px ${ti.couleur}18, 0 1px 6px rgba(0,0,0,0.4)`,
+                  opacity: isDemo ? 0.55 : 1,
+                  transition: "transform 0.25s, box-shadow 0.25s",
+                }}>
+                  {/* Date + type */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>
+                      {formatDate(m.date)}
+                    </span>
+                    <span style={{ fontSize: "0.65rem", color: ti.couleur, opacity: 0.8 }}>{ti.symbole}</span>
+                  </div>
+
+                  {/* Texte du moment */}
+                  <p style={{
+                    fontFamily: T.serif, fontStyle: "italic",
+                    fontSize: "0.82rem", color: T.orPale,
+                    lineHeight: 1.65, margin: 0,
+                    display: "-webkit-box",
+                    WebkitLineClamp: 4,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                  }}>
+                    {m.texte}
+                  </p>
+
+                  {/* Type label */}
+                  <div style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.46rem", letterSpacing: "0.25em", textTransform: "uppercase", color: ti.couleur, opacity: 0.7 }}>
+                    {ti.label}
+                  </div>
+
+                  {/* Suppression (appui long simulé par double-clic) */}
+                  {!isDemo && (
+                    <button
+                      onDoubleClick={() => deleteMoment(m.id)}
+                      title="Double-cliquer pour supprimer"
+                      style={{
+                        position: "absolute", top: "0.4rem", right: "0.4rem",
+                        background: "none", border: "none", cursor: "pointer",
+                        color: T.brume, fontSize: "0.55rem", opacity: 0.3,
+                        padding: "0.2rem",
+                      }}
+                    >✕</button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Bas du fil ── */}
+      {loaded && (
+        <div style={{ textAlign: "center", marginTop: "2rem", paddingBottom: "2rem" }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.8 }}>
+            {moments.length === 0
+              ? "Ton fil commence à la première phrase que tu gardes."
+              : `${moments.length} moment${moments.length > 1 ? "s" : ""} gardé${moments.length > 1 ? "s" : ""}.`}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ─── LE MIROIR ───────────────────────────────────────────────────────────────
 // Pas un chat. Un reflet. L'utilisateur pose une phrase — ALBA renvoie une seule
@@ -5120,13 +5214,10 @@ export default function Alba() {
   const [tabHistory, setTabHistory] = useState([]);
   const [navContext, setNavContext] = useState(null);
   const [cleActive, setCleActive] = useState(0);
-  const [porteOuverte, setPorteOuverte] = useState(null); // index 0-5 ou null
-  const [lettrePortePendante, setLettrePortePendante] = useState(null); // lettre à livrer dans X heures
   const [allPostitsApp, setAllPostitsApp] = useState({}); // partagé Ardoise → Accueil
   const [progressStats, setProgressStats] = useState({
     joursActifs: 1, postitsTotal: 0,
     conversationsTotal: 0, bilansTotal: 0, souffleTotal: 0,
-    tempetesNommees: 0, tempetesTraversees: 0,
   });
   const [dbReady, setDbReady] = useState(false);
   const db = useAlbaDB();
@@ -5160,53 +5251,11 @@ export default function Alba() {
     }, 800);
   }, [progressStats, cleActive, dbReady]);
 
-  // Vérifier si une lettre de Porte est en attente de livraison
-  useEffect(() => {
-    try {
-      const pending = localStorage.getItem("alba_lettre_porte_pending");
-      if (pending) {
-        const { cleIdx, deliverAt } = JSON.parse(pending);
-        if (Date.now() >= deliverAt) {
-          // Livrer la lettre dans l'Ardoise
-          const lettre = LETTRES_PORTES[cleIdx];
-          if (lettre) {
-            const lettreEntry = {
-              id: `porte_${cleIdx}_${Date.now()}`,
-              date: new Date().toISOString(),
-              titre: `✦ ${lettre.cle} — ${lettre.titre}`,
-              texte: lettre.corps,
-              type: "porte",
-            };
-            const existing = JSON.parse(localStorage.getItem("alba_lettres") || "[]");
-            // Ne livrer qu'une seule fois par Clé
-            const alreadyDelivered = existing.some(l => l.id && l.id.startsWith(`porte_${cleIdx}`));
-            if (!alreadyDelivered) {
-              localStorage.setItem("alba_lettres", JSON.stringify([lettreEntry, ...existing]));
-            }
-          }
-          localStorage.removeItem("alba_lettre_porte_pending");
-        }
-      }
-    } catch(e) {}
-  }, [dbReady]);
-
   const incrementStat = (key, n = 1) => {
     setProgressStats(s => {
-      const updated = { ...s, [key]: (s[key] || 0) + n };
+      const updated = { ...s, [key]: s[key] + n };
       const nouvelle = calcProgressionCle(updated);
-      if (nouvelle > cleActive) {
-        setCleActive(nouvelle);
-        // Déclencher l'animation de la Porte
-        setPorteOuverte(nouvelle);
-        // Programmer la lettre pour dans 3-8h (aléatoire, mystérieux)
-        const delai = (3 + Math.random() * 5) * 60 * 60 * 1000;
-        try {
-          localStorage.setItem("alba_lettre_porte_pending", JSON.stringify({
-            cleIdx: nouvelle,
-            deliverAt: Date.now() + delai,
-          }));
-        } catch(e) {}
-      }
+      if (nouvelle > cleActive) setCleActive(nouvelle);
       return updated;
     });
   };
@@ -5284,14 +5333,6 @@ export default function Alba() {
       <FontLoader />
       <Grain />
       <Horizon />
-
-      {/* ── ANIMATION PORTE ── */}
-      {porteOuverte !== null && (
-        <PorteAnimation
-          cleIndex={porteOuverte}
-          onEnd={() => setPorteOuverte(null)}
-        />
-      )}
 
       {view === "splash" && <Splash onEnd={() => setView("onboarding")} />}
       {view === "onboarding" && <Onboarding onComplete={handleComplete} />}
