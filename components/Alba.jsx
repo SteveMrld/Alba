@@ -967,7 +967,7 @@ const AuthScreen = ({ onAuth }) => {
             textAlign: "center", lineHeight: 1.7, marginBottom: "0.5rem",
           }}>
             Entre ton adresse email.<br/>
-            <span style={{ color: T.brume, fontSize: "0.88rem" }}>Un code t'y sera envoyé.</span>
+            <span style={{ color: T.brume, fontSize: "0.88rem" }}>Un lien de connexion t'y sera envoyé.</span>
           </div>
           <input
             type="email"
@@ -996,63 +996,43 @@ const AuthScreen = ({ onAuth }) => {
               color: T.nuit, transition: "all 0.2s",
             }}
           >
-            {loading ? "Envoi…" : "Recevoir le code"}
+            {loading ? "Envoi…" : "Recevoir le lien"}
           </button>
         </div>
       )}
 
       {step === "code" && (
-        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
+          {/* Icône enveloppe */}
+          <div style={{ fontSize: "2.5rem", opacity: 0.8 }}>✉</div>
           <div style={{
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "1.05rem", color: T.orPale,
-            textAlign: "center", lineHeight: 1.7, marginBottom: "0.5rem",
+            fontSize: "1.1rem", color: T.orPale,
+            textAlign: "center", lineHeight: 1.8,
           }}>
-            Le code est dans ta boîte.<br/>
-            <span style={{ color: T.brume, fontSize: "0.88rem" }}>{email}</span>
+            Un lien t'a été envoyé.
           </div>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={code}
-            onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-            onKeyDown={e => e.key === "Enter" && verifyCode()}
-            placeholder="000000"
-            autoFocus
-            style={{
-              background: T.nuit2, border: `1px solid ${T.brume}33`,
-              borderRadius: "4px", padding: "0.9rem 1.1rem",
-              fontFamily: T.sans, fontSize: "1.6rem", color: T.orPale,
-              outline: "none", width: "100%", boxSizing: "border-box",
-              textAlign: "center", letterSpacing: "0.4em",
-            }}
-          />
-          {errMsg && (
-            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center" }}>
-              {errMsg}
-            </div>
-          )}
-          <button
-            onClick={verifyCode}
-            disabled={loading || code.length < 6}
-            style={{
-              background: loading ? `${T.or}44` : T.or,
-              border: "none", borderRadius: "4px",
-              padding: "0.9rem", cursor: loading ? "default" : "pointer",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
-              letterSpacing: "0.4em", textTransform: "uppercase",
-              color: T.nuit, transition: "all 0.2s",
-            }}
-          >
-            {loading ? "Vérification…" : "Entrer"}
-          </button>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.82rem",
+            color: T.brume, textAlign: "center", lineHeight: 1.7,
+          }}>
+            Ouvre ta boîte <span style={{ color: T.orPale }}>{email}</span><br/>
+            et clique sur le lien pour entrer dans ALBA.
+          </div>
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.8rem", color: `${T.brume}99`,
+            textAlign: "center", marginTop: "0.5rem",
+          }}>
+            Le lien expire dans 24h.
+          </div>
           <button
             onClick={() => { setStep("email"); setCode(""); setErrMsg(""); }}
             style={{
               background: "none", border: "none", cursor: "pointer",
               fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
               letterSpacing: "0.3em", textTransform: "uppercase",
-              color: T.brume, padding: "0.5rem",
+              color: T.brume, padding: "0.5rem", marginTop: "1rem",
             }}
           >
             ← Changer d'email
