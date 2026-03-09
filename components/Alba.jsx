@@ -516,6 +516,10 @@ const FontLoader = () => (
       70%     { transform: translate(2%,-2%); }
       90%     { transform: translate(-3%,1%); }
     }
+    @keyframes alba-breathe {
+      0%,100% { opacity: 0.055; transform: scale(1); }
+      50%     { opacity: 0.09;  transform: scale(1.08); }
+    }
   `}</style>
 );
 
@@ -721,6 +725,15 @@ const Grain = () => (
 // ─── HORIZON GLOW ─────────────────────────────────────────────────────────────
 const Horizon = () => (
   <>
+    {/* Souffle vivant — pulse toutes les 12s, quasi imperceptible */}
+    <div style={{
+      position: "fixed", top: "50%", left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: "70vw", height: "70vw", maxWidth: 500, maxHeight: 500,
+      borderRadius: "50%", pointerEvents: "none", zIndex: 0,
+      background: `radial-gradient(circle, ${T.or}22 0%, transparent 70%)`,
+      animation: "alba-breathe 12s ease-in-out infinite",
+    }} />
     <div style={{
       position: "fixed", bottom: 0, left: 0, right: 0, height: "40vh", pointerEvents: "none", zIndex: 0,
       background: `radial-gradient(ellipse 90% 60% at 50% 100%, ${T.or}18 0%, transparent 70%)`,
