@@ -3552,7 +3552,7 @@ const VIDEOS = [
 // ─── TERRITOIRES DES CLÉS ─────────────────────────────────────────────────────
 const TERRITOIRES_CLES = [
   {
-    index: 1, nom: "Reconnaître", symbole: "🪔", couleur: "#C8A96E",
+    index: 1, nom: "Reconnaître", symbole: "/pictos/porte-01-reconnaitre.svg", couleur: "#C8A96E",
     video: "/videos/etoiles.mp4",
     ambiance: { bg: "#1A1408", accent: "#C8A96E", texte: "Avant de changer quoi que ce soit, il faut voir ce qui est là." },
     souffle: "La lumière ne juge pas ce qu'elle éclaire.",
@@ -3586,7 +3586,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 2, nom: "Comprendre", symbole: "🌿", couleur: "#7BA88A",
+    index: 2, nom: "Comprendre", symbole: "/pictos/porte-02-comprendre.svg", couleur: "#7BA88A",
     video: "/videos/foret.mp4",
     ambiance: { bg: "#0E1610", accent: "#7BA88A", texte: "Comprendre, c'est remonter à la source sans se noyer dedans." },
     souffle: "Comprendre n'est pas excuser. C'est voir plus loin.",
@@ -3620,7 +3620,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 3, nom: "Ressentir", symbole: "🌊", couleur: "#7B9EA8",
+    index: 3, nom: "Ressentir", symbole: "/pictos/porte-03-ressentir.svg", couleur: "#7B9EA8",
     video: "/videos/vagues.mp4",
     ambiance: { bg: "#0A1318", accent: "#7B9EA8", texte: "Ressentir n'est pas souffrir davantage. C'est arrêter de porter seul." },
     souffle: "Ce que tu ressens ne te définit pas. Mais l'ignorer te rétrécit.",
@@ -3654,7 +3654,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 4, nom: "Lâcher", symbole: "🍂", couleur: "#D4856A",
+    index: 4, nom: "Lâcher", symbole: "/pictos/porte-04-lacher.svg", couleur: "#D4856A",
     video: "/videos/desert.mp4",
     ambiance: { bg: "#180E08", accent: "#D4856A", texte: "Ce que tu portes encore t'appartient-il vraiment ?" },
     souffle: "Lâcher n'est pas perdre. C'est choisir ce qu'on veut porter.",
@@ -3688,7 +3688,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 5, nom: "Recevoir", symbole: "🌑", couleur: "#A87BC8",
+    index: 5, nom: "Recevoir", symbole: "/pictos/porte-05-recevoir.svg", couleur: "#A87BC8",
     video: "/videos/nuages.mp4",
     ambiance: { bg: "#110D18", accent: "#A87BC8", texte: "Tu as passé longtemps à donner. Maintenant apprends à t'ouvrir." },
     souffle: "Recevoir demande plus de courage que donner.",
@@ -3722,7 +3722,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 6, nom: "Devenir", symbole: "✦", couleur: "#E8D5B0",
+    index: 6, nom: "Devenir", symbole: "/pictos/porte-06-devenir.svg", couleur: "#E8D5B0",
     video: "/videos/caraibe.mp4",
     ambiance: { bg: "#0A1018", accent: "#E8D5B0", texte: "Tu n'arrives pas quelque part. Tu te révèles à toi-même." },
     souffle: "Tu n'es pas en train de te réparer. Tu es en train de te révéler.",
@@ -3781,7 +3781,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 2, nom: "Comprendre", symbole: "🌿", couleur: "#7BA88A",
+    index: 2, nom: "Comprendre", symbole: "/pictos/porte-02-comprendre.svg", couleur: "#7BA88A",
     souffle: "Comprendre n'est pas excuser. C'est voir plus loin.",
     questions: [
       "Quelle histoire te racontes-tu sur toi-même depuis si longtemps que tu l'as prise pour la réalité ?",
@@ -3807,7 +3807,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 3, nom: "Ressentir", symbole: "🌊", couleur: "#7B9EA8",
+    index: 3, nom: "Ressentir", symbole: "/pictos/porte-03-ressentir.svg", couleur: "#7B9EA8",
     souffle: "Ce que tu ressens ne te définit pas. Mais l'ignorer te rétrécit.",
     questions: [
       "Quelle émotion as-tu appris à ne jamais montrer ? Pourquoi ?",
@@ -3833,7 +3833,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 4, nom: "Lâcher", symbole: "🍂", couleur: "#D4856A",
+    index: 4, nom: "Lâcher", symbole: "/pictos/porte-04-lacher.svg", couleur: "#D4856A",
     souffle: "Lâcher n'est pas perdre. C'est choisir ce qu'on veut porter.",
     questions: [
       "Qu'est-ce que tu continues à tenir alors que ça t'épuise ?",
@@ -3859,7 +3859,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 5, nom: "Recevoir", symbole: "🌑", couleur: "#A87BC8",
+    index: 5, nom: "Recevoir", symbole: "/pictos/porte-05-recevoir.svg", couleur: "#A87BC8",
     souffle: "Recevoir demande plus de courage que donner.",
     questions: [
       "Pourquoi est-ce plus facile pour toi de donner que de recevoir ?",
@@ -3885,7 +3885,7 @@ const TERRITOIRES_CLES = [
     ],
   },
   {
-    index: 6, nom: "Devenir", symbole: "✦", couleur: "#C8A96E",
+    index: 6, nom: "Devenir", symbole: "/pictos/porte-06-devenir.svg", couleur: "#C8A96E",
     souffle: "Tu n'es pas en train de te réparer. Tu es en train de te révéler.",
     questions: [
       "Qui es-tu quand tu n'as plus rien à prouver ?",
@@ -3916,7 +3916,7 @@ const TERRITOIRES_CLES = [
 // ─── PORTES VII–XII ────────────────────────────────────────────────────────────
 const TERRITOIRES_AVANCES = [
   {
-    index: 7, nom: "Créer", symbole: "✧", couleur: "#E8A87C",
+    index: 7, nom: "Créer", symbole: "/pictos/porte-07-creer.svg", couleur: "#E8A87C",
     video: "/videos/desert.mp4",
     ambiance: { bg: "#1A1008", accent: "#E8A87C", texte: "Tu as traversé beaucoup. Maintenant quelque chose veut naître." },
     souffle: "Créer, ce n'est pas produire. C'est laisser sortir ce qui cherchait une forme.",
@@ -3950,7 +3950,7 @@ const TERRITOIRES_AVANCES = [
     ],
   },
   {
-    index: 8, nom: "Relier", symbole: "∞", couleur: "#9EC8B4",
+    index: 8, nom: "Relier", symbole: "/pictos/porte-08-relier.svg", couleur: "#9EC8B4",
     video: "/videos/caraibe.mp4",
     ambiance: { bg: "#0A1610", accent: "#9EC8B4", texte: "Tu as appris à être avec toi. Maintenant tu peux être vraiment avec les autres." },
     souffle: "Revenir vers les autres depuis un endroit solide.",
@@ -3984,7 +3984,7 @@ const TERRITOIRES_AVANCES = [
     ],
   },
   {
-    index: 9, nom: "Protéger", symbole: "◈", couleur: "#B8A0D8",
+    index: 9, nom: "Protéger", symbole: "/pictos/porte-09-proteger.svg", couleur: "#B8A0D8",
     video: "/videos/nuages.mp4",
     ambiance: { bg: "#100D18", accent: "#B8A0D8", texte: "Protéger ce qui est sacré en toi n'est pas de l'égoïsme. C'est de la clarté." },
     souffle: "Une limite posée avec amour protège les deux personnes.",
@@ -4018,7 +4018,7 @@ const TERRITOIRES_AVANCES = [
     ],
   },
   {
-    index: 10, nom: "Transmettre", symbole: "⟳", couleur: "#C8A96E",
+    index: 10, nom: "Transmettre", symbole: "/pictos/porte-10-transmettre.svg", couleur: "#C8A96E",
     video: "/videos/savane.mp4",
     ambiance: { bg: "#140F08", accent: "#C8A96E", texte: "Tu as appris quelque chose de rare. La question n'est plus quoi apprendre — mais quoi donner." },
     souffle: "Ce que tu as traversé n'est pas qu'à toi. Ça peut éclairer quelqu'un d'autre.",
@@ -4052,7 +4052,7 @@ const TERRITOIRES_AVANCES = [
     ],
   },
   {
-    index: 11, nom: "Habiter", symbole: "◯", couleur: "#A8B8C8",
+    index: 11, nom: "Habiter", symbole: "/pictos/porte-11-habiter.svg", couleur: "#A8B8C8",
     video: "/videos/vagues.mp4",
     ambiance: { bg: "#0A1016", accent: "#A8B8C8", texte: "Tu as beaucoup cherché. Maintenant apprends à rester là où tu es." },
     souffle: "Habiter sa vie, c'est arrêter d'en être le spectateur.",
@@ -4086,7 +4086,7 @@ const TERRITOIRES_AVANCES = [
     ],
   },
   {
-    index: 12, nom: "Être", symbole: "·", couleur: "#F5EFE6",
+    index: 12, nom: "Être", symbole: "/pictos/porte-12-etre.svg", couleur: "#F5EFE6",
     video: "/videos/etoiles.mp4",
     ambiance: { bg: "#0A0A0E", accent: "#F5EFE6", texte: "Tu es arrivé quelque part. Pas à la fin — au commencement de toi-même." },
     souffle: "Il n'y a plus rien à devenir. Il y a juste à être ce que tu es déjà.",
@@ -4188,6 +4188,7 @@ const RECO_LIVRES = [
   { id: "transurfing-zeland", titre: "Transurfing — Les espaces des variantes", auteur: "Vadim Zeland", type: "livre", themes: ["realite","intention","energie","transformation","eveil"], portes: [6,7,9], description: "Nous naviguons entre des variantes possibles de notre vie — et notre énergie intérieure détermine laquelle se manifeste. Déroutant, unique, puissant." },
   { id: "cameron-artist-way", titre: "Libérez votre créativité", auteur: "Julia Cameron", type: "livre", themes: ["creativite","confiance-en-soi","blocage-creatif","transformation"], portes: [7], description: "12 semaines pour débloquer sa créativité. La créativité est liée à la spiritualité, et tout le monde peut créer. Un programme qui a changé des millions de vies." },
   { id: "allix-test", titre: "Le Test", auteur: "Stéphane Allix", type: "livre", themes: ["deuil","mort","invisible","spiritualite","apres-la-mort"], portes: [4,10,12], description: "Allix cache des objets dans son cercueil, puis interroge des médiums à son insu. Ce qu'il découvre ébranle ses certitudes. Rigoureux sur ce que la science n'explique pas." },
+  { id: "ferguson-nerf-vague", titre: "Les Pouvoirs Secrets du Nerf Vague", auteur: "Anna Ferguson", type: "livre", themes: ["corps","trauma","anxiete","stress","guerison","burn-out"], portes: [3,4,11], description: "Le nerf vague régule les émotions, le stress, l'inflammation. Anna Ferguson montre comment l'activer pour sortir de l'état de survie — respiration, froid, son. Un livre ancré dans la science du système nerveux." },
   { id: "moradel-niagara", titre: "Sur les Hauteurs des Chutes du Niagara", auteur: "Steve Moradel", type: "livre", themes: ["quete-de-sens","identite","liberte","roman"], portes: [1,6,12], description: "Un roman qui traverse l'identité, la quête, la liberté. Depuis les racines caribéennes, il dit quelque chose d'universel sur ce qu'on cherche quand on regarde vers l'horizon." },
 ];
 
@@ -4202,6 +4203,7 @@ const RECO_PODCASTS = [
   { id: "tara-brach", titre: "Tara Brach Podcast", auteur: "Tara Brach", type: "podcast", themes: ["meditation","trauma","pleine-conscience","acceptation","guerison"], portes: [3,5,11], description: "Psychologue et enseignante bouddhiste. Ses méditations guidées sur la présence et l'auto-compassion sont parmi les plus belles disponibles." },
   { id: "dialogues-midal", titre: "Dialogues", auteur: "Fabrice Midal", type: "podcast", themes: ["philosophie","meditation","present","sens","bien-etre"], portes: [1,11,12], description: "Le fondateur de l'École Occidentale de Méditation en dialogue avec des penseurs. Une façon douce et profonde d'approcher la méditation." },
   { id: "le-phare", titre: "Le Phare", auteur: "Julien Maurel", type: "podcast", themes: ["transformation","spiritualite","resilience","quete-de-sens","foi"], portes: [6,10,12], description: "Des témoignages de transformation spirituelle. Des gens ordinaires qui racontent comment quelque chose a basculé en eux." },
+  { id: "instant-zen", titre: "L'Instant Zen", auteur: "Chen Li / Le Monastère", type: "podcast", themes: ["meditation","present","anxiete","bien-etre","paix"], portes: [3,11,12], description: "Un podcast de méditation et de sagesse zen par le Monastère. Des épisodes courts, apaisants, ancrés dans la tradition bouddhiste. Pour ceux qui ont besoin de silence intérieur." },
 ];
 
 const ETATS_THEMES_MAP = {
@@ -4520,7 +4522,12 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         textAlign: "center", marginBottom: "2rem",
         animation: "fadeUpCle 0.6s ease forwards",
       }}>
-        <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{territoire.symbole}</div>
+        <div style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>
+          {territoire.symbole.endsWith(".svg")
+            ? <img src={territoire.symbole} width={40} height={40} alt={territoire.nom} style={{ opacity: 0.9 }} />
+            : <span style={{ fontSize: "2rem" }}>{territoire.symbole}</span>
+          }
+        </div>
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
           letterSpacing: "0.5em", textTransform: "uppercase",
@@ -6214,11 +6221,11 @@ const FilDeVie = ({ data, db }) => {
   const pressTimer = useRef(null);
 
   const TYPES = [
-    { id: "insight",   label: "Prise de conscience", couleur: "#C8A96E", symbole: "✦" },
+    { id: "insight",   label: "Prise de conscience", couleur: "#C8A96E", symbole: "/pictos/porte-06-devenir.svg" },
     { id: "emotion",   label: "Émotion traversée",   couleur: "#D4856A", symbole: "○" },
     { id: "victoire",  label: "Victoire intérieure",  couleur: "#7BA88A", symbole: "◇" },
     { id: "question",  label: "Question ouverte",     couleur: "#7B9EA8", symbole: "◎" },
-    { id: "passage",   label: "Moment de passage",    couleur: "#A87BC8", symbole: "◈" },
+    { id: "passage",   label: "Moment de passage",    couleur: "#A87BC8", symbole: "/pictos/porte-09-proteger.svg" },
   ];
 
   const typeInfo = (id) => TYPES.find(t => t.id === id) || TYPES[0];
@@ -6420,7 +6427,7 @@ const FilDeVie = ({ data, db }) => {
                 letterSpacing: "0.15em", padding: "0.4rem 0.8rem",
                 borderRadius: "2px", cursor: "pointer", transition: "all 0.2s",
                 display: "flex", alignItems: "center", gap: "0.4rem",
-              }}><span>{t.symbole}</span>{t.label}</button>
+              }}>{t.symbole.endsWith?.(".svg") ? <img src={t.symbole} width={14} height={14} alt="" /> : <span>{t.symbole}</span>}{t.label}</button>
             ))}
           </div>
           <textarea value={texte} onChange={e => setTexte(e.target.value)}
@@ -6525,7 +6532,7 @@ const FilDeVie = ({ data, db }) => {
                     <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>
                       {formatDate(m.date)}
                     </span>
-                    <span style={{ fontSize: "0.65rem", color: ti.couleur, opacity: 0.8 }}>{ti.symbole}</span>
+                    {ti.symbole.endsWith?.(".svg") ? <img src={ti.symbole} width={14} height={14} alt="" style={{ opacity: 0.8 }} /> : <span style={{ fontSize: "0.65rem", color: ti.couleur, opacity: 0.8 }}>{ti.symbole}</span>}
                   </div>
                   <p style={{
                     fontFamily: T.serif, fontStyle: "italic",
