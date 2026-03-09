@@ -6020,17 +6020,111 @@ ${resume}
     setLoading(false);
   };
 
-  const typeActif = POSTIT_TYPES.find(t => t.id === type);
+  // ── Synthèse poétique — apparaît automatiquement après 3 fragments dans la semaine ──
+  const [synthesePoetique, setSynthesePoetique]     = useState(null);
+  const [syntheseLoading, setSyntheseLoading]       = useState(false);
+  const [syntheseGeneree, setSyntheseGeneree]       = useState(false);
+
+  useEffect(() => {
+    // Ne générer qu'une fois par semaine
+    const weekKey = (() => {
+      const d = new Date(); const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(d.setDate(diff)).toISOString().split("T")[0];
+    })();
+    const cacheKey = `alba_synthese_${weekKey}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { setSynthesePoetique(cached); return; }
+
+    // Compter les fragments de la semaine
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+    let fragmentsSemaine = [];
+    Object.entries(allPostits).forEach(([dateKey, posts]) => {
+      if (new Date(dateKey + "T00:00:00") >= cutoff) {
+        posts.forEach(p => { if (p.texte) fragmentsSemaine.push(p.texte); });
+      }
+    });
+
+    if (fragmentsSemaine.length >= 3 && !syntheseGeneree) {
+      setSyntheseGeneree(true);
+      setSyntheseLoading(true);
+      const cdv = cheminDeVie(data.naissance);
+      const chemin = CHEMINS[cdv] || CHEMINS[9];
+      const extrait = fragmentsSemaine.slice(0, 6).map(t => `"${t.slice(0, 120)}"`).join("\n");
+      const prompt = `Tu es ALBA. Tu as lu les fragments que ${data.prenom} a posés cette semaine sur son ardoise (Chemin ${cdv} — ${chemin.titre}).
+
+Voici ce qu'il·elle a écrit :
+${extrait}
+
+Écris UNE SEULE phrase poétique — pas analytique, pas thérapeutique. Une phrase qui nomme ce que tu entends entre les lignes. Qui touche quelque chose de vrai sans l'expliquer. Entre 15 et 30 mots. Pas de signature. Pas de guillemets. Juste la phrase.`;
+
+      fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 120, messages: [{ role: "user", content: prompt }] }),
+      }).then(r => r.json()).then(d => {
+        const texteGenere = d.content?.[0]?.text?.trim() || null;
+        if (texteGenere) {
+          setSynthesePoetique(texteGenere);
+          localStorage.setItem(cacheKey, texteGenere);
+        }
+        setSyntheseLoading(false);
+      }).catch(() => setSyntheseLoading(false));
+    }
+  }, [allPostits]);
+
+
   const stats = POSTIT_TYPES.map(t => ({ ...t, count: postits.filter(p => p.type === t.id).length })).filter(t => t.count > 0);
 
   return (
     <div style={{ padding: "0 0 6rem" }}>
+
+      {/* ── SYNTHÈSE POÉTIQUE — apparaît après 3 fragments dans la semaine ── */}
+      {(syntheseLoading || synthesePoetique) && (
+        <div style={{
+          margin: "1.2rem 1.5rem 0",
+          padding: "1.3rem 1.6rem",
+          background: "transparent",
+          border: `1px solid ${T.or}15`,
+          borderLeft: `2px solid ${T.or}40`,
+          borderRadius: "6px",
+          animation: "fadeUp 0.8s ease forwards",
+          position: "relative", overflow: "hidden",
+        }}>
+          {/* Halo très subtil */}
+          <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}08, transparent 70%)`, pointerEvents: "none" }} />
+
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
+            <span style={{ color: T.or, fontSize: "0.65rem", opacity: 0.6 }}>✦</span>
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}66` }}>
+              Ce que j'entends cette semaine
+            </span>
+          </div>
+
+          {syntheseLoading ? (
+            <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{ width: 3, height: 3, borderRadius: "50%", background: `${T.or}55`, animation: `alba-breathe 1.4s ease ${i*0.2}s infinite` }} />
+              ))}
+            </div>
+          ) : (
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", color: `${T.orPale}cc`,
+              lineHeight: 1.85, margin: 0, letterSpacing: "0.01em",
+            }}>
+              {synthesePoetique}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ── RÉVEIL D'UNE TEMPÊTE ── */}
       {tempeteReveil && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 200,
           background: "rgba(10,8,6,0.94)",
+
           display: "flex", alignItems: "center", justifyContent: "center",
           animation: "fadeIn 0.5s ease",
           padding: "1.5rem",
