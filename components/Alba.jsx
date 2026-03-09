@@ -3504,6 +3504,357 @@ const VIDEOS = [
   { src: "/videos/savane.mp4",   legende: "Chaque coucher de soleil est une permission de lâcher.",       label: "Crépuscule" },
 ];
 
+// ─── TERRITOIRES DES CLÉS ─────────────────────────────────────────────────────
+const TERRITOIRES_CLES = [
+  {
+    index: 1, nom: "Reconnaître", symbole: "🪔", couleur: "#C8A96E",
+    souffle: "La lumière ne juge pas ce qu'elle éclaire.",
+    questions: [
+      "Qu'est-ce que tu continues à faire semblant de ne pas savoir sur toi-même ?",
+      "Si tu retirais le rôle que tu joues pour les autres — qui resterait-il ?",
+      "Quelle vérité évites-tu depuis si longtemps qu'elle a pris la forme d'une habitude ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Pose une main sur ta poitrine. Demande-toi : \"Qu'est-ce que je ressens là, maintenant ?\" Reste 3 minutes sans chercher à répondre.",
+        "Écris une phrase commençant par \"Je fais semblant que…\" sans la corriger.",
+        "Ce soir, avant de dormir, nomme une chose que tu as vue aujourd'hui sur toi-même.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Rappelle-toi un moment où tu as agi contre ce que tu ressentais. Qu'est-ce qui t'a retenu ?",
+        "Écris la liste de tout ce que tu portes et qui n'est pas à toi.",
+        "Parle à quelqu'un de confiance d'une chose que tu ne dis jamais.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Relis ce que tu as écrit depuis le début de cette Clé. Qu'est-ce qui t'étonne ?",
+        "Écris une lettre à la version de toi qui n'avait pas encore reconnu ça.",
+        "Choisis une chose que tu vas arrêter de faire semblant.",
+      ]},
+    ],
+  },
+  {
+    index: 2, nom: "Comprendre", symbole: "🌿", couleur: "#7BA88A",
+    souffle: "Comprendre n'est pas excuser. C'est voir plus loin.",
+    questions: [
+      "Quelle histoire te racontes-tu sur toi-même depuis si longtemps que tu l'as prise pour la réalité ?",
+      "De qui as-tu appris à te voir de cette façon ?",
+      "Si tu comprenais vraiment d'où vient ta douleur — qu'est-ce que ça changerait ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Pense à une réaction que tu as eue cette semaine et qui t'a surpris toi-même. D'où venait-elle vraiment ?",
+        "Écris : \"Je me critique souvent pour… Mais en réalité, cette critique m'a été transmise par…\"",
+        "Rappelle-toi une scène d'enfance où tu as décidé quelque chose sur toi-même. Laquelle ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Identifie un schéma qui se répète dans ta vie. Dans quel contexte est-il apparu pour la première fois ?",
+        "Écris sans filtre ce que tu aurais aimé qu'on te dise quand tu étais enfant.",
+        "Observe aujourd'hui une fois où tu te comportes avec toi-même comme quelqu'un t'a traité autrefois.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Réécris l'histoire que tu te racontes sur toi-même — mais cette fois avec de la bienveillance.",
+        "Dis à voix haute, seul : \"Ce n'était pas ma faute.\" Observe ce que tu ressens.",
+        "Choisis une croyance sur toi-même que tu es prêt à déposer. Écris-la, puis déchire le papier.",
+      ]},
+    ],
+  },
+  {
+    index: 3, nom: "Ressentir", symbole: "🌊", couleur: "#7B9EA8",
+    souffle: "Ce que tu ressens ne te définit pas. Mais l'ignorer te rétrécit.",
+    questions: [
+      "Quelle émotion as-tu appris à ne jamais montrer ? Pourquoi ?",
+      "Où dans ton corps portes-tu ce que tu ne dis pas ?",
+      "Si tes émotions pouvaient parler — qu'est-ce qu'elles diraient depuis tout ce temps ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Assieds-toi cinq minutes. Scanne ton corps de la tête aux pieds. Note ce qui attire ton attention.",
+        "Aujourd'hui, quand une émotion monte, ne la nomme pas tout de suite. Laisse-la être là 30 secondes.",
+        "Écris : \"En ce moment je ressens… et mon corps dit…\"",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Rappelle-toi la dernière fois que tu as pleuré. Était-ce vraiment pour la raison apparente ?",
+        "Note une émotion que tu évites. Qu'est-ce que tu crains qu'il se passe si tu la laisses venir ?",
+        "Permets-toi aujourd'hui d'exprimer quelque chose que tu gardes d'habitude pour toi.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris une lettre à une émotion que tu as longtemps rejetée. Commence par : \"Je t'ai ignoré parce que…\"",
+        "Choisis un moment de la semaine passée où tu as ressenti quelque chose d'intense. Honore-le en l'écrivant vraiment.",
+        "Dis à quelqu'un de confiance quelque chose que tu ressens mais que tu n'as jamais dit.",
+      ]},
+    ],
+  },
+  {
+    index: 4, nom: "Lâcher", symbole: "🍂", couleur: "#D4856A",
+    souffle: "Lâcher n'est pas perdre. C'est choisir ce qu'on veut porter.",
+    questions: [
+      "Qu'est-ce que tu continues à tenir alors que ça t'épuise ?",
+      "Si tu lâchais vraiment — qu'est-ce que tu aurais peur de devenir ?",
+      "Quelle rancœur te coûte plus qu'elle ne t'a jamais rapporté ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Fais la liste de trois choses que tu portes et qui ne t'appartiennent plus. Juste les nommer.",
+        "Observe aujourd'hui une fois où tu t'accroches à quelque chose par peur plutôt que par désir.",
+        "Écris : \"Je refuse encore de lâcher… parce que j'ai peur que…\"",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Pense à quelqu'un que tu n'as pas pardonné. Pas pour eux — pour toi : qu'est-ce que ce non-pardon te coûte ?",
+        "Identifie une version de toi-même que tu es prêt à laisser partir. Dis-lui au revoir par écrit.",
+        "Fais quelque chose aujourd'hui que tu remets depuis longtemps parce que tu attends que ce soit parfait.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris une lettre à quelqu'un que tu as du mal à pardonner. Tu n'as pas à l'envoyer.",
+        "Identifie une attente envers quelqu'un qui ne sera jamais satisfaite. Comment tu vis sans elle ?",
+        "Choisis une chose concrète à lâcher cette semaine. Pas une idée — un acte.",
+      ]},
+    ],
+  },
+  {
+    index: 5, nom: "Recevoir", symbole: "🌑", couleur: "#A87BC8",
+    souffle: "Recevoir demande plus de courage que donner.",
+    questions: [
+      "Pourquoi est-ce plus facile pour toi de donner que de recevoir ?",
+      "Qu'est-ce que tu refuses de te donner à toi-même que tu donnerais sans hésiter à quelqu'un que tu aimes ?",
+      "Si tu méritais vraiment d'être aimé tel que tu es — qu'est-ce qui changerait dans ta vie ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Accepte un compliment aujourd'hui sans le minimiser. Dis juste : \"Merci.\"",
+        "Fais une chose aujourd'hui uniquement pour toi, sans que ça serve à quelqu'un d'autre.",
+        "Écris trois choses que tu te donnes rarement et que tu mérites pourtant.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Demande de l'aide pour quelque chose que tu aurais géré seul. Observe ce que ça fait.",
+        "Note une situation où tu sabotes ce qui est bon pour toi. D'où vient ce réflexe ?",
+        "Écris : \"Je mérite… même si je n'ai pas encore…\"",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Parle à toi-même comme tu parlerais à quelqu'un que tu aimes profondément. Qu'est-ce que tu te dirais ?",
+        "Identifie quelqu'un dans ta vie qui te donne sans compter. Est-ce que tu le laisses vraiment faire ?",
+        "Écris une liste de ce que tu es prêt à recevoir maintenant. Pas un jour — maintenant.",
+      ]},
+    ],
+  },
+  {
+    index: 6, nom: "Devenir", symbole: "✦", couleur: "#C8A96E",
+    souffle: "Tu n'es pas en train de te réparer. Tu es en train de te révéler.",
+    questions: [
+      "Qui es-tu quand tu n'as plus rien à prouver ?",
+      "Quelle vie mènerais-tu si tu te faisais pleinement confiance ?",
+      "Qu'est-ce que tu veux laisser derrière toi — pas comme héritage, mais comme trace vivante ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Écris qui tu es sans utiliser ton métier, ton rôle ou tes accomplissements.",
+        "Note une valeur que tu veux incarner davantage. Comment elle se manifeste déjà en toi ?",
+        "Imagine-toi dans 5 ans, pleinement toi-même. Qu'est-ce qui est différent ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Identifie une peur qui t'empêche d'avancer. Est-ce ta peur ou celle de quelqu'un d'autre ?",
+        "Écris une décision que tu remets à plus tard par manque de confiance en toi. Qu'est-ce qui se passerait si tu la prenais maintenant ?",
+        "Fais aujourd'hui quelque chose qui correspond à la personne que tu veux devenir — même petit.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris une lettre à la version de toi dans 10 ans. Qu'est-ce que tu veux lui dire ?",
+        "Choisis une chose que tu vas commencer — pas finir, pas perfectionner. Commencer.",
+        "Dis à voix haute : \"Je suis en train de devenir quelqu'un que j'aime.\" Observe ce que ça fait.",
+      ]},
+    ],
+  },
+];
+
+const TerritoireCle = ({ cleActive = 0, progressStats = {} }) => {
+  const [section, setSection] = useState("pratique"); // "pratique" | "questions"
+  const [niveauPratique, setNiveauPratique] = useState(0); // 0=Ouvrir, 1=Traverser, 2=Intégrer
+  const [exerciceFait, setExerciceFait] = useState({});
+
+  const territoire = TERRITOIRES_CLES[Math.max(0, cleActive - 1)] || TERRITOIRES_CLES[0];
+  const pratique = territoire.pratiques[niveauPratique];
+
+  // Déterminer le niveau automatiquement selon la progression
+  useEffect(() => {
+    const eclats = calcEclats(progressStats);
+    const seuil = SEUILS_PORTES[Math.max(0, cleActive - 1)] || 0;
+    const progression = eclats - seuil;
+    if (progression > 30) setNiveauPratique(2);
+    else if (progression > 12) setNiveauPratique(1);
+    else setNiveauPratique(0);
+  }, [cleActive, progressStats]);
+
+  // Charger les exercices faits
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`alba_exercices_cle${cleActive}`);
+      if (saved) setExerciceFait(JSON.parse(saved));
+    } catch {}
+  }, [cleActive]);
+
+  const toggleExercice = (idx) => {
+    const updated = { ...exerciceFait, [idx]: !exerciceFait[idx] };
+    setExerciceFait(updated);
+    try { localStorage.setItem(`alba_exercices_cle${cleActive}`, JSON.stringify(updated)); } catch {}
+  };
+
+  return (
+    <div style={{ padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
+      <style>{`@keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
+
+      {/* En-tête Clé */}
+      <div style={{
+        textAlign: "center", marginBottom: "2rem",
+        animation: "fadeUpCle 0.6s ease forwards",
+      }}>
+        <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{territoire.symbole}</div>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: territoire.couleur, marginBottom: "0.3rem",
+        }}>Clé {territoire.index}</div>
+        <div style={{
+          fontFamily: T.serif, fontSize: "1.6rem", fontWeight: 300,
+          color: T.orPale, letterSpacing: "0.08em",
+        }}>{territoire.nom}</div>
+        <div style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.85rem", color: T.brume, marginTop: "0.6rem",
+          lineHeight: 1.6,
+        }}>{territoire.souffle}</div>
+      </div>
+
+      {/* Sélecteur section */}
+      <div style={{
+        display: "flex", gap: "0", marginBottom: "2rem",
+        border: `1px solid ${territoire.couleur}33`, borderRadius: "4px",
+        overflow: "hidden",
+      }}>
+        {[["pratique", "Pratiques"], ["questions", "Questions"]].map(([id, label]) => (
+          <button key={id} onClick={() => setSection(id)} style={{
+            flex: 1, padding: "0.7rem",
+            background: section === id ? `${territoire.couleur}22` : "transparent",
+            border: "none", cursor: "pointer",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+            letterSpacing: "0.3em", textTransform: "uppercase",
+            color: section === id ? territoire.couleur : T.brume,
+            borderRight: id === "pratique" ? `1px solid ${territoire.couleur}33` : "none",
+            transition: "all 0.2s",
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* PRATIQUES */}
+      {section === "pratique" && (
+        <div style={{ animation: "fadeUpCle 0.5s ease forwards" }}>
+          {/* Sélecteur niveau */}
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", justifyContent: "center" }}>
+            {territoire.pratiques.map((p, i) => (
+              <button key={i} onClick={() => setNiveauPratique(i)} style={{
+                padding: "0.4rem 0.9rem",
+                background: niveauPratique === i ? territoire.couleur : "transparent",
+                border: `1px solid ${niveauPratique === i ? territoire.couleur : territoire.couleur + "44"}`,
+                borderRadius: "20px", cursor: "pointer",
+                fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+                letterSpacing: "0.25em", textTransform: "uppercase",
+                color: niveauPratique === i ? T.nuit : territoire.couleur,
+                transition: "all 0.2s",
+              }}>{p.label}</button>
+            ))}
+          </div>
+
+          <div style={{
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            letterSpacing: "0.4em", textTransform: "uppercase",
+            color: `${territoire.couleur}88`, marginBottom: "1.2rem", textAlign: "center",
+          }}>3 exercices · niveau {pratique.label.toLowerCase()}</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {pratique.exercices.map((ex, i) => (
+              <div
+                key={i}
+                onClick={() => toggleExercice(i)}
+                style={{
+                  padding: "1.2rem 1.4rem",
+                  background: exerciceFait[i] ? `${territoire.couleur}15` : `${T.nuit2}`,
+                  border: `1px solid ${exerciceFait[i] ? territoire.couleur + "44" : territoire.couleur + "22"}`,
+                  borderRadius: "6px", cursor: "pointer",
+                  transition: "all 0.25s",
+                  animation: `fadeUpCle 0.5s ease forwards ${i * 0.1}s`, opacity: 0,
+                }}
+              >
+                <div style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
+                  <div style={{
+                    width: 20, height: 20, borderRadius: "50%", flexShrink: 0, marginTop: 2,
+                    border: `1px solid ${territoire.couleur}66`,
+                    background: exerciceFait[i] ? territoire.couleur : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    transition: "all 0.2s",
+                  }}>
+                    {exerciceFait[i] && <span style={{ fontSize: "0.6rem", color: T.nuit }}>✓</span>}
+                  </div>
+                  <p style={{
+                    fontFamily: T.serif, fontStyle: "italic",
+                    fontSize: "0.92rem", color: exerciceFait[i] ? territoire.couleur : T.orPale,
+                    lineHeight: 1.7, margin: 0,
+                    textDecoration: exerciceFait[i] ? "none" : "none",
+                  }}>{ex}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            marginTop: "2rem", textAlign: "center",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.78rem", color: `${T.brume}88`,
+          }}>
+            Appuie sur un exercice pour le marquer comme fait.<br/>
+            Chaque acte génère des Éclats d'aube.
+          </div>
+        </div>
+      )}
+
+      {/* QUESTIONS */}
+      {section === "questions" && (
+        <div style={{ animation: "fadeUpCle 0.5s ease forwards" }}>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            letterSpacing: "0.4em", textTransform: "uppercase",
+            color: `${territoire.couleur}88`, marginBottom: "1.5rem", textAlign: "center",
+          }}>3 questions à méditer</div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
+            {territoire.questions.map((q, i) => (
+              <div key={i} style={{
+                padding: "1.4rem 1.5rem",
+                background: `${T.nuit2}`,
+                border: `1px solid ${territoire.couleur}22`,
+                borderLeft: `3px solid ${territoire.couleur}88`,
+                borderRadius: "0 6px 6px 0",
+                animation: `fadeUpCle 0.5s ease forwards ${i * 0.15}s`, opacity: 0,
+              }}>
+                <p style={{
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "1rem", color: T.orPale,
+                  lineHeight: 1.75, margin: 0,
+                }}>{q}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{
+            marginTop: "2rem", textAlign: "center",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.78rem", color: `${T.brume}88`, lineHeight: 1.7,
+          }}>
+            Ces questions ne demandent pas de réponse immédiate.<br/>
+            Laisse-les travailler en toi.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Evasion = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
   const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
@@ -5902,7 +6253,7 @@ export default function Alba() {
     { id: "compagnon", label: "Jour" },
     { id: "presence",  label: "Miroir" },
     { id: "ardoise",   label: "Ardoise" },
-    { id: "evasion",   label: "Évasion" },
+    { id: "cle",       label: "Ma Clé" },
     { id: "profil",    label: "Profil" },
   ];
 
@@ -5920,6 +6271,12 @@ export default function Alba() {
         style={{ color: active ? "#C8A96E" : "#8C7F74", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
         <circle cx="12" cy="8" r="4"/>
         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    );
+    if (id === "cle") return (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+        style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
       </svg>
     );
     const src = map[id];
@@ -6021,6 +6378,7 @@ export default function Alba() {
             {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
             {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+            {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
             {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
