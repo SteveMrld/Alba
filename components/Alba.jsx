@@ -2897,26 +2897,62 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         </div>
       </div>
 
-      {/* ── LIVRE ── */}
-      <div style={{
-        margin: "1rem 1.5rem 0",
-        display: "flex", alignItems: "center", gap: "1rem",
-        background: `${T.nuit2}`,
-        border: `1px solid ${T.brume}15`,
-        borderRadius: "4px", padding: "1rem 1.2rem",
-        animation: "fadeUp 0.7s ease forwards 0.75s", opacity: 0,
-      }}>
-        {/* Spine du livre */}
-        <div style={{
-          width: 10, height: 52, flexShrink: 0, borderRadius: "1px",
-          background: `linear-gradient(to bottom, ${T.or}80, ${T.aurore}60)`,
-        }}/>
-        <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.2rem" }}>Pour traverser</div>
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.98rem", color: T.orPale }}>{livre.titre}</div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", color: T.brume, marginTop: "0.1rem" }}>{livre.auteur}</div>
-        </div>
-      </div>
+      {/* ── RECOMMANDATIONS PERSONNALISÉES ── */}
+      {(() => {
+        // Mapper l'intention/état vers les thèmes de recommandation
+        const intentionBasse = (data.intention || "").toLowerCase();
+        const etatsDetectes = [];
+        if (intentionBasse.includes("rupture") || intentionBasse.includes("séparation") || intentionBasse.includes("separation")) etatsDetectes.push("separation");
+        if (intentionBasse.includes("deuil") || intentionBasse.includes("perte") || intentionBasse.includes("perdu")) etatsDetectes.push("deuil");
+        if (intentionBasse.includes("épuisement") || intentionBasse.includes("epuisement") || intentionBasse.includes("burn")) etatsDetectes.push("burn-out");
+        if (intentionBasse.includes("anxiété") || intentionBasse.includes("anxiete") || intentionBasse.includes("anxieux")) etatsDetectes.push("anxiete");
+        if (intentionBasse.includes("trahison")) etatsDetectes.push("relation-toxique");
+        if (intentionBasse.includes("maladie") || intentionBasse.includes("diagnostic")) etatsDetectes.push("maladie");
+        if (intentionBasse.includes("qui je suis") || intentionBasse.includes("perdu")) etatsDetectes.push("quete-de-sens");
+        if (etatsDetectes.length === 0) etatsDetectes.push("quete-de-sens");
+
+        const recos = getRecommandationsPersonnalisees(etatsDetectes, cleActive + 1, 2);
+        if (!recos.length) return null;
+
+        return (
+          <div style={{ margin: "1rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.75s", opacity: 0 }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+              Pour toi · Ce moment
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              {recos.map((r) => {
+                const isLivre = r.type === "livre";
+                const acc = isLivre ? T.or : "#9EC8B4";
+                return (
+                  <div key={r.id} style={{
+                    display: "flex", alignItems: "flex-start", gap: "0.9rem",
+                    background: T.nuit2, border: `1px solid ${acc}18`,
+                    borderLeft: `3px solid ${acc}55`,
+                    borderRadius: "0 6px 6px 0", padding: "0.9rem 1rem",
+                  }}>
+                    <div style={{ flexShrink: 0, marginTop: "0.15rem" }}>
+                      {isLivre ? (
+                        <div style={{ width: 8, height: 44, borderRadius: "1px", background: `linear-gradient(to bottom, ${T.or}90, ${T.aurore}60)` }}/>
+                      ) : (
+                        <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={acc} strokeWidth="1.5" strokeLinecap="round" opacity={0.7}>
+                          <circle cx="12" cy="12" r="10"/><polygon points="10,8 16,12 10,16"/>
+                        </svg>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.35em", textTransform: "uppercase", color: acc, marginBottom: "0.25rem", opacity: 0.8 }}>
+                        {isLivre ? "Livre" : "Podcast"} · {r.auteur}
+                      </div>
+                      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.orPale, lineHeight: 1.3, marginBottom: "0.3rem" }}>{r.titre}</div>
+                      <div style={{ fontFamily: T.serif, fontSize: "0.75rem", color: T.aube, opacity: 0.6, lineHeight: 1.6 }}>{r.description.slice(0, 90)}…</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── BLESSURE / QUESTION cliquable ── */}
       <button onClick={() => onNavigate("presence", { question: blessure.question })} style={{
@@ -4127,6 +4163,74 @@ const getLumiereDuJour = () => {
   const auj = new Date();
   const joursSinceDebut = Math.floor((auj - debut) / (1000 * 60 * 60 * 24));
   return LUMIERES[joursSinceDebut % LUMIERES.length];
+};
+
+// ─── BASE DE RECOMMANDATIONS ─────────────────────────────────────────────────
+const RECO_LIVRES = [
+  { id: "tolle-moment-present", titre: "Le Pouvoir du moment présent", auteur: "Eckhart Tolle", type: "livre", themes: ["anxiete","mental","meditation","present","burn-out"], portes: [1,3,11], description: "Une seule idée, développée avec profondeur : la souffrance naît du mental qui vit dans le passé ou le futur. La sortie est toujours ici, maintenant." },
+  { id: "tolle-nouvelle-terre", titre: "Nouvelle Terre", auteur: "Eckhart Tolle", type: "livre", themes: ["eveil","ego","quete-de-sens","transformation","mental"], portes: [2,6,12], description: "Tolle décortique l'ego — cette voix dans la tête qui croit être toi — et montre comment s'en libérer sans le combattre." },
+  { id: "marc-aurele-pensees", titre: "Pensées pour moi-même", auteur: "Marc Aurèle", type: "livre", themes: ["mental","anxiete","present","sagesse","stoicisme"], portes: [1,4,11], description: "L'homme le plus puissant du monde passait ses nuits à se rappeler qu'il n'était rien. Ces notes privées sont d'une modernité troublante." },
+  { id: "guillemin-deux-petits-pas", titre: "Deux petits pas sur le sable mouillé", auteur: "Anne-Dauphine Guillemin", type: "livre", themes: ["deuil","enfant","maladie","amour","perte"], portes: [3,4,5], description: "Une mère accompagne sa fille atteinte d'une maladie rare. Un texte d'une grâce bouleversante sur l'amour et ce que la vie garde même dans les moments les plus sombres." },
+  { id: "frankl-sens", titre: "L'Homme en quête de sens", auteur: "Viktor Frankl", type: "livre", themes: ["deuil","souffrance","sens","resilience","perte","mort"], portes: [4,6,12], description: "Écrit après Auschwitz. La thèse : on peut supporter presque n'importe quoi si on trouve un sens à ce qu'on traverse. Le sens ne se trouve pas — il se crée." },
+  { id: "rinpoche-tibetain", titre: "Le Livre tibétain de la vie et de la mort", auteur: "Sogyal Rinpoché", type: "livre", themes: ["deuil","mort","spiritualite","invisible","apres-la-mort"], portes: [4,10,12], description: "La grande référence bouddhiste sur la mort et ce qui vient après. Un accompagnement profond pour ceux qui ont perdu quelqu'un ou apprivoisent leur propre finitude." },
+  { id: "gibran-prophete", titre: "Le Prophète", auteur: "Khalil Gibran", type: "livre", themes: ["separation","amour","deuil","sens","beaute","relations"], portes: [5,8,12], description: "Un des textes les plus beaux jamais écrits sur l'amour, la liberté, la mort. Des poèmes en prose qui disent ce que les mots ordinaires ne peuvent pas dire." },
+  { id: "rosenberg-communication", titre: "Les Mots sont des fenêtres (ou des murs)", auteur: "Marshall Rosenberg", type: "livre", themes: ["relations","communication","colere","conflit","separation"], portes: [8,9], description: "La Communication Non Violente. Parler depuis ce qu'on ressent plutôt que depuis ce qu'on reproche. Transforme les relations de l'intérieur." },
+  { id: "van-der-kolk-corps", titre: "Le Corps n'oublie rien", auteur: "Bessel van der Kolk", type: "livre", themes: ["trauma","corps","guerison","emotions","therapie","maladie"], portes: [2,3,4], description: "Les traumatismes ne sont pas que des souvenirs — ils vivent dans le corps. Van der Kolk montre comment les libérer. Un livre qui change la façon de se comprendre." },
+  { id: "odoul-dis-moi", titre: "Dis-moi où tu as mal, je te dirai pourquoi", auteur: "Michel Odoul", type: "livre", themes: ["corps","maladie","emotions","guerison","psychosomatique"], portes: [2,3,5], description: "Chaque douleur physique dit quelque chose d'une tension émotionnelle. Odoul décrypte le langage du corps comme mémoire vivante." },
+  { id: "calestrémé-energie", titre: "La Clé de Votre Énergie", auteur: "Natacha Calestrémé", type: "livre", themes: ["energie","guerison","emotions","corps","trauma"], portes: [3,4,5], description: "22 protocoles pour se libérer émotionnellement. Des guérisons que la médecine classique n'expliquait pas. Accessible, concret, parfois bouleversant." },
+  { id: "coelho-alchimiste", titre: "L'Alchimiste", auteur: "Paulo Coelho", type: "livre", themes: ["quete-de-sens","destin","transformation","courage","reve"], portes: [6,7,10], description: "Un berger andalou part chercher un trésor. Ce qu'il trouve, c'est lui-même. Court, lumineux, universel." },
+  { id: "prophetie-andes", titre: "La Prophétie des Andes", auteur: "James Redfield", type: "livre", themes: ["quete-de-sens","synchronicites","eveil","energie","transformation"], portes: [1,6,7], description: "Un roman initiatique sur les coïncidences qui ne sont pas des coïncidences. Neuf révélations sur la façon dont l'énergie circule entre les êtres." },
+  { id: "conversations-dieu", titre: "Conversations avec Dieu", auteur: "Neale Donald Walsch", type: "livre", themes: ["quete-de-sens","spiritualite","amour","sens","invisible"], portes: [5,10,12], description: "Une lettre de colère à Dieu — et une réponse. Ce dialogue dit des choses que peu de livres osent dire sur l'amour et la peur." },
+  { id: "dialogues-ange", titre: "Dialogues avec l'Ange", auteur: "Gitta Mallasz", type: "livre", themes: ["spiritualite","invisible","quete-de-sens","mort","eveil"], portes: [5,10,12], description: "Budapest, 1943. Quatre personnes reçoivent des messages d'une présence qu'elles appellent l'Ange. Un texte qui ne ressemble à aucun autre." },
+  { id: "lenoir-puissance-joie", titre: "La Puissance de la joie", auteur: "Frédéric Lenoir", type: "livre", themes: ["quete-de-sens","bonheur","sagesse","transformation","bien-etre"], portes: [6,11,12], description: "La différence entre le plaisir — fugace — et la joie, état profond indépendant des circonstances. La joie se cultive." },
+  { id: "4-accords-tolteques", titre: "Les Quatre Accords Toltèques", auteur: "Don Miguel Ruiz", type: "livre", themes: ["croyances","mental","relations","liberte","confiance-en-soi"], portes: [1,2,4], description: "Quatre principes tirés de la sagesse toltèque. Simples à lire, difficiles à tenir — et profondément libérateurs." },
+  { id: "bourbeau-5-blessures", titre: "Les 5 blessures qui empêchent d'être soi-même", auteur: "Lise Bourbeau", type: "livre", themes: ["croyances","schemas","confiance-en-soi","blessures","relations"], portes: [2,5,9], description: "Cinq blessures fondamentales — rejet, abandon, humiliation, trahison, injustice — et comment elles façonnent nos comportements à notre insu." },
+  { id: "transurfing-zeland", titre: "Transurfing — Les espaces des variantes", auteur: "Vadim Zeland", type: "livre", themes: ["realite","intention","energie","transformation","eveil"], portes: [6,7,9], description: "Nous naviguons entre des variantes possibles de notre vie — et notre énergie intérieure détermine laquelle se manifeste. Déroutant, unique, puissant." },
+  { id: "cameron-artist-way", titre: "Libérez votre créativité", auteur: "Julia Cameron", type: "livre", themes: ["creativite","confiance-en-soi","blocage-creatif","transformation"], portes: [7], description: "12 semaines pour débloquer sa créativité. La créativité est liée à la spiritualité, et tout le monde peut créer. Un programme qui a changé des millions de vies." },
+  { id: "allix-test", titre: "Le Test", auteur: "Stéphane Allix", type: "livre", themes: ["deuil","mort","invisible","spiritualite","apres-la-mort"], portes: [4,10,12], description: "Allix cache des objets dans son cercueil, puis interroge des médiums à son insu. Ce qu'il découvre ébranle ses certitudes. Rigoureux sur ce que la science n'explique pas." },
+  { id: "moradel-niagara", titre: "Sur les Hauteurs des Chutes du Niagara", auteur: "Steve Moradel", type: "livre", themes: ["quete-de-sens","identite","liberte","roman"], portes: [1,6,12], description: "Un roman qui traverse l'identité, la quête, la liberté. Depuis les racines caribéennes, il dit quelque chose d'universel sur ce qu'on cherche quand on regarde vers l'horizon." },
+];
+
+const RECO_PODCASTS = [
+  { id: "change-ma-vie", titre: "Change ma vie", auteur: "Clotilde Dusoulier", type: "podcast", themes: ["mental","emotions","confiance-en-soi","anxiete","bien-etre"], portes: [1,2,3], description: "Plus de 40 millions d'écoutes. Des outils précis et concrets pour mieux se comprendre et changer de l'intérieur. La référence absolue en français." },
+  { id: "vie-interieure", titre: "La Vie intérieure", auteur: "Christophe André", type: "podcast", themes: ["emotions","meditation","pleine-conscience","anxiete","present"], portes: [3,11], description: "4 à 5 minutes par épisode sur des émotions précises. Un espace de reconnexion à soi, rare et juste. Sur France Culture." },
+  { id: "metamorphose", titre: "Métamorphose", auteur: "Anne Ghesquière", type: "podcast", themes: ["transformation","spiritualite","sante","psychologie","quete-de-sens"], portes: [2,6,10], description: "La référence française des podcasts bien-être. On pioche à la carte selon ce qu'on traverse." },
+  { id: "passeport-invisible", titre: "Passeport pour l'invisible", auteur: "Stéphane Allix", type: "podcast", themes: ["spiritualite","mort","deuil","invisible","apres-la-mort"], portes: [4,10,12], description: "Les expériences aux frontières du visible. Rigoureux, ouvert, bouleversant. Pour ceux qui questionnent l'invisible." },
+  { id: "huberman-lab", titre: "Huberman Lab", auteur: "Andrew Huberman", type: "podcast", themes: ["corps","sommeil","stress","cerveau","burn-out","science"], portes: [3,4,11], description: "Le neuroscientifique de Stanford traduit la science du cerveau en protocoles pratiques. Chaque épisode vaut plusieurs heures de lecture." },
+  { id: "esther-perel", titre: "Where Should We Begin?", auteur: "Esther Perel", type: "podcast", themes: ["relations","couple","separation","communication","amour"], portes: [4,8,9], description: "De vrais couples en séance de thérapie. En direct, sans filtre. Ce qu'on entend ressemble à ce qu'on vit. Le meilleur podcast sur l'amour et la rupture." },
+  { id: "feeling-good", titre: "Feeling Good Podcast", auteur: "Dr David Burns", type: "podcast", themes: ["depression","anxiete","therapie-cognitive","croyances","confiance-en-soi"], portes: [1,2,4], description: "Le psychiatre Burns répond à des questions réelles sur la dépression, l'anxiété, la honte. Direct, efficace." },
+  { id: "tara-brach", titre: "Tara Brach Podcast", auteur: "Tara Brach", type: "podcast", themes: ["meditation","trauma","pleine-conscience","acceptation","guerison"], portes: [3,5,11], description: "Psychologue et enseignante bouddhiste. Ses méditations guidées sur la présence et l'auto-compassion sont parmi les plus belles disponibles." },
+  { id: "dialogues-midal", titre: "Dialogues", auteur: "Fabrice Midal", type: "podcast", themes: ["philosophie","meditation","present","sens","bien-etre"], portes: [1,11,12], description: "Le fondateur de l'École Occidentale de Méditation en dialogue avec des penseurs. Une façon douce et profonde d'approcher la méditation." },
+  { id: "le-phare", titre: "Le Phare", auteur: "Julien Maurel", type: "podcast", themes: ["transformation","spiritualite","resilience","quete-de-sens","foi"], portes: [6,10,12], description: "Des témoignages de transformation spirituelle. Des gens ordinaires qui racontent comment quelque chose a basculé en eux." },
+];
+
+const ETATS_THEMES_MAP = {
+  "separation":       ["separation","amour","deuil","relations","guerison"],
+  "deuil":            ["deuil","mort","perte","invisible","souffrance"],
+  "anxiete":          ["anxiete","mental","stress","present","burn-out"],
+  "burn-out":         ["burn-out","corps","stress","energie","present"],
+  "quete-de-sens":    ["quete-de-sens","sens","eveil","spiritualite","transformation"],
+  "creer":            ["creativite","blocage-creatif","reve","transformation","confiance-en-soi"],
+  "relation-toxique": ["relations","schemas","blessures","croyances","communication"],
+  "confiance-en-soi": ["croyances","schemas","liberte","confiance-en-soi","blessures"],
+  "trauma":           ["trauma","corps","guerison","emotions","blessures"],
+  "se-reconnecter":   ["corps","present","meditation","emotions","bien-etre"],
+  "heureux":          ["sens","bonheur","quete-de-sens","sagesse","transformation"],
+  "maladie":          ["maladie","corps","guerison","psychosomatique","energie"],
+};
+
+const getRecommandationsPersonnalisees = (etats = [], porte = null, max = 3) => {
+  const themes = [...new Set(etats.flatMap(e => ETATS_THEMES_MAP[e] || []))];
+  const tous = [...RECO_LIVRES, ...RECO_PODCASTS];
+  if (!themes.length && !porte) return tous.slice(0, max);
+  return tous
+    .filter(r => r.themes.some(t => themes.includes(t)) || (porte && r.portes?.includes(porte)))
+    .sort((a, b) => {
+      const sA = a.themes.filter(t => themes.includes(t)).length + (porte && a.portes?.includes(porte) ? 2 : 0);
+      const sB = b.themes.filter(t => themes.includes(t)).length + (porte && b.portes?.includes(porte) ? 2 : 0);
+      return sB - sA;
+    })
+    .slice(0, max);
 };
 
 // ─── SYSTÈME SEMI-ADAPTATIF ────────────────────────────────────────────────────
