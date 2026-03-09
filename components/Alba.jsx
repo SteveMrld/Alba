@@ -4440,10 +4440,17 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   const [section, setSection] = useState("pratique");
   const [niveauPratique, setNiveauPratique] = useState(0);
   const [exerciceFait, setExerciceFait] = useState({});
-  const [signal, setSignal] = useState(null); // { niveau, exerciceIdx, tag }
-  const [exercicesMis, setExercicesMis] = useState([]); // ordre adapté
+  const [signal, setSignal] = useState(null);
+  const [exercicesMis, setExercicesMis] = useState([]);
+  const [porteIdx, setPorteIdx] = useState(Math.max(0, cleActive - 1)); // navigation locale
 
-  const territoire = TERRITOIRES_CLES[Math.max(0, cleActive - 1)] || TERRITOIRES_CLES[0];
+  const tousLesTerrItoires = TERRITOIRES_CLES; // 12 portes
+  const territoire = tousLesTerrItoires[porteIdx] || tousLesTerrItoires[0];
+  const eclats = calcEclats(progressStats);
+  const porteDebloquee = (idx) => eclats >= (SEUILS_PORTES[idx] || 0);
+
+  // Sync si cleActive change depuis l'extérieur
+  useEffect(() => { setPorteIdx(Math.max(0, cleActive - 1)); }, [cleActive]);
   const pratique = territoire.pratiques[niveauPratique];
 
   // Déterminer le niveau selon la progression
@@ -4480,15 +4487,16 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   // Charger les exercices faits
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`alba_exercices_cle${cleActive}`);
+      const saved = localStorage.getItem(`alba_exercices_cle${porteIdx}`);
       if (saved) setExerciceFait(JSON.parse(saved));
+      else setExerciceFait({});
     } catch {}
-  }, [cleActive]);
+  }, [porteIdx]);
 
   const toggleExercice = (idx) => {
     const updated = { ...exerciceFait, [idx]: !exerciceFait[idx] };
     setExerciceFait(updated);
-    try { localStorage.setItem(`alba_exercices_cle${cleActive}`, JSON.stringify(updated)); } catch {}
+    try { localStorage.setItem(`alba_exercices_cle${porteIdx}`, JSON.stringify(updated)); } catch {}
   };
 
   return (
@@ -4508,6 +4516,40 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
 
     <div style={{ position: "relative", zIndex: 1, padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
       <style>{`@keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
+
+      {/* Navigation entre Portes */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: "1.2rem", padding: "0 0.2rem",
+      }}>
+        <button
+          onClick={() => { if (porteIdx > 0) { setPorteIdx(p => p - 1); setSection("pratique"); }}}
+          disabled={porteIdx === 0}
+          style={{ background: "none", border: "none", cursor: porteIdx === 0 ? "default" : "pointer",
+            color: porteIdx === 0 ? `${T.brume}30` : T.brume, fontSize: "1.2rem", padding: "0.5rem" }}
+        >←</button>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem",
+            letterSpacing: "0.5em", textTransform: "uppercase", color: territoire.couleur }}>
+            Porte {territoire.index} / 12
+          </div>
+          <div style={{ display: "flex", gap: "4px", justifyContent: "center", marginTop: "0.4rem" }}>
+            {tousLesTerrItoires.map((t, i) => (
+              <div key={i} onClick={() => { setPorteIdx(i); setSection("pratique"); }} style={{
+                width: i === porteIdx ? 16 : 6, height: 4, borderRadius: 2,
+                background: i === porteIdx ? territoire.couleur : porteDebloquee(i) ? `${T.brume}60` : `${T.brume}20`,
+                transition: "all 0.3s", cursor: "pointer",
+              }}/>
+            ))}
+          </div>
+        </div>
+        <button
+          onClick={() => { if (porteIdx < tousLesTerrItoires.length - 1) { setPorteIdx(p => p + 1); setSection("pratique"); }}}
+          disabled={porteIdx === tousLesTerrItoires.length - 1}
+          style={{ background: "none", border: "none", cursor: porteIdx === tousLesTerrItoires.length - 1 ? "default" : "pointer",
+            color: porteIdx === tousLesTerrItoires.length - 1 ? `${T.brume}30` : T.brume, fontSize: "1.2rem", padding: "0.5rem" }}
+        >→</button>
+      </div>
 
       {/* Phrase d'ambiance Porte */}
       <div style={{
