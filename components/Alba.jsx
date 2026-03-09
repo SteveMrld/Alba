@@ -3160,7 +3160,392 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
 };
 
 // ─── RITUEL DU CRÉPUSCULE ────────────────────────────────────────────────────
+// ─── LE CIEL — Rituel du Cairn ────────────────────────────────────────────────
+
+const ETATS_CAIRN = [
+  { id: "chagrin",        label: "quelque chose que je perds",              couleur: "#4A6FA5", hex: "#4A6FA5" },
+  { id: "fatigue",        label: "je n'en peux plus",                       couleur: "#7A7A8A", hex: "#7A7A8A" },
+  { id: "colere",         label: "quelque chose en moi résiste",            couleur: "#C45C2A", hex: "#C45C2A" },
+  { id: "solitude",       label: "je suis seul avec ça",                    couleur: "#2A3A5C", hex: "#2A3A5C" },
+  { id: "questionnement", label: "je ne sais plus",                         couleur: "#8A6FA5", hex: "#8A6FA5" },
+  { id: "traversee",      label: "je suis en chemin malgré tout",           couleur: "#C8A96E", hex: "#C8A96E" },
+  { id: "espoir",         label: "quelque chose recommence",                couleur: "#6A9E8A", hex: "#6A9E8A" },
+  { id: "douceur",        label: "je me traite avec soin",                  couleur: "#C4857A", hex: "#C4857A" },
+  { id: "gratitude",      label: "j'ai reçu quelque chose",                 couleur: "#D4A84B", hex: "#D4A84B" },
+  { id: "paix",           label: "je suis posé",                            couleur: "#8AA88A", hex: "#8AA88A" },
+  { id: "joie",           label: "quelque chose de léger",                  couleur: "#E8B89A", hex: "#E8B89A" },
+  { id: "guerison",       label: "je sens que ça change en moi",            couleur: "#D4C8B8", hex: "#D4C8B8" },
+];
+
+const PHRASES_CAIRN = {
+  chagrin:        "Le chagrin est une forme d'amour qui cherche où aller.",
+  fatigue:        "Poser ce qu'on porte, c'est déjà un acte de courage.",
+  colere:         "La colère dit quelque chose de juste. Écoute-la.",
+  solitude:       "D'autres ont veillé dans le même silence ce soir.",
+  questionnement: "Ne pas savoir est parfois la réponse la plus honnête.",
+  traversee:      "Être en chemin, c'est déjà être arrivé quelque part.",
+  espoir:         "Quelque chose en toi sait que ça peut recommencer.",
+  douceur:        "Prendre soin de soi n'est pas un luxe. C'est un retour.",
+  gratitude:      "Ce que tu as reçu continue à travailler en toi.",
+  paix:           "La paix n'est pas l'absence. C'est une présence.",
+  joie:           "Laisse la légèreté prendre toute la place qu'elle mérite.",
+  guerison:       "La guérison ne prévient pas. Elle arrive doucement.",
+};
+
+// Génère des points de ciel simulés + les vrais depuis Supabase
+const genererEtoilesCiel = (pierresReelles) => {
+  const rng = (seed) => { let x = Math.sin(seed) * 10000; return x - Math.floor(x); };
+  const points = [];
+  // ~200 points de fond (histoire collective simulée)
+  for (let i = 0; i < 200; i++) {
+    const etat = ETATS_CAIRN[Math.floor(rng(i * 7.3) * ETATS_CAIRN.length)];
+    points.push({
+      id: `bg_${i}`, x: rng(i * 3.7) * 100, y: rng(i * 5.1) * 100,
+      couleur: etat.couleur, taille: 1 + rng(i * 2.3) * 2,
+      opacite: 0.15 + rng(i * 4.1) * 0.35, isReal: false,
+    });
+  }
+  // Pierres réelles par-dessus
+  pierresReelles.forEach((p, i) => {
+    points.push({
+      id: `real_${p.id || i}`,
+      x: 5 + rng((p.created_at || i) * 9.1 + 1) * 90,
+      y: 5 + rng((p.created_at || i) * 6.7 + 2) * 90,
+      couleur: (ETATS_CAIRN.find(e => e.id === p.etat) || ETATS_CAIRN[5]).couleur,
+      taille: 2 + rng(i * 1.7) * 2, opacite: 0.5 + rng(i * 3.3) * 0.4, isReal: true,
+    });
+  });
+  return points;
+};
+
+const CielCairn = ({ userId, db }) => {
+  const [etape, setEtape]           = useState(0); // 0=ciel 1=question 2=etats 3=geste 4=envol 5=retour
+  const [texte, setTexte]           = useState("");
+  const [etatChoisi, setEtatChoisi] = useState(null);
+  const [pierres, setPierres]       = useState([]);
+  const [nouvellePierre, setNouvellePierre] = useState(null);
+  const [piedDePage, setPiedDePage] = useState(false);
+  const [dejaFaitAujd, setDejaFaitAujd] = useState(false);
+  const [isHolding, setIsHolding]   = useState(false);
+  const [holdProgress, setHoldProgress] = useState(0);
+  const [particules, setParticules] = useState([]);
+  const holdTimerRef = useRef(null);
+  const holdIntervalRef = useRef(null);
+
+  const today = new Date().toISOString().split("T")[0];
+
+  // Charger les pierres depuis Supabase
+  useEffect(() => {
+    const charger = async () => {
+      try {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_cairn?select=id,etat,created_at&order=created_at.desc&limit=300`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+        });
+        if (r.ok) { const d = await r.json(); setPierres(d); }
+      } catch {}
+      // Vérifier si déjà fait aujourd'hui
+      try {
+        const fait = localStorage.getItem(`alba_cairn_${today}`);
+        if (fait) setDejaFaitAujd(true);
+      } catch {}
+    };
+    charger();
+  }, []);
+
+  const etoiles = useMemo(() => genererEtoilesCiel(pierres), [pierres]);
+
+  // Sauvegarder la pierre
+  const sauvegarderPierre = async () => {
+    const pierre = { etat: etatChoisi.id, user_token: userId || "anon", created_at: new Date().toISOString() };
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/alba_cairn`, {
+        method: "POST",
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify(pierre),
+      });
+      localStorage.setItem(`alba_cairn_${today}`, "1");
+      setDejaFaitAujd(true);
+    } catch {}
+    setNouvellePierre({ x: 48 + Math.random() * 4, y: 20 + Math.random() * 10, couleur: etatChoisi.couleur, isNew: true });
+    setPierres(prev => [...prev, { ...pierre, id: Date.now() }]);
+  };
+
+  // Geste maintien
+  const startHold = () => {
+    setIsHolding(true);
+    let progress = 0;
+    holdIntervalRef.current = setInterval(() => {
+      progress += 2;
+      setHoldProgress(progress);
+      // Générer particules
+      if (progress % 10 === 0) {
+        setParticules(prev => [...prev, {
+          id: Date.now() + Math.random(),
+          angle: Math.random() * 360,
+          distance: 40 + Math.random() * 30,
+          size: 2 + Math.random() * 3,
+          couleur: etatChoisi.couleur,
+        }]);
+      }
+      if (progress >= 100) {
+        clearInterval(holdIntervalRef.current);
+        setIsHolding(false);
+        setHoldProgress(100);
+        setTimeout(() => setEtape(4), 300);
+      }
+    }, 30);
+  };
+
+  const stopHold = () => {
+    clearInterval(holdIntervalRef.current);
+    setIsHolding(false);
+    if (holdProgress < 100) setHoldProgress(0);
+  };
+
+  // Nettoyage
+  useEffect(() => () => { clearInterval(holdIntervalRef.current); clearTimeout(holdTimerRef.current); }, []);
+
+  // ── CIEL (étape 0 et 5) ────────────────────────────────────────────────────
+  const CielView = ({ showNouvelleEtoile }) => (
+    <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden" }}>
+      {/* Nébuleuse de fond */}
+      <div style={{ position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A44 0%, transparent 70%)",
+        pointerEvents: "none" }} />
+
+      {/* Étoiles */}
+      {etoiles.map(e => (
+        <div key={e.id} style={{
+          position: "absolute", left: `${e.x}%`, top: `${e.y}%`,
+          width: e.taille, height: e.taille, borderRadius: "50%",
+          background: e.couleur, opacity: e.opacite,
+          boxShadow: e.isReal ? `0 0 ${e.taille * 3}px ${e.couleur}55` : "none",
+          transition: "opacity 2s ease",
+          animation: e.isReal ? `alba-breathe ${8 + Math.random() * 8}s ease-in-out infinite` : "none",
+        }} />
+      ))}
+
+      {/* Nouvelle étoile — brille plus fort */}
+      {showNouvelleEtoile && nouvellePierre && (
+        <div style={{
+          position: "absolute", left: `${nouvellePierre.x}%`, top: `${nouvellePierre.y}%`,
+          width: 6, height: 6, borderRadius: "50%",
+          background: nouvellePierre.couleur,
+          boxShadow: `0 0 20px ${nouvellePierre.couleur}, 0 0 40px ${nouvellePierre.couleur}55`,
+          animation: "alba-breathe 3s ease-in-out infinite",
+          zIndex: 10,
+        }} />
+      )}
+
+      {/* Compteur discret */}
+      <div style={{ position: "absolute", bottom: "7rem", left: 0, right: 0, textAlign: "center" }}>
+        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55` }}>
+          {pierres.length + 200} présences dans ce ciel
+        </p>
+      </div>
+
+      {/* Bouton déposer / déjà fait */}
+      <div style={{ position: "absolute", bottom: "3.5rem", left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+        {dejaFaitAujd && etape !== 5 ? (
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}66` }}>
+            Ta pierre est dans le ciel ce soir.
+          </p>
+        ) : etape === 5 ? (
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${etatChoisi?.couleur}cc` }}>
+            Elle brille là-haut. Tu peux rester.
+          </p>
+        ) : (
+          <button onClick={() => setEtape(1)} style={{
+            background: "transparent", border: `1px solid ${T.or}33`,
+            borderRadius: "30px", padding: "0.8rem 2rem",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+            letterSpacing: "0.5em", textTransform: "uppercase",
+            color: `${T.or}99`, cursor: "pointer",
+            transition: "all 0.4s ease",
+          }}>
+            Déposer une pierre
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  if (etape === 0 || etape === 5) return <CielView showNouvelleEtoile={etape === 5} />;
+
+  // ── ÉTAPE 1 : Question ─────────────────────────────────────────────────────
+  if (etape === 1) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+      <div style={{ position: "absolute", top: "25%", left: "50%", transform: "translateX(-50%)", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}08 0%, transparent 70%)`, animation: "alba-breathe 8s ease-in-out infinite", pointerEvents: "none" }} />
+
+      <div style={{ width: "100%", maxWidth: 340, position: "relative", zIndex: 1 }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.2rem, 4vw, 1.5rem)", color: T.orPale, lineHeight: 1.9, textAlign: "center", marginBottom: "2.5rem", animation: "fadeUp 1s ease forwards" }}>
+          Qu'est-ce que tu portes<br/>en ce moment ?
+        </p>
+        <textarea
+          value={texte} onChange={e => setTexte(e.target.value)}
+          placeholder="En un mot, une phrase…"
+          rows={3} autoFocus
+          style={{
+            width: "100%", background: "transparent", border: "none",
+            borderBottom: `1px solid ${texte ? T.or + "44" : T.brume + "22"}`,
+            color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1.05rem", padding: "0.5rem 0", outline: "none",
+            resize: "none", boxSizing: "border-box", lineHeight: 1.7,
+            textAlign: "center", transition: "border-color 0.3s",
+          }}
+        />
+        <button onClick={() => setEtape(2)} style={{
+          marginTop: "2rem", background: "transparent", border: `1px solid ${T.or}30`,
+          borderRadius: "30px", padding: "0.75rem 1.8rem",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          letterSpacing: "0.45em", textTransform: "uppercase",
+          color: `${T.or}88`, cursor: "pointer", display: "block",
+          margin: "2rem auto 0", transition: "all 0.3s",
+        }}>
+          {texte.trim() ? "Continuer →" : "Passer →"}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── ÉTAPE 2 : Choix état ───────────────────────────────────────────────────
+  if (etape === 2) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem", overflowY: "auto" }}>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}bb`, textAlign: "center", marginBottom: "2rem", lineHeight: 1.8, animation: "fadeUp 0.6s ease forwards" }}>
+        Cette chose que tu portes,<br/>elle ressemble plutôt à…
+      </p>
+      <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        {ETATS_CAIRN.map((e, i) => (
+          <button key={e.id} onClick={() => { setEtatChoisi(e); setEtape(3); }}
+            style={{
+              background: "transparent", border: `1px solid ${e.couleur}25`,
+              borderLeft: `3px solid ${e.couleur}55`,
+              borderRadius: "6px", padding: "0.85rem 1.2rem",
+              fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem",
+              color: `${T.aube}bb`, cursor: "pointer", textAlign: "left",
+              transition: "all 0.2s", animation: `fadeUp 0.4s ease forwards ${i * 0.04}s`,
+              opacity: 0,
+            }}
+            onMouseEnter={e2 => { e2.currentTarget.style.background = `${e.couleur}12`; e2.currentTarget.style.color = T.aube; }}
+            onMouseLeave={e2 => { e2.currentTarget.style.background = "transparent"; e2.currentTarget.style.color = `${T.aube}bb`; }}
+          >
+            {e.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── ÉTAPE 3 : Geste (maintenir) ────────────────────────────────────────────
+  if (etape === 3 && etatChoisi) return (
+    <div style={{
+      minHeight: "100vh", background: "#060408",
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      padding: "2rem", overflow: "hidden", position: "relative",
+    }}>
+      {/* Wash de couleur progressif */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: `radial-gradient(ellipse at center, ${etatChoisi.couleur}${Math.floor(holdProgress * 0.18).toString(16).padStart(2,"0")} 0%, transparent 70%)`,
+        transition: "background 0.3s ease",
+      }} />
+
+      {/* Phrase ALBA */}
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${etatChoisi.couleur}cc`, textAlign: "center", lineHeight: 1.85, maxWidth: 280, marginBottom: "3rem", animation: "fadeUp 0.8s ease forwards", position: "relative", zIndex: 1 }}>
+        {PHRASES_CAIRN[etatChoisi.id]}
+      </p>
+
+      {/* La pierre — cercle à maintenir */}
+      <div style={{ position: "relative", zIndex: 2 }}>
+        {/* Particules */}
+        {particules.map(p => (
+          <div key={p.id} style={{
+            position: "absolute",
+            left: `calc(50% + ${Math.cos(p.angle * Math.PI / 180) * p.distance}px)`,
+            top: `calc(50% + ${Math.sin(p.angle * Math.PI / 180) * p.distance}px)`,
+            width: p.size, height: p.size, borderRadius: "50%",
+            background: p.couleur, opacity: 0.6,
+            transform: "translate(-50%, -50%)",
+            transition: "opacity 1s ease",
+            animation: "fadeIn 0.3s ease forwards",
+          }} />
+        ))}
+
+        {/* Anneau de progression */}
+        <svg width={120} height={120} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) rotate(-90deg)" }}>
+          <circle cx={60} cy={60} r={54} fill="none" stroke={`${etatChoisi.couleur}22`} strokeWidth={2} />
+          <circle cx={60} cy={60} r={54} fill="none" stroke={etatChoisi.couleur} strokeWidth={2}
+            strokeDasharray={`${2 * Math.PI * 54}`}
+            strokeDashoffset={`${2 * Math.PI * 54 * (1 - holdProgress / 100)}`}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 0.1s linear" }}
+          />
+        </svg>
+
+        {/* Bouton pierre */}
+        <div
+          onMouseDown={startHold} onMouseUp={stopHold} onMouseLeave={stopHold}
+          onTouchStart={startHold} onTouchEnd={stopHold}
+          style={{
+            width: 80, height: 80, borderRadius: "50%",
+            background: `radial-gradient(circle, ${etatChoisi.couleur}55 0%, ${etatChoisi.couleur}22 60%, transparent 100%)`,
+            border: `1px solid ${etatChoisi.couleur}66`,
+            cursor: "pointer", userSelect: "none",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transform: isHolding ? "scale(1.08)" : "scale(1)",
+            transition: "transform 0.2s ease",
+            boxShadow: isHolding ? `0 0 30px ${etatChoisi.couleur}44` : `0 0 15px ${etatChoisi.couleur}22`,
+          }}
+        />
+      </div>
+
+      <p style={{ marginTop: "2.5rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, animation: "fadeUp 1s ease forwards 0.5s", opacity: 0, position: "relative", zIndex: 1 }}>
+        {holdProgress < 100 ? "Maintiens pour déposer" : "…"}
+      </p>
+    </div>
+  );
+
+  // ── ÉTAPE 4 : Envol ────────────────────────────────────────────────────────
+  if (etape === 4) {
+    useEffect(() => {
+      sauvegarderPierre();
+      const t = setTimeout(() => setEtape(5), 3000);
+      return () => clearTimeout(t);
+    }, []);
+
+    return (
+      <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
+        {/* Fond wash */}
+        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 70%, ${etatChoisi.couleur}18 0%, transparent 60%)`, animation: "fadeIn 1s ease forwards", pointerEvents: "none" }} />
+
+        {/* Étoile qui monte */}
+        <div style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: etatChoisi.couleur,
+          boxShadow: `0 0 20px ${etatChoisi.couleur}, 0 0 40px ${etatChoisi.couleur}55`,
+          animation: "pierreEnvol 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+        }} />
+
+        <style>{`
+          @keyframes pierreEnvol {
+            0%   { transform: translateY(0) scale(1); opacity: 1; }
+            60%  { transform: translateY(-40vh) scale(1.3); opacity: 0.9; }
+            100% { transform: translateY(-80vh) scale(0.4); opacity: 0; }
+          }
+        `}</style>
+
+        <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}88`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0 }}>
+          Ta lumière a rejoint le ciel.
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 // ─── RITUEL DU MATIN ──────────────────────────────────────────────────────────
+
 // Séquence guidée 3 minutes — ancrée dans la Porte active
 
 const RITUELS_PAR_PORTE = {
@@ -7383,7 +7768,7 @@ export default function Alba() {
     { id: "presence",  label: "Miroir" },
     { id: "ardoise",   label: "Ardoise" },
     { id: "cle",       label: "Ma Clé" },
-    { id: "lumiere",   label: "Lumière" },
+    { id: "ciel",      label: "Le Ciel" },
     { id: "profil",    label: "Profil" },
   ];
 
@@ -7396,18 +7781,10 @@ export default function Alba() {
       evasion:   "/icons/navigation_evasion.svg",
       souffle:   "/icons/navigation_souffle.svg",
     };
-    if (id === "lumiere") return (
+    if (id === "lumiere" || id === "ciel") return (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
         style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/>
-        <line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/>
-        <line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
       </svg>
     );
     if (id === "profil") return (
@@ -7523,7 +7900,7 @@ export default function Alba() {
             {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
             {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
-            {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
+            {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
             {tab === "lumiere"   && <LumiereDuJour />}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
             {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
