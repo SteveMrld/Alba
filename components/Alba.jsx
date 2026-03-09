@@ -1077,30 +1077,177 @@ const AuthScreen = ({ onAuth }) => {
 
 // ─── SPLASH ────────────────────────────────────────────────────────────────────
 const Splash = ({ onEnd }) => {
+  const [phase, setPhase] = useState("logo"); // logo | landing
+  const HEURE = new Date().getHours();
+  const heroVideo = HEURE < 6 ? "/videos/etoiles.mp4"
+                  : HEURE < 12 ? "/videos/caraibe.mp4"
+                  : HEURE < 17 ? "/videos/foret.mp4"
+                  : "/videos/savane2.mp4";
+
   useEffect(() => {
-    const t = setTimeout(onEnd, 2800);
+    const t = setTimeout(() => setPhase("landing"), 2200);
     return () => clearTimeout(t);
-  }, [onEnd]);
+  }, []);
+
+  if (phase === "logo") {
+    return (
+      <Screen centered>
+        <style>{`
+          @keyframes logoFadeIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+          @keyframes taglineFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        `}</style>
+        <div style={{ textAlign: "center" }}>
+          <div style={{
+            fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(4.5rem, 14vw, 8rem)",
+            letterSpacing: "0.4em", lineHeight: 1,
+            background: `linear-gradient(90deg, ${T.or}, ${T.orPale}, ${T.or})`,
+            backgroundSize: "200% auto",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            animation: "logoFadeIn 1.4s ease forwards, shimmer 3s linear infinite",
+          }}>ALBA</div>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+            letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
+            marginTop: "1.2rem",
+            animation: "taglineFade 1.2s ease forwards 0.9s", opacity: 0,
+          }}>L'aube en toi</div>
+        </div>
+      </Screen>
+    );
+  }
+
+  // ── LANDING PAGE ──
   return (
-    <Screen centered>
-      <div style={{ textAlign: "center" }}>
+    <div style={{
+      position: "fixed", inset: 0,
+      background: T.nuit,
+      display: "flex", flexDirection: "column",
+      overflow: "hidden",
+    }}>
+      <style>{`
+        @keyframes landFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes landFadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes orb { 0%,100%{transform:scale(1) translate(0,0)} 50%{transform:scale(1.08) translate(-10px,10px)} }
+      `}</style>
+
+      {/* Vidéo de fond */}
+      <video autoPlay loop muted playsInline style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", opacity: 0.18, pointerEvents: "none",
+      }}>
+        <source src={heroVideo} type="video/mp4" />
+      </video>
+
+      {/* Overlay gradient */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: `linear-gradient(to bottom, ${T.nuit}CC 0%, ${T.nuit}55 40%, ${T.nuit}CC 80%, ${T.nuit} 100%)`,
+        pointerEvents: "none",
+      }}/>
+
+      {/* Orbe doré central */}
+      <div style={{
+        position: "absolute", top: "30%", left: "50%",
+        transform: "translateX(-50%)",
+        width: 320, height: 320, borderRadius: "50%",
+        background: `radial-gradient(circle, ${T.or}1A 0%, transparent 70%)`,
+        animation: "orb 6s ease-in-out infinite",
+        pointerEvents: "none",
+      }}/>
+
+      {/* Contenu */}
+      <div style={{
+        position: "relative", zIndex: 10,
+        flex: 1, display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        padding: "2rem 1.5rem",
+        textAlign: "center",
+      }}>
+
+        {/* Logo */}
         <div style={{
-          fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(4.5rem, 14vw, 8rem)",
-          letterSpacing: "0.4em", color: T.or, lineHeight: 1,
-          animation: "fadeIn 1.8s ease forwards",
+          fontFamily: T.serif, fontWeight: 300,
+          fontSize: "clamp(3.5rem, 12vw, 6rem)",
+          letterSpacing: "0.4em",
           background: `linear-gradient(90deg, ${T.or}, ${T.orPale}, ${T.or})`,
           backgroundSize: "200% auto",
           WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           backgroundClip: "text",
-          animationName: "shimmer", animationDuration: "3s", animationIterationCount: "infinite",
+          animation: "shimmer 4s linear infinite, landFadeIn 0.8s ease forwards",
+          marginBottom: "0.6rem",
         }}>ALBA</div>
+
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
           letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
-          marginTop: "1.2rem", animation: "fadeIn 2s ease forwards 0.8s", opacity: 0,
+          marginBottom: "3rem",
+          animation: "landFadeIn 0.8s ease forwards 0.3s", opacity: 0,
         }}>L'aube en toi</div>
+
+        {/* Phrase centrale */}
+        <div style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)",
+          color: T.orPale, lineHeight: 1.8,
+          maxWidth: 340, marginBottom: "1.5rem",
+          animation: "landFadeUp 0.9s ease forwards 0.6s", opacity: 0,
+        }}>
+          Un espace pour toi.<br/>
+          Présent à 3h du matin.<br/>
+          Présent les jours de lumière.
+        </div>
+
+        <div style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.9rem", color: T.brume,
+          maxWidth: 300, lineHeight: 1.7,
+          marginBottom: "3.5rem",
+          animation: "landFadeUp 0.9s ease forwards 0.9s", opacity: 0,
+        }}>
+          Pas un journal. Pas une appli de méditation.<br/>
+          Une maison intérieure.
+        </div>
+
+        {/* Bouton principal */}
+        <div style={{ animation: "landFadeUp 0.9s ease forwards 1.2s", opacity: 0, width: "100%", maxWidth: 300 }}>
+          <button
+            onClick={onEnd}
+            style={{
+              width: "100%",
+              background: `linear-gradient(135deg, ${T.or}, #D4A058)`,
+              border: "none", borderRadius: "2px",
+              padding: "1rem 2rem",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.45em", textTransform: "uppercase",
+              color: T.nuit, cursor: "pointer",
+              boxShadow: `0 0 40px ${T.or}33`,
+              transition: "all 0.3s",
+            }}
+            onMouseEnter={e => e.target.style.boxShadow = `0 0 60px ${T.or}55`}
+            onMouseLeave={e => e.target.style.boxShadow = `0 0 40px ${T.or}33`}
+          >
+            Entrer dans ALBA
+          </button>
+        </div>
+
+        {/* Signatures */}
+        <div style={{
+          marginTop: "3rem",
+          display: "flex", gap: "2rem", alignItems: "center",
+          animation: "landFadeIn 0.9s ease forwards 1.5s", opacity: 0,
+        }}>
+          {["Présent chaque jour", "Gratuit pour commencer", "Sans publicité"].map((t, i) => (
+            <div key={i} style={{
+              fontFamily: T.sans, fontWeight: 200,
+              fontSize: "0.45rem", letterSpacing: "0.3em",
+              textTransform: "uppercase", color: `${T.brume}99`,
+              textAlign: "center",
+            }}>{t}</div>
+          ))}
+        </div>
       </div>
-    </Screen>
+    </div>
   );
 };
 
