@@ -1074,13 +1074,25 @@ const AuthScreen = ({ onAuth }) => {
 };
 
 // ─── SPLASH ────────────────────────────────────────────────────────────────────
+const VIDEOS_AMBIANCE = {
+  nuit:  ["/videos/etoiles.mp4", "/videos/nuages.mp4"],
+  matin: ["/videos/caraibe.mp4", "/videos/vagues.mp4"],
+  jour:  ["/videos/foret.mp4",   "/videos/desert.mp4"],
+  soir:  ["/videos/savane2.mp4", "/videos/savane.mp4", "/videos/nuages.mp4"],
+};
+
+const getVideoAmbiance = () => {
+  const h = new Date().getHours();
+  const pool = h < 6 ? VIDEOS_AMBIANCE.nuit
+             : h < 12 ? VIDEOS_AMBIANCE.matin
+             : h < 17 ? VIDEOS_AMBIANCE.jour
+             : VIDEOS_AMBIANCE.soir;
+  return pool[Math.floor(Math.random() * pool.length)];
+};
+
 const Splash = ({ onEnd }) => {
   const [phase, setPhase] = useState("logo"); // logo | landing
-  const HEURE = new Date().getHours();
-  const heroVideo = HEURE < 6 ? "/videos/etoiles.mp4"
-                  : HEURE < 12 ? "/videos/caraibe.mp4"
-                  : HEURE < 17 ? "/videos/foret.mp4"
-                  : "/videos/savane2.mp4";
+  const [heroVideo] = useState(() => getVideoAmbiance());
 
   useEffect(() => {
     const t = setTimeout(() => setPhase("landing"), 2200);
@@ -2621,10 +2633,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   ];
 
   // Vidéo selon l'heure
-  const heroVideo = heure < 6 ? "/videos/etoiles.mp4"
-                  : heure < 12 ? "/videos/caraibe.mp4"
-                  : heure < 17 ? "/videos/foret.mp4"
-                  : "/videos/savane2.mp4";
+  const [heroVideo] = useState(() => getVideoAmbiance());
 
   return (
     <div style={{ paddingBottom: "6rem" }}>
@@ -3508,7 +3517,210 @@ const VIDEOS = [
 const TERRITOIRES_CLES = [
   {
     index: 1, nom: "Reconnaître", symbole: "🪔", couleur: "#C8A96E",
+    video: "/videos/etoiles.mp4",
+    ambiance: { bg: "#1A1408", accent: "#C8A96E", texte: "Avant de changer quoi que ce soit, il faut voir ce qui est là." },
     souffle: "La lumière ne juge pas ce qu'elle éclaire.",
+    questions: [
+      "Qu'est-ce que tu continues à faire semblant de ne pas savoir sur toi-même ?",
+      "Si tu retirais le rôle que tu joues pour les autres — qui resterait-il ?",
+      "Quelle vérité évites-tu depuis si longtemps qu'elle a pris la forme d'une habitude ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Pose une main sur ta poitrine. Demande-toi : \"Qu'est-ce que je ressens là, maintenant ?\" Reste 3 minutes sans chercher à répondre.",
+        "Écris une phrase commençant par \"Je fais semblant que…\" sans la corriger.",
+        "Ce soir, avant de dormir, nomme une chose que tu as vue aujourd'hui sur toi-même.",
+        "Observe ta façon de parler de toi quand tu te présentes à quelqu'un. Qu'est-ce que tu mets en avant ? Qu'est-ce que tu ne dis jamais ?",
+        "Prends un moment dans la journée pour ne rien faire. Juste être là. Observe ce qui remonte.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Trace une ligne au centre d'une page. À gauche : ce que tu contrôles. À droite : ce que tu ne contrôles pas. Place chaque chose de son côté.",
+        "Écris la liste de tout ce que tu portes et qui n'est pas à toi.",
+        "Parle à quelqu'un de confiance d'une chose que tu ne dis jamais.",
+        "Rappelle-toi un moment où tu as agi contre ce que tu ressentais. Qu'est-ce qui t'a retenu ?",
+        "Écris : \"La chose que je reconnais en moi et que j'aurais aimé reconnaître plus tôt, c'est…\"",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Relis ce que tu as écrit depuis le début de cette Clé. Qu'est-ce qui t'étonne ?",
+        "Écris une lettre à la version de toi qui n'avait pas encore reconnu ça.",
+        "Choisis une chose que tu vas arrêter de faire semblant.",
+        "Dis à voix haute ce que tu sais sur toi-même et que tu n'as encore jamais dit à personne.",
+        "Écris la différence entre qui tu croyais être avant et qui tu commences à voir maintenant.",
+      ]},
+    ],
+  },
+  {
+    index: 2, nom: "Comprendre", symbole: "🌿", couleur: "#7BA88A",
+    video: "/videos/foret.mp4",
+    ambiance: { bg: "#0E1610", accent: "#7BA88A", texte: "Comprendre, c'est remonter à la source sans se noyer dedans." },
+    souffle: "Comprendre n'est pas excuser. C'est voir plus loin.",
+    questions: [
+      "Quelle histoire te racontes-tu sur toi-même depuis si longtemps que tu l'as prise pour la réalité ?",
+      "De qui as-tu appris à te voir de cette façon ?",
+      "Si tu comprenais vraiment d'où vient ta douleur — qu'est-ce que ça changerait ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Pense à une réaction que tu as eue cette semaine et qui t'a surpris toi-même. D'où venait-elle vraiment ?",
+        "Écris : \"Je me critique souvent pour… Mais en réalité, cette critique m'a été transmise par…\"",
+        "Rappelle-toi une scène d'enfance où tu as décidé quelque chose sur toi-même. Laquelle ?",
+        "Identifie une phrase qu'on t'a dite souvent quand tu étais enfant. Est-ce que tu y crois encore ?",
+        "Observe aujourd'hui quelque chose que tu fais par automatisme. D'où vient ce geste ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Identifie un schéma qui se répète dans ta vie. Dans quel contexte est-il apparu pour la première fois ?",
+        "Écris sans filtre ce que tu aurais aimé qu'on te dise quand tu étais enfant.",
+        "Observe aujourd'hui une fois où tu te comportes avec toi-même comme quelqu'un t'a traité autrefois.",
+        "Écris : \"La blessure que je comprends mieux maintenant, c'est…\"",
+        "Pense à quelqu'un qui t'a fait du mal. Est-ce que tu comprends d'où ça venait pour eux — sans excuser ?",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Réécris l'histoire que tu te racontes sur toi-même — mais cette fois avec de la bienveillance.",
+        "Dis à voix haute, seul : \"Ce n'était pas ma faute.\" Observe ce que tu ressens.",
+        "Choisis une croyance sur toi-même que tu es prêt à déposer. Écris-la, puis déchire le papier.",
+        "Écris une lettre à quelqu'un qui t'a transmis quelque chose de lourd — sans l'envoyer. Dis-lui que tu comprends, et que tu rends ce qui est à lui.",
+        "Qu'est-ce que comprendre t'a donné que tu n'avais pas avant ? Écris-le.",
+      ]},
+    ],
+  },
+  {
+    index: 3, nom: "Ressentir", symbole: "🌊", couleur: "#7B9EA8",
+    video: "/videos/vagues.mp4",
+    ambiance: { bg: "#0A1318", accent: "#7B9EA8", texte: "Ressentir n'est pas souffrir davantage. C'est arrêter de porter seul." },
+    souffle: "Ce que tu ressens ne te définit pas. Mais l'ignorer te rétrécit.",
+    questions: [
+      "Quelle émotion as-tu appris à ne jamais montrer ? Pourquoi ?",
+      "Où dans ton corps portes-tu ce que tu ne dis pas ?",
+      "Si tes émotions pouvaient parler — qu'est-ce qu'elles diraient depuis tout ce temps ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Assieds-toi cinq minutes. Scanne ton corps de la tête aux pieds. Note ce qui attire ton attention.",
+        "Aujourd'hui, quand une émotion monte, ne la nomme pas tout de suite. Laisse-la être là 30 secondes.",
+        "Écris : \"En ce moment je ressens… et mon corps dit…\"",
+        "Pense à une situation récente où tu as dit \"ça va\" alors que ce n'était pas tout à fait vrai. Qu'est-ce qui était là, vraiment ?",
+        "Choisis une couleur qui correspond à ce que tu ressens aujourd'hui. Pourquoi cette couleur ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Rappelle-toi la dernière fois que tu as pleuré. Était-ce vraiment pour la raison apparente ?",
+        "Note une émotion que tu évites. Qu'est-ce que tu crains qu'il se passe si tu la laisses venir ?",
+        "Permets-toi aujourd'hui d'exprimer quelque chose que tu gardes d'habitude pour toi.",
+        "Écris la liste des émotions que tu t'autorises — et celles que tu t'interdis. Qui t'a appris ces règles ?",
+        "Reste cinq minutes avec une émotion difficile sans essayer de la résoudre. Juste la nommer, encore et encore.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris une lettre à une émotion que tu as longtemps rejetée. Commence par : \"Je t'ai ignoré parce que…\"",
+        "Choisis un moment de la semaine passée où tu as ressenti quelque chose d'intense. Honore-le en l'écrivant vraiment.",
+        "Dis à quelqu'un de confiance quelque chose que tu ressens mais que tu n'as jamais dit.",
+        "Écris ce que ça t'a coûté de ne pas ressentir pendant longtemps.",
+        "Qu'est-ce que tu ressens maintenant que tu n'aurais pas pu ressentir avant ? Note-le — c'est de l'espace gagné.",
+      ]},
+    ],
+  },
+  {
+    index: 4, nom: "Lâcher", symbole: "🍂", couleur: "#D4856A",
+    video: "/videos/desert.mp4",
+    ambiance: { bg: "#180E08", accent: "#D4856A", texte: "Ce que tu portes encore t'appartient-il vraiment ?" },
+    souffle: "Lâcher n'est pas perdre. C'est choisir ce qu'on veut porter.",
+    questions: [
+      "Qu'est-ce que tu continues à tenir alors que ça t'épuise ?",
+      "Si tu lâchais vraiment — qu'est-ce que tu aurais peur de devenir ?",
+      "Quelle rancœur te coûte plus qu'elle ne t'a jamais rapporté ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Fais la liste de trois choses que tu portes et qui ne t'appartiennent plus. Juste les nommer.",
+        "Observe aujourd'hui une fois où tu t'accroches à quelque chose par peur plutôt que par désir.",
+        "Écris : \"Je refuse encore de lâcher… parce que j'ai peur que…\"",
+        "Pense à quelque chose que tu possèdes — un objet, une habitude, une relation — et demande-toi : est-ce que ça me nourrit encore, ou est-ce que je le garde par réflexe ?",
+        "Écris la différence entre abandonner et lâcher prise.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Écris toutes les phrases qui commencent par \"Et si j'avais…\" Relis-les une fois. Puis barre-les toutes. L'idée n'est pas d'oublier — c'est de ne plus laisser ton énergie coincée là.",
+        "Pense à quelqu'un que tu n'as pas pardonné. Souviens-toi : lâcher prise ne veut pas dire donner raison. Ça veut dire retrouver ta paix, même si l'autre ne comprend pas.",
+        "Identifie une version de toi-même que tu es prêt à laisser partir. Dis-lui au revoir par écrit.",
+        "Qu'est-ce que tu attends encore que quelqu'un reconnaisse, s'excuse, ou comprenne ? Qu'est-ce que tu ferais si tu n'attendais plus ?",
+        "Fais quelque chose aujourd'hui que tu remets depuis longtemps parce que tu attends que ce soit parfait.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris une lettre à quelqu'un que tu as du mal à pardonner. Tu n'as pas à l'envoyer.",
+        "Identifie une attente envers quelqu'un qui ne sera jamais satisfaite. Comment tu vis sans elle ?",
+        "Choisis une chose concrète à lâcher cette semaine. Pas une idée — un acte.",
+        "Qu'est-ce que lâcher t'a rendu ? Écris ce qui est revenu depuis que tu portes moins.",
+        "Écris une promesse à toi-même : ce que tu ne porteras plus jamais seul.",
+      ]},
+    ],
+  },
+  {
+    index: 5, nom: "Recevoir", symbole: "🌑", couleur: "#A87BC8",
+    video: "/videos/nuages.mp4",
+    ambiance: { bg: "#110D18", accent: "#A87BC8", texte: "Tu as passé longtemps à donner. Maintenant apprends à t'ouvrir." },
+    souffle: "Recevoir demande plus de courage que donner.",
+    questions: [
+      "Pourquoi est-ce plus facile pour toi de donner que de recevoir ?",
+      "Qu'est-ce que tu refuses de te donner à toi-même que tu donnerais sans hésiter à quelqu'un que tu aimes ?",
+      "Si tu méritais vraiment d'être aimé tel que tu es — qu'est-ce qui changerait dans ta vie ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Écris une lettre où toutes les phrases commencent par \"Je me pardonne…\" Laisse venir ce qui vient. Ne cherche pas à bien faire. C'est un espace pour t'accueillir, pas pour t'expliquer.",
+        "Accepte un compliment aujourd'hui sans le minimiser. Dis juste : \"Merci.\"",
+        "Fais une chose aujourd'hui uniquement pour toi, sans que ça serve à quelqu'un d'autre.",
+        "Écris trois choses que tu mérites et que tu ne t'accordes pas encore.",
+        "Note une fois où quelqu'un t'a offert quelque chose — attention, temps, amour — et où tu l'as esquivé. Qu'est-ce qui s'est passé en toi ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Demande de l'aide pour quelque chose que tu aurais géré seul. Observe ce que ça fait.",
+        "Note une situation où tu sabotes ce qui est bon pour toi. D'où vient ce réflexe ?",
+        "Écris : \"Je mérite… même si je n'ai pas encore…\"",
+        "Passe une heure à faire quelque chose qui te nourrit — pas quelque chose de productif. Juste ce qui te fait du bien. Observe la résistance si elle est là.",
+        "Écris ce que tu ressentirais si tu te permettais d'être pleinement aimé tel que tu es, maintenant, sans condition.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Parle à toi-même comme tu parlerais à quelqu'un que tu aimes profondément. Qu'est-ce que tu te dirais ?",
+        "Identifie quelqu'un dans ta vie qui te donne sans compter. Est-ce que tu le laisses vraiment faire ?",
+        "Écris une liste de ce que tu es prêt à recevoir maintenant. Pas un jour — maintenant.",
+        "Écris une lettre d'amour à toi-même. Pas de modestie, pas d'ironie. Juste la vérité de ce que tu vois de beau en toi.",
+        "Qu'est-ce que recevoir a changé en toi depuis le début de cette Clé ?",
+      ]},
+    ],
+  },
+  {
+    index: 6, nom: "Devenir", symbole: "✦", couleur: "#E8D5B0",
+    video: "/videos/caraibe.mp4",
+    ambiance: { bg: "#0A1018", accent: "#E8D5B0", texte: "Tu n'arrives pas quelque part. Tu te révèles à toi-même." },
+    souffle: "Tu n'es pas en train de te réparer. Tu es en train de te révéler.",
+    questions: [
+      "Qui es-tu quand tu n'as plus rien à prouver ?",
+      "Quelle vie mènerais-tu si tu te faisais pleinement confiance ?",
+      "Qu'est-ce que tu veux laisser derrière toi — pas comme héritage, mais comme trace vivante ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Écris qui tu es sans utiliser ton métier, ton rôle ou tes accomplissements.",
+        "Note une valeur que tu veux incarner davantage. Comment elle se manifeste déjà en toi ?",
+        "Imagine-toi dans 5 ans, pleinement toi-même. Qu'est-ce qui est différent ?",
+        "Écris une liste de ce qui te rend vivant — pas utile, pas efficace. Vivant.",
+        "Qu'est-ce que tu ferais si tu savais que tu ne peux pas échouer ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Identifie une peur qui t'empêche d'avancer. Est-ce ta peur ou celle de quelqu'un d'autre ?",
+        "Écris une décision que tu remets à plus tard par manque de confiance en toi. Qu'est-ce qui se passerait si tu la prenais maintenant ?",
+        "Fais aujourd'hui quelque chose qui correspond à la personne que tu veux devenir — même petit.",
+        "Écris la différence entre la vie que tu mènes et la vie que tu veux mener. Qu'est-ce qui les sépare vraiment ?",
+        "Identifie une chose que tu fais encore pour correspondre à ce que les autres attendent de toi. Est-ce que tu veux continuer ?",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris une lettre à la version de toi dans 10 ans. Qu'est-ce que tu veux lui dire ?",
+        "Choisis une chose que tu vas commencer — pas finir, pas perfectionner. Commencer.",
+        "Dis à voix haute : \"Je suis en train de devenir quelqu'un que j'aime.\" Observe ce que ça fait.",
+        "Relis tout ce que tu as traversé dans ALBA. Qu'est-ce que tu as appris sur toi que tu ne savais pas au début ?",
+        "Écris le portrait de la personne que tu deviens — avec les mots d'un ami qui t'aime.",
+      ]},
+    ],
+  },
+];
+
     questions: [
       "Qu'est-ce que tu continues à faire semblant de ne pas savoir sur toi-même ?",
       "Si tu retirais le rôle que tu joues pour les autres — qui resterait-il ?",
@@ -3816,8 +4028,30 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   };
 
   return (
-    <div style={{ padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
+    <div style={{ position: "relative", minHeight: "100vh" }}>
+      {/* Vidéo de fond propre à la Porte */}
+      <video
+        key={territoire.video}
+        autoPlay muted loop playsInline
+        style={{
+          position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+          objectFit: "cover", zIndex: 0, opacity: 0.08,
+          transition: "opacity 1s ease",
+        }}
+      >
+        <source src={territoire.video} type="video/mp4" />
+      </video>
+
+    <div style={{ position: "relative", zIndex: 1, padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
       <style>{`@keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
+
+      {/* Phrase d'ambiance Porte */}
+      <div style={{
+        fontFamily: T.serif, fontStyle: "italic",
+        fontSize: "0.78rem", color: `${territoire.couleur}88`,
+        textAlign: "center", marginBottom: "1.8rem", lineHeight: 1.6,
+        animation: "fadeUpCle 0.4s ease forwards",
+      }}>{territoire.ambiance?.texte}</div>
 
       {/* En-tête Clé */}
       <div style={{
@@ -3986,6 +4220,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };
