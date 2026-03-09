@@ -3147,13 +3147,36 @@ const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
   const [lettreOuverte, setLettreOuverte] = useState(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem("alba_lettres");
-    if (saved) try { setLettres(JSON.parse(saved)); } catch {}
+    (async () => {
+      try {
+        const uk = localStorage.getItem("alba_user_key") || "local";
+        const rows = await sb.list("alba_lettres", { user_key: uk });
+        if (rows && rows.length > 0) {
+          setLettres(rows.map(r => ({ id: r.id, date: r.delivered_at, titre: r.titre, texte: r.texte, type: r.type || "hebdo", lue: r.lue })));
+          return;
+        }
+      } catch {}
+      const saved = localStorage.getItem("alba_lettres");
+      if (saved) try { setLettres(JSON.parse(saved)); } catch {}
+    })();
   }, []);
 
-  const saveLettres = (list) => {
+  const saveLettres = async (list) => {
     setLettres(list);
     localStorage.setItem("alba_lettres", JSON.stringify(list));
+    // Sync Supabase
+    try {
+      const uk = localStorage.getItem("alba_user_key") || "local";
+      if (list[0]) {
+        const l = list[0];
+        await sb.upsert("alba_lettres", {
+          id: l.id, user_key: uk,
+          porte_index: l.type === "porte" ? parseInt(l.id.split("_")[1] || 0) : -1,
+          titre: l.titre, texte: l.texte, type: l.type || "hebdo",
+          lue: l.lue || false, delivered_at: l.date,
+        });
+      }
+    } catch {}
   };
 
   // Vérifie si une lettre a déjà été générée cette semaine
