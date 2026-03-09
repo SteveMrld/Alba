@@ -688,55 +688,6 @@ const getPhraseduJour = (cleActive = 0) => {
 };
 
 // ─── RECOMMANDATIONS ─────────────────────────────────────────────────────────
-const RECO_LIVRES = [
-  // Par blessure
-  { titre: "Le Prophète",                 auteur: "Khalil Gibran",          blessures: ["Abandon","Rejet"],        sensibilites: ["spirituel","intuitif","transition"], chemin: [] },
-  { titre: "Les Quatre Accords Toltèques",auteur: "Don Miguel Ruiz",        blessures: ["Trahison","Humiliation"], sensibilites: ["all"],                               chemin: [] },
-  { titre: "Mille Soleils Splendides",    auteur: "Khaled Hosseini",        blessures: ["Humiliation","Injustice"],sensibilites: ["intuitif","transition"],             chemin: [] },
-  { titre: "La Force de l'âme",           auteur: "Nelson Mandela",         blessures: ["Injustice"],              sensibilites: ["rationnel","transition"],            chemin: [] },
-  { titre: "Du chaos naît une étoile",    auteur: "Steve Moradel",          blessures: ["Rejet","Abandon"],        sensibilites: ["all"],                               chemin: [] },
-  { titre: "L'Homme en quête de sens",    auteur: "Viktor Frankl",          blessures: ["Croissance","Présence"],  sensibilites: ["rationnel","transition"],            chemin: [] },
-  { titre: "Le Pouvoir du moment présent",auteur: "Eckhart Tolle",          blessures: ["Croissance","Présence","Abandon"], sensibilites: ["spirituel","intuitif"],    chemin: [] },
-  { titre: "Les Cinq Blessures",          auteur: "Lise Bourbeau",          blessures: ["Abandon","Trahison","Rejet","Humiliation","Injustice"], sensibilites: ["spirituel","intuitif","transition"], chemin: [] },
-  { titre: "Osez vous faire du bien",     auteur: "Christophe André",       blessures: ["Humiliation","Rejet","Croissance"], sensibilites: ["rationnel","transition"],  chemin: [] },
-  { titre: "Imparfaits, libres et heureux",auteur: "Christophe André",      blessures: ["Humiliation","Rejet","Croissance"], sensibilites: ["rationnel"],              chemin: [] },
-  { titre: "Le Corps n'oublie rien",      auteur: "Bessel van der Kolk",    blessures: ["Trahison","Humiliation","Abandon"], sensibilites: ["rationnel","transition"],  chemin: [] },
-  { titre: "Conversations avec Dieu",     auteur: "Neale Donald Walsch",    blessures: ["Présence","Croissance"],  sensibilites: ["spirituel"],                        chemin: [] },
-  { titre: "La Nuit des temps",           auteur: "René Barjavel",          blessures: ["Abandon","Trahison"],     sensibilites: ["intuitif","transition","spirituel"], chemin: [] },
-  { titre: "L'Alchimiste",               auteur: "Paulo Coelho",            blessures: ["Croissance","Rejet"],     sensibilites: ["spirituel","intuitif"],              chemin: [5,3,9] },
-  { titre: "Le Petit Prince",             auteur: "Antoine de Saint-Exupéry",blessures: ["Abandon","Rejet"],      sensibilites: ["all"],                               chemin: [6,2,9] },
-  { titre: "Pensées pour moi-même",       auteur: "Marc Aurèle",            blessures: ["Injustice","Croissance"], sensibilites: ["rationnel"],                        chemin: [8,4,1] },
-  { titre: "Le Tao Te Ching",             auteur: "Lao Tseu",               blessures: ["Présence","Croissance"],  sensibilites: ["spirituel","intuitif"],              chemin: [7,9] },
-  { titre: "Brainstorm",                  auteur: "Daniel J. Siegel",       blessures: ["Rejet","Abandon"],        sensibilites: ["rationnel","transition"],            chemin: [] },
-];
-
-const RECO_PODCASTS = [
-  { titre: "Émotions",                   auteur: "Louie Media",             blessures: ["Abandon","Trahison","Humiliation","Rejet","Injustice"], sensibilites: ["all"] },
-  { titre: "Thinkerview",                auteur: "Thinkerview",             blessures: ["Croissance","Présence","Injustice"], sensibilites: ["rationnel","transition"] },
-  { titre: "Des Ondes Positives",        auteur: "Sébastien Night",         blessures: ["Croissance","Présence"],  sensibilites: ["spirituel","intuitif"] },
-  { titre: "Huberman Lab (FR)",          auteur: "Andrew Huberman",         blessures: ["Croissance","Présence"],  sensibilites: ["rationnel"] },
-  { titre: "Choses à Savoir Psycho",     auteur: "Choses à Savoir",        blessures: ["all"],                    sensibilites: ["rationnel","transition"] },
-  { titre: "La Poudre",                  auteur: "Lauren Bastide",          blessures: ["Humiliation","Injustice","Rejet"], sensibilites: ["intuitif","transition"] },
-  { titre: "Être et Savoir",             auteur: "France Culture",          blessures: ["Croissance","Présence"],  sensibilites: ["spirituel","rationnel"] },
-  { titre: "Métamorphose",               auteur: "Soundheart",              blessures: ["Abandon","Rejet","Croissance"], sensibilites: ["spirituel","intuitif"] },
-  { titre: "Le Coeur sur la Table",      auteur: "Victoire Tuaillon",       blessures: ["Abandon","Trahison"],     sensibilites: ["intuitif","transition","rationnel"] },
-  { titre: "Sens & Cohérence",           auteur: "Fabrice Midal",           blessures: ["Présence","Croissance"],  sensibilites: ["spirituel","intuitif"] },
-  { titre: "L'École du Bonheur",         auteur: "Frédéric Lenoir",         blessures: ["Croissance","Présence","Rejet"], sensibilites: ["spirituel","intuitif","transition"] },
-  { titre: "No Stupid Questions",        auteur: "Freakonomics Radio",      blessures: ["Croissance"],             sensibilites: ["rationnel"] },
-];
-
-const getRecommandations = (blessureNom, sens, cdv) => {
-  const score = (item) => {
-    let s = 0;
-    if (item.blessures.includes("all") || item.blessures.includes(blessureNom)) s += 3;
-    if (item.sensibilites?.includes("all") || item.sensibilites?.includes(sens)) s += 2;
-    if (item.chemin?.includes(cdv)) s += 1;
-    return s;
-  };
-  const livres = [...RECO_LIVRES].sort((a,b) => score(b)-score(a)).slice(0,3);
-  const podcasts = [...RECO_PODCASTS].sort((a,b) => score(b)-score(a)).slice(0,3);
-  return { livres, podcasts };
-};
 
 // ─── QUESTIONS DU CRÉPUSCULE ─────────────────────────────────────────────────
 const QUESTIONS_CREPUSCULE = [
