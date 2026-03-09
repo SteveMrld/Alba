@@ -182,24 +182,13 @@ let _authToken = null;
 let _authUser  = null;
 
 const sbAuth = {
-  // Envoyer le magic link
-  async sendMagicLink(email) {
-    const r = await fetch(`${SUPABASE_URL}/auth/v1/otp`, {
+  // Inscription
+  async signUp(email, password) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
       method: "POST",
       headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ email, create_user: true }),
+      body: JSON.stringify({ email, password }),
     });
-    return r.ok;
-  },
-
-  // Vérifier le token OTP (6 chiffres)
-  async verifyOtp(email, token) {
-    const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
-      method: "POST",
-      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "email", email, token }),
-    });
-    if (!r.ok) return null;
     const data = await r.json();
     if (data.access_token) {
       _authToken = data.access_token;
@@ -208,8 +197,29 @@ const sbAuth = {
         localStorage.setItem("alba_auth_token", data.access_token);
         localStorage.setItem("alba_auth_user",  JSON.stringify(data.user));
       } catch {}
+      return { user: data.user, error: null };
     }
-    return data.user || null;
+    return { user: null, error: data.msg || data.error_description || "Erreur lors de l'inscription." };
+  },
+
+  // Connexion
+  async signIn(email, password) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await r.json();
+    if (data.access_token) {
+      _authToken = data.access_token;
+      _authUser  = data.user;
+      try {
+        localStorage.setItem("alba_auth_token", data.access_token);
+        localStorage.setItem("alba_auth_user",  JSON.stringify(data.user));
+      } catch {}
+      return { user: data.user, error: null };
+    }
+    return { user: null, error: "Email ou mot de passe incorrect." };
   },
 
   // Charger session depuis localStorage
@@ -952,149 +962,142 @@ const PaywallScreen = ({ onClose, userKey, userEmail }) => {
 
 // ─── ÉCRAN AUTH — Magic Link ──────────────────────────────────────────────────
 const AuthScreen = ({ onAuth }) => {
-  const [email, setEmail]     = useState("");
-  const [step, setStep]       = useState("email");  // email | code | sending | error
-  const [code, setCode]       = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errMsg, setErrMsg]   = useState("");
+  const [mode, setMode]         = useState("login");  // login | signup
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm]   = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [errMsg, setErrMsg]     = useState("");
+  const [showPwd, setShowPwd]   = useState(false);
 
-  const sendLink = async () => {
-    if (!email.trim() || !email.includes("@")) return;
-    setLoading(true);
-    const ok = await sbAuth.sendMagicLink(email.trim().toLowerCase());
-    setLoading(false);
-    if (ok) setStep("code");
-    else { setErrMsg("Une erreur est survenue. Réessaie."); setStep("error"); }
+  const inputStyle = {
+    background: "#1E1A16", border: `1px solid ${T.brume}33`,
+    borderRadius: "6px", padding: "0.85rem 1.1rem",
+    fontFamily: T.sans, fontSize: "0.95rem", color: T.aube,
+    outline: "none", width: "100%", boxSizing: "border-box",
+    transition: "border 0.2s",
   };
 
-  const verifyCode = async () => {
-    if (code.trim().length < 6) return;
+  const handleSubmit = async () => {
+    setErrMsg("");
+    if (!email.includes("@")) { setErrMsg("Adresse email invalide."); return; }
+    if (password.length < 6)  { setErrMsg("Le mot de passe doit faire au moins 6 caractères."); return; }
+    if (mode === "signup" && password !== confirm) { setErrMsg("Les mots de passe ne correspondent pas."); return; }
     setLoading(true);
-    const user = await sbAuth.verifyOtp(email.trim().toLowerCase(), code.trim());
+    const { user, error } = mode === "login"
+      ? await sbAuth.signIn(email.trim().toLowerCase(), password)
+      : await sbAuth.signUp(email.trim().toLowerCase(), password);
     setLoading(false);
     if (user) onAuth(user);
-    else { setErrMsg("Code incorrect ou expiré."); }
+    else setErrMsg(error || "Une erreur est survenue.");
   };
 
   return (
     <div style={{
-      position: "fixed", inset: 0,
-      background: T.nuit,
+      position: "fixed", inset: 0, background: T.nuit,
       display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "center",
       padding: "2rem",
     }}>
       {/* Halo */}
       <div style={{
-        position: "absolute", top: "20%", left: "50%",
+        position: "absolute", top: "15%", left: "50%",
         transform: "translateX(-50%)",
-        width: 280, height: 280,
-        background: `radial-gradient(ellipse, ${T.or}18 0%, transparent 70%)`,
+        width: 300, height: 300,
+        background: `radial-gradient(ellipse, ${T.or}15 0%, transparent 70%)`,
         pointerEvents: "none",
       }}/>
 
       {/* Logo */}
-      <div style={{
-        fontFamily: T.serif, fontSize: "2.2rem", letterSpacing: "0.28em",
-        color: T.or, marginBottom: "0.4rem",
-      }}>ALBA</div>
-      <div style={{
-        fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem",
-        color: T.brume, marginBottom: "3rem",
-      }}>L'aube en toi</div>
+      <div style={{ fontFamily: T.serif, fontSize: "2.2rem", letterSpacing: "0.28em", color: T.or, marginBottom: "0.3rem" }}>ALBA</div>
+      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, marginBottom: "2.5rem" }}>L'aube en toi</div>
 
-      {step === "email" && (
-        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "1.05rem", color: T.orPale,
-            textAlign: "center", lineHeight: 1.7, marginBottom: "0.5rem",
-          }}>
-            Entre ton adresse email.<br/>
-            <span style={{ color: T.brume, fontSize: "0.88rem" }}>Un lien de connexion t'y sera envoyé.</span>
-          </div>
+      <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+
+        {/* Toggle login / inscription */}
+        <div style={{ display: "flex", background: "#1E1A16", borderRadius: "6px", padding: "3px", marginBottom: "0.4rem" }}>
+          {["login", "signup"].map(m => (
+            <button key={m} onClick={() => { setMode(m); setErrMsg(""); }} style={{
+              flex: 1, padding: "0.6rem", border: "none", borderRadius: "4px",
+              background: mode === m ? `${T.or}22` : "transparent",
+              color: mode === m ? T.or : T.brume,
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+              letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+              transition: "all 0.2s",
+            }}>
+              {m === "login" ? "Se connecter" : "Créer un compte"}
+            </button>
+          ))}
+        </div>
+
+        {/* Email */}
+        <input
+          type="email" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="ton@email.com" autoFocus
+          style={inputStyle}
+        />
+
+        {/* Mot de passe */}
+        <div style={{ position: "relative" }}>
           <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && sendLink()}
-            placeholder="ton@email.com"
-            autoFocus
-            style={{
-              background: T.nuit2, border: `1px solid ${T.brume}33`,
-              borderRadius: "4px", padding: "0.9rem 1.1rem",
-              fontFamily: T.sans, fontSize: "1rem", color: T.aube,
-              outline: "none", width: "100%", boxSizing: "border-box",
-              transition: "border 0.2s",
-            }}
+            type={showPwd ? "text" : "password"}
+            value={password} onChange={e => setPassword(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && !confirm && handleSubmit()}
+            placeholder="Mot de passe"
+            style={{ ...inputStyle, paddingRight: "3rem" }}
           />
-          <button
-            onClick={sendLink}
-            disabled={loading || !email.includes("@")}
-            style={{
-              background: loading ? `${T.or}44` : T.or,
-              border: "none", borderRadius: "4px",
-              padding: "0.9rem", cursor: loading ? "default" : "pointer",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
-              letterSpacing: "0.4em", textTransform: "uppercase",
-              color: T.nuit, transition: "all 0.2s",
-            }}
-          >
-            {loading ? "Envoi…" : "Recevoir le lien"}
-          </button>
+          <button onClick={() => setShowPwd(v => !v)} style={{
+            position: "absolute", right: "0.8rem", top: "50%", transform: "translateY(-50%)",
+            background: "none", border: "none", cursor: "pointer",
+            color: T.brume, fontSize: "0.75rem", padding: "0.2rem",
+          }}>{showPwd ? "Cacher" : "Voir"}</button>
         </div>
-      )}
 
-      {step === "code" && (
-        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "1.5rem", alignItems: "center" }}>
-          {/* Icône enveloppe */}
-          <div style={{ fontSize: "2.5rem", opacity: 0.8 }}>✉</div>
-          <div style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "1.1rem", color: T.orPale,
-            textAlign: "center", lineHeight: 1.8,
-          }}>
-            Un lien t'a été envoyé.
-          </div>
-          <div style={{
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.82rem",
-            color: T.brume, textAlign: "center", lineHeight: 1.7,
-          }}>
-            Ouvre ta boîte <span style={{ color: T.orPale }}>{email}</span><br/>
-            et clique sur le lien pour entrer dans ALBA.
-          </div>
-          <div style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.8rem", color: `${T.brume}99`,
-            textAlign: "center", marginTop: "0.5rem",
-          }}>
-            Le lien expire dans 24h.
-          </div>
-          <button
-            onClick={() => { setStep("email"); setCode(""); setErrMsg(""); }}
-            style={{
-              background: "none", border: "none", cursor: "pointer",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
-              letterSpacing: "0.3em", textTransform: "uppercase",
-              color: T.brume, padding: "0.5rem", marginTop: "1rem",
-            }}
-          >
-            ← Changer d'email
-          </button>
-        </div>
-      )}
+        {/* Confirmation (inscription seulement) */}
+        {mode === "signup" && (
+          <input
+            type={showPwd ? "text" : "password"}
+            value={confirm} onChange={e => setConfirm(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSubmit()}
+            placeholder="Confirmer le mot de passe"
+            style={inputStyle}
+          />
+        )}
 
-      {step === "error" && (
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", color: "#D4856A", marginBottom: "1.5rem" }}>{errMsg}</div>
-          <button onClick={() => setStep("email")} style={{
-            background: "none", border: `1px solid ${T.brume}44`,
-            borderRadius: "4px", padding: "0.7rem 1.5rem",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
-            letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume, cursor: "pointer",
-          }}>Réessayer</button>
+        {/* Erreur */}
+        {errMsg && (
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center" }}>
+            {errMsg}
+          </div>
+        )}
+
+        {/* Bouton principal */}
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          style={{
+            background: loading ? `${T.or}55` : T.or,
+            border: "none", borderRadius: "6px",
+            padding: "0.95rem", cursor: loading ? "default" : "pointer",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+            letterSpacing: "0.4em", textTransform: "uppercase",
+            color: T.nuit, transition: "all 0.2s", marginTop: "0.2rem",
+          }}
+        >
+          {loading ? "…" : mode === "login" ? "Entrer dans ALBA" : "Créer mon compte"}
+        </button>
+
+        {/* Hint */}
+        <div style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.75rem", color: `${T.brume}77`,
+          textAlign: "center", lineHeight: 1.6, marginTop: "0.5rem",
+        }}>
+          {mode === "login"
+            ? "Pas encore de compte ? Clique sur \"Créer un compte\"."
+            : "Déjà un compte ? Clique sur \"Se connecter\"."}
         </div>
-      )}
+      </div>
     </div>
   );
 };
