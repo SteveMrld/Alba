@@ -158,10 +158,11 @@ let _authUser  = null;
 const sbAuth = {
   // Envoyer le magic link
   async sendMagicLink(email) {
+    const redirectTo = `${window.location.origin}${window.location.pathname}`;
     const r = await fetch(`${SUPABASE_URL}/auth/v1/otp`, {
       method: "POST",
       headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
-      body: JSON.stringify({ email, create_user: true }),
+      body: JSON.stringify({ email, create_user: true, options: { emailRedirectTo: redirectTo } }),
     });
     return r.ok;
   },
