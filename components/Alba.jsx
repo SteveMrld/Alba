@@ -5531,6 +5531,32 @@ export default function Alba() {
   // ── Chargement initial ──
   useEffect(() => {
     (async () => {
+      // Capturer le Magic Link depuis l'URL (#access_token=...)
+      const hash = window.location.hash;
+      if (hash && hash.includes("access_token")) {
+        const params = new URLSearchParams(hash.replace("#", ""));
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+        if (access_token) {
+          try {
+            // Récupérer l'utilisateur avec ce token
+            const r = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+              headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${access_token}` }
+            });
+            if (r.ok) {
+              const user = await r.json();
+              _authToken = access_token;
+              _authUser = user;
+              try {
+                localStorage.setItem("alba_auth_token", access_token);
+                localStorage.setItem("alba_auth_user", JSON.stringify(user));
+              } catch {}
+              // Nettoyer l'URL
+              window.history.replaceState(null, "", window.location.pathname);
+            }
+          } catch {}
+        }
+      }
       // Vérifier session auth
       const existingUser = sbAuth.loadSession();
       if (existingUser) {
