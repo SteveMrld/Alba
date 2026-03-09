@@ -4546,37 +4546,57 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
     <div style={{ position: "relative", zIndex: 1, padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
       <style>{`@keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
 
-      {/* Navigation entre Portes */}
+      {/* Navigation entre Portes — flèches visibles */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginBottom: "1.2rem", padding: "0 0.2rem",
+        marginBottom: "1.5rem",
+        background: `${T.nuit2}CC`,
+        border: `1px solid ${territoire.couleur}33`,
+        borderRadius: "8px", padding: "0.7rem 0.5rem",
       }}>
         <button
           onClick={() => { if (porteIdx > 0) { setPorteIdx(p => p - 1); setSection("pratique"); }}}
-          disabled={porteIdx === 0}
-          style={{ background: "none", border: "none", cursor: porteIdx === 0 ? "default" : "pointer",
-            color: porteIdx === 0 ? `${T.brume}30` : T.brume, fontSize: "1.2rem", padding: "0.5rem" }}
+          style={{
+            background: porteIdx === 0 ? "transparent" : `${territoire.couleur}22`,
+            border: porteIdx === 0 ? `1px solid ${T.brume}22` : `1px solid ${territoire.couleur}55`,
+            borderRadius: "6px", width: 44, height: 44,
+            cursor: porteIdx === 0 ? "default" : "pointer",
+            color: porteIdx === 0 ? `${T.brume}40` : territoire.couleur,
+            fontSize: "1.3rem", display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s", flexShrink: 0,
+          }}
         >←</button>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem",
-            letterSpacing: "0.5em", textTransform: "uppercase", color: territoire.couleur }}>
-            Porte {territoire.index} / 12
+
+        <div style={{ textAlign: "center", flex: 1 }}>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            letterSpacing: "0.5em", textTransform: "uppercase",
+            color: territoire.couleur, marginBottom: "0.5rem",
+          }}>
+            Porte {territoire.index} · {territoire.nom}
           </div>
-          <div style={{ display: "flex", gap: "4px", justifyContent: "center", marginTop: "0.4rem" }}>
+          <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
             {tousLesTerrItoires.map((t, i) => (
               <div key={i} onClick={() => { setPorteIdx(i); setSection("pratique"); }} style={{
-                width: i === porteIdx ? 16 : 6, height: 4, borderRadius: 2,
-                background: i === porteIdx ? territoire.couleur : porteDebloquee(i) ? `${T.brume}60` : `${T.brume}20`,
+                width: i === porteIdx ? 18 : 7, height: 5, borderRadius: 3,
+                background: i === porteIdx ? territoire.couleur : `${T.brume}40`,
                 transition: "all 0.3s", cursor: "pointer",
               }}/>
             ))}
           </div>
         </div>
+
         <button
           onClick={() => { if (porteIdx < tousLesTerrItoires.length - 1) { setPorteIdx(p => p + 1); setSection("pratique"); }}}
-          disabled={porteIdx === tousLesTerrItoires.length - 1}
-          style={{ background: "none", border: "none", cursor: porteIdx === tousLesTerrItoires.length - 1 ? "default" : "pointer",
-            color: porteIdx === tousLesTerrItoires.length - 1 ? `${T.brume}30` : T.brume, fontSize: "1.2rem", padding: "0.5rem" }}
+          style={{
+            background: porteIdx === tousLesTerrItoires.length - 1 ? "transparent" : `${territoire.couleur}22`,
+            border: porteIdx === tousLesTerrItoires.length - 1 ? `1px solid ${T.brume}22` : `1px solid ${territoire.couleur}55`,
+            borderRadius: "6px", width: 44, height: 44,
+            cursor: porteIdx === tousLesTerrItoires.length - 1 ? "default" : "pointer",
+            color: porteIdx === tousLesTerrItoires.length - 1 ? `${T.brume}40` : territoire.couleur,
+            fontSize: "1.3rem", display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s", flexShrink: 0,
+          }}
         >→</button>
       </div>
 
