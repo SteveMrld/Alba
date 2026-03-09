@@ -2579,6 +2579,57 @@ const ProgressionCles = ({ stats, clesDebloquees, onSelectCle, cleActive }) => {
 };
 
 // ─── ACCUEIL ──────────────────────────────────────────────────────────────────
+// ─── ÉCHOS HUMAINS ────────────────────────────────────────────────────────────
+// 40 fragments vrais — imparfaits, humains, pas des aphorismes
+const ECHOS_HUMAINS = [
+  "Je crois que j'ai besoin de moins en faire pour les autres.",
+  "Aujourd'hui j'ai pleuré sans vraiment savoir pourquoi. Ça a fait du bien.",
+  "Je commence à accepter que je ne saurai peut-être jamais pourquoi ça s'est passé comme ça.",
+  "J'ai réalisé ce soir que j'attends encore des excuses qui ne viendront pas.",
+  "Je crois que je confonds être fort et ne pas sentir.",
+  "Quelque chose en moi commence à lâcher. Je ne sais pas si c'est bien ou pas.",
+  "J'aimerais être plus doux avec moi-même. Je ne sais pas encore comment.",
+  "Je me suis surpris à sourire aujourd'hui. Ça faisait longtemps.",
+  "J'ai l'impression que je guéris en dormant. Comme si la nuit faisait quelque chose que le jour ne peut pas faire.",
+  "Ce soir je n'arrive pas à être là où je suis. Je suis ailleurs.",
+  "Je réalise que j'ai passé des années à attendre la permission de quelqu'un.",
+  "Je crois que j'ai besoin de silence. Pas de solitude — de silence.",
+  "Aujourd'hui quelqu'un m'a dit que j'avais l'air bien. Je ne sais pas si c'est vrai.",
+  "J'essaie de ne plus m'expliquer autant. C'est plus épuisant qu'on ne le croit.",
+  "Je reviens souvent à la même question : est-ce que j'ai bien fait ?",
+  "Ce soir j'ai l'impression que tout ce que je traverse a une forme. Je ne la vois pas encore.",
+  "J'ai relu quelque chose que j'avais écrit il y a trois mois. Je me reconnaissais à peine.",
+  "Je commence à comprendre que certaines personnes ne changeront pas. C'est dur.",
+  "J'aimerais pouvoir dire merci à quelqu'un qui n'est plus là.",
+  "Ce matin j'avais peur sans raison précise. Juste peur.",
+  "Je crois que je m'isole quand j'aurais besoin de l'inverse.",
+  "Aujourd'hui j'ai fait une chose que je remettais depuis longtemps. Rien d'extraordinaire. Mais ça comptait.",
+  "Je réalise que je parle beaucoup mais que je dis rarement ce que je ressens vraiment.",
+  "Ce soir j'ai l'impression de tenir quelque chose de fragile. Je ne veux pas l'abîmer.",
+  "Parfois la fatigue n'est pas physique. C'est une fatigue d'avoir fait semblant.",
+  "Je crois que j'ai besoin d'entendre que ça va aller. Même si je ne suis pas sûr que ce soit vrai.",
+  "Aujourd'hui j'ai choisi de ne pas me justifier. C'était étrange. Et bien.",
+  "Je reviens toujours au même endroit en moi. Comme si quelque chose m'attendait là.",
+  "Ce matin la lumière était différente. Je ne sais pas ce que ça voulait dire mais ça m'a touché.",
+  "Je commence à accepter que certaines choses ne se réparent pas — elles se transforment.",
+  "J'ai passé la journée à faire comme si. Ce soir je n'ai plus la force.",
+  "Quelqu'un m'a dit quelque chose de vrai aujourd'hui. Je ne m'y attendais pas.",
+  "Je crois que ce que je cherche n'est pas dehors.",
+  "Ce soir j'ai envie de rien faire. Et pour une fois je me permets.",
+  "J'ai réalisé que je demande toujours pardon alors que ce n'est pas moi qui ai eu tort.",
+  "Aujourd'hui j'ai eu l'impression que quelque chose en moi recommençait doucement.",
+  "Je ne sais pas où je vais. Mais je sens que je suis en train de marcher dans la bonne direction.",
+  "Ce soir je n'arrive pas à dormir. Pas d'angoisse. Juste trop de choses qui tournent.",
+  "J'ai essayé d'être gentil avec moi-même aujourd'hui. C'est plus difficile que d'être gentil avec quelqu'un d'autre.",
+  "Je crois que traverser quelque chose et en parler, c'est déjà commencer à le poser.",
+];
+
+const getEchoHumain = () => {
+  const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+  return ECHOS_HUMAINS[dayIndex % ECHOS_HUMAINS.length];
+};
+
+// ─── ACCUEIL ──────────────────────────────────────────────────────────────────
 const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
@@ -2852,6 +2903,35 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           </p>
         </div>
       )}
+
+      {/* ── ÉCHO HUMAIN ── */}
+      <div style={{
+        margin: "1rem 1.5rem 0",
+        animation: "fadeUp 0.7s ease forwards 0.35s", opacity: 0,
+      }}>
+        <div style={{
+          background: "transparent",
+          border: `1px solid ${T.brume}18`,
+          borderRadius: "8px",
+          padding: "1.2rem 1.5rem",
+          position: "relative",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.8rem" }}>
+            <div style={{ width: 3, height: 3, borderRadius: "50%", background: T.brume, opacity: 0.4 }} />
+            <span style={{
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.43rem",
+              letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}66`,
+            }}>Quelqu'un a déposé ceci</span>
+          </div>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.9rem", color: `${T.brume}99`,
+            lineHeight: 1.75, margin: 0,
+          }}>
+            "{getEchoHumain()}"
+          </p>
+        </div>
+      </div>
 
       {/* ── CLÉ DU JOUR ── */}
       <div style={{
