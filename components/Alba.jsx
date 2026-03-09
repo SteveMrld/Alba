@@ -279,6 +279,24 @@ const getUserKey = () => {
     created_at timestamptz default now()
   );
 
+  create table if not exists alba_fil (
+    id text primary key,
+    user_key text not null,
+    texte text not null,
+    type text not null default 'insight',
+    created_at timestamptz default now()
+  );
+  create index if not exists idx_alba_fil_user on alba_fil(user_key);
+
+  create table if not exists alba_lettres (
+    id text primary key,
+    user_key text not null,
+    porte_index int not null,
+    lue boolean default false,
+    delivered_at timestamptz default now()
+  );
+  create index if not exists idx_alba_lettres_user on alba_lettres(user_key);
+
   create table alba_postits (
     id bigint primary key generated always as identity,
     user_key text not null,
@@ -5001,22 +5019,40 @@ const FilDeVie = ({ data, db }) => {
   const formatDate = (iso) => new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("alba_fil");
-      if (stored) setMoments(JSON.parse(stored));
-    } catch {}
-    setLoaded(true);
+    (async () => {
+      try {
+        const uk = localStorage.getItem("alba_user_key") || "local";
+        const rows = await sb.list("alba_fil", { user_key: uk });
+        if (rows && rows.length > 0) {
+          setMoments(rows.map(r => ({ id: r.id, texte: r.texte, type: r.type, date: r.created_at })));
+          setLoaded(true);
+          return;
+        }
+      } catch {}
+      try {
+        const stored = localStorage.getItem("alba_fil");
+        if (stored) setMoments(JSON.parse(stored));
+      } catch {}
+      setLoaded(true);
+    })();
   }, []);
 
-  const saveMoments = (list) => {
+  const saveMoments = async (list) => {
     setMoments(list);
     try { localStorage.setItem("alba_fil", JSON.stringify(list)); } catch {}
   };
 
-  const addMoment = () => {
+  const addMoment = async () => {
     if (!texte.trim()) return;
-    saveMoments([{ id: Date.now(), texte: texte.trim(), type, date: new Date().toISOString() }, ...moments]);
+    const nouveau = { id: String(Date.now()), texte: texte.trim(), type, date: new Date().toISOString() };
+    const newList = [nouveau, ...moments];
+    saveMoments(newList);
     setTexte(""); setAjout(false);
+    // Sauvegarder dans Supabase
+    try {
+      const uk = localStorage.getItem("alba_user_key") || "local";
+      await sb.upsert("alba_fil", { id: nouveau.id, user_key: uk, texte: nouveau.texte, type: nouveau.type, created_at: nouveau.date });
+    } catch {}
   };
 
   const startPress = (id) => {
