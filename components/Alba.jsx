@@ -3664,15 +3664,113 @@ const TERRITOIRES_CLES = [
   },
 ];
 
-const TerritoireCle = ({ cleActive = 0, progressStats = {} }) => {
-  const [section, setSection] = useState("pratique"); // "pratique" | "questions"
-  const [niveauPratique, setNiveauPratique] = useState(0); // 0=Ouvrir, 1=Traverser, 2=Intégrer
+// ─── SYSTÈME SEMI-ADAPTATIF ────────────────────────────────────────────────────
+// Cartographie : mots-clés → index d'exercice prioritaire par Clé
+// Format : { cleIndex: { motCle: indexExercicePrioritaire } }
+const SIGNAL_MAP = {
+  // Clé I — Reconnaître
+  1: {
+    mots: [
+      { tags: ["peur","effrayé","effrayée","angoisse","anxieux","anxieuse","inquiet","inquiète"], exercice: 0, niveau: 0 },
+      { tags: ["rôle","masque","semblant","façade","image","paraître"], exercice: 1, niveau: 0 },
+      { tags: ["habitude","automatique","répète","répétition","pattern","schéma"], exercice: 2, niveau: 1 },
+      { tags: ["porter","portes","charge","poids","lourd","lourde"], exercice: 1, niveau: 1 },
+      { tags: ["contrôle","maîtrise","maîtriser","gérer","gestion"], exercice: 0, niveau: 1 },
+    ]
+  },
+  // Clé II — Comprendre
+  2: {
+    mots: [
+      { tags: ["enfance","enfant","petite","petit","parents","mère","père","famille"], exercice: 2, niveau: 0 },
+      { tags: ["critique","critiques","jugement","juger","me juge","nul","nulle"], exercice: 1, niveau: 0 },
+      { tags: ["répète","répétition","schéma","pattern","encore","toujours"], exercice: 0, niveau: 1 },
+      { tags: ["faute","coupable","responsable","ma faute"], exercice: 1, niveau: 2 },
+    ]
+  },
+  // Clé III — Ressentir
+  3: {
+    mots: [
+      { tags: ["corps","ventre","gorge","poitrine","tension","contracté","contractée"], exercice: 0, niveau: 0 },
+      { tags: ["colère","rage","furieux","furieuse","en colère"], exercice: 2, niveau: 1 },
+      { tags: ["tristesse","triste","pleurer","pleuré","larmes"], exercice: 0, niveau: 1 },
+      { tags: ["vide","absent","absente","détaché","détachée","rien","insensible"], exercice: 1, niveau: 1 },
+      { tags: ["honte","humilié","humiliée","gêne","embarrassé"], exercice: 0, niveau: 2 },
+    ]
+  },
+  // Clé IV — Lâcher
+  4: {
+    mots: [
+      { tags: ["porter","portes","charge","poids","épuisé","épuisée","fatigue"], exercice: 0, niveau: 0 },
+      { tags: ["et si","regret","regrette","aurait","aurais","raté","raté"], exercice: 0, niveau: 1 },
+      { tags: ["pardonner","pardonne","pardon","rancune","rancœur"], exercice: 1, niveau: 1 },
+      { tags: ["parfait","perfectionnisme","jamais assez","bien faire"], exercice: 2, niveau: 1 },
+      { tags: ["lettre","écrire","écrit","écrire à"], exercice: 0, niveau: 2 },
+    ]
+  },
+  // Clé V — Recevoir
+  5: {
+    mots: [
+      { tags: ["mérite","mériter","mérité","valeur","compte","importes"], exercice: 0, niveau: 0 },
+      { tags: ["seul","seule","aide","aidé","demander","demande"], exercice: 0, niveau: 1 },
+      { tags: ["saboter","sabote","empêche","bloque","bloqué"], exercice: 1, niveau: 1 },
+      { tags: ["amour","aimer","aimé","aimée","aime"], exercice: 0, niveau: 2 },
+    ]
+  },
+  // Clé VI — Devenir
+  6: {
+    mots: [
+      { tags: ["peur","bloqué","bloquée","peur d'avancer","remet","reporte"], exercice: 0, niveau: 1 },
+      { tags: ["avenir","futur","demain","dans quelques","années"], exercice: 2, niveau: 0 },
+      { tags: ["valeur","valeurs","sens","vouloir","envie"], exercice: 1, niveau: 0 },
+      { tags: ["lettre","écrire","écrit"], exercice: 0, niveau: 2 },
+    ]
+  },
+};
+
+// Extrait le dernier texte significatif de l'Ardoise
+const extraireSignal = (allPostits) => {
+  if (!allPostits) return "";
+  try {
+    // Cherche dans les post-its (objets avec .content ou .texte)
+    const tous = Object.values(allPostits).flat().filter(Boolean);
+    if (!tous.length) return "";
+    // Trie par date décroissante si possible
+    const sorted = tous.sort((a, b) => {
+      const da = new Date(a.createdAt || a.created_at || 0);
+      const db2 = new Date(b.createdAt || b.created_at || 0);
+      return db2 - da;
+    });
+    const dernier = sorted[0];
+    return (dernier.content || dernier.texte || dernier.text || "").toLowerCase();
+  } catch { return ""; }
+};
+
+// Détecte les signaux dans un texte et retourne l'exercice recommandé
+const detecterSignal = (texte, cleIndex) => {
+  if (!texte || !cleIndex) return null;
+  const map = SIGNAL_MAP[cleIndex];
+  if (!map) return null;
+  const txt = texte.toLowerCase();
+  for (const signal of map.mots) {
+    if (signal.tags.some(tag => txt.includes(tag))) {
+      return { niveau: signal.niveau, exerciceIdx: signal.exercice, tag: signal.tags[0] };
+    }
+  }
+  return null;
+};
+
+const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
+const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
+  const [section, setSection] = useState("pratique");
+  const [niveauPratique, setNiveauPratique] = useState(0);
   const [exerciceFait, setExerciceFait] = useState({});
+  const [signal, setSignal] = useState(null); // { niveau, exerciceIdx, tag }
+  const [exercicesMis, setExercicesMis] = useState([]); // ordre adapté
 
   const territoire = TERRITOIRES_CLES[Math.max(0, cleActive - 1)] || TERRITOIRES_CLES[0];
   const pratique = territoire.pratiques[niveauPratique];
 
-  // Déterminer le niveau automatiquement selon la progression
+  // Déterminer le niveau selon la progression
   useEffect(() => {
     const eclats = calcEclats(progressStats);
     const seuil = SEUILS_PORTES[Math.max(0, cleActive - 1)] || 0;
@@ -3681,6 +3779,27 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {} }) => {
     else if (progression > 12) setNiveauPratique(1);
     else setNiveauPratique(0);
   }, [cleActive, progressStats]);
+
+  // Détecter le signal depuis le dernier texte écrit
+  useEffect(() => {
+    const texte = extraireSignal(allPostits);
+    const detected = detecterSignal(texte, cleActive);
+    if (detected) {
+      setSignal(detected);
+      setNiveauPratique(detected.niveau);
+    }
+  }, [allPostits, cleActive]);
+
+  // Réordonner les exercices si signal détecté
+  useEffect(() => {
+    const exs = [...(territoire.pratiques[niveauPratique]?.exercices || [])];
+    if (signal && signal.niveau === niveauPratique && signal.exerciceIdx < exs.length) {
+      // Mettre l'exercice recommandé en premier
+      const [cible] = exs.splice(signal.exerciceIdx, 1);
+      exs.unshift(cible);
+    }
+    setExercicesMis(exs);
+  }, [niveauPratique, signal, territoire]);
 
   // Charger les exercices faits
   useEffect(() => {
@@ -3767,8 +3886,24 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {} }) => {
             color: `${territoire.couleur}88`, marginBottom: "1.2rem", textAlign: "center",
           }}>3 exercices · niveau {pratique.label.toLowerCase()}</div>
 
+          {/* Signal détecté */}
+          {signal && (
+            <div style={{
+              padding: "0.8rem 1.2rem", marginBottom: "1.2rem",
+              background: `${territoire.couleur}12`,
+              border: `1px solid ${territoire.couleur}33`,
+              borderRadius: "6px",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "0.82rem", color: territoire.couleur,
+              lineHeight: 1.6, textAlign: "center",
+            }}>
+              ALBA a entendu ce que tu as écrit.<br/>
+              <span style={{ color: T.brume, fontSize: "0.75rem" }}>Un exercice a été mis en avant pour toi.</span>
+            </div>
+          )}
+
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {pratique.exercices.map((ex, i) => (
+            {(exercicesMis.length ? exercicesMis : pratique.exercices).map((ex, i) => (
               <div
                 key={i}
                 onClick={() => toggleExercice(i)}
@@ -6378,7 +6513,7 @@ export default function Alba() {
             {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
             {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
-            {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} />}
+            {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
             {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
