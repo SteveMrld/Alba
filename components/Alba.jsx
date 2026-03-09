@@ -19,6 +19,32 @@ const ECLATS_PAR_ACTE = {
 const SEUILS_PORTES = [0, 15, 35, 65, 100, 150];
 
 // Symboles des 6 Clés — la mythologie d'ALBA
+const PICTOS_INLINE = {
+  1: `<path d="M24 9c-3.8 3.2-5.8 6.6-5.8 10.1 0 4.4 2.6 7.2 5.8 8.5 3.2-1.3 5.8-4.1 5.8-8.5C29.8 15.6 27.8 12.2 24 9Z"/><path d="M24 28v6"/><path d="M19.5 38h9"/>`,
+  2: `<path d="M24 38V24"/><path d="M24 24c0-5.5 3.5-9 8.5-10.5"/><path d="M24 28c-3.2 0-6 2.5-7 6"/><path d="M24 20c-2.2-3.8-6.2-5.8-10-6.5"/><path d="M32.5 13.5c1.3.8 1.7 2.5.9 3.8-.8 1.3-2.5 1.7-3.8.9"/><path d="M17 34.2c1.4-.5 2.9.2 3.4 1.6.5 1.4-.2 2.9-1.6 3.4"/><path d="M14 13.5c1.5 0 2.7 1.2 2.7 2.7S15.5 19 14 19"/>`,
+  3: `<path d="M10 28c4.2-3.5 8.8-5.2 14-5.2S33.8 24.5 38 28"/><path d="M14 33c3-2.3 6.4-3.4 10-3.4S31 30.7 34 33"/><path d="M19 38c1.5-.9 3.2-1.4 5-1.4s3.5.5 5 1.4"/>`,
+  4: `<path d="M24 12c4.2 2.8 7 6.2 7 10.4 0 6.2-5 11.6-11 13.6-2.2-2.4-3.4-5-3.4-7.7 0-4.8 3.3-7.8 7.4-8.9"/><path d="M27 14c-1.4 3.1-3.9 5.6-7.6 7.5"/>`,
+  5: `<path d="M14 18c0 9.5 4.4 16 10 16s10-6.5 10-16"/><path d="M14 18c2.4 2.2 5.7 3.4 10 3.4s7.6-1.2 10-3.4"/><path d="M16.5 16c1.4-2 4-3 7.5-3s6.1 1 7.5 3"/>`,
+  6: `<path d="M24 12v8"/><path d="M24 28v8"/><path d="M12 24h8"/><path d="M28 24h8"/><path d="M17 17l5 5"/><path d="M31 31l-5-5"/><path d="M31 17l-5 5"/><path d="M17 31l5-5"/><circle cx="24" cy="24" r="2.5"/>`,
+  7: `<circle cx="18" cy="30" r="1.8"/><path d="M20.8 28.8c2.8-1.8 5.2-4.3 7-7.5"/><path d="M27.8 21.3c.8-1.4 1.5-3 2.1-4.8"/><path d="M28.8 14.5c1.6 1.2 3 2.9 3.8 4.9"/><path d="M32.6 19.4c.5 1.3.8 2.7.8 4.2"/><path d="M30.2 14.5c-1 2.6-2.4 5.1-4.2 7.2"/>`,
+  8: `<circle cx="18" cy="24" r="6.5"/><circle cx="30" cy="24" r="6.5"/>`,
+  9: `<circle cx="24" cy="24" r="13"/><path d="M24 15l7 9-7 9-7-9 7-9Z"/>`,
+  10: `<path d="M16 28c1.5 4.8 5.6 8 10.4 8 5.1 0 9.4-3.6 10.6-8.8"/><path d="M32 13c-1.2 3.8-4.4 6.4-8 7.6"/><path d="M18.5 18.5C20 13.9 24 11 28.3 11c1.5 0 3 .4 4.3 1"/><path d="M18 18l6 2-2 6"/>`,
+  11: `<circle cx="24" cy="24" r="12"/><path d="M24 18v12"/><path d="M18 24h12"/>`,
+  12: `<circle cx="24" cy="24" r="3.2"/><path d="M24 11v5"/><path d="M24 32v5"/><path d="M11 24h5"/><path d="M32 24h5"/><path d="M15.5 15.5l3.5 3.5"/><path d="M29 29l3.5 3.5"/><path d="M32.5 15.5L29 19"/><path d="M19 29l-3.5 3.5"/>`,
+};
+
+// Composant picto inline — rendu SVG garanti, couleur dynamique
+const PortePicto = ({ index, couleur, size = 44 }) => {
+  const paths = PICTOS_INLINE[index] || PICTOS_INLINE[1];
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none"
+      stroke={couleur} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+      dangerouslySetInnerHTML={{ __html: paths }}
+    />
+  );
+};
+
 const SYMBOLES_CLES = [
   { emoji: "🪔", nom: "une lampe",          phrase: "Tu as commencé à regarder ce qui est là." },
   { emoji: "🌿", nom: "une feuille vivante", phrase: "Quelque chose en toi a commencé à comprendre." },
@@ -4565,10 +4591,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         animation: "fadeUpCle 0.6s ease forwards",
       }}>
         <div style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>
-          {territoire.symbole.endsWith(".svg")
-            ? <img src={territoire.symbole} width={40} height={40} alt={territoire.nom} style={{ opacity: 0.9 }} />
-            : <span style={{ fontSize: "2rem" }}>{territoire.symbole}</span>
-          }
+          <PortePicto index={territoire.index} couleur={territoire.couleur} size={44} />
         </div>
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
