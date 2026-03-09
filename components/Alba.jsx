@@ -3917,7 +3917,7 @@ const TERRITOIRES_CLES = [
 const TERRITOIRES_AVANCES = [
   {
     index: 7, nom: "Créer", symbole: "/pictos/porte-07-creer.svg", couleur: "#E8A87C",
-    video: "/videos/desert.mp4",
+    video: "/videos/braise.mp4",
     ambiance: { bg: "#1A1008", accent: "#E8A87C", texte: "Tu as traversé beaucoup. Maintenant quelque chose veut naître." },
     souffle: "Créer, ce n'est pas produire. C'est laisser sortir ce qui cherchait une forme.",
     questions: [
@@ -3951,7 +3951,7 @@ const TERRITOIRES_AVANCES = [
   },
   {
     index: 8, nom: "Relier", symbole: "/pictos/porte-08-relier.svg", couleur: "#9EC8B4",
-    video: "/videos/caraibe.mp4",
+    video: "/videos/cercles.mp4",
     ambiance: { bg: "#0A1610", accent: "#9EC8B4", texte: "Tu as appris à être avec toi. Maintenant tu peux être vraiment avec les autres." },
     souffle: "Revenir vers les autres depuis un endroit solide.",
     questions: [
@@ -3985,7 +3985,7 @@ const TERRITOIRES_AVANCES = [
   },
   {
     index: 9, nom: "Protéger", symbole: "/pictos/porte-09-proteger.svg", couleur: "#B8A0D8",
-    video: "/videos/nuages.mp4",
+    video: "/videos/pierre.mp4",
     ambiance: { bg: "#100D18", accent: "#B8A0D8", texte: "Protéger ce qui est sacré en toi n'est pas de l'égoïsme. C'est de la clarté." },
     souffle: "Une limite posée avec amour protège les deux personnes.",
     questions: [
@@ -4087,7 +4087,7 @@ const TERRITOIRES_AVANCES = [
   },
   {
     index: 12, nom: "Être", symbole: "/pictos/porte-12-etre.svg", couleur: "#F5EFE6",
-    video: "/videos/etoiles.mp4",
+    video: "/videos/aube.mp4",
     ambiance: { bg: "#0A0A0E", accent: "#F5EFE6", texte: "Tu es arrivé quelque part. Pas à la fin — au commencement de toi-même." },
     souffle: "Il n'y a plus rien à devenir. Il y a juste à être ce que tu es déjà.",
     questions: [
