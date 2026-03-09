@@ -3876,6 +3876,259 @@ const TERRITOIRES_CLES = [
   },
 ];
 
+
+// ─── PORTES VII–XII ────────────────────────────────────────────────────────────
+const TERRITOIRES_AVANCES = [
+  {
+    index: 7, nom: "Créer", symbole: "✧", couleur: "#E8A87C",
+    video: "/videos/desert.mp4",
+    ambiance: { bg: "#1A1008", accent: "#E8A87C", texte: "Tu as traversé beaucoup. Maintenant quelque chose veut naître." },
+    souffle: "Créer, ce n'est pas produire. C'est laisser sortir ce qui cherchait une forme.",
+    questions: [
+      "Qu'est-ce que tu portes depuis longtemps et qui cherche encore à exister ?",
+      "Qu'est-ce qui t'empêche de créer — la peur du jugement, la peur de l'échec, ou la peur que ce ne soit pas assez bien ?",
+      "Si tu pouvais créer une seule chose avant de mourir — qu'est-ce que ce serait ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Prends une feuille. Dessine, écris, trace — sans intention. Juste laisser la main aller. 5 minutes sans te juger.",
+        "Écris la liste de tout ce que tu voulais créer et que tu n'as jamais commencé. Sans te justifier.",
+        "Choisis une chose dans cette liste. Pas la plus grande — la plus proche de toi maintenant.",
+        "Note ce que tu ressentirais si tu créais vraiment cette chose. Pas ce que les autres en diraient. Toi.",
+        "Passe 10 minutes aujourd'hui à faire quelque chose avec tes mains — cuisine, dessin, écriture. Sans objectif.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Identifie la voix intérieure qui dit \"c'est nul\", \"c'est déjà été fait\", \"qui tu es pour faire ça\". D'où vient-elle ?",
+        "Commence quelque chose aujourd'hui — même 10 minutes. Pas pour finir. Pour commencer.",
+        "Écris : \"Ce que je veux créer dit de moi que…\"",
+        "Trouve une personne qui crée quelque chose que tu admires. Qu'est-ce qui te touche dans ce qu'elle fait ?",
+        "Écris la différence entre créer pour être vu et créer pour exister.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Relis ce que tu as créé ou commencé depuis le début de cette Porte. Qu'est-ce qui te surprend ?",
+        "Partage quelque chose que tu as créé avec une personne de confiance. Observe ce que ça fait de montrer.",
+        "Écris une lettre à la peur qui t'a longtemps empêché de créer.",
+        "Choisis un engagement créatif que tu tiens pour les 30 prochains jours. Petit mais réel.",
+        "Écris ce que créer t'a rendu de toi-même.",
+      ]},
+    ],
+  },
+  {
+    index: 8, nom: "Relier", symbole: "∞", couleur: "#9EC8B4",
+    video: "/videos/caraibe.mp4",
+    ambiance: { bg: "#0A1610", accent: "#9EC8B4", texte: "Tu as appris à être avec toi. Maintenant tu peux être vraiment avec les autres." },
+    souffle: "Revenir vers les autres depuis un endroit solide.",
+    questions: [
+      "Dans quelle relation te perds-tu encore toi-même ?",
+      "Qu'est-ce que tu n'as jamais dit à quelqu'un que tu aimes parce que tu ne savais pas comment ?",
+      "Quelle relation dans ta vie mérite d'être réparée — ou laissée partir avec douceur ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Pense à quelqu'un que tu aimes. Écris ce que tu aimes en lui sans jamais lui avoir dit.",
+        "Observe aujourd'hui une conversation que tu as. Est-ce que tu écoutes vraiment, ou tu attends de parler ?",
+        "Écris : \"La relation dans laquelle je me sens le plus moi-même, c'est…\"",
+        "Identifie quelqu'un que tu as éloigné sans le vouloir. Qu'est-ce qui s'est passé ?",
+        "Note une chose que tu pourrais faire aujourd'hui pour nourrir une relation qui compte.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Écris une lettre à quelqu'un à qui tu veux dire quelque chose d'important. Tu décides si tu l'envoies.",
+        "Identifie un schéma qui revient dans tes relations — comment tu te comportes quand tu as peur d'être quitté ou déçu.",
+        "Choisis une relation tendue. Qu'est-ce que tu peux changer dans ta façon d'être — sans attendre que l'autre change ?",
+        "Écris la différence entre être seul et être solitaire. Où en es-tu ?",
+        "Pense à quelqu'un qui t'a aimé sans que tu l'aies pleinement reçu. Comment tu vis ça ?",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Dis à quelqu'un de confiance ce que tu as traversé dans ALBA. Pas tout — quelque chose de vrai.",
+        "Fais un acte concret de réconciliation — avec quelqu'un, ou avec une partie de toi-même.",
+        "Écris ce que tu attends désormais d'une relation — en termes de ce que tu es prêt à donner.",
+        "Identifie une relation que tu as nourrie différemment depuis que tu as commencé ce parcours. Qu'est-ce qui a changé ?",
+        "Écris le portrait de la façon dont tu veux aimer — pas être aimé. Aimer.",
+      ]},
+    ],
+  },
+  {
+    index: 9, nom: "Protéger", symbole: "◈", couleur: "#B8A0D8",
+    video: "/videos/nuages.mp4",
+    ambiance: { bg: "#100D18", accent: "#B8A0D8", texte: "Protéger ce qui est sacré en toi n'est pas de l'égoïsme. C'est de la clarté." },
+    souffle: "Une limite posée avec amour protège les deux personnes.",
+    questions: [
+      "Où dans ta vie dis-tu oui alors que tu veux dire non ?",
+      "Quelle peur te rend incapable de poser une limite — la peur de décevoir, d'être abandonné, de paraître difficile ?",
+      "Qu'est-ce qui mérite d'être protégé en toi — et que tu as laissé traverser trop souvent ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Fais la liste des situations où tu te sacrifies sans que ça te soit demandé.",
+        "Observe aujourd'hui une fois où tu dis oui alors que non serait plus juste. Juste observer — pas changer encore.",
+        "Écris : \"La chose en moi que je protège le moins, c'est…\"",
+        "Identifie une limite que tu aimerais poser. Qu'est-ce qui t'en empêche ?",
+        "Note la différence entre une limite rigide et une limite claire. Tu veux laquelle ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Dis non à quelque chose aujourd'hui. Pas de justification. Juste non.",
+        "Écris une limite que tu veux poser à quelqu'un. Formule-la depuis l'amour, pas depuis la colère.",
+        "Identifie quelqu'un qui franchit régulièrement ce qui est important pour toi. Qu'est-ce qui te retient ?",
+        "Écris ce que ça te coûte de ne pas te protéger.",
+        "Pense à quelqu'un qui sait se protéger avec grâce. Qu'est-ce que tu peux apprendre de lui ?",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Pose une limite réelle cette semaine. Observe comment l'autre réagit — et comment tu te sens.",
+        "Écris une lettre à la version de toi qui a laissé passer trop de choses. Avec compassion.",
+        "Note ce que protéger ton espace intérieur a rendu possible dans ta vie.",
+        "Identifie ce qui est maintenant sacré pour toi — ce que tu ne négocieras plus.",
+        "Écris : \"Je me protège maintenant parce que je sais que…\"",
+      ]},
+    ],
+  },
+  {
+    index: 10, nom: "Transmettre", symbole: "⟳", couleur: "#C8A96E",
+    video: "/videos/savane.mp4",
+    ambiance: { bg: "#140F08", accent: "#C8A96E", texte: "Tu as appris quelque chose de rare. La question n'est plus quoi apprendre — mais quoi donner." },
+    souffle: "Ce que tu as traversé n'est pas qu'à toi. Ça peut éclairer quelqu'un d'autre.",
+    questions: [
+      "Qu'est-ce que tu as compris sur toi-même que tu aurais aimé savoir 10 ans plus tôt ?",
+      "À qui pourrais-tu transmettre quelque chose de ce que tu as traversé ?",
+      "Quelle est la différence entre enseigner et témoigner ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Écris trois choses que tu sais maintenant et qui auraient changé ta vie si tu les avais sues plus tôt.",
+        "Pense à quelqu'un dans ton entourage qui traverse quelque chose que tu as traversé. Comment être présent sans imposer ton chemin ?",
+        "Écris : \"Ce que j'ai à transmettre, ce n'est pas un savoir. C'est…\"",
+        "Rappelle-toi quelqu'un qui t'a transmis quelque chose sans le savoir. Qu'a-t-il fait exactement ?",
+        "Note la différence entre donner des conseils et partager une expérience.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Écris un texte court sur quelque chose que tu as traversé. Pour toi d'abord. Pas pour être publié.",
+        "Parle à quelqu'un de confiance de ce que tu as appris sur toi depuis le début de ce parcours.",
+        "Identifie une façon concrète de transmettre — écrire, parler, être présent, témoigner. Laquelle te ressemble ?",
+        "Écris ce que tu ne veux pas transmettre — les schémas, les croyances, les blessures que tu choisis de ne pas passer.",
+        "Qu'est-ce que transmettre te demande de faire que tu n'as pas encore fait ?",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Fais quelque chose de concret pour quelqu'un — une conversation vraie, une lettre, un geste.",
+        "Écris ce que tu veux que les gens qui te connaissent aient reçu de toi — pas après ta mort, maintenant.",
+        "Note ce que transmettre t'a appris sur toi que tu ne savais pas encore.",
+        "Choisis quelque chose à partager avec quelqu'un qui en a besoin — une pensée, une pratique, un livre.",
+        "Écris la lettre que tu aurais aimé recevoir à un moment difficile. Garde-la. Elle est peut-être pour quelqu'un d'autre un jour.",
+      ]},
+    ],
+  },
+  {
+    index: 11, nom: "Habiter", symbole: "◯", couleur: "#A8B8C8",
+    video: "/videos/vagues.mp4",
+    ambiance: { bg: "#0A1016", accent: "#A8B8C8", texte: "Tu as beaucoup cherché. Maintenant apprends à rester là où tu es." },
+    souffle: "Habiter sa vie, c'est arrêter d'en être le spectateur.",
+    questions: [
+      "Dans quels moments de ta vie es-tu vraiment présent — pas en train de penser à avant ou après ?",
+      "Qu'est-ce que tu fuis encore en te réfugiant dans le passé ou le futur ?",
+      "Si ta vie actuelle méritait d'être habitée pleinement — qu'est-ce qui changerait dans ta façon d'être là ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Pendant un repas aujourd'hui, pose ton téléphone. Mange en étant là — vraiment là. Goûts, textures, sensations.",
+        "Marche 10 minutes sans destination précise. Observe ce qui est là — pas ce qui devrait être là.",
+        "Écris : \"Les moments où je suis vraiment présent, c'est quand…\"",
+        "Note une habitude qui t'éloigne de l'instant présent. Juste la nommer.",
+        "Assieds-toi dans un endroit que tu connais bien. Regarde-le comme si c'était la première fois.",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Identifie quelque chose dans ta vie actuelle que tu n'as pas encore vraiment accepté. Qu'est-ce que ça changerait si tu l'habitais tel que c'est ?",
+        "Écris : \"La vie que je vis en ce moment mérite…\"",
+        "Passe une heure sans plan, sans objectif, sans écran. Juste être là.",
+        "Observe une relation proche. Est-ce que tu es vraiment présent dedans ou est-ce que tu es ailleurs ?",
+        "Écris ce que tu rates quand tu n'es pas là.",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Écris ce que \"habiter ta vie\" signifie concrètement pour toi — dans les actes du quotidien.",
+        "Choisis un endroit — une pièce, un lieu — et vas-y passer du temps. Sans but. Juste être là.",
+        "Note ce qui a changé dans ta façon d'être présent depuis le début de ce parcours.",
+        "Écris une promesse à toi-même sur la façon dont tu veux habiter les prochains mois.",
+        "Qu'est-ce que habiter vraiment ta vie rend possible que tu ne croyais pas possible avant ?",
+      ]},
+    ],
+  },
+  {
+    index: 12, nom: "Être", symbole: "·", couleur: "#F5EFE6",
+    video: "/videos/etoiles.mp4",
+    ambiance: { bg: "#0A0A0E", accent: "#F5EFE6", texte: "Tu es arrivé quelque part. Pas à la fin — au commencement de toi-même." },
+    souffle: "Il n'y a plus rien à devenir. Il y a juste à être ce que tu es déjà.",
+    questions: [
+      "Qui es-tu quand tu enlèves tout ce que tu fais, tout ce que tu possèdes, tous les rôles que tu joues ?",
+      "Est-ce que tu t'aimes — pas malgré ce que tu es, mais à cause de ce que tu es ?",
+      "Si tu avais une seule phrase à transmettre à quelqu'un qui commence ce chemin — quelle serait-elle ?",
+    ],
+    pratiques: [
+      { niveau: 1, label: "Ouvrir", exercices: [
+        "Écris qui tu es en une phrase. Pas ton nom, pas ton métier. Toi.",
+        "Passe un moment aujourd'hui à ne rien faire. Pas méditer — être. Observer ce qui monte quand il n'y a rien à faire.",
+        "Écris : \"Je suis en paix avec…\"",
+        "Note une chose en toi que tu n'aurais pas acceptée au début de ce parcours et que tu accueilles maintenant.",
+        "Qu'est-ce que tu n'as plus besoin de prouver ?",
+      ]},
+      { niveau: 2, label: "Traverser", exercices: [
+        "Écris la liste de tout ce que tu portais quand tu as commencé ALBA. Qu'est-ce que tu ne portes plus ?",
+        "Parle à voix haute de toi-même — seul — comme tu parlerais de quelqu'un que tu aimes et que tu respectes.",
+        "Écris une lettre à la version de toi qui a ouvert ALBA pour la première fois. Qu'est-ce que tu lui dirais ?",
+        "Identifie le moment dans ce parcours où quelque chose a vraiment changé. Qu'est-ce qui s'est passé ?",
+        "Qu'est-ce qu'être toi signifie aujourd'hui que ça ne signifiait pas avant ?",
+      ]},
+      { niveau: 3, label: "Intégrer", exercices: [
+        "Relis les lettres que tu as écrites tout au long du parcours. Qu'est-ce qui t'étonne dans ce que tu étais ?",
+        "Écris le portrait de la personne que tu es maintenant — sans modestie, sans fausse humilité.",
+        "Choisis un acte qui symbolise pour toi la fin d'un cycle et le début d'un autre.",
+        "Écris ce que tu veux que ta vie soit — maintenant, depuis cet endroit où tu es.",
+        "Dis à quelqu'un que tu aimes quelque chose que tu n'aurais pas pu dire avant d'avoir traversé tout ça.",
+      ]},
+    ],
+  },
+];
+
+// ─── LUMIÈRES QUOTIDIENNES ────────────────────────────────────────────────────
+const LUMIERES = [
+  // CORPS
+  { id: 1, famille: "Corps", titre: "Ce que le corps garde", texte: "Le corps se souvient de tout ce que l'esprit a voulu oublier. Les traumatismes ne disparaissent pas — ils se logent. Dans le ventre, la gorge, le dos, les épaules. Ce n'est pas une métaphore : les émotions non traitées modifient le tonus musculaire, la posture, la respiration. La bonne nouvelle : ce qui a été logé peut être libéré. Pas seulement par la parole — par le mouvement, le souffle, le toucher.", acte: "Pose une main sur un endroit de ton corps qui retient quelque chose. Respire vers cet endroit. Rien d'autre." },
+  { id: 2, famille: "Corps", titre: "Les émotions dans l'intestin", texte: "L'intestin contient 500 millions de neurones et produit 95% de la sérotonine du corps. Ce n'est pas un hasard si l'angoisse se sent dans le ventre avant d'être pensée dans la tête. La communication entre le cerveau et le système digestif va dans les deux sens. Nourrir son microbiote, c'est aussi nourrir son état émotionnel.", acte: "Observe la prochaine fois que tu ressens une émotion. Où est-elle dans ton corps ? Dans le ventre ? La poitrine ? La gorge ?" },
+  { id: 3, famille: "Corps", titre: "Le jeûne et l'espace intérieur", texte: "Quand le corps ne digère pas, il nettoie. Mais au-delà de la biologie, le jeûne crée un espace intérieur. Les traditions l'ont su avant la science : le ramadan, le carême, les retraites de vipassana. Priver le corps de nourriture, c'est aussi rediriger l'énergie vers d'autres perceptions. Beaucoup décrivent une clarté mentale, une sensibilité accrue, une présence différente au monde.", acte: "Si tu peux, saute un repas. Observe ce qui se passe — pas dans ton corps, dans ta tête." },
+  { id: 4, famille: "Corps", titre: "Ce que la respiration change", texte: "Le souffle est le seul système autonome du corps que tu peux contrôler consciemment. Ralentir la respiration à 6 cycles par minute induit un état de cohérence cardiaque — le cœur, le cerveau et le système nerveux se synchronisent. En 5 minutes, le taux de cortisol baisse. Le souffle est le raccourci vers l'état intérieur.", acte: "5 minutes. Inspire 5 secondes, expire 5 secondes. Rien d'autre." },
+  { id: 5, famille: "Corps", titre: "Le fascia, mémoire silencieuse", texte: "Le fascia est ce tissu conjonctif qui enveloppe chaque muscle, chaque organe, chaque os. Il est continu — une seule pièce qui traverse tout le corps. Les ostéopathes le savent : une tension au niveau des hanches peut venir d'un choc émotionnel ancien. Le fascia se souvient — jusqu'à ce qu'il soit travaillé, relâché, réhydraté. C'est pour ça qu'un massage profond peut déclencher des larmes sans raison apparente.", acte: "Étire-toi lentement. Reste 2 minutes dans chaque position. Observe ce qui remonte." },
+  { id: 6, famille: "Corps", titre: "Le sommeil comme thérapie", texte: "Pendant le sommeil paradoxal, le cerveau retraite les émotions de la journée — mais sans les hormones de stress. C'est pour ça que \"la nuit porte conseil\" est biologiquement vrai : le lendemain matin, le même souvenir douloureux est moins chargé émotionnellement. Priver quelqu'un de sommeil, c'est lui retirer sa capacité à guérir émotionnellement.", acte: "Protège une nuit. Pas d'écran une heure avant. Observe la différence demain matin." },
+  { id: 7, famille: "Corps", titre: "Le mouvement comme langage", texte: "Avant la parole, il y avait le corps. Les traumatismes sont des réponses de survie figées dans le corps. Les animaux les libèrent naturellement par le tremblement. Les humains ont appris à se contrôler — au détriment de la décharge. Danser, courir, trembler volontairement : c'est libérer ce qui était bloqué.", acte: "Bouge pendant 5 minutes sans objectif. Pas du sport — du mouvement libre." },
+  // PRATIQUE
+  { id: 8, famille: "Pratique", titre: "L'hypnose ericksonienne", texte: "Milton Erickson a découvert que chaque personne a en elle les ressources pour aller mieux — l'inconscient n'est pas un lieu de pulsions sombres, c'est un réservoir de solutions. L'hypnose ericksonienne crée un état de réceptivité dans lequel les résistances s'allègent. Un langage poétique, métaphorique, indirect — qui contourne la censure du mental. On l'utilise pour la douleur chronique, les phobies, le deuil, la confiance en soi.", acte: "Ferme les yeux. Imagine un endroit où tu te sens parfaitement en sécurité. Reste-y 5 minutes." },
+  { id: 9, famille: "Pratique", titre: "Le journaling thérapeutique", texte: "James Pennebaker a conduit dans les années 80 une expérience simple : écrire sur un traumatisme pendant 20 minutes, 4 jours de suite. Résultat : moins d'anxiété, moins de visites chez le médecin. L'écriture ne guérit pas — elle organise. Elle transforme une expérience brute et chaotique en récit, et le récit donne du sens.", acte: "Écris pendant 20 minutes sur quelque chose que tu n'as jamais vraiment écrit. Sans relire. Sans corriger." },
+  { id: 10, famille: "Pratique", titre: "L'EMDR", texte: "Eye Movement Desensitization and Reprocessing. La technique consiste à exposer quelqu'un à un souvenir traumatique tout en faisant des stimulations bilatérales — yeux, sons, tapotements. Le cerveau retraite le souvenir et le stocke différemment — moins chargé, moins présent. L'OMS la reconnaît comme traitement du stress post-traumatique.", acte: "Pense à un souvenir légèrement inconfortable. Bouge les yeux de gauche à droite pendant 30 secondes. Observe." },
+  { id: 11, famille: "Pratique", titre: "La méditation de bienveillance", texte: "Metta signifie \"bienveillance\" en pali. La pratique : générer intentionnellement de la chaleur d'abord pour soi, puis pour des proches, puis pour des neutres, puis pour des difficiles. Les études montrent que 8 semaines de pratique augmentent l'activation de l'insula — la zone du cerveau liée à l'empathie. C'est un entraînement — pas un sentiment qu'on attend, mais qu'on cultive.", acte: "Dis mentalement à quelqu'un que tu aimes : \"Puisses-tu être heureux. Puisses-tu être en paix.\" Répète 5 fois. Puis dis-le à toi-même." },
+  { id: 12, famille: "Pratique", titre: "La visualisation", texte: "Le cerveau ne fait pas bien la différence entre une expérience vécue et une expérience visualisée avec précision. Les neurones s'activent de la même façon. C'est pour ça que les sportifs de haut niveau visualisent leurs performances avant de les faire — pas comme un vœu, comme un entraînement neurologique.", acte: "Ferme les yeux et visualise une version de toi qui gère une situation difficile avec calme et clarté. En détail — ce que tu dis, comment tu te tiens, ce que tu ressens." },
+  { id: 13, famille: "Pratique", titre: "Le jeûne et les envies", texte: "Au-delà des bénéfices métaboliques, le jeûne intermittent change le rapport à soi. Il demande d'apprendre à distinguer la faim physique de la faim émotionnelle. Il développe une tolérance à l'inconfort dans une société qui offre une satisfaction immédiate à tout moment. Les pratiquants décrivent une relation différente à leurs envies — pas seulement de nourriture.", acte: "Observe la prochaine fois que tu manges sans avoir faim. Qu'est-ce que tu cherchais vraiment ?" },
+  { id: 14, famille: "Pratique", titre: "La cohérence cardiaque", texte: "Le cœur possède 40 000 neurones et génère un champ électromagnétique 60 fois plus puissant que celui du cerveau. La cohérence cardiaque — cet état de synchronisation entre le rythme cardiaque, la respiration et le système nerveux — est mesurable et reproductible. 5 minutes, 3 fois par jour, à 6 respirations par minute. Effets prouvés sur le stress et l'anxiété.", acte: "Essaie le 365 : inspire 5 secondes, expire 5 secondes. 5 minutes. 3 fois dans la journée si possible." },
+  // SAGESSE
+  { id: 15, famille: "Sagesse", titre: "Les 4 accords toltèques", texte: "Don Miguel Ruiz a distillé une sagesse ancienne en 4 principes. Que ta parole soit impeccable. Ne prends rien personnellement. Ne fais pas de suppositions. Fais toujours de ton mieux. Ces quatre règles semblent simples. Les tenir une seule journée révèle à quel point elles ne le sont pas.", acte: "Choisis un des quatre accords. Tiens-le pour aujourd'hui seulement. Observe." },
+  { id: 16, famille: "Sagesse", titre: "Marc Aurèle et le moment présent", texte: "Deux mille ans avant le mouvement mindfulness, un empereur romain écrivait chaque soir dans un journal jamais destiné à la publication. Ce qu'il répète inlassablement : tu ne contrôles que ton jugement, pas les événements. La douleur n'est pas dans ce qui arrive — elle est dans ce qu'on pense de ce qui arrive. L'obstacle est le chemin.", acte: "Face à une situation difficile, demande-toi : est-ce que je souffre de l'événement, ou de ce que j'en pense ?" },
+  { id: 17, famille: "Sagesse", titre: "Rumi et le vide comme porte", texte: "Rumi, poète soufi du XIIIe siècle, a pour image centrale le ney — la flûte de roseau qui pleure depuis qu'on l'a coupée du roseau. Cette coupure n'est pas une blessure — c'est ce qui lui donne sa musique. Le vide en nous n'est pas un manque à combler. C'est l'espace d'où vient le son.", acte: "Écris une chose que tu as perdue et qui t'a donné quelque chose que tu n'aurais pas eu autrement." },
+  { id: 18, famille: "Sagesse", titre: "Jung et l'ombre", texte: "Carl Gustav Jung appelait \"l'ombre\" tout ce que nous refusons de voir en nous — nos colères, nos jalousies, nos lâchetés, nos désirs inavoués. Ce que nous ne reconnaissons pas en nous, nous le projetons sur les autres. Faire la paix avec son ombre — pas la combattre, l'accueillir — c'est une des formes les plus profondes d'honnêteté envers soi-même.", acte: "Identifie quelque chose qui t'énerve profondément chez quelqu'un. Est-ce que tu reconnais cette chose en toi, quelque part ?" },
+  { id: 19, famille: "Sagesse", titre: "L'impermanence", texte: "Anicca — l'impermanence — est l'une des trois marques de l'existence dans le bouddhisme. Tout change, tout passe, rien n'est fixe. Ce n'est pas du pessimisme : c'est une libération. La souffrance vient de l'attachement à ce qui ne peut pas durer. Mais l'impermanence vaut aussi pour la douleur — elle aussi passera.", acte: "Face à quelque chose de difficile que tu vis en ce moment. Rappelle-toi : dans 5 ans, où sera-ce ?" },
+  { id: 20, famille: "Sagesse", titre: "Les Évangiles comme textes intérieurs", texte: "Peu importe la foi — les Évangiles contiennent des textes d'une profondeur psychologique rare. \"Enlève d'abord la poutre de ton propre œil.\" \"Qui veut sauver sa vie la perdra.\" Ce ne sont pas des injonctions morales — ce sont des descriptions précises du fonctionnement de l'ego. Lus comme textes intérieurs, sans dogme, ils disent quelque chose d'universel.", acte: "Relis une parabole — le fils prodigue, le bon samaritain. Lis-la comme si elle parlait de toi maintenant." },
+  { id: 21, famille: "Sagesse", titre: "Viktor Frankl et le sens", texte: "Viktor Frankl a survécu à Auschwitz et en a tiré une thérapie : la logothérapie. Sa thèse : l'humain peut supporter presque n'importe quoi s'il trouve un sens à ce qu'il traverse. \"Celui qui a un pourquoi peut supporter presque n'importe quel comment.\" Le sens ne se trouve pas — il se crée.", acte: "Face à quelque chose de difficile dans ta vie, demande-toi : quel sens est-ce que je peux choisir de lui donner ?" },
+  // ÉCOUTE
+  { id: 22, famille: "Écoute", titre: "Le corps n'oublie rien", texte: "Bessel van der Kolk démontre dans ce livre que les traumatismes ne sont pas seulement des souvenirs — ils sont des expériences corporelles figées. Il y présente des approches que la psychiatrie traditionnelle ignorait : EMDR, yoga, théâtre, neurofeedback. Pas parce qu'elles sont alternatives — parce qu'elles atteignent ce que la parole seule ne peut pas atteindre.", acte: "Retiens un nom : Bessel van der Kolk. Si un jour tu veux comprendre pourquoi le corps parle, commence par là." },
+  { id: 23, famille: "Écoute", titre: "L'homme en quête de sens", texte: "Écrit en 9 jours après la libération des camps, ce livre de Viktor Frankl n'a pas pris une ride. C'est à la fois un témoignage et une théorie — la preuve que même dans les conditions les plus extrêmes, quelque chose en nous reste libre. Pas libre de ce qui nous arrive. Libre de comment nous y répondons.", acte: "Aujourd'hui, identifie une situation où tu n'as pas le choix de ce qui se passe — mais où tu as le choix de comment tu y réponds." },
+  { id: 24, famille: "Écoute", titre: "Pourquoi dormons-nous ?", texte: "Matthew Walker a passé 20 ans à étudier le sommeil. Le sommeil n'est pas un temps mort : c'est quand le cerveau consolide les apprentissages, nettoie les déchets métaboliques, retraite les émotions. Priver quelqu'un de sommeil, c'est le priver de santé mentale à long terme.", acte: "Cette nuit : couche-toi 30 minutes plus tôt que d'habitude. Observe ce que ça change demain." },
+  { id: 25, famille: "Écoute", titre: "Les 4 accords toltèques", texte: "Don Miguel Ruiz a écrit un des livres les plus vendus au monde sur la croissance personnelle — et l'un des plus solides. Pas de psychologie de comptoir : une sagesse ancienne reformulée avec simplicité. Ce qui le distingue : il ne propose pas des techniques, mais des principes de vie. On peut le relire chaque année et y trouver quelque chose de nouveau.", acte: "Trouve ce livre. Ouvre-le à la première page. Lis juste la première page." },
+  { id: 26, famille: "Écoute", titre: "Conversations avec Dieu", texte: "Neale Donald Walsch a écrit ce livre dans un état de désespoir profond. Il a commencé une lettre de colère — et quelque chose a répondu. Peu importe ce qu'on pense de la nature de cette réponse : le dialogue qui en résulte pose des questions que peu de livres osent poser sur l'amour, la peur, la culpabilité. Lu comme une conversation intérieure radicalement honnête.", acte: "Écris aujourd'hui une lettre à une force plus grande que toi — que tu l'appelles Dieu, le Vivant, la Vie, ou rien. Dis ce que tu n'as jamais dit." },
+  { id: 27, famille: "Écoute", titre: "La puissance de la joie", texte: "Frédéric Lenoir distingue le plaisir — fugace, dépendant de l'extérieur — de la joie, qui est un état profond indépendant des circonstances. Il traverse les traditions — stoïcisme, bouddhisme, christianisme mystique — pour montrer que la joie se cultive. Pas comme une injonction au bonheur, mais comme une discipline intérieure.", acte: "Nomme trois choses qui te donnent une joie profonde — pas un plaisir, une joie. Observe ce qu'elles ont en commun." },
+  { id: 28, famille: "Écoute", titre: "Les Pensées de Marc Aurèle", texte: "Marcus Aurelius était l'homme le plus puissant du monde — et il passait ses nuits à se rappeler qu'il n'était rien. Ces notes personnelles, jamais destinées à être publiées, sont d'une modernité troublante. Il parle de l'ego, du temps, de la mort, de la colère, de la compassion. Chaque entrée est courte. On peut l'ouvrir au hasard.", acte: "Ouvre ce livre au hasard — ou cherche une citation de Marc Aurèle en ligne. Lis-la lentement. Deux fois." },
+];
+
+// Obtenir la lumière du jour (tourne en boucle)
+const getLumiereDuJour = () => {
+  const debut = new Date("2025-01-01");
+  const auj = new Date();
+  const joursSinceDebut = Math.floor((auj - debut) / (1000 * 60 * 60 * 24));
+  return LUMIERES[joursSinceDebut % LUMIERES.length];
+};
+
 // ─── SYSTÈME SEMI-ADAPTATIF ────────────────────────────────────────────────────
 // Cartographie : mots-clés → index d'exercice prioritaire par Clé
 // Format : { cleIndex: { motCle: indexExercicePrioritaire } }
@@ -3971,7 +4224,112 @@ const detecterSignal = (texte, cleIndex) => {
   return null;
 };
 
-const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
+// ─── LUMIÈRE QUOTIDIENNE ──────────────────────────────────────────────────────
+const FAMILLE_COULEURS = {
+  "Corps":    "#D4856A",
+  "Pratique": "#7B9EA8",
+  "Sagesse":  "#C8A96E",
+  "Écoute":   "#A87BC8",
+};
+
+const LumiereDuJour = () => {
+  const lumiere = getLumiereDuJour();
+  const couleur = FAMILLE_COULEURS[lumiere.famille] || T.or;
+  const [acteVu, setActeVu] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("alba_lumiere_lue");
+      const aujourd = new Date().toDateString();
+      if (saved === aujourd) setActeVu(true);
+    } catch {}
+  }, []);
+
+  const marquerLue = () => {
+    setActeVu(true);
+    try { localStorage.setItem("alba_lumiere_lue", new Date().toDateString()); } catch {};
+  };
+
+  return (
+    <div style={{ padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
+      <style>{`@keyframes fadeUpL { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
+
+      {/* En-tête */}
+      <div style={{ textAlign: "center", marginBottom: "2rem", animation: "fadeUpL 0.5s ease forwards" }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: couleur, marginBottom: "0.5rem",
+        }}>Lumière du jour · {lumiere.famille}</div>
+        <div style={{
+          fontFamily: T.serif, fontSize: "1.4rem", fontWeight: 300,
+          color: T.orPale, lineHeight: 1.3,
+        }}>{lumiere.titre}</div>
+      </div>
+
+      {/* Texte */}
+      <div style={{
+        padding: "1.5rem",
+        background: `${couleur}0A`,
+        border: `1px solid ${couleur}22`,
+        borderRadius: "8px",
+        marginBottom: "1.5rem",
+        animation: "fadeUpL 0.6s ease forwards 0.1s", opacity: 0,
+      }}>
+        <p style={{
+          fontFamily: T.serif, fontSize: "1rem",
+          color: T.aube, lineHeight: 1.9, margin: 0,
+        }}>{lumiere.texte}</p>
+      </div>
+
+      {/* Acte du jour */}
+      <div
+        onClick={marquerLue}
+        style={{
+          padding: "1.2rem 1.4rem",
+          background: acteVu ? `${couleur}18` : `${T.nuit2}`,
+          border: `1px solid ${acteVu ? couleur + "55" : couleur + "33"}`,
+          borderLeft: `3px solid ${couleur}`,
+          borderRadius: "0 8px 8px 0",
+          cursor: "pointer",
+          transition: "all 0.3s",
+          animation: "fadeUpL 0.6s ease forwards 0.2s", opacity: 0,
+        }}
+      >
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+          letterSpacing: "0.4em", textTransform: "uppercase",
+          color: couleur, marginBottom: "0.6rem",
+        }}>Pour aujourd'hui</div>
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.95rem", color: acteVu ? couleur : T.orPale,
+          lineHeight: 1.7, margin: 0,
+        }}>{lumiere.acte}</p>
+        {acteVu && (
+          <div style={{
+            marginTop: "0.8rem",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+            letterSpacing: "0.3em", textTransform: "uppercase",
+            color: couleur,
+          }}>✓ Lu aujourd'hui</div>
+        )}
+      </div>
+
+      {/* Navigation entre lumières */}
+      <div style={{
+        marginTop: "2rem", textAlign: "center",
+        fontFamily: T.serif, fontStyle: "italic",
+        fontSize: "0.78rem", color: `${T.brume}88`, lineHeight: 1.7,
+        animation: "fadeUpL 0.6s ease forwards 0.3s", opacity: 0,
+      }}>
+        Une lumière par jour.<br/>
+        Demain, une autre fenêtre s'ouvrira.
+      </div>
+    </div>
+  );
+};
+
 const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
   const [section, setSection] = useState("pratique");
   const [niveauPratique, setNiveauPratique] = useState(0);
@@ -6624,6 +6982,7 @@ export default function Alba() {
     { id: "presence",  label: "Miroir" },
     { id: "ardoise",   label: "Ardoise" },
     { id: "cle",       label: "Ma Clé" },
+    { id: "lumiere",   label: "Lumière" },
     { id: "profil",    label: "Profil" },
   ];
 
@@ -6636,6 +6995,20 @@ export default function Alba() {
       evasion:   "/icons/navigation_evasion.svg",
       souffle:   "/icons/navigation_souffle.svg",
     };
+    if (id === "lumiere") return (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+        style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    );
     if (id === "profil") return (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
         style={{ color: active ? "#C8A96E" : "#8C7F74", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
@@ -6750,6 +7123,7 @@ export default function Alba() {
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
             {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
+            {tab === "lumiere"   && <LumiereDuJour />}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
             {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
           </div>
