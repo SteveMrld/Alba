@@ -150,13 +150,84 @@ const SUPABASE_URL  = "https://yuwqokjkpooozgtsvfkc.supabase.co";
 const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
 const SB_ENABLED = true;
 
+// ─── AUTH SUPABASE — Magic Link ───────────────────────────────────────────────
+// Token de session stocké en mémoire + localStorage
+let _authToken = null;
+let _authUser  = null;
+
+const sbAuth = {
+  // Envoyer le magic link
+  async sendMagicLink(email) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/otp`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, create_user: true }),
+    });
+    return r.ok;
+  },
+
+  // Vérifier le token OTP (6 chiffres)
+  async verifyOtp(email, token) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "email", email, token }),
+    });
+    if (!r.ok) return null;
+    const data = await r.json();
+    if (data.access_token) {
+      _authToken = data.access_token;
+      _authUser  = data.user;
+      try {
+        localStorage.setItem("alba_auth_token", data.access_token);
+        localStorage.setItem("alba_auth_user",  JSON.stringify(data.user));
+      } catch {}
+    }
+    return data.user || null;
+  },
+
+  // Charger session depuis localStorage
+  loadSession() {
+    try {
+      const t = localStorage.getItem("alba_auth_token");
+      const u = localStorage.getItem("alba_auth_user");
+      if (t && u) {
+        _authToken = t;
+        _authUser  = JSON.parse(u);
+        return _authUser;
+      }
+    } catch {}
+    return null;
+  },
+
+  // Déconnexion
+  signOut() {
+    _authToken = null;
+    _authUser  = null;
+    try {
+      localStorage.removeItem("alba_auth_token");
+      localStorage.removeItem("alba_auth_user");
+    } catch {}
+  },
+
+  getUser()  { return _authUser; },
+  getToken() { return _authToken; },
+};
+
+// Helper token — utilise le token auth si dispo, sinon anon key
+const getAuthHeader = () => ({
+  apikey: SUPABASE_KEY,
+  Authorization: `Bearer ${_authToken || SUPABASE_KEY}`,
+  "Content-Type": "application/json",
+});
+
 // Client Supabase léger (sans SDK — juste fetch)
 const sb = {
   async get(table, match) {
     if (!SB_ENABLED) return null;
     const params = Object.entries(match).map(([k,v]) => `${k}=eq.${encodeURIComponent(v)}`).join("&");
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}&limit=1`, {
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json" },
+      headers: getAuthHeader(),
     });
     const data = await r.json();
     return Array.isArray(data) ? data[0] || null : null;
@@ -165,7 +236,7 @@ const sb = {
     if (!SB_ENABLED) return null;
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
       method: "POST",
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", Prefer: "resolution=merge-duplicates,return=representation" },
+      headers: { ...getAuthHeader(), Prefer: "resolution=merge-duplicates,return=representation" },
       body: JSON.stringify(row),
     });
     return r.ok ? await r.json() : null;
@@ -174,7 +245,7 @@ const sb = {
     if (!SB_ENABLED) return [];
     const params = Object.entries(match).map(([k,v]) => `${k}=eq.${encodeURIComponent(v)}`).join("&");
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}&order=created_at.asc`, {
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+      headers: getAuthHeader(),
     });
     return r.ok ? await r.json() : [];
   },
@@ -183,7 +254,7 @@ const sb = {
     const params = Object.entries(match).map(([k,v]) => `${k}=eq.${encodeURIComponent(v)}`).join("&");
     await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`, {
       method: "DELETE",
-      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+      headers: getAuthHeader(),
     });
   },
 };
@@ -703,6 +774,175 @@ const Screen = ({ children, centered, style }) => (
     {children}
   </div>
 );
+
+// ─── ÉCRAN AUTH — Magic Link ──────────────────────────────────────────────────
+const AuthScreen = ({ onAuth }) => {
+  const [email, setEmail]     = useState("");
+  const [step, setStep]       = useState("email");  // email | code | sending | error
+  const [code, setCode]       = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errMsg, setErrMsg]   = useState("");
+
+  const sendLink = async () => {
+    if (!email.trim() || !email.includes("@")) return;
+    setLoading(true);
+    const ok = await sbAuth.sendMagicLink(email.trim().toLowerCase());
+    setLoading(false);
+    if (ok) setStep("code");
+    else { setErrMsg("Une erreur est survenue. Réessaie."); setStep("error"); }
+  };
+
+  const verifyCode = async () => {
+    if (code.trim().length < 6) return;
+    setLoading(true);
+    const user = await sbAuth.verifyOtp(email.trim().toLowerCase(), code.trim());
+    setLoading(false);
+    if (user) onAuth(user);
+    else { setErrMsg("Code incorrect ou expiré."); }
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0,
+      background: T.nuit,
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "2rem",
+    }}>
+      {/* Halo */}
+      <div style={{
+        position: "absolute", top: "20%", left: "50%",
+        transform: "translateX(-50%)",
+        width: 280, height: 280,
+        background: `radial-gradient(ellipse, ${T.or}18 0%, transparent 70%)`,
+        pointerEvents: "none",
+      }}/>
+
+      {/* Logo */}
+      <div style={{
+        fontFamily: T.serif, fontSize: "2.2rem", letterSpacing: "0.28em",
+        color: T.or, marginBottom: "0.4rem",
+      }}>ALBA</div>
+      <div style={{
+        fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem",
+        color: T.brume, marginBottom: "3rem",
+      }}>L'aube en toi</div>
+
+      {step === "email" && (
+        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1.05rem", color: T.orPale,
+            textAlign: "center", lineHeight: 1.7, marginBottom: "0.5rem",
+          }}>
+            Entre ton adresse email.<br/>
+            <span style={{ color: T.brume, fontSize: "0.88rem" }}>Un code t'y sera envoyé.</span>
+          </div>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && sendLink()}
+            placeholder="ton@email.com"
+            autoFocus
+            style={{
+              background: T.nuit2, border: `1px solid ${T.brume}33`,
+              borderRadius: "4px", padding: "0.9rem 1.1rem",
+              fontFamily: T.sans, fontSize: "1rem", color: T.aube,
+              outline: "none", width: "100%", boxSizing: "border-box",
+              transition: "border 0.2s",
+            }}
+          />
+          <button
+            onClick={sendLink}
+            disabled={loading || !email.includes("@")}
+            style={{
+              background: loading ? `${T.or}44` : T.or,
+              border: "none", borderRadius: "4px",
+              padding: "0.9rem", cursor: loading ? "default" : "pointer",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.4em", textTransform: "uppercase",
+              color: T.nuit, transition: "all 0.2s",
+            }}
+          >
+            {loading ? "Envoi…" : "Recevoir le code"}
+          </button>
+        </div>
+      )}
+
+      {step === "code" && (
+        <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1.05rem", color: T.orPale,
+            textAlign: "center", lineHeight: 1.7, marginBottom: "0.5rem",
+          }}>
+            Le code est dans ta boîte.<br/>
+            <span style={{ color: T.brume, fontSize: "0.88rem" }}>{email}</span>
+          </div>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={code}
+            onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            onKeyDown={e => e.key === "Enter" && verifyCode()}
+            placeholder="000000"
+            autoFocus
+            style={{
+              background: T.nuit2, border: `1px solid ${T.brume}33`,
+              borderRadius: "4px", padding: "0.9rem 1.1rem",
+              fontFamily: T.sans, fontSize: "1.6rem", color: T.orPale,
+              outline: "none", width: "100%", boxSizing: "border-box",
+              textAlign: "center", letterSpacing: "0.4em",
+            }}
+          />
+          {errMsg && (
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center" }}>
+              {errMsg}
+            </div>
+          )}
+          <button
+            onClick={verifyCode}
+            disabled={loading || code.length < 6}
+            style={{
+              background: loading ? `${T.or}44` : T.or,
+              border: "none", borderRadius: "4px",
+              padding: "0.9rem", cursor: loading ? "default" : "pointer",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.4em", textTransform: "uppercase",
+              color: T.nuit, transition: "all 0.2s",
+            }}
+          >
+            {loading ? "Vérification…" : "Entrer"}
+          </button>
+          <button
+            onClick={() => { setStep("email"); setCode(""); setErrMsg(""); }}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              letterSpacing: "0.3em", textTransform: "uppercase",
+              color: T.brume, padding: "0.5rem",
+            }}
+          >
+            ← Changer d'email
+          </button>
+        </div>
+      )}
+
+      {step === "error" && (
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", color: "#D4856A", marginBottom: "1.5rem" }}>{errMsg}</div>
+          <button onClick={() => setStep("email")} style={{
+            background: "none", border: `1px solid ${T.brume}44`,
+            borderRadius: "4px", padding: "0.7rem 1.5rem",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+            letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume, cursor: "pointer",
+          }}>Réessayer</button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // ─── SPLASH ────────────────────────────────────────────────────────────────────
 const Splash = ({ onEnd }) => {
@@ -4197,7 +4437,7 @@ const Journal = ({ data }) => {
 };
 
 // ─── PROFIL ────────────────────────────────────────────────────────────────────
-const Profil = ({ data, onUpdateData, progressStats }) => {
+const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
@@ -4394,8 +4634,20 @@ const Profil = ({ data, onUpdateData, progressStats }) => {
         <SouffleInline />
       </div>
 
+      {/* ── Déconnexion ── */}
+      {onSignOut && (
+        <div style={{ marginTop: "0.5rem", textAlign: "center" }}>
+          <button onClick={onSignOut} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            letterSpacing: "0.4em", textTransform: "uppercase",
+            color: `${T.brume}33`,
+          }}>Se déconnecter</button>
+        </div>
+      )}
+
       {/* ── Réinitialiser ── */}
-      <div style={{ marginTop: "1.5rem", textAlign: "center" }}>
+      <div style={{ marginTop: "1rem", textAlign: "center" }}>
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)} style={{
             background: "none", border: "none", cursor: "pointer",
@@ -5115,6 +5367,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
 // ─── APP ──────────────────────────────────────────────────────────────────────
 export default function Alba() {
   const [view, setView] = useState("splash");
+  const [authUser, setAuthUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState("compagnon");
   const [tabHistory, setTabHistory] = useState([]);
@@ -5134,11 +5387,23 @@ export default function Alba() {
   // ── Chargement initial ──
   useEffect(() => {
     (async () => {
+      // Vérifier session auth
+      const existingUser = sbAuth.loadSession();
+      if (existingUser) {
+        setAuthUser(existingUser);
+      }
       // Profil
       const profile = await db.loadProfile();
       if (profile) {
         setUserData(profile);
-        setView("app");
+        if (existingUser) {
+          setView("app");
+        } else {
+          setView("auth");
+        }
+      } else if (existingUser) {
+        // Auth mais pas encore de profil → onboarding
+        setView("onboarding");
       }
       // Progression
       const prog = await db.loadProgress();
@@ -5209,6 +5474,23 @@ export default function Alba() {
       }
       return updated;
     });
+  };
+
+  const handleAuth = (user) => {
+    setAuthUser(user);
+    // Si profil déjà existant → app directement
+    if (userData) {
+      setView("app");
+    } else {
+      setView("onboarding");
+    }
+  };
+
+  const handleSignOut = () => {
+    sbAuth.signOut();
+    setAuthUser(null);
+    setUserData(null);
+    setView("auth");
   };
 
   const handleComplete = (data) => {
@@ -5293,7 +5575,8 @@ export default function Alba() {
         />
       )}
 
-      {view === "splash" && <Splash onEnd={() => setView("onboarding")} />}
+      {view === "splash" && <Splash onEnd={() => setView(authUser ? (userData ? "app" : "onboarding") : "auth")} />}
+      {view === "auth"    && <AuthScreen onAuth={handleAuth} />}
       {view === "onboarding" && <Onboarding onComplete={handleComplete} />}
       {view === "portrait" && <Portrait data={userData} onContinue={() => setView("app")} />}
 
@@ -5353,7 +5636,7 @@ export default function Alba() {
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} />}
+            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} />}
           </div>
 
           {/* ── BOTTOM NAV ── */}
