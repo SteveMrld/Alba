@@ -473,7 +473,7 @@ const T = {
   or:      "#C8A96E",
   orPale:  "#E8D5B0",
   aube:    "#F5EFE6",
-  brume:   "#8C7F74",
+  brume:   "#B0A59A",
   aurore:  "#E8B89A",
   aurore2: "#D4856A",
   fond:    "#141210",
@@ -867,7 +867,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail }) => {
         <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
           <span style={{ fontFamily: T.serif, fontSize: "2.4rem", color: T.or }}>9€</span>
           <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, letterSpacing: "0.3em" }}> / mois</span>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginTop: "0.3rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.3rem" }}>
             RÉSILIABLE À TOUT MOMENT
           </div>
         </div>
@@ -897,7 +897,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail }) => {
           background: "none", border: "none", cursor: "pointer",
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
           letterSpacing: "0.3em", textTransform: "uppercase",
-          color: `${T.brume}55`, padding: "0.5rem",
+          color: T.brume, padding: "0.5rem",
         }}>
           Continuer en accès gratuit
         </button>
@@ -1405,7 +1405,7 @@ const Onboarding = ({ onComplete }) => {
         {/* Séparateur */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "1.4rem 0" }}>
           <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}88` }}>ou</span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: T.brume }}>ou</span>
           <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
         </div>
 
@@ -1739,7 +1739,7 @@ const Portrait = ({ data, onContinue }) => {
       {/* Vidéo ambiante très discrète */}
       <video autoPlay loop muted playsInline style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", opacity: 0.05, pointerEvents: "none",
+        objectFit: "cover", opacity: 0.15, pointerEvents: "none",
       }}>
         <source src={HEURE < 6 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
       </video>
@@ -2494,7 +2494,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         {/* Vidéo de fond hero */}
         <video autoPlay loop muted playsInline style={{
           position: "absolute", inset: 0, width: "100%", height: "100%",
-          objectFit: "cover", zIndex: 0, opacity: 0.09,
+          objectFit: "cover", zIndex: 0, opacity: 0.18,
         }}><source src={heroVideo} type="video/mp4"/></video>
 
         {/* Halo arrière-plan */}
@@ -2633,7 +2633,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           <p style={{
             marginTop: "1rem",
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.82rem", color: `${T.brume}88`,
+            fontSize: "0.82rem", color: T.brume,
             lineHeight: 1.7,
           }}>
             Ce n'est pas un jugement. C'est simplement ce que tu portes en ce moment.
@@ -3116,7 +3116,7 @@ Signe simplement : ALBA`;
             {generation ? "ALBA écrit…" : isPremium ? "Recevoir la lettre de la semaine" : "✦ Débloquer les Lettres — 9€/mois"}
           </button>
           {generation && (
-            <p style={{ textAlign: "center", marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88` }}>
+            <p style={{ textAlign: "center", marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume }}>
               Elle lit ton ardoise…
             </p>
           )}
@@ -3130,7 +3130,7 @@ Signe simplement : ALBA`;
           border: `1px solid ${T.brume}15`,
           borderRadius: "6px",
         }}>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}88`, lineHeight: 1.8 }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, lineHeight: 1.8 }}>
             Pose encore quelques fragments dans ton ardoise — ALBA aura besoin d'au moins deux moments pour t'écrire.
           </p>
         </div>
@@ -3141,7 +3141,7 @@ Signe simplement : ALBA`;
           padding: "0.8rem 1rem", marginBottom: "1.5rem",
           border: `1px solid ${T.brume}15`, borderRadius: "6px",
         }}>
-          <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.brume}66` }}>
+          <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume }}>
             Prochaine lettre disponible dans quelques jours
           </p>
         </div>
@@ -3151,7 +3151,7 @@ Signe simplement : ALBA`;
       {lettres.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem 0" }}>
           <div style={{ fontSize: "1.5rem", marginBottom: "1rem", opacity: 0.3 }}>✉</div>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}55`, lineHeight: 1.8 }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, lineHeight: 1.8 }}>
             Tes lettres apparaîtront ici.<br/>Elles resteront pour toi.
           </p>
         </div>
@@ -3201,7 +3201,7 @@ Signe simplement : ALBA`;
                 <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.3rem" }}>
                   Lettre d'ALBA
                 </div>
-                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", color: `${T.brume}88` }}>
+                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", color: T.brume }}>
                   {semaineFmt(lettreOuverte.date)}
                 </div>
               </div>
@@ -3612,7 +3612,7 @@ const SouffleInline = () => {
           }}>{active ? "Pause" : cyclesDone > 0 ? "Continuer" : "Commencer"}</button>
 
           {cyclesDone > 0 && (
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", color: `${T.brume}88` }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", color: T.brume }}>
               {cyclesDone} cycle{cyclesDone > 1 ? "s" : ""}
             </span>
           )}
@@ -4705,7 +4705,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
             background: "none", border: "none", cursor: "pointer",
             fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem",
             letterSpacing: "0.3em", textTransform: "uppercase",
-            color: `${T.brume}88`,
+            color: T.brume,
           }}>Changer →</button>
         </div>
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>
@@ -4733,7 +4733,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
                   <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.vue ? `${T.or}cc` : `${T.aube}88`, lineHeight: 1.7 }}>
                     {t.texte}
                   </p>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginTop: "0.4rem" }}>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.4rem" }}>
                     {new Date(t.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                     {t.vue ? " · traversée" : ""}
                   </div>
@@ -5322,7 +5322,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: `${T.brume}cc`, lineHeight: 2 }}>
           Tu es ici.
         </p>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}66`, marginTop: "0.3rem" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, marginTop: "0.3rem" }}>
           Reste aussi longtemps que tu veux.
         </p>
         <button onClick={() => setPhase("idle")} style={{
@@ -5330,7 +5330,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
           borderRadius: "20px", padding: "0.5rem 1.4rem",
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
           letterSpacing: "0.4em", textTransform: "uppercase",
-          color: `${T.brume}88`, cursor: "pointer",
+          color: T.brume, cursor: "pointer",
         }}>Revenir</button>
       </div>
     </div>
@@ -5426,7 +5426,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
                       {isPremium ? "Laisser venir" : "✦ Débloquer le Miroir"}
                     </button>
                     {!isPremium && (
-                      <div style={{ marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}88`, textAlign: "center" }}>
+                      <div style={{ marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: T.brume, textAlign: "center" }}>
                         Accès complet — 9€ / mois
                       </div>
                     )}
@@ -5438,7 +5438,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
                   <button onClick={() => setPhase("silence")} style={{
                     background: "none", border: "none",
                     fontFamily: T.serif, fontStyle: "italic",
-                    fontSize: "0.85rem", color: `${T.brume}66`,
+                    fontSize: "0.85rem", color: T.brume,
                     cursor: "pointer", letterSpacing: "0.02em",
                   }}>
                     Je veux juste être là
@@ -5455,7 +5455,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
             {/* Ce que l'utilisateur avait écrit — petit, discret */}
             <p style={{
               fontFamily: T.serif, fontStyle: "italic",
-              fontSize: "0.85rem", color: `${T.brume}55`,
+              fontSize: "0.85rem", color: T.brume,
               lineHeight: 1.7, marginBottom: "2.5rem",
               maxWidth: 360, margin: "0 auto 2.5rem",
             }}>
@@ -5481,7 +5481,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
               marginTop: "1.2rem",
               fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
               letterSpacing: "0.5em", textTransform: "uppercase",
-              color: `${T.brume}55`,
+              color: T.brume,
             }}>ALBA</p>
 
             {/* Actions */}
@@ -5490,7 +5490,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
                 background: "transparent", border: `1px solid ${T.brume}28`,
                 borderRadius: "20px", padding: "0.55rem 1.6rem",
                 fontFamily: T.serif, fontStyle: "italic",
-                fontSize: "0.9rem", color: `${T.brume}88`,
+                fontSize: "0.9rem", color: T.brume,
                 cursor: "pointer", transition: "all 0.25s",
               }}
                 onMouseEnter={e => { e.target.style.borderColor = `${T.or}44`; e.target.style.color = T.or; }}
