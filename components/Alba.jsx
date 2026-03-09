@@ -3326,14 +3326,14 @@ const getPhotos = (cdv, blessure) => {
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
 const VIDEOS = [
-  { src: "/videos/etoiles.mp4",  legende: "Le silence des étoiles répond à tous les silences.",      label: "Étoiles" },
-  { src: "/videos/caraibe.mp4",  legende: "La mer des Caraïbes ne juge pas. Elle accueille.",         label: "Caraïbes" },
-  { src: "/videos/vagues.mp4",   legende: "La mer reçoit tout. Elle ne retient rien.",                label: "Vagues" },
-  { src: "/videos/desert.mp4",   legende: "Marcher dans le vide apprend à porter le silence.",        label: "Désert" },
-  { src: "/videos/nuages.mp4",   legende: "Au-dessus des nuages, il fait toujours beau.",             label: "Nuages" },
-  { src: "/videos/savane2.mp4",  legende: "La savane brûle. Et elle renaît.",                         label: "Savane" },
-  { src: "/videos/foret.mp4",    legende: "La forêt n'explique pas sa lumière.",                      label: "Forêt" },
-  { src: "/videos/savane.mp4",   legende: "Chaque coucher de soleil est une permission de lâcher.",   label: "Crépuscule" },
+  { src: "/videos/etoiles.mp4",  legende: "Certaines nuits, le monde entier se tait pour toi.",          label: "Étoiles" },
+  { src: "/videos/caraibe.mp4",  legende: "Il y a des endroits qui te rappellent qui tu es vraiment.",   label: "Caraïbes" },
+  { src: "/videos/vagues.mp4",   legende: "Laisse venir ce qui vient. Laisse partir ce qui part.",        label: "Vagues" },
+  { src: "/videos/desert.mp4",   legende: "Le vide n'est pas un manque. C'est de l'espace.",             label: "Désert" },
+  { src: "/videos/nuages.mp4",   legende: "Tout passe. C'est la seule promesse que la vie tient.",        label: "Nuages" },
+  { src: "/videos/savane2.mp4",  legende: "Tu n'as pas à tout comprendre pour continuer d'avancer.",     label: "Savane" },
+  { src: "/videos/foret.mp4",    legende: "Il existe en toi quelque chose que rien n'a pu abîmer.",       label: "Forêt" },
+  { src: "/videos/savane.mp4",   legende: "Chaque coucher de soleil est une permission de lâcher.",       label: "Crépuscule" },
 ];
 
 const Evasion = ({ data }) => {
