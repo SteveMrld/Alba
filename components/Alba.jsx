@@ -3121,6 +3121,9 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         </p>
       </button>
 
+      {/* ── RITUEL DU MATIN ── (visible avant midi) */}
+      {isMatin && <RituelMatin data={data} cleActive={cleActive} onComplete={() => {}} />}
+
       {/* ── RITUEL DU CRÉPUSCULE ── (visible après 18h) */}
       {heure >= 18 && <RituelCrepuscule data={data} onPoser={(txt) => {
         // On stocke la réponse dans l'Ardoise du soir via localStorage
@@ -3157,6 +3160,251 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
 };
 
 // ─── RITUEL DU CRÉPUSCULE ────────────────────────────────────────────────────
+// ─── RITUEL DU MATIN ──────────────────────────────────────────────────────────
+// Séquence guidée 3 minutes — ancrée dans la Porte active
+
+const RITUELS_PAR_PORTE = {
+  1:  { ancrage: "Pose une main sur la poitrine. Sens ton cœur battre.", question: "Qu'est-ce que tu portes ce matin que tu pourrais nommer ?", intention: "Aujourd'hui je regarde ce qui est là, sans le fuir." },
+  2:  { ancrage: "Ferme les yeux. Pense à une chose qui se répète dans ta vie.", question: "Qu'est-ce que cette répétition veut t'apprendre ?", intention: "Aujourd'hui je reste curieux de ce que je ne comprends pas encore." },
+  3:  { ancrage: "Assieds-toi. Pose les deux pieds à plat. Sens le sol.", question: "Quelle émotion est là en ce moment, sans que tu l'aies invitée ?", intention: "Aujourd'hui j'accueille ce que je ressens sans l'effacer." },
+  4:  { ancrage: "Inspire profondément. En expirant, imagine que tu poses quelque chose.", question: "Qu'est-ce que tu portes pour quelqu'un d'autre depuis trop longtemps ?", intention: "Aujourd'hui je pose ce qui n'est pas à moi." },
+  5:  { ancrage: "Pense à une personne qui t'a donné quelque chose. Laisse entrer ce souvenir.", question: "Qu'est-ce qui t'empêche de recevoir vraiment ?", intention: "Aujourd'hui je m'autorise à recevoir sans mériter d'abord." },
+  6:  { ancrage: "Regarde tes mains. Ce sont les mains de quelqu'un qui devient.", question: "Qui es-tu quand tu n'as rien à prouver à personne ?", intention: "Aujourd'hui je suis la personne que je suis en train de devenir." },
+  7:  { ancrage: "Pense à quelque chose que tu veux créer. Laisse-le exister une seconde.", question: "Qu'est-ce qui attend en toi d'être fait ?", intention: "Aujourd'hui je laisse naître quelque chose, même imparfait." },
+  8:  { ancrage: "Pense à quelqu'un qui compte pour toi. Envoie-lui une pensée silencieuse.", question: "Qu'est-ce que le lien avec les autres te demande en ce moment ?", intention: "Aujourd'hui je m'ouvre au lien sans me perdre." },
+  9:  { ancrage: "Visualise un espace qui te protège. Un lieu intérieur sûr.", question: "De quoi as-tu besoin pour te sentir en sécurité aujourd'hui ?", intention: "Aujourd'hui je prends soin de ce qui me protège." },
+  10: { ancrage: "Pense à quelque chose que tu as appris dans la douleur.", question: "À qui pourrais-tu transmettre quelque chose de ce chemin ?", intention: "Aujourd'hui ce que j'ai traversé a une valeur." },
+  11: { ancrage: "Sens ton corps dans l'espace où tu es. Tu es ici.", question: "Dans quel espace te sens-tu vraiment chez toi ?", intention: "Aujourd'hui j'habite pleinement l'endroit où je suis." },
+  12: { ancrage: "Ferme les yeux. Ne cherche rien. Juste être.", question: "Si tu n'avais rien à faire aujourd'hui, qui serais-tu ?", intention: "Aujourd'hui j'existe, simplement." },
+};
+
+const SOUFFLES_MATIN = [
+  { label: "4-4-4", inspire: 4, tiens: 4, expire: 4 },
+  { label: "4-7-8", inspire: 4, tiens: 7, expire: 8 },
+  { label: "5-5",   inspire: 5, tiens: 0, expire: 5 },
+];
+
+const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
+  const porteNum = (cleActive % 12) + 1;
+  const rituel = RITUELS_PAR_PORTE[porteNum] || RITUELS_PAR_PORTE[1];
+  const souffle = SOUFFLES_MATIN[new Date().getDate() % SOUFFLES_MATIN.length];
+
+  const [etape, setEtape] = useState(0); // 0=intro 1=ancrage 2=souffle 3=question 4=intention 5=done
+  const [reponse, setReponse]   = useState("");
+  const [souffleEtat, setSouffleEtat] = useState("inspire"); // inspire|tiens|expire
+  const [souffleTimer, setSouffleTimer] = useState(null);
+  const [souffleCycles, setSouffleCycles] = useState(0);
+  const [souffleCount, setSouffleCount] = useState(souffle.inspire);
+  const [rituelFait] = useState(() => {
+    try { return localStorage.getItem("alba_rituel_" + new Date().toISOString().split("T")[0]) === "1"; } catch { return false; }
+  });
+
+  // Déjà fait aujourd'hui
+  if (rituelFait && etape === 0) return (
+    <div style={{ margin: "1rem 1.5rem 0", padding: "1rem 1.4rem", border: `1px solid ${T.or}15`, borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.7rem" }}>
+      <span style={{ color: T.or, fontSize: "0.9rem" }}>✦</span>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}99`, margin: 0 }}>
+        Rituel du matin accompli. Bonne journée, {data.prenom}.
+      </p>
+    </div>
+  );
+
+  const marquerFait = () => {
+    try { localStorage.setItem("alba_rituel_" + new Date().toISOString().split("T")[0], "1"); } catch {}
+    if (onComplete) onComplete();
+  };
+
+  // Souffle — cycle automatique
+  useEffect(() => {
+    if (etape !== 2) return;
+    if (souffleCycles >= 3) { setEtape(3); return; }
+
+    const phases = [
+      { etat: "inspire",  dur: souffle.inspire * 1000, next: souffle.tiens > 0 ? "tiens" : "expire" },
+      ...(souffle.tiens > 0 ? [{ etat: "tiens", dur: souffle.tiens * 1000, next: "expire" }] : []),
+      { etat: "expire",  dur: souffle.expire * 1000, next: "inspire" },
+    ];
+
+    let phaseIdx = phases.findIndex(p => p.etat === souffleEtat);
+    if (phaseIdx === -1) phaseIdx = 0;
+    const phase = phases[phaseIdx];
+
+    // Compte à rebours
+    let remaining = Math.ceil(phase.dur / 1000);
+    setSouffleCount(remaining);
+    const countdown = setInterval(() => {
+      remaining--;
+      setSouffleCount(remaining);
+      if (remaining <= 0) clearInterval(countdown);
+    }, 1000);
+
+    const t = setTimeout(() => {
+      clearInterval(countdown);
+      if (phase.next === "inspire" && souffleEtat === "expire") {
+        setSouffleCycles(c => c + 1);
+      }
+      setSouffleEtat(phase.next);
+    }, phase.dur);
+
+    setSouffleTimer(t);
+    return () => { clearTimeout(t); clearInterval(countdown); };
+  }, [etape, souffleEtat, souffleCycles]);
+
+  const cardStyle = {
+    margin: "1rem 1.5rem 0",
+    background: `linear-gradient(135deg, #16120A, ${T.nuit})`,
+    border: `1px solid ${T.or}28`,
+    borderRadius: "10px",
+    padding: "1.8rem 1.6rem",
+    animation: "fadeUp 0.5s ease forwards",
+    position: "relative", overflow: "hidden",
+  };
+
+  const labelStyle = {
+    fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+    letterSpacing: "0.55em", textTransform: "uppercase", color: `${T.or}88`,
+    marginBottom: "1.2rem", display: "flex", alignItems: "center", gap: "0.5rem",
+  };
+
+  const btnNext = (label, onClick) => (
+    <button onClick={onClick} style={{
+      marginTop: "1.4rem", background: `${T.or}15`, border: `1px solid ${T.or}40`,
+      borderRadius: "6px", padding: "0.75rem 1.4rem",
+      fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+      letterSpacing: "0.35em", textTransform: "uppercase",
+      color: T.or, cursor: "pointer", transition: "all 0.2s",
+      display: "block", width: "100%",
+    }}>{label}</button>
+  );
+
+  // ── ÉTAPE 0 : Intro ──────────────────────────────────────────────────────────
+  if (etape === 0) return (
+    <div style={cardStyle}>
+      <div style={{ position: "absolute", top: -40, right: -40, width: 150, height: 150, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}10, transparent 70%)`, pointerEvents: "none" }} />
+      <div style={labelStyle}><span>✦</span> Rituel du matin</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem, 3vw, 1.15rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "0.4rem" }}>
+        Trois minutes pour toi, {data.prenom}.<br/>
+        <span style={{ fontSize: "0.9rem", color: T.brume }}>Ancrage · Souffle · Intention.</span>
+      </p>
+      {btnNext("Commencer →", () => setEtape(1))}
+    </div>
+  );
+
+  // ── ÉTAPE 1 : Ancrage ────────────────────────────────────────────────────────
+  if (etape === 1) return (
+    <div style={cardStyle}>
+      <div style={labelStyle}><span>1 / 3</span> Ancrage</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem, 3vw, 1.1rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "1rem" }}>
+        {rituel.ancrage}
+      </p>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}aa`, lineHeight: 1.7 }}>
+        Prends le temps qu'il faut. Il n'y a rien d'autre à faire en ce moment.
+      </p>
+      {btnNext("C'est fait →", () => setEtape(2))}
+    </div>
+  );
+
+  // ── ÉTAPE 2 : Souffle ────────────────────────────────────────────────────────
+  if (etape === 2) {
+    const progress = souffleCycles / 3;
+    const souffleLabels = { inspire: "Inspire", tiens: "Retiens", expire: "Expire" };
+    const souffleCouleurs = { inspire: T.or, tiens: T.aurore, expire: "#9EC8B4" };
+    return (
+      <div style={cardStyle}>
+        <div style={labelStyle}><span>2 / 3</span> Souffle</div>
+        <div style={{ textAlign: "center", padding: "1rem 0" }}>
+          {/* Cercle animé */}
+          <div style={{
+            width: 100, height: 100, borderRadius: "50%", margin: "0 auto 1.2rem",
+            border: `2px solid ${souffleCouleurs[souffleEtat]}55`,
+            background: `radial-gradient(circle, ${souffleCouleurs[souffleEtat]}18 0%, transparent 70%)`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.8s ease",
+            transform: souffleEtat === "inspire" ? "scale(1.1)" : souffleEtat === "expire" ? "scale(0.9)" : "scale(1)",
+            boxShadow: `0 0 ${souffleEtat === "tiens" ? "20px" : "8px"} ${souffleCouleurs[souffleEtat]}22`,
+          }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "1.8rem", color: souffleCouleurs[souffleEtat] }}>
+              {souffleCount}
+            </span>
+          </div>
+          <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem", letterSpacing: "0.5em", textTransform: "uppercase", color: souffleCouleurs[souffleEtat] }}>
+            {souffleLabels[souffleEtat]}
+          </p>
+          {/* Barre de progression cycles */}
+          <div style={{ display: "flex", gap: "6px", justifyContent: "center", marginTop: "1.2rem" }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{ width: 24, height: 3, borderRadius: 2, background: i < souffleCycles ? T.or : `${T.brume}25`, transition: "background 0.4s" }} />
+            ))}
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}66`, marginTop: "0.8rem" }}>
+            {souffleCycles < 3 ? `${3 - souffleCycles} cycle${3 - souffleCycles > 1 ? "s" : ""} restant${3 - souffleCycles > 1 ? "s" : ""}` : "…"}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── ÉTAPE 3 : Question ───────────────────────────────────────────────────────
+  if (etape === 3) return (
+    <div style={cardStyle}>
+      <div style={labelStyle}><span>3 / 3</span> Question du matin</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem, 3vw, 1.12rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "1.2rem" }}>
+        {rituel.question}
+      </p>
+      <textarea
+        value={reponse} onChange={e => setReponse(e.target.value)}
+        placeholder="Quelques mots suffisent…"
+        rows={3}
+        style={{
+          width: "100%", background: "transparent", border: "none",
+          borderBottom: `1px solid ${reponse ? T.or + "44" : T.brume + "22"}`,
+          color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "1rem", padding: "0.4rem 0", outline: "none",
+          resize: "none", boxSizing: "border-box", lineHeight: 1.7,
+        }}
+      />
+      {btnNext(reponse.trim() ? "Poser →" : "Passer →", () => {
+        if (reponse.trim()) {
+          // Sauvegarder dans l'Ardoise
+          try {
+            const key = new Date().toISOString().split("T")[0];
+            const saved = JSON.parse(localStorage.getItem("alba_postits") || "{}");
+            saved[key] = [{ id: Date.now(), texte: reponse.trim(), type: "matin", heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) }, ...(saved[key] || [])];
+            localStorage.setItem("alba_postits", JSON.stringify(saved));
+          } catch {}
+        }
+        setEtape(4);
+      })}
+    </div>
+  );
+
+  // ── ÉTAPE 4 : Intention ──────────────────────────────────────────────────────
+  if (etape === 4) return (
+    <div style={cardStyle}>
+      <div style={labelStyle}><span>✦</span> Ton intention du jour</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.05rem, 3.2vw, 1.2rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "1.4rem" }}>
+        {rituel.intention}
+      </p>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88`, lineHeight: 1.7 }}>
+        Porte cette phrase avec toi aujourd'hui. Elle n'a pas besoin d'être vraie tout de suite.
+      </p>
+      {btnNext("C'est noté ✦", () => { setEtape(5); marquerFait(); })}
+    </div>
+  );
+
+  // ── ÉTAPE 5 : Terminé ────────────────────────────────────────────────────────
+  return (
+    <div style={{ margin: "1rem 1.5rem 0", padding: "1.2rem 1.6rem", background: `${T.or}08`, border: `1px solid ${T.or}25`, borderRadius: "8px", animation: "fadeUp 0.5s ease forwards" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+        <span style={{ color: T.or, fontSize: "0.9rem" }}>✦</span>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, margin: 0 }}>
+          Rituel accompli. La journée commence.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const RituelCrepuscule = ({ data, onPoser }) => {
   const [reponse, setReponse] = useState("");
   const [pose, setPose] = useState(false);
