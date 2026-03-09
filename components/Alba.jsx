@@ -2618,6 +2618,33 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   };
   const miroirMots = getMiroirSemaine();
 
+  // ── Mémoire — fragment passé (7-21 jours) ──────────────────────────────────
+  const getFragmentMémoire = () => {
+    if (!progressStats?.allPostits) return null;
+    // Une fois par semaine — affiché les lundis et mercredis
+    const jour = new Date().getDay();
+    if (jour !== 1 && jour !== 3) return null;
+    const today = new Date();
+    // Cherche un postit entre 7 et 21 jours en arrière
+    const candidats = [];
+    Object.entries(progressStats.allPostits || {}).forEach(([dateKey, posts]) => {
+      const d = new Date(dateKey + "T00:00:00");
+      const diff = Math.floor((today - d) / (1000 * 60 * 60 * 24));
+      if (diff >= 7 && diff <= 21) {
+        posts.forEach(p => {
+          if (p.texte && p.texte.trim().length > 15) {
+            candidats.push({ texte: p.texte.trim(), diff });
+          }
+        });
+      }
+    });
+    if (candidats.length === 0) return null;
+    // Choisit le plus récent dans la fenêtre
+    candidats.sort((a, b) => a.diff - b.diff);
+    return candidats[0];
+  };
+  const fragmentMémoire = getFragmentMémoire();
+
   const ENTREES = [
     { id: "presence", label: "Présence",  desc: "Un reflet intérieur",         couleur: "#7B9EA8" },
     { id: "ardoise",  label: "Ardoise",   desc: "Poser ce qui traverse", couleur: "#C8A96E" },
@@ -2784,6 +2811,44 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
             lineHeight: 1.7,
           }}>
             Ce n'est pas un jugement. C'est simplement ce que tu portes en ce moment.
+          </p>
+        </div>
+      )}
+
+      {/* ── MÉMOIRE — fragment passé ── */}
+      {fragmentMémoire && (
+        <div style={{
+          margin: "1rem 1.5rem 0",
+          background: `linear-gradient(135deg, ${T.nuit2}dd, #16120Edd)`,
+          border: `1px solid ${T.brume}18`,
+          borderRadius: "8px",
+          padding: "1.3rem 1.6rem",
+          animation: "fadeUp 0.7s ease forwards 0.32s", opacity: 0,
+          position: "relative", overflow: "hidden",
+        }}>
+          {/* Ligne discrète en haut */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "1px", background: `linear-gradient(to right, transparent, ${T.brume}25, transparent)` }} />
+
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
+            <div style={{ width: 3, height: 3, borderRadius: "50%", background: T.brume, opacity: 0.5 }} />
+            <span style={{
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem",
+              letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}88`,
+            }}>
+              Il y a {fragmentMémoire.diff} jour{fragmentMémoire.diff > 1 ? "s" : ""}, tu écrivais
+            </span>
+          </div>
+
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.92rem", color: `${T.brume}cc`,
+            lineHeight: 1.75, margin: 0,
+            borderLeft: `2px solid ${T.brume}25`,
+            paddingLeft: "0.9rem",
+          }}>
+            "{fragmentMémoire.texte.length > 120
+              ? fragmentMémoire.texte.slice(0, 120) + "…"
+              : fragmentMémoire.texte}"
           </p>
         </div>
       )}
