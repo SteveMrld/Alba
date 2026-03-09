@@ -775,6 +775,137 @@ const Screen = ({ children, centered, style }) => (
   </div>
 );
 
+// ─── PAYWALL — Abonnement 9€/mois ────────────────────────────────────────────
+const PaywallScreen = ({ onClose, userKey, userEmail }) => {
+  const [loading, setLoading] = useState(false);
+  const [err, setErr]         = useState(null);
+
+  const startCheckout = async () => {
+    setLoading(true);
+    setErr(null);
+    try {
+      const r = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userKey, email: userEmail }),
+      });
+      const data = await r.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        setErr("Impossible d'ouvrir le paiement. Réessaie.");
+      }
+    } catch {
+      setErr("Une erreur est survenue.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 500,
+      background: "rgba(10,8,6,0.96)",
+      display: "flex", alignItems: "flex-end",
+      animation: "fadeIn 0.3s ease",
+    }} onClick={onClose}>
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 540, margin: "0 auto",
+          background: `linear-gradient(170deg, #1A1714, #141210)`,
+          borderTop: `1px solid ${T.or}33`,
+          borderRadius: "20px 20px 0 0",
+          padding: "2.5rem 2rem 4rem",
+          animation: "fadeUp 0.35s ease forwards",
+        }}
+      >
+        {/* En-tête */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div style={{
+            fontSize: "2rem", marginBottom: "0.8rem",
+            filter: `drop-shadow(0 0 16px ${T.or}66)`,
+          }}>✦</div>
+          <div style={{
+            fontFamily: T.serif, fontSize: "1.5rem",
+            color: T.orPale, marginBottom: "0.4rem",
+          }}>
+            ALBA — Accès complet
+          </div>
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.95rem", color: T.brume, lineHeight: 1.7,
+          }}>
+            Le Miroir et les Lettres des Portes.<br/>
+            Pour ceux qui veulent aller plus loin.
+          </div>
+        </div>
+
+        {/* Ce qui est inclus */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "2rem" }}>
+          {[
+            { icon: "🌊", label: "Le Miroir", desc: "Une phrase posée. Un reflet renvoyé. Illimité." },
+            { icon: "✦",  label: "Lettres des Portes", desc: "6 lettres uniques, une par Clé franchie." },
+            { icon: "🌿", label: "Lettres hebdomadaires", desc: "ALBA lit ton Ardoise et t'écrit." },
+          ].map((item, i) => (
+            <div key={i} style={{
+              display: "flex", gap: "1rem", alignItems: "flex-start",
+              padding: "0.9rem 1rem",
+              background: `${T.or}07`,
+              border: `1px solid ${T.or}18`,
+              borderRadius: "6px",
+            }}>
+              <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{item.icon}</span>
+              <div>
+                <div style={{ fontFamily: T.serif, color: T.orPale, fontSize: "0.95rem" }}>{item.label}</div>
+                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.75rem", color: T.brume, marginTop: "0.2rem" }}>{item.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Prix */}
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <span style={{ fontFamily: T.serif, fontSize: "2.4rem", color: T.or }}>9€</span>
+          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, letterSpacing: "0.3em" }}> / mois</span>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginTop: "0.3rem" }}>
+            RÉSILIABLE À TOUT MOMENT
+          </div>
+        </div>
+
+        {/* Bouton */}
+        {err && (
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center", marginBottom: "1rem" }}>{err}</div>
+        )}
+        <button
+          onClick={startCheckout}
+          disabled={loading}
+          style={{
+            width: "100%",
+            background: loading ? `${T.or}66` : T.or,
+            border: "none", borderRadius: "6px",
+            padding: "1rem", cursor: loading ? "default" : "pointer",
+            fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+            letterSpacing: "0.4em", textTransform: "uppercase",
+            color: T.nuit, transition: "all 0.2s",
+          }}
+        >
+          {loading ? "Ouverture du paiement…" : "Commencer — 9€ / mois"}
+        </button>
+
+        <button onClick={onClose} style={{
+          width: "100%", marginTop: "0.8rem",
+          background: "none", border: "none", cursor: "pointer",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          letterSpacing: "0.3em", textTransform: "uppercase",
+          color: `${T.brume}55`, padding: "0.5rem",
+        }}>
+          Continuer en accès gratuit
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ─── ÉCRAN AUTH — Magic Link ──────────────────────────────────────────────────
 const AuthScreen = ({ onAuth }) => {
   const [email, setEmail]     = useState("");
@@ -2865,7 +2996,7 @@ const RecommandationsBlock = ({ data }) => {
 };
 
 // ─── LETTRES D'ALBA ──────────────────────────────────────────────────────────
-const LettresAlba = ({ data, allPostits }) => {
+const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
   const [lettres, setLettres] = useState([]);
   const [generation, setGeneration] = useState(false);
   const [lettreOuverte, setLettreOuverte] = useState(null);
@@ -2970,10 +3101,10 @@ Signe simplement : ALBA`;
         </p>
       </div>
 
-      {/* ── Bouton générer ── */}
+      {/* ── Bouton générer — premium ── */}
       {peutGenerer && (
         <div style={{ marginBottom: "1.5rem" }}>
-          <button onClick={genererLettre} disabled={generation} style={{
+          <button onClick={isPremium ? genererLettre : onShowPaywall} disabled={generation} style={{
             width: "100%", padding: "1.1rem",
             background: generation ? "transparent" : `${T.or}10`,
             border: `1px solid ${generation ? T.brume + "22" : T.or + "44"}`,
@@ -2982,7 +3113,7 @@ Signe simplement : ALBA`;
             fontSize: "1rem", color: generation ? T.brume : T.or,
             transition: "all 0.3s",
           }}>
-            {generation ? "ALBA écrit…" : "Recevoir la lettre de la semaine"}
+            {generation ? "ALBA écrit…" : isPremium ? "Recevoir la lettre de la semaine" : "✦ Débloquer les Lettres — 9€/mois"}
           </button>
           {generation && (
             <p style={{ textAlign: "center", marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88` }}>
@@ -3655,7 +3786,7 @@ const POSTIT_TYPES = [
   { id: "victoire",  label: "Victoire",  couleur: "#A87BC8", papier: "#150E1E", bord: "#A87BC8" },
 ];
 
-const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) => {
+const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange, isPremium, onShowPaywall }) => {
   const [sousOnglet, setSousOnglet] = useState("ardoise");
   const [allPostitsLocal, setAllPostitsLocal] = useState({});
 
@@ -3691,7 +3822,7 @@ const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange }) =
       </div>
       {sousOnglet === "ardoise" && <ArdoiseInner data={data} db={db} onPostitAjoute={onPostitAjoute} onBilanGenere={onBilanGenere} onPostitsChange={handlePostitsChange} />}
       {sousOnglet === "fil"     && <FilDeVie data={data} db={db} />}
-      {sousOnglet === "lettres" && <LettresAlba data={data} allPostits={allPostitsLocal} />}
+      {sousOnglet === "lettres" && <LettresAlba data={data} allPostits={allPostitsLocal} isPremium={isPremium} onShowPaywall={onShowPaywall} />}
     </div>
   );
 };
@@ -5067,12 +5198,18 @@ const FilDeVie = ({ data, db }) => {
 // ─── LE MIROIR ───────────────────────────────────────────────────────────────
 // Pas un chat. Un reflet. L'utilisateur pose une phrase — ALBA renvoie une seule
 // phrase. Un seul appel API. Pas de suite. Pas de conversation.
-const Presence = ({ data, onStart }) => {
+const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
   const [texte, setTexte]       = useState("");
   const [reflet, setReflet]     = useState(null);  // la phrase renvoyée
   const [loading, setLoading]   = useState(false);
   const [phase, setPhase]       = useState("idle"); // idle | writing | listening | revealed | silence
   const textareaRef             = useRef(null);
+
+  // Premium gate — afficher paywall si non abonné et tentative d'utiliser le Miroir
+  const handleEcouterGated = () => {
+    if (!isPremium) { if (onShowPaywall) onShowPaywall(); return; }
+    ecouter();
+  };
 
   const cdv     = cheminDeVie(data.naissance);
   const chemin  = CHEMINS[cdv] || CHEMINS[9];
@@ -5270,10 +5407,10 @@ Tu n'es pas Claude. Tu es ALBA.`;
                   autoFocus
                 />
 
-                {/* Bouton Écouter */}
+                {/* Bouton Écouter — premium */}
                 {texte.trim().length > 0 && (
                   <div style={{ marginTop: "2rem", animation: "fadeUp 0.5s ease forwards" }}>
-                    <button onClick={ecouter} style={{
+                    <button onClick={isPremium ? ecouter : onShowPaywall} style={{
                       background: "transparent",
                       border: `1px solid ${T.or}55`,
                       borderRadius: "24px",
@@ -5286,8 +5423,13 @@ Tu n'es pas Claude. Tu es ALBA.`;
                       onMouseEnter={e => { e.target.style.background = `${T.or}12`; e.target.style.borderColor = T.or; }}
                       onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.borderColor = `${T.or}55`; }}
                     >
-                      Laisser venir
+                      {isPremium ? "Laisser venir" : "✦ Débloquer le Miroir"}
                     </button>
+                    {!isPremium && (
+                      <div style={{ marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}88`, textAlign: "center" }}>
+                        Accès complet — 9€ / mois
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -5368,6 +5510,8 @@ Tu n'es pas Claude. Tu es ALBA.`;
 export default function Alba() {
   const [view, setView] = useState("splash");
   const [authUser, setAuthUser] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState("compagnon");
   const [tabHistory, setTabHistory] = useState([]);
@@ -5391,6 +5535,13 @@ export default function Alba() {
       const existingUser = sbAuth.loadSession();
       if (existingUser) {
         setAuthUser(existingUser);
+        // Vérifier statut premium
+        try {
+          const userKey = existingUser.id || localStorage.getItem("alba_user_key") || "local";
+          const pr = await fetch(`/api/subscription?user_key=${encodeURIComponent(userKey)}`);
+          const pd = await pr.json();
+          setIsPremium(pd.premium === true);
+        } catch {}
       }
       // Profil
       const profile = await db.loadProfile();
@@ -5412,6 +5563,14 @@ export default function Alba() {
         setCleActive(prog.cleActive);
       }
       setDbReady(true);
+      // Vérifier retour Stripe
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("subscribed") === "1") {
+          setIsPremium(true);
+          window.history.replaceState({}, "", "/");
+        }
+      }
     })();
   }, []);
 
@@ -5476,8 +5635,15 @@ export default function Alba() {
     });
   };
 
-  const handleAuth = (user) => {
+  const handleAuth = async (user) => {
     setAuthUser(user);
+    // Vérifier statut premium
+    try {
+      const userKey = user.id || localStorage.getItem("alba_user_key") || "local";
+      const pr = await fetch(`/api/subscription?user_key=${encodeURIComponent(userKey)}`);
+      const pd = await pr.json();
+      setIsPremium(pd.premium === true);
+    } catch {}
     // Si profil déjà existant → app directement
     if (userData) {
       setView("app");
@@ -5567,6 +5733,15 @@ export default function Alba() {
       <Grain />
       <Horizon />
 
+      {/* ── PAYWALL ── */}
+      {showPaywall && (
+        <PaywallScreen
+          onClose={() => setShowPaywall(false)}
+          userKey={authUser?.id || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : "local")}
+          userEmail={authUser?.email || ""}
+        />
+      )}
+
       {/* ── ANIMATION PORTE ── */}
       {porteOuverte !== null && (
         <PorteAnimation
@@ -5632,11 +5807,11 @@ export default function Alba() {
           {/* ── CONTENT ── */}
           <div style={{ padding: "0 0" }}>
             {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
-            {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} /></div>}
-            {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} />}
+            {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
+            {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
             {tab === "evasion"   && <div style={{padding:"0 1.5rem"}}><Evasion data={userData} /></div>}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} />}
+            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
           </div>
 
           {/* ── BOTTOM NAV ── */}
