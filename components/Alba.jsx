@@ -3521,7 +3521,7 @@ const TERRITOIRES_CLES = [
         "Ce soir, avant de dormir, nomme une chose que tu as vue aujourd'hui sur toi-même.",
       ]},
       { niveau: 2, label: "Traverser", exercices: [
-        "Rappelle-toi un moment où tu as agi contre ce que tu ressentais. Qu'est-ce qui t'a retenu ?",
+        "Trace une ligne au centre d'une page. À gauche : ce que tu contrôles. À droite : ce que tu ne contrôles pas. Laisse venir tout ce qui se présente — les émotions, les autres, le passé, le futur. Place chaque chose de son côté.",
         "Écris la liste de tout ce que tu portes et qui n'est pas à toi.",
         "Parle à quelqu'un de confiance d'une chose que tu ne dis jamais.",
       ]},
@@ -3599,9 +3599,9 @@ const TERRITOIRES_CLES = [
         "Écris : \"Je refuse encore de lâcher… parce que j'ai peur que…\"",
       ]},
       { niveau: 2, label: "Traverser", exercices: [
-        "Pense à quelqu'un que tu n'as pas pardonné. Pas pour eux — pour toi : qu'est-ce que ce non-pardon te coûte ?",
+        "Écris toutes les phrases qui commencent par \"Et si j'avais…\" Relis-les une fois. Puis barre-les toutes. L'idée n'est pas d'oublier — c'est de ne plus laisser ton énergie coincée là.",
+        "Pense à quelqu'un que tu n'as pas pardonné. Souviens-toi : lâcher prise ne veut pas dire donner raison. Ça veut dire retrouver ta paix, même si l'autre ne comprend pas.",
         "Identifie une version de toi-même que tu es prêt à laisser partir. Dis-lui au revoir par écrit.",
-        "Fais quelque chose aujourd'hui que tu remets depuis longtemps parce que tu attends que ce soit parfait.",
       ]},
       { niveau: 3, label: "Intégrer", exercices: [
         "Écris une lettre à quelqu'un que tu as du mal à pardonner. Tu n'as pas à l'envoyer.",
@@ -3620,9 +3620,9 @@ const TERRITOIRES_CLES = [
     ],
     pratiques: [
       { niveau: 1, label: "Ouvrir", exercices: [
+        "Écris une lettre où toutes les phrases commencent par \"Je me pardonne…\" Laisse venir ce qui vient. Ne cherche pas à bien faire. C'est un espace pour t'accueillir, pas pour t'expliquer.",
         "Accepte un compliment aujourd'hui sans le minimiser. Dis juste : \"Merci.\"",
         "Fais une chose aujourd'hui uniquement pour toi, sans que ça serve à quelqu'un d'autre.",
-        "Écris trois choses que tu te donnes rarement et que tu mérites pourtant.",
       ]},
       { niveau: 2, label: "Traverser", exercices: [
         "Demande de l'aide pour quelque chose que tu aurais géré seul. Observe ce que ça fait.",
