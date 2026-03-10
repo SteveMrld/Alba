@@ -2874,11 +2874,13 @@ const getEchoHumain = () => {
 
 // ─── ACCUEIL ──────────────────────────────────────────────────────────────────
 const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
+  if (!data) return null;
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const cle = CLES[cleActive] || CLES[0];
   const citation = CITATIONS[cdv % CITATIONS.length];
-  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const intentionStr = (data.intention || "").toLowerCase();
+  const bIdx = Object.values(BLESSURES).findIndex(b => intentionStr.includes(b.nom.toLowerCase()));
   const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
   const livre = LIVRES[blessure.nom];
 
