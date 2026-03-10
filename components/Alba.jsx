@@ -5877,8 +5877,12 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
               textTransform: "uppercase",
             }}>{["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][territoire.index - 1]}</div>
 
-            {/* Gravure */}
-            <GravurePorte index={territoire.index} couleur={territoire.couleur} size={52} />
+            {/* Picto GPT */}
+            <img
+              src={`/pictos/porte-${String(territoire.index).padStart(2,"0")}-${["","reconnaitre","comprendre","ressentir","lacher","recevoir","devenir","creer","relier","proteger","transmettre","habiter","etre"][territoire.index]}.svg`}
+              alt={territoire.nom}
+              style={{ width: 52, height: 52, opacity: 0.9 }}
+            />
 
             {/* Nom */}
             <div style={{
