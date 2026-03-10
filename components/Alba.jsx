@@ -99,8 +99,6 @@ const GravurePorte = ({ index, couleur, size = 120 }) => {
         style={{ position: "relative", zIndex: 1, opacity: 0.85 }}
         dangerouslySetInnerHTML={{ __html: g.gravure }}
       />
-      {/* ── AUDIO ENGINE ── */}
-      <audio ref={audioRef} style={{ display: "none" }} />
 
       {/* ── MODALE SON — première fois ── */}
       {view === "app" && sonChoix === null && (
@@ -145,7 +143,7 @@ const GravurePorte = ({ index, couleur, size = 120 }) => {
         </div>
       )}
 
-      {/* ── MINI PLAYER SON — pour ceux qui ont activé ── */}
+      {/* ── MINI PLAYER SON ── */}
       {view === "app" && sonChoix === "oui" && (
         <div style={{
           position: "fixed", bottom: "calc(60px + env(safe-area-inset-bottom) + 0.5rem)",
