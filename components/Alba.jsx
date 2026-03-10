@@ -1268,6 +1268,17 @@ const AuthScreen = ({ onAuth }) => {
                 <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.7, marginBottom: "1rem" }}>
                   Entre ton email.<br/>ALBA t'envoie un lien de réinitialisation.
                 </div>
+                <input
+                  type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="ton@email.com" autoFocus
+                  style={{
+                    background: "#1E1A16", border: `1px solid ${T.brume}33`,
+                    borderRadius: "6px", padding: "0.85rem 1.1rem",
+                    fontFamily: T.sans, fontSize: "0.95rem", color: T.aube,
+                    outline: "none", width: "100%", boxSizing: "border-box",
+                    marginBottom: "0.8rem",
+                  }}
+                />
                 {errMsg && (
                   <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", marginBottom: "0.8rem" }}>{errMsg}</div>
                 )}
