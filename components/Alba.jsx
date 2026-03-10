@@ -7522,47 +7522,47 @@ Ou propose un autre mot si aucun ne convient. Un seul mot.`;
 
 // ─── LA SALLE DES TROUVAILLES ────────────────────────────────────────────────
 const CATEGORIES_TROUVAILLES = [
-  { id: "tout",         label: "Tout",          emoji: "✦" },
-  { id: "livre",        label: "Livre",         emoji: "📖" },
-  { id: "film",         label: "Film",          emoji: "🎬" },
-  { id: "serie",        label: "Série",         emoji: "🎞" },
-  { id: "podcast",      label: "Podcast",       emoji: "🎙" },
-  { id: "musique",      label: "Musique",       emoji: "♪" },
-  { id: "album",        label: "Album",         emoji: "🎵" },
-  { id: "pratique",     label: "Pratique",      emoji: "🌿" },
-  { id: "lieu",         label: "Lieu",          emoji: "🏛" },
-  { id: "voyage",       label: "Voyage",        emoji: "✈" },
-  { id: "destination",  label: "Destination",   emoji: "🌍" },
-  { id: "citation",     label: "Citation",      emoji: "❝" },
-  { id: "poeme",        label: "Poème",         emoji: "🪶" },
-  { id: "exposition",   label: "Exposition",    emoji: "🖼" },
-  { id: "spectacle",    label: "Spectacle",     emoji: "🎭" },
-  { id: "theatre",      label: "Théâtre",       emoji: "🎭" },
-  { id: "danse",        label: "Danse",         emoji: "🩰" },
-  { id: "rituel",       label: "Rituel",        emoji: "🕯" },
-  { id: "idee",         label: "Idée",          emoji: "💡" },
-  { id: "philosophie",  label: "Philosophie",   emoji: "∞" },
-  { id: "priere",       label: "Prière",        emoji: "🙏" },
-  { id: "meditation",   label: "Méditation",    emoji: "◎" },
-  { id: "respiration",  label: "Respiration",   emoji: "〰" },
-  { id: "mouvement",    label: "Mouvement",     emoji: "〰" },
-  { id: "sport",        label: "Sport",         emoji: "⚡" },
-  { id: "art",          label: "Art",           emoji: "🎨" },
-  { id: "photo",        label: "Photographie",  emoji: "📷" },
-  { id: "peinture",     label: "Peinture",      emoji: "🖌" },
-  { id: "sculpture",    label: "Sculpture",     emoji: "🗿" },
-  { id: "architecture", label: "Architecture",  emoji: "🏛" },
-  { id: "nature",       label: "Nature",        emoji: "🌿" },
-  { id: "plante",       label: "Plante",        emoji: "🌱" },
-  { id: "animal",       label: "Animal",        emoji: "🦋" },
-  { id: "recette",      label: "Recette",       emoji: "🍃" },
-  { id: "the",          label: "Thé",           emoji: "🍵" },
-  { id: "parfum",       label: "Parfum",        emoji: "✿" },
-  { id: "objet",        label: "Objet",         emoji: "◇" },
-  { id: "lettre",       label: "Lettre",        emoji: "✉" },
-  { id: "journal",      label: "Journal",       emoji: "📓" },
-  { id: "reve",         label: "Rêve",          emoji: "🌙" },
-  { id: "silence",      label: "Silence",       emoji: "◌" },
+  { id: "tout",         label: "Tout",          emoji: "✦",  img: null },
+  { id: "livre",        label: "Livre",         emoji: "📖", img: "livre" },
+  { id: "film",         label: "Film",          emoji: "🎬", img: "bobine" },
+  { id: "serie",        label: "Série",         emoji: "🎞", img: "bobine" },
+  { id: "podcast",      label: "Podcast",       emoji: "🎙", img: "casque" },
+  { id: "musique",      label: "Musique",       emoji: "♪",  img: "musique" },
+  { id: "album",        label: "Album",         emoji: "🎵", img: "onde" },
+  { id: "pratique",     label: "Pratique",      emoji: "🌿", img: "lotus" },
+  { id: "lieu",         label: "Lieu",          emoji: "🏛",  img: "globe" },
+  { id: "voyage",       label: "Voyage",        emoji: "✈",  img: "globe" },
+  { id: "destination",  label: "Destination",   emoji: "🌍", img: "boussole" },
+  { id: "citation",     label: "Citation",      emoji: "❝",  img: "carnet" },
+  { id: "poeme",        label: "Poème",         emoji: "🪶", img: "carnet" },
+  { id: "exposition",   label: "Exposition",    emoji: "🖼",  img: "cristal" },
+  { id: "spectacle",    label: "Spectacle",     emoji: "🎭", img: "ruban" },
+  { id: "theatre",      label: "Théâtre",       emoji: "🎭", img: "ruban" },
+  { id: "danse",        label: "Danse",         emoji: "🩰", img: "ruban" },
+  { id: "rituel",       label: "Rituel",        emoji: "🕯",  img: "bougie" },
+  { id: "idee",         label: "Idée",          emoji: "💡", img: "etoile" },
+  { id: "philosophie",  label: "Philosophie",   emoji: "∞",  img: "cristal" },
+  { id: "priere",       label: "Prière",        emoji: "🙏", img: "main" },
+  { id: "meditation",   label: "Méditation",    emoji: "◎",  img: "lotus" },
+  { id: "respiration",  label: "Respiration",   emoji: "〰", img: "onde" },
+  { id: "mouvement",    label: "Mouvement",     emoji: "〰", img: "ruban" },
+  { id: "sport",        label: "Sport",         emoji: "⚡", img: "ruban" },
+  { id: "art",          label: "Art",           emoji: "🎨", img: "cristal" },
+  { id: "photo",        label: "Photographie",  emoji: "📷", img: "oeil" },
+  { id: "peinture",     label: "Peinture",      emoji: "🖌",  img: "cristal" },
+  { id: "sculpture",    label: "Sculpture",     emoji: "🗿",  img: "cristal" },
+  { id: "architecture", label: "Architecture",  emoji: "🏛",  img: "globe" },
+  { id: "nature",       label: "Nature",        emoji: "🌿", img: "lotus" },
+  { id: "plante",       label: "Plante",        emoji: "🌱", img: "lotus" },
+  { id: "animal",       label: "Animal",        emoji: "🦋", img: "etoile" },
+  { id: "recette",      label: "Recette",       emoji: "🍃", img: "main" },
+  { id: "the",          label: "Thé",           emoji: "🍵", img: "bougie" },
+  { id: "parfum",       label: "Parfum",        emoji: "✿",  img: "ruban" },
+  { id: "objet",        label: "Objet",         emoji: "◇",  img: "cristal" },
+  { id: "lettre",       label: "Lettre",        emoji: "✉",  img: "carnet" },
+  { id: "journal",      label: "Journal",       emoji: "📓", img: "carnet" },
+  { id: "reve",         label: "Rêve",          emoji: "🌙", img: "oeil" },
+  { id: "silence",      label: "Silence",       emoji: "◌",  img: "bougie" },
 ];
 
 const TROUVAILLES_DEMO = [
@@ -7618,8 +7618,14 @@ const SalleDesTrouvailles = ({ data }) => {
           letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
         }}>← Retour</button>
 
-        {/* Emoji catégorie */}
-        <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem", opacity: 0.7 }}>{c.emoji}</div>
+        {/* Image objet */}
+        {c.img ? (
+          <img src={`/trouvailles/${c.img}.jpg`} alt={c.label}
+            style={{ width: 100, height: 100, objectFit: "cover", borderRadius: "8px", opacity: 0.85, marginBottom: "1.5rem" }}
+          />
+        ) : (
+          <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem", opacity: 0.7 }}>{c.emoji}</div>
+        )}
 
         {/* Catégorie */}
         <div style={{
@@ -7820,11 +7826,21 @@ const SalleDesTrouvailles = ({ data }) => {
               position: "relative", overflow: "hidden",
               minHeight: 120,
             }}>
-              {/* Halo interne */}
+              {/* Image objet en fond */}
+              {getCat(t.categorie).img && (
+                <img src={`/trouvailles/${getCat(t.categorie).img}.jpg`}
+                  style={{
+                    position: "absolute", bottom: -10, right: -10,
+                    width: 90, height: 90, objectFit: "cover",
+                    opacity: 0.18, borderRadius: "4px",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
+              {/* Gradient overlay */}
               <div style={{
-                position: "absolute", bottom: -20, right: -20,
-                width: 80, height: 80, borderRadius: "50%",
-                background: `radial-gradient(circle, ${T.or}0A 0%, transparent 70%)`,
+                position: "absolute", inset: 0,
+                background: `linear-gradient(135deg, ${T.nuit2} 40%, transparent 100%)`,
                 pointerEvents: "none",
               }}/>
               {/* Catégorie */}
