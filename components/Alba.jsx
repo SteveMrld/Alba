@@ -8363,20 +8363,20 @@ export default function Alba() {
     };
     if (id === "lumiere" || id === "ciel") return (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
-        style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
+        style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.85, transition: "all 0.25s" }}>
         <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
       </svg>
     );
     if (id === "profil") return (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
-        style={{ color: active ? "#C8A96E" : "#8C7F74", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
+        style={{ color: active ? "#C8A96E" : "#8C7F74", opacity: active ? 1 : 0.85, transition: "all 0.25s" }}>
         <circle cx="12" cy="8" r="4"/>
         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
       </svg>
     );
     if (id === "cle") return (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
-        style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.5, transition: "all 0.25s" }}>
+        style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.85, transition: "all 0.25s" }}>
         <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
       </svg>
     );
@@ -8503,13 +8503,13 @@ export default function Alba() {
                 display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
                 padding: "0.3rem 0.6rem",
                 transition: "opacity 0.2s",
-                opacity: tab === t.id ? 1 : 0.5,
+                opacity: tab === t.id ? 1 : 0.85,
               }}>
                 <NavIcon id={t.id} active={tab === t.id} />
                 <span style={{
                   fontFamily: T.sans, fontWeight: tab === t.id ? 300 : 200,
                   fontSize: "0.45rem", letterSpacing: "0.3em", textTransform: "uppercase",
-                  color: tab === t.id ? T.or : T.brume,
+                  color: tab === t.id ? T.or : T.aube,
                   transition: "color 0.2s",
                 }}>{t.label}</span>
               </button>
