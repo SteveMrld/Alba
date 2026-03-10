@@ -7519,6 +7519,342 @@ Ou propose un autre mot si aucun ne convient. Un seul mot.`;
   );
 };
 
+
+// ─── LA SALLE DES TROUVAILLES ────────────────────────────────────────────────
+const CATEGORIES_TROUVAILLES = [
+  { id: "tout",         label: "Tout",          emoji: "✦" },
+  { id: "livre",        label: "Livre",         emoji: "📖" },
+  { id: "film",         label: "Film",          emoji: "🎬" },
+  { id: "serie",        label: "Série",         emoji: "🎞" },
+  { id: "podcast",      label: "Podcast",       emoji: "🎙" },
+  { id: "musique",      label: "Musique",       emoji: "♪" },
+  { id: "album",        label: "Album",         emoji: "🎵" },
+  { id: "pratique",     label: "Pratique",      emoji: "🌿" },
+  { id: "lieu",         label: "Lieu",          emoji: "🏛" },
+  { id: "voyage",       label: "Voyage",        emoji: "✈" },
+  { id: "destination",  label: "Destination",   emoji: "🌍" },
+  { id: "citation",     label: "Citation",      emoji: "❝" },
+  { id: "poeme",        label: "Poème",         emoji: "🪶" },
+  { id: "exposition",   label: "Exposition",    emoji: "🖼" },
+  { id: "spectacle",    label: "Spectacle",     emoji: "🎭" },
+  { id: "theatre",      label: "Théâtre",       emoji: "🎭" },
+  { id: "danse",        label: "Danse",         emoji: "🩰" },
+  { id: "rituel",       label: "Rituel",        emoji: "🕯" },
+  { id: "idee",         label: "Idée",          emoji: "💡" },
+  { id: "philosophie",  label: "Philosophie",   emoji: "∞" },
+  { id: "priere",       label: "Prière",        emoji: "🙏" },
+  { id: "meditation",   label: "Méditation",    emoji: "◎" },
+  { id: "respiration",  label: "Respiration",   emoji: "〰" },
+  { id: "mouvement",    label: "Mouvement",     emoji: "〰" },
+  { id: "sport",        label: "Sport",         emoji: "⚡" },
+  { id: "art",          label: "Art",           emoji: "🎨" },
+  { id: "photo",        label: "Photographie",  emoji: "📷" },
+  { id: "peinture",     label: "Peinture",      emoji: "🖌" },
+  { id: "sculpture",    label: "Sculpture",     emoji: "🗿" },
+  { id: "architecture", label: "Architecture",  emoji: "🏛" },
+  { id: "nature",       label: "Nature",        emoji: "🌿" },
+  { id: "plante",       label: "Plante",        emoji: "🌱" },
+  { id: "animal",       label: "Animal",        emoji: "🦋" },
+  { id: "recette",      label: "Recette",       emoji: "🍃" },
+  { id: "the",          label: "Thé",           emoji: "🍵" },
+  { id: "parfum",       label: "Parfum",        emoji: "✿" },
+  { id: "objet",        label: "Objet",         emoji: "◇" },
+  { id: "lettre",       label: "Lettre",        emoji: "✉" },
+  { id: "journal",      label: "Journal",       emoji: "📓" },
+  { id: "reve",         label: "Rêve",          emoji: "🌙" },
+  { id: "silence",      label: "Silence",       emoji: "◌" },
+];
+
+const TROUVAILLES_DEMO = [
+  { id:1, categorie:"livre", titre:"L'homme qui voulait être heureux", pourquoi:"Je l'ai lu dans une période où j'étais perdu. Il m'a rappelé que nous avons plus de liberté que nous le croyons.", jours:17 },
+  { id:2, categorie:"pratique", titre:"La méditation Vipassana", pourquoi:"Dix jours de silence. Je ne savais pas que j'avais autant de bruit en moi.", jours:34 },
+  { id:3, categorie:"film", titre:"Paterson", pourquoi:"Un film sur la beauté du quotidien. Sur l'idée que la vie ordinaire peut être un poème.", jours:8 },
+  { id:4, categorie:"citation", titre:"'Ce qui ne me tue pas me rend plus fort'", pourquoi:"Je l'ai relu le soir d'une rupture. Ce soir-là, ça m'a suffi.", jours:52 },
+  { id:5, categorie:"musique", titre:"Nuvole Bianche — Ludovico Einaudi", pourquoi:"Quand les mots ne venaient plus, cette musique parlait à ma place.", jours:3 },
+  { id:6, categorie:"voyage", titre:"Kyoto en novembre", pourquoi:"Les érables rouges. Le silence des temples tôt le matin. J'ai compris quelque chose sur le passage du temps.", jours:91 },
+  { id:7, categorie:"priere", titre:"La prière de la sérénité", pourquoi:"Accepter ce qu'on ne peut pas changer. Je la dis encore chaque matin.", jours:22 },
+  { id:8, categorie:"podcast", titre:"On Being — Krista Tippett", pourquoi:"Des conversations sur ce qui compte vraiment. Je me sens moins seul après chaque épisode.", jours:14 },
+  { id:9, categorie:"rituel", titre:"Écrire trois choses le soir", pourquoi:"Pas de la gratitude forcée. Juste observer ce qui s'est passé. Ça change le regard.", jours:45 },
+  { id:10, categorie:"lieu", titre:"La forêt de Fontainebleau au lever du soleil", pourquoi:"Il y a une lumière là-bas qui remet les choses à leur juste place.", jours:6 },
+  { id:11, categorie:"philosophie", titre:"Le stoïcisme — Marc Aurèle", pourquoi:"Pensées pour moi-même. Écrit par un empereur pour lui-même, jamais pour être publié. C'est ce qui le rend si honnête.", jours:28 },
+  { id:12, categorie:"respiration", titre:"La cohérence cardiaque", pourquoi:"5 minutes. Trois fois par jour. Je ne croyais pas que respirer pouvait changer autant de choses.", jours:19 },
+];
+
+const SalleDesTrouvailles = ({ data }) => {
+  const [filtre, setFiltre] = useState("tout");
+  const [selected, setSelected] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({ categorie: "", titre: "", pourquoi: "" });
+  const [formSent, setFormSent] = useState(false);
+
+  const cat = CATEGORIES_TROUVAILLES.find(c => c.id === filtre);
+  const filtered = TROUVAILLES_DEMO.filter(t => filtre === "tout" || t.categorie === filtre);
+  const getCat = (id) => CATEGORIES_TROUVAILLES.find(c => c.id === id) || { emoji: "✦", label: id };
+
+  // Vue carte ouverte
+  if (selected) {
+    const c = getCat(selected.categorie);
+    return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "#0A0806",
+        display: "flex", flexDirection: "column",
+        justifyContent: "center", alignItems: "center",
+        padding: "2rem",
+        animation: "fadeUp 0.5s ease forwards",
+      }}>
+        {/* Halo central */}
+        <div style={{
+          position: "absolute", top: "35%", left: "50%", transform: "translate(-50%,-50%)",
+          width: 300, height: 300, borderRadius: "50%",
+          background: `radial-gradient(circle, ${T.or}08 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }}/>
+
+        <button onClick={() => setSelected(null)} style={{
+          position: "absolute", top: "1.2rem", left: "1.2rem",
+          background: "transparent", border: "none",
+          color: T.brume, fontFamily: T.sans, fontSize: "0.5rem",
+          letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+        }}>← Retour</button>
+
+        {/* Emoji catégorie */}
+        <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem", opacity: 0.7 }}>{c.emoji}</div>
+
+        {/* Catégorie */}
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: `${T.or}88`, marginBottom: "0.8rem",
+        }}>{c.label}</div>
+
+        {/* Titre */}
+        <div style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(1.3rem, 4vw, 1.7rem)",
+          color: T.orPale, fontWeight: 300,
+          textAlign: "center", lineHeight: 1.4,
+          marginBottom: "2rem", maxWidth: 380,
+        }}>{selected.titre}</div>
+
+        {/* Séparateur */}
+        <div style={{ width: 40, height: 1, background: `${T.or}44`, marginBottom: "2rem" }}/>
+
+        {/* Texte anonyme */}
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          letterSpacing: "0.3em", textTransform: "uppercase",
+          color: T.brume, marginBottom: "1rem",
+        }}>Quelqu'un a écrit…</div>
+
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(0.9rem, 3vw, 1rem)",
+          color: T.aube, lineHeight: 1.9,
+          textAlign: "center", maxWidth: 360,
+          fontWeight: 300,
+        }}>{selected.pourquoi}</p>
+
+        {/* Jours */}
+        <div style={{
+          marginTop: "2.5rem",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+          letterSpacing: "0.3em", color: `${T.brume}66`,
+        }}>Laissé ici il y a {selected.jours} {selected.jours === 1 ? "jour" : "jours"}</div>
+      </div>
+    );
+  }
+
+  // Formulaire dépôt
+  if (showForm) {
+    return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "#0A0806",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        padding: "2rem",
+        animation: "fadeUp 0.5s ease forwards",
+      }}>
+        <button onClick={() => setShowForm(false)} style={{
+          position: "absolute", top: "1.2rem", left: "1.2rem",
+          background: "transparent", border: "none",
+          color: T.brume, fontFamily: T.sans, fontSize: "0.5rem",
+          letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+        }}>← Retour</button>
+
+        {formSent ? (
+          <div style={{ textAlign: "center", animation: "fadeUp 0.6s ease forwards" }}>
+            <div style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>✦</div>
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.4rem)", color: T.orPale, marginBottom: "1rem", fontWeight: 300 }}>
+              Ta trouvaille est déposée.
+            </div>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, lineHeight: 1.8 }}>
+              Quelqu'un la trouvera peut-être un jour.
+            </p>
+          </div>
+        ) : (
+          <div style={{ width: "100%", maxWidth: 420 }}>
+            <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+              <div style={{ fontSize: "1.8rem", marginBottom: "1rem", opacity: 0.6 }}>✦</div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300, marginBottom: "0.5rem" }}>
+                Tu peux laisser ici ce qui t'a aidé.
+              </div>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.7 }}>
+                Quelqu'un le trouvera peut-être un jour.
+              </p>
+            </div>
+
+            {/* Catégorie */}
+            <div style={{ marginBottom: "1.2rem" }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Catégorie</div>
+              <select value={formData.categorie} onChange={e => setFormData({...formData, categorie: e.target.value})} style={{
+                width: "100%", background: `${T.nuit2}`, border: `1px solid ${T.brume}33`,
+                borderRadius: "4px", padding: "0.7rem 0.8rem",
+                color: formData.categorie ? T.aube : T.brume,
+                fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
+                outline: "none", cursor: "pointer",
+              }}>
+                <option value="" style={{ background: "#1E1A16" }}>Choisir…</option>
+                {CATEGORIES_TROUVAILLES.filter(c => c.id !== "tout").map(c => (
+                  <option key={c.id} value={c.id} style={{ background: "#1E1A16" }}>{c.emoji} {c.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Titre */}
+            <div style={{ marginBottom: "1.2rem" }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Titre</div>
+              <input value={formData.titre} onChange={e => setFormData({...formData, titre: e.target.value})}
+                placeholder="Le nom du livre, du film, de la pratique…"
+                maxLength={100}
+                style={{
+                  width: "100%", background: "transparent", border: `1px solid ${T.brume}33`,
+                  borderRadius: "4px", padding: "0.7rem 0.8rem",
+                  color: T.aube, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
+                  outline: "none", boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            {/* Pourquoi */}
+            <div style={{ marginBottom: "2rem" }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Pourquoi ça t'a aidé</div>
+              <textarea value={formData.pourquoi} onChange={e => setFormData({...formData, pourquoi: e.target.value})}
+                placeholder="Quelques mots sincères. Pas besoin de tout expliquer."
+                maxLength={280}
+                rows={3}
+                style={{
+                  width: "100%", background: "transparent", border: `1px solid ${T.brume}33`,
+                  borderRadius: "4px", padding: "0.7rem 0.8rem",
+                  color: T.aube, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
+                  outline: "none", resize: "none", boxSizing: "border-box",
+                }}
+              />
+              <div style={{ textAlign: "right", fontFamily: T.sans, fontSize: "0.5rem", color: `${T.brume}66`, marginTop: "0.3rem" }}>
+                {formData.pourquoi.length} / 280
+              </div>
+            </div>
+
+            <div style={{ textAlign: "center" }}>
+              <Btn
+                onClick={() => {
+                  if (formData.categorie && formData.titre.length > 2 && formData.pourquoi.length > 10) {
+                    setFormSent(true);
+                  }
+                }}
+                disabled={!formData.categorie || formData.titre.length < 3 || formData.pourquoi.length < 10}
+              >Déposer dans la salle</Btn>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Vue principale
+  return (
+    <div style={{ paddingBottom: "5rem" }}>
+      {/* En-tête */}
+      <div style={{ textAlign: "center", padding: "1.5rem 1rem 1rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+          La Salle des
+        </div>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.4rem, 4.5vw, 1.8rem)", color: T.orPale, fontWeight: 300, marginBottom: "0.6rem" }}>
+          Trouvailles
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.8, maxWidth: 340, margin: "0 auto" }}>
+          Certaines choses dans la vie nous sont données par d'autres.<br/>
+          Ces gens-là sont passés par ici.
+        </p>
+      </div>
+
+      {/* Filtres — scroll horizontal */}
+      <div style={{ overflowX: "auto", padding: "1rem 1rem 0.5rem", scrollbarWidth: "none" }}>
+        <div style={{ display: "flex", gap: "0.5rem", width: "max-content" }}>
+          {CATEGORIES_TROUVAILLES.map(c => (
+            <button key={c.id} onClick={() => setFiltre(c.id)} style={{
+              background: filtre === c.id ? `${T.or}18` : "transparent",
+              border: `1px solid ${filtre === c.id ? T.or + "55" : T.brume + "22"}`,
+              borderRadius: "20px", padding: "0.35rem 0.8rem",
+              color: filtre === c.id ? T.orPale : T.brume,
+              fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem",
+              cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap",
+            }}>
+              {c.emoji} {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Grille cartes */}
+      <div style={{ padding: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.8rem" }}>
+        {filtered.map(t => {
+          const c = getCat(t.categorie);
+          return (
+            <div key={t.id} onClick={() => setSelected(t)} style={{
+              background: `${T.nuit2}`,
+              border: `1px solid ${T.brume}18`,
+              borderRadius: "8px", padding: "1.2rem 1rem",
+              cursor: "pointer", transition: "all 0.3s",
+              position: "relative", overflow: "hidden",
+              minHeight: 120,
+            }}>
+              {/* Halo interne */}
+              <div style={{
+                position: "absolute", bottom: -20, right: -20,
+                width: 80, height: 80, borderRadius: "50%",
+                background: `radial-gradient(circle, ${T.or}0A 0%, transparent 70%)`,
+                pointerEvents: "none",
+              }}/>
+              {/* Catégorie */}
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.4rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.6rem" }}>
+                {c.emoji} {c.label}
+              </div>
+              {/* Titre */}
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.82rem, 2.5vw, 0.95rem)", color: T.orPale, fontWeight: 300, lineHeight: 1.4, marginBottom: "0.8rem" }}>
+                {t.titre}
+              </div>
+              {/* Jours */}
+              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}55` }}>
+                il y a {t.jours}j
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bouton déposer */}
+      <div style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginBottom: "1rem", lineHeight: 1.7 }}>
+          Tu as quelque chose à laisser ici ?
+        </div>
+        <Btn onClick={() => setShowForm(true)}>Déposer une trouvaille</Btn>
+      </div>
+    </div>
+  );
+};
+
 // ─── BIBLIOTHÈQUE DES SAGESSES ───────────────────────────────────────────────
 const SAGESSES = [
   { id: "ikigai", nom: "Ikigai", origine: "Japonais", fichier: "ikigai", texte: "Quelqu'un t'a demandé un jour ce que tu voulais faire de ta vie. Tu as peut-être répondu quelque chose de raisonnable. Mais l'Ikigai pose une autre question — quatre en réalité, simultanément : qu'est-ce qui me passionne ? Qu'est-ce que je sais faire vraiment ? Ce que je fais est-il utile au monde ? Puis-je en vivre ? L'Ikigai, c'est le point où ces quatre cercles se rejoignent. Pour certains, il est évident depuis l'enfance. Pour d'autres, il se révèle à cinquante ans, après une crise, après un deuil. Mais il est là. Il a toujours été là." },
@@ -8921,12 +9257,13 @@ export default function Alba() {
   };
 
   const TABS = [
-    { id: "compagnon", label: "Jour" },
-    { id: "presence",  label: "Miroir" },
-    { id: "ardoise",   label: "Ardoise" },
-    { id: "cle",       label: "Ma Clé" },
-    { id: "ciel",      label: "Le Ciel" },
-    { id: "profil",    label: "Profil" },
+    { id: "compagnon",    label: "Jour" },
+    { id: "presence",     label: "Miroir" },
+    { id: "ardoise",      label: "Ardoise" },
+    { id: "cle",          label: "Ma Clé" },
+    { id: "ciel",         label: "Le Ciel" },
+    { id: "trouvailles",  label: "Trouvailles" },
+    { id: "profil",       label: "Profil" },
   ];
 
   // Icônes nav SVG
@@ -8938,6 +9275,12 @@ export default function Alba() {
       evasion:   "/icons/navigation_evasion.svg",
       souffle:   "/icons/navigation_souffle.svg",
     };
+    if (id === "trouvailles") return (
+      <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+        <path d="M12 3l1.5 4.5H18l-3.75 2.7 1.5 4.5L12 12l-3.75 2.7 1.5-4.5L6 7.5h4.5z"/>
+        <circle cx="12" cy="12" r="9" strokeDasharray="2 3" opacity="0.4"/>
+      </svg>
+    );
     if (id === "lumiere" || id === "ciel") return (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
         style={{ color: active ? "#C8A96E" : "#B0A59A", opacity: active ? 1 : 0.85, transition: "all 0.25s" }}>
@@ -9058,6 +9401,7 @@ export default function Alba() {
             {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
             {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
             {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
+            {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
             {tab === "lumiere"   && <LumiereDuJour />}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
             {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
