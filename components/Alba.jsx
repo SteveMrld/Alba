@@ -45,6 +45,64 @@ const PortePicto = ({ index, couleur, size = 44 }) => {
   );
 };
 
+// ─── GRAVURES & CALLIGRAPHIE ──────────────────────────────────────────────────
+const GRAVURES_PORTES = [
+  null, // index 0 unused
+  // I — Reconnaître — 見 (voir) — un œil dans un miroir
+  { kanji: "見", langue: "ja", gravure: `<circle cx="24" cy="18" r="8" stroke-width="0.8"/><ellipse cx="24" cy="18" rx="3" ry="3" stroke-width="0.8"/><path d="M8 18 Q24 8 40 18 Q24 28 8 18Z" stroke-width="0.8" fill="none"/><line x1="24" y1="28" x2="24" y2="38" stroke-width="0.8"/><line x1="16" y1="38" x2="32" y2="38" stroke-width="0.8"/><path d="M12 34 Q24 30 36 34" stroke-width="0.6" fill="none"/>` },
+  // II — Comprendre — ف (Fa — la parole, l'esprit) — livre ouvert avec lumière
+  { kanji: "ف", langue: "ar", gravure: `<path d="M24 8 L14 12 L14 36 L24 40 L34 36 L34 12 Z" stroke-width="0.8" fill="none"/><line x1="24" y1="8" x2="24" y2="40" stroke-width="0.8"/><line x1="16" y1="16" x2="22" y2="16" stroke-width="0.6"/><line x1="16" y1="20" x2="22" y2="20" stroke-width="0.6"/><line x1="16" y1="24" x2="22" y2="24" stroke-width="0.6"/><line x1="26" y1="16" x2="32" y2="16" stroke-width="0.6"/><line x1="26" y1="20" x2="32" y2="20" stroke-width="0.6"/><line x1="26" y1="24" x2="32" y2="24" stroke-width="0.6"/><path d="M18 10 L22 8 L22 12 Z" stroke-width="0.6" fill="none"/>` },
+  // III — Ressentir — 感 (sentir) — cœur avec vagues
+  { kanji: "感", langue: "ja", gravure: `<path d="M24 36 Q12 26 12 20 Q12 14 18 13 Q21 12 24 16 Q27 12 30 13 Q36 14 36 20 Q36 26 24 36Z" stroke-width="0.8" fill="none"/><path d="M10 42 Q17 38 24 40 Q31 38 38 42" stroke-width="0.6" fill="none"/><path d="M12 46 Q18 43 24 44 Q30 43 36 46" stroke-width="0.5" fill="none"/>` },
+  // IV — Lâcher — ن (Nun — la mer, le lâcher) — chaînes qui se défont
+  { kanji: "ن", langue: "ar", gravure: `<circle cx="16" cy="16" r="5" stroke-width="0.8" fill="none"/><circle cx="32" cy="16" r="5" stroke-width="0.8" fill="none"/><line x1="21" y1="16" x2="27" y2="16" stroke-width="0.8"/><path d="M14 22 Q10 32 16 38" stroke-width="0.8" fill="none"/><path d="M34 22 Q40 30 34 36" stroke-width="0.8" fill="none" stroke-dasharray="2,2"/><path d="M20 34 Q24 40 28 34" stroke-width="0.8" fill="none"/>` },
+  // V — Recevoir — 受 (recevoir) — mains ouvertes coupe
+  { kanji: "受", langue: "ja", gravure: `<path d="M12 28 Q12 22 18 20 L24 18 L30 20 Q36 22 36 28" stroke-width="0.8" fill="none"/><path d="M10 30 Q24 36 38 30" stroke-width="0.8" fill="none"/><path d="M18 20 L16 12 M30 20 L32 12" stroke-width="0.6" fill="none"/><circle cx="16" cy="10" r="2" stroke-width="0.6" fill="none"/><circle cx="32" cy="10" r="2" stroke-width="0.6" fill="none"/><path d="M20 34 Q24 40 28 34" stroke-width="0.6" fill="none"/>` },
+  // VI — Devenir — ك (Kaf — la paume) — chrysalide ouverte
+  { kanji: "ك", langue: "ar", gravure: `<ellipse cx="24" cy="24" rx="8" ry="12" stroke-width="0.8" fill="none"/><path d="M16 24 Q8 18 10 10 Q16 6 24 12" stroke-width="0.7" fill="none"/><path d="M32 24 Q40 18 38 10 Q32 6 24 12" stroke-width="0.7" fill="none"/><path d="M20 12 Q24 8 28 12" stroke-width="0.6" fill="none"/><line x1="24" y1="8" x2="24" y2="4" stroke-width="0.6"/>` },
+  // VII — Créer — 創 (créer) — mains qui façonnent argile
+  { kanji: "創", langue: "ja", gravure: `<ellipse cx="24" cy="28" rx="10" ry="6" stroke-width="0.8" fill="none"/><path d="M14 28 L12 20 Q12 14 24 12 Q36 14 36 20 L34 28" stroke-width="0.8" fill="none"/><path d="M18 22 Q24 18 30 22" stroke-width="0.6" fill="none"/><line x1="20" y1="12" x2="18" y2="6" stroke-width="0.6"/><line x1="28" y1="12" x2="30" y2="6" stroke-width="0.6"/>` },
+  // VIII — Relier — و (Waw — et, la connexion) — deux êtres reliés
+  { kanji: "و", langue: "ar", gravure: `<circle cx="16" cy="16" r="5" stroke-width="0.8" fill="none"/><circle cx="32" cy="16" r="5" stroke-width="0.8" fill="none"/><path d="M21 16 Q24 22 27 16" stroke-width="0.8" fill="none"/><line x1="16" y1="21" x2="16" y2="34" stroke-width="0.8"/><line x1="32" y1="21" x2="32" y2="34" stroke-width="0.8"/><path d="M16 34 Q24 40 32 34" stroke-width="0.8" fill="none"/>` },
+  // IX — Protéger — 守 (protéger/garder) — arbre-bouclier
+  { kanji: "守", langue: "ja", gravure: `<path d="M24 8 Q14 12 12 22 Q12 32 24 40 Q36 32 36 22 Q34 12 24 8Z" stroke-width="0.8" fill="none"/><line x1="24" y1="16" x2="24" y2="36" stroke-width="0.7"/><path d="M18 24 L24 20 L30 24" stroke-width="0.6" fill="none"/><path d="M16 30 L24 26 L32 30" stroke-width="0.6" fill="none"/>` },
+  // X — Transmettre — ب (Ba — le commencement) — flamme passée
+  { kanji: "ب", langue: "ar", gravure: `<path d="M16 38 Q14 28 18 20 Q20 14 24 10 Q26 16 24 22 Q22 26 26 28 Q32 26 30 18 Q34 24 34 32 Q34 38 28 40" stroke-width="0.8" fill="none"/><line x1="18" y1="38" x2="30" y2="38" stroke-width="0.8"/><path d="M22 8 Q24 4 26 8" stroke-width="0.6" fill="none"/>` },
+  // XI — Habiter — 住 (habiter) — maison-racines
+  { kanji: "住", langue: "ja", gravure: `<path d="M24 8 L10 20 L14 20 L14 38 L34 38 L34 20 L38 20 Z" stroke-width="0.8" fill="none"/><line x1="20" y1="38" x2="20" y2="28" stroke-width="0.7"/><line x1="20" y1="28" x2="28" y2="28" stroke-width="0.7"/><line x1="28" y1="28" x2="28" y2="38" stroke-width="0.7"/><path d="M16 42 Q20 38 24 42 Q28 38 32 42" stroke-width="0.6" fill="none"/>` },
+  // XII — Être — ق (Qaf — la montagne, l'essentiel) — arbre seul
+  { kanji: "ق", langue: "ar", gravure: `<line x1="24" y1="8" x2="24" y2="38" stroke-width="0.8"/><path d="M14 20 Q24 14 34 20" stroke-width="0.7" fill="none"/><path d="M16 28 Q24 22 32 28" stroke-width="0.7" fill="none"/><path d="M18 34 Q24 30 30 34" stroke-width="0.6" fill="none"/><line x1="16" y1="38" x2="32" y2="38" stroke-width="0.8"/><path d="M20 42 Q24 46 28 42" stroke-width="0.6" fill="none"/>` },
+];
+
+const GravurePorte = ({ index, couleur, size = 120 }) => {
+  const g = GRAVURES_PORTES[index];
+  if (!g) return null;
+  return (
+    <div style={{ position: "relative", width: size, height: size, margin: "0 auto" }}>
+      {/* Calligraphie en filigrane */}
+      <div style={{
+        position: "absolute", inset: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.72,
+        lineHeight: 1,
+        color: `${couleur}12`,
+        fontFamily: g.langue === "ar" ? "'Noto Naskh Arabic', serif" : "'Noto Serif JP', serif",
+        pointerEvents: "none",
+        userSelect: "none",
+        direction: g.langue === "ar" ? "rtl" : "ltr",
+      }}>
+        {g.kanji}
+      </div>
+      {/* Gravure SVG */}
+      <svg width={size} height={size} viewBox="0 0 48 48" fill="none"
+        stroke={couleur} strokeLinecap="round" strokeLinejoin="round"
+        style={{ position: "relative", zIndex: 1, opacity: 0.85 }}
+        dangerouslySetInnerHTML={{ __html: g.gravure }}
+      />
+    </div>
+  );
+};
+
 const SYMBOLES_CLES = [
   { emoji: "🪔", nom: "une lampe",          phrase: "Tu as commencé à regarder ce qui est là." },
   { emoji: "🌿", nom: "une feuille vivante", phrase: "Quelque chose en toi a commencé à comprendre." },
@@ -5601,13 +5659,30 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         animation: "fadeUpCle 0.4s ease forwards",
       }}>{territoire.ambiance?.texte}</div>
 
-      {/* En-tête Clé */}
+      {/* En-tête Clé — Gravure + Calligraphie */}
       <div style={{
         textAlign: "center", marginBottom: "2rem",
         animation: "fadeUpCle 0.6s ease forwards",
+        position: "relative",
       }}>
-        <div style={{ marginBottom: "0.5rem", display: "flex", justifyContent: "center" }}>
-          <PortePicto index={territoire.index} couleur={territoire.couleur} size={44} />
+        {/* Caractère calligraphique géant en filigrane */}
+        {GRAVURES_PORTES[territoire.index] && (
+          <div style={{
+            position: "absolute", top: "-1rem", left: "50%", transform: "translateX(-50%)",
+            fontSize: "8rem", lineHeight: 1,
+            color: `${territoire.couleur}07`,
+            fontFamily: GRAVURES_PORTES[territoire.index]?.langue === "ar"
+              ? "'Noto Naskh Arabic', serif"
+              : "'Noto Serif JP', serif",
+            pointerEvents: "none", userSelect: "none",
+            direction: GRAVURES_PORTES[territoire.index]?.langue === "ar" ? "rtl" : "ltr",
+            zIndex: 0,
+          }}>
+            {GRAVURES_PORTES[territoire.index]?.kanji}
+          </div>
+        )}
+        <div style={{ marginBottom: "1rem", display: "flex", justifyContent: "center", position: "relative", zIndex: 1 }}>
+          <GravurePorte index={territoire.index} couleur={territoire.couleur} size={80} />
         </div>
         <div style={{
           fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
