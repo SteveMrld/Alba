@@ -99,6 +99,91 @@ const GravurePorte = ({ index, couleur, size = 120 }) => {
         style={{ position: "relative", zIndex: 1, opacity: 0.85 }}
         dangerouslySetInnerHTML={{ __html: g.gravure }}
       />
+      {/* ── AUDIO ENGINE ── */}
+      <audio ref={audioRef} style={{ display: "none" }} />
+
+      {/* ── MODALE SON — première fois ── */}
+      {view === "app" && sonChoix === null && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 200,
+          display: "flex", alignItems: "flex-end", justifyContent: "center",
+          background: "rgba(10,8,6,0.7)",
+          backdropFilter: "blur(4px)",
+          animation: "fadeUp 0.5s ease forwards",
+        }}>
+          <div style={{
+            width: "100%", maxWidth: 560,
+            background: T.nuit2,
+            borderTop: `1px solid ${T.brume}22`,
+            borderRadius: "16px 16px 0 0",
+            padding: "2rem 1.5rem calc(2rem + env(safe-area-inset-bottom))",
+            textAlign: "center",
+          }}>
+            <div style={{ fontSize: "1.8rem", marginBottom: "1rem", opacity: 0.7 }}>♪</div>
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300, marginBottom: "0.6rem" }}>
+              Paysages sonores
+            </div>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.8, marginBottom: "2rem" }}>
+              ALBA peut jouer des ambiances musicales pendant ta navigation.<br/>
+              Tu pourras les couper à tout moment.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+              <button onClick={activerSon} style={{
+                background: `${T.or}18`, border: `1px solid ${T.or}44`,
+                borderRadius: "6px", padding: "0.9rem",
+                color: T.orPale, fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "1rem", cursor: "pointer",
+              }}>Oui, j'active les ambiances</button>
+              <button onClick={refuserSon} style={{
+                background: "transparent", border: `1px solid ${T.brume}22`,
+                borderRadius: "6px", padding: "0.9rem",
+                color: T.brume, fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "0.9rem", cursor: "pointer",
+              }}>Non merci, je préfère le silence</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MINI PLAYER SON — pour ceux qui ont activé ── */}
+      {view === "app" && sonChoix === "oui" && (
+        <div style={{
+          position: "fixed", bottom: "calc(60px + env(safe-area-inset-bottom) + 0.5rem)",
+          right: "1rem", zIndex: 49,
+          display: "flex", alignItems: "center", gap: "0.5rem",
+        }}>
+          {sonVisible && (
+            <div style={{
+              background: `${T.nuit2}ee`, border: `1px solid ${T.brume}22`,
+              borderRadius: "20px", padding: "0.4rem 0.8rem",
+              display: "flex", alignItems: "center", gap: "0.6rem",
+              backdropFilter: "blur(8px)",
+              animation: "fadeUp 0.3s ease forwards",
+            }}>
+              <button onClick={toggleSon} style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: sonActif ? T.or : T.brume, fontSize: "0.85rem", padding: 0,
+              }}>{sonActif ? "⏸" : "▶"}</button>
+              <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.65rem", color: T.brume, whiteSpace: "nowrap" }}>
+                {AMBIANCES[sonIndex].label}
+              </span>
+              <button onClick={nextAmbiance} style={{
+                background: "none", border: "none", cursor: "pointer",
+                color: T.brume, fontSize: "0.7rem", padding: 0,
+              }}>↻</button>
+            </div>
+          )}
+          <button onClick={() => setSonVisible(v => !v)} style={{
+            width: 32, height: 32, borderRadius: "50%",
+            background: sonActif ? `${T.or}22` : `${T.nuit2}cc`,
+            border: `1px solid ${sonActif ? T.or + "44" : T.brume + "22"}`,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            backdropFilter: "blur(8px)",
+          }}>
+            <span style={{ fontSize: "0.75rem", color: sonActif ? T.or : T.brume }}>♪</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -9072,6 +9157,55 @@ export default function Alba() {
   });
   const [dbReady, setDbReady] = useState(false);
   const db = useAlbaDB();
+
+  // ── Son ambiant ──
+  const [sonActif, setSonActif] = useState(false);
+  const [sonChoix, setSonChoix] = useState(null); // null = pas encore demandé
+  const [sonIndex, setSonIndex] = useState(0);
+  const [sonVisible, setSonVisible] = useState(false); // mini player visible
+  const audioRef = useRef(null);
+
+  const AMBIANCES = [
+    { id: "aube",      label: "L'Aube intérieure",  fichier: "aube.mp3" },
+    { id: "traversee", label: "La Traversée",        fichier: "traversee.mp3" },
+    { id: "souffle",   label: "Le Souffle sacré",    fichier: "souffle.mp3" },
+    { id: "nuit",      label: "La Nuit des étoiles", fichier: "nuit.mp3" },
+    { id: "passage",   label: "Le Passage",           fichier: "passage.mp3" },
+    { id: "silence",   label: "Le Silence habité",   fichier: "silence.mp3" },
+  ];
+
+  useEffect(() => {
+    if (typeof localStorage !== "undefined") {
+      const pref = localStorage.getItem("alba_son_preference");
+      if (pref === "oui") { setSonChoix("oui"); setSonActif(true); }
+      else if (pref === "non") setSonChoix("non");
+      // null = pas encore demandé
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (sonActif && sonChoix === "oui") {
+      audioRef.current.src = "/sons/" + AMBIANCES[sonIndex].fichier;
+      audioRef.current.volume = 0.18;
+      audioRef.current.loop = true;
+      audioRef.current.play().catch(() => {});
+    } else {
+      audioRef.current.pause();
+    }
+  }, [sonActif, sonIndex, sonChoix]);
+
+  const activerSon = () => {
+    localStorage.setItem("alba_son_preference", "oui");
+    setSonChoix("oui");
+    setSonActif(true);
+  };
+  const refuserSon = () => {
+    localStorage.setItem("alba_son_preference", "non");
+    setSonChoix("non");
+  };
+  const toggleSon = () => setSonActif(v => !v);
+  const nextAmbiance = () => setSonIndex(i => (i + 1) % AMBIANCES.length);
 
   // ── Chargement initial ──
   useEffect(() => {
