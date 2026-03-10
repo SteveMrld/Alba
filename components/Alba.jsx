@@ -1641,6 +1641,38 @@ const Onboarding = ({ onComplete }) => {
   const [annee, setAnnee] = useState(1980);
   const [anneeConfirm, setAnneeConfirm] = useState(false);
   const [autreTexte, setAutreTexte] = useState("");
+  const [signe, setSigne] = useState("");
+  const [couleurPred, setCouleurPred] = useState("");
+
+  const SIGNES = [
+    { id: "belier",     label: "Bélier",      symbole: "♈" },
+    { id: "taureau",    label: "Taureau",      symbole: "♉" },
+    { id: "gemeaux",    label: "Gémeaux",      symbole: "♊" },
+    { id: "cancer",     label: "Cancer",       symbole: "♋" },
+    { id: "lion",       label: "Lion",         symbole: "♌" },
+    { id: "vierge",     label: "Vierge",       symbole: "♍" },
+    { id: "balance",    label: "Balance",      symbole: "♎" },
+    { id: "scorpion",   label: "Scorpion",     symbole: "♏" },
+    { id: "sagittaire", label: "Sagittaire",   symbole: "♐" },
+    { id: "capricorne", label: "Capricorne",   symbole: "♑" },
+    { id: "verseau",    label: "Verseau",      symbole: "♒" },
+    { id: "poissons",   label: "Poissons",     symbole: "♓" },
+  ];
+
+  const COULEURS_PRED = [
+    { id: "noir",     label: "Noir",     hex: "#1A1A1A" },
+    { id: "blanc",    label: "Blanc",    hex: "#F5F0E8" },
+    { id: "or",       label: "Or",       hex: "#C8A96E" },
+    { id: "rouge",    label: "Rouge",    hex: "#C84040" },
+    { id: "bordeaux", label: "Bordeaux", hex: "#8B2040" },
+    { id: "bleu",     label: "Bleu",     hex: "#4A6EA8" },
+    { id: "vert",     label: "Vert",     hex: "#4A8A5A" },
+    { id: "violet",   label: "Violet",   hex: "#7B4EA8" },
+    { id: "pourpre",  label: "Pourpre",  hex: "#8B3A6A" },
+    { id: "rose",     label: "Rose",     hex: "#C87BA0" },
+    { id: "orange",   label: "Orange",   hex: "#C87040" },
+    { id: "gris",     label: "Gris",     hex: "#8A8278" },
+  ];
 
   const INTENTIONS_TEMPETE = [
     "Une rupture, une séparation",
@@ -1693,7 +1725,7 @@ const Onboarding = ({ onComplete }) => {
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
         <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
-          ALBA &nbsp;·&nbsp; Étape 2 / 4
+          ALBA &nbsp;·&nbsp; Étape 2 / 6
         </div>
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 4vw, 1.7rem)", color: T.orPale, textAlign: "center", marginBottom: "0.6rem", lineHeight: 1.3 }}>
           Comment tu te situes, {prenom} ?
@@ -1900,14 +1932,91 @@ const Onboarding = ({ onComplete }) => {
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
           {intention && (intention !== "Autre chose…" || autreTexte.length > 2) &&
-            <Btn onClick={() => onComplete({
-              prenom,
-              naissance: dateStr,
-              intention: intention === "Autre chose…" ? autreTexte : intention,
-              sensibilite,
-            })}>Entrer dans l'aube</Btn>
+            <Btn onClick={() => setStep(4)}>Continuer</Btn>
           }
           <Btn secondary small onClick={() => setStep(2)}>Revenir</Btn>
+        </div>
+      </div>
+    </Screen>
+  );
+
+  // ── ÉTAPE 4 — Signe astrologique ─────────────────────────────────────────
+  if (step === 4) return (
+    <Screen centered>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+          ALBA &nbsp;·&nbsp; Étape 5 / 6
+        </div>
+        <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+          Ton signe, {prenom} ?
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, textAlign: "center", marginBottom: "2rem" }}>
+          Pas une croyance. Une langue parmi d'autres.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.6rem", marginBottom: "2rem" }}>
+          {SIGNES.map(s => (
+            <button key={s.id} onClick={() => setSigne(s.id)} style={{
+              background: signe === s.id ? `${T.or}18` : "transparent",
+              border: `1px solid ${signe === s.id ? T.or + "66" : T.brume + "22"}`,
+              borderRadius: "6px", padding: "0.7rem 0.4rem",
+              cursor: "pointer", transition: "all 0.2s",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
+            }}>
+              <span style={{ fontSize: "1.2rem", color: signe === s.id ? T.or : T.brume }}>{s.symbole}</span>
+              <span style={{ fontFamily: T.serif, fontSize: "0.7rem", color: signe === s.id ? T.orPale : T.brume, fontStyle: "italic" }}>{s.label}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+          <Btn onClick={() => setStep(5)} canNext={!!signe} disabled={!signe} style={{ opacity: signe ? 1 : 0.4 }}>Continuer</Btn>
+          <Btn secondary small onClick={() => setStep(3)}>Revenir</Btn>
+        </div>
+      </div>
+    </Screen>
+  );
+
+  // ── ÉTAPE 5 — Couleur de prédilection ────────────────────────────────────
+  if (step === 5) return (
+    <Screen centered>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+          ALBA &nbsp;·&nbsp; Étape 6 / 6
+        </div>
+        <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+          Ta couleur, {prenom} ?
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, textAlign: "center", marginBottom: "2rem" }}>
+          Celle qui te ressemble. Celle que tu portes ou que tu rêves.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.6rem", marginBottom: "2rem" }}>
+          {COULEURS_PRED.map(c => (
+            <button key={c.id} onClick={() => setCouleurPred(c.id)} style={{
+              background: couleurPred === c.id ? `${c.hex}25` : "transparent",
+              border: `2px solid ${couleurPred === c.id ? c.hex : T.brume + "22"}`,
+              borderRadius: "8px", padding: "0.8rem 0.4rem",
+              cursor: "pointer", transition: "all 0.2s",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem",
+            }}>
+              <div style={{
+                width: 28, height: 28, borderRadius: "50%",
+                background: c.hex,
+                border: `1px solid ${T.brume}33`,
+                boxShadow: couleurPred === c.id ? `0 0 10px ${c.hex}66` : "none",
+              }}/>
+              <span style={{ fontFamily: T.serif, fontSize: "0.68rem", color: couleurPred === c.id ? T.orPale : T.brume, fontStyle: "italic" }}>{c.label}</span>
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+          {couleurPred && <Btn onClick={() => onComplete({
+            prenom,
+            naissance: dateStr,
+            intention: intention === "Autre chose…" ? autreTexte : intention,
+            sensibilite,
+            signe,
+            couleur: couleurPred,
+          })}>Entrer dans l'aube</Btn>}
+          <Btn secondary small onClick={() => setStep(4)}>Revenir</Btn>
         </div>
       </div>
     </Screen>
