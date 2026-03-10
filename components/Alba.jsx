@@ -794,29 +794,75 @@ const Screen = ({ children, centered, style }) => (
 );
 
 // ─── PAYWALL — Abonnement 9€/mois ────────────────────────────────────────────
-const PaywallScreen = ({ onClose, userKey, userEmail }) => {
-  const [loading, setLoading] = useState(false);
-  const [err, setErr]         = useState(null);
+const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
+  const [mode, setMode]           = useState("plans"); // plans | gift_buy | gift_redeem
+  const [plan, setPlan]           = useState("monthly"); // monthly | annual
+  const [loading, setLoading]     = useState(false);
+  const [err, setErr]             = useState(null);
+  // Cadeau — achat
+  const [giftDuration, setGiftDuration] = useState("1month");
+  const [senderEmail, setSenderEmail]   = useState(userEmail || "");
+  const [recipientName, setRecipientName] = useState("");
+  const [giftMessage, setGiftMessage]   = useState("");
+  const [giftCode, setGiftCode]         = useState(""); // après paiement
+  const [giftSuccess, setGiftSuccess]   = useState(false);
+  // Code cadeau — saisie
+  const [redeemCode, setRedeemCode]     = useState("");
+  const [redeemSuccess, setRedeemSuccess] = useState(null);
 
   const startCheckout = async () => {
-    setLoading(true);
-    setErr(null);
+    setLoading(true); setErr(null);
     try {
       const r = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userKey, email: userEmail }),
+        body: JSON.stringify({ userKey, email: userEmail, plan }),
       });
       const data = await r.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setErr("Impossible d'ouvrir le paiement. Réessaie.");
-      }
-    } catch {
-      setErr("Une erreur est survenue.");
-    }
+      if (data.url) window.location.href = data.url;
+      else setErr("Impossible d'ouvrir le paiement. Réessaie.");
+    } catch { setErr("Une erreur est survenue."); }
     setLoading(false);
+  };
+
+  const buyGift = async () => {
+    setLoading(true); setErr(null);
+    try {
+      const r = await fetch("/api/gift/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ duration: giftDuration, senderEmail, recipientName, message: giftMessage }),
+      });
+      const data = await r.json();
+      if (data.url) window.location.href = data.url;
+      else setErr(data.error || "Erreur lors de la création du cadeau.");
+    } catch { setErr("Une erreur est survenue."); }
+    setLoading(false);
+  };
+
+  const redeemGift = async () => {
+    setLoading(true); setErr(null);
+    try {
+      const r = await fetch("/api/gift/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: redeemCode, userKey }),
+      });
+      const data = await r.json();
+      if (data.success) {
+        setRedeemSuccess(data);
+        if (onPremiumActivated) setTimeout(onPremiumActivated, 2000);
+      } else setErr(data.error || "Code invalide.");
+    } catch { setErr("Une erreur est survenue."); }
+    setLoading(false);
+  };
+
+  const inputStyle = {
+    width: "100%", background: "#1A1510",
+    border: `1px solid ${T.brume}33`, borderRadius: "6px",
+    padding: "0.8rem 1rem", fontFamily: T.sans, fontSize: "0.9rem",
+    color: T.aube, outline: "none", boxSizing: "border-box",
+    marginBottom: "0.7rem",
   };
 
   return (
@@ -826,94 +872,203 @@ const PaywallScreen = ({ onClose, userKey, userEmail }) => {
       display: "flex", alignItems: "flex-end",
       animation: "fadeIn 0.3s ease",
     }} onClick={onClose}>
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          width: "100%", maxWidth: 540, margin: "0 auto",
-          background: `linear-gradient(170deg, #1A1714, #141210)`,
-          borderTop: `1px solid ${T.or}33`,
-          borderRadius: "20px 20px 0 0",
-          padding: "2.5rem 2rem 4rem",
-          animation: "fadeUp 0.35s ease forwards",
-        }}
-      >
+      <div onClick={e => e.stopPropagation()} style={{
+        width: "100%", maxWidth: 540, margin: "0 auto",
+        background: `linear-gradient(170deg, #1A1714, #141210)`,
+        borderTop: `1px solid ${T.or}33`,
+        borderRadius: "20px 20px 0 0",
+        padding: "2rem 2rem 4rem",
+        animation: "fadeUp 0.35s ease forwards",
+        maxHeight: "92vh", overflowY: "auto",
+      }}>
         {/* En-tête */}
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{
-            fontSize: "2rem", marginBottom: "0.8rem",
-            filter: `drop-shadow(0 0 16px ${T.or}66)`,
-          }}>✦</div>
-          <div style={{
-            fontFamily: T.serif, fontSize: "1.5rem",
-            color: T.orPale, marginBottom: "0.4rem",
-          }}>
+        <div style={{ textAlign: "center", marginBottom: "1.8rem" }}>
+          <div style={{ fontSize: "1.8rem", marginBottom: "0.6rem", filter: `drop-shadow(0 0 12px ${T.or}66)` }}>✦</div>
+          <div style={{ fontFamily: T.serif, fontSize: "1.4rem", color: T.orPale, marginBottom: "0.3rem" }}>
             ALBA — Accès complet
           </div>
-          <div style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.95rem", color: T.brume, lineHeight: 1.7,
-          }}>
-            Le Miroir et les Lettres des Portes.<br/>
-            Pour ceux qui veulent aller plus loin.
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, lineHeight: 1.7 }}>
+            Le Miroir. Les Lettres. La voix d'ALBA.
           </div>
         </div>
 
-        {/* Ce qui est inclus */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem", marginBottom: "2rem" }}>
+        {/* Navigation modes */}
+        <div style={{ display: "flex", borderBottom: `1px solid ${T.brume}18`, marginBottom: "1.6rem" }}>
           {[
-            { icon: "🌊", label: "Le Miroir", desc: "Une phrase posée. Un reflet renvoyé. Illimité." },
-            { icon: "✦",  label: "Lettres des Portes", desc: "6 lettres uniques, une par Clé franchie." },
-            { icon: "🌿", label: "Lettres hebdomadaires", desc: "ALBA lit ton Ardoise et t'écrit." },
-          ].map((item, i) => (
-            <div key={i} style={{
-              display: "flex", gap: "1rem", alignItems: "flex-start",
-              padding: "0.9rem 1rem",
-              background: `${T.or}07`,
-              border: `1px solid ${T.or}18`,
-              borderRadius: "6px",
-            }}>
-              <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>{item.icon}</span>
-              <div>
-                <div style={{ fontFamily: T.serif, color: T.orPale, fontSize: "0.95rem" }}>{item.label}</div>
-                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.75rem", color: T.brume, marginTop: "0.2rem" }}>{item.desc}</div>
-              </div>
-            </div>
+            { id: "plans", label: "S'abonner" },
+            { id: "gift_buy", label: "Offrir" },
+            { id: "gift_redeem", label: "J'ai un code" },
+          ].map(m => (
+            <button key={m.id} onClick={() => { setMode(m.id); setErr(null); }} style={{
+              flex: 1, background: "none", border: "none", cursor: "pointer",
+              padding: "0.7rem 0",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+              letterSpacing: "0.35em", textTransform: "uppercase",
+              color: mode === m.id ? T.or : T.brume,
+              borderBottom: `2px solid ${mode === m.id ? T.or : "transparent"}`,
+              transition: "all 0.2s",
+            }}>{m.label}</button>
           ))}
         </div>
 
-        {/* Prix */}
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <span style={{ fontFamily: T.serif, fontSize: "2.4rem", color: T.or }}>9€</span>
-          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, letterSpacing: "0.3em" }}> / mois</span>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.3rem" }}>
-            RÉSILIABLE À TOUT MOMENT
-          </div>
-        </div>
+        {/* ── MODE : PLANS ── */}
+        {mode === "plans" && (
+          <>
+            {/* Features */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.8rem" }}>
+              {[
+                { icon: "🌊", label: "Le Miroir", desc: "Un reflet renvoyé. Sans jugement. Illimité." },
+                { icon: "✦",  label: "Lettres des Portes", desc: "6 lettres uniques, une par Clé franchie." },
+                { icon: "🌿", label: "Lettre mensuelle", desc: "ALBA t'écrit une fois par mois. Longue. Intime." },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  display: "flex", gap: "0.9rem", alignItems: "flex-start",
+                  padding: "0.8rem 1rem", background: `${T.or}07`,
+                  border: `1px solid ${T.or}15`, borderRadius: "6px",
+                }}>
+                  <span style={{ fontSize: "1rem", flexShrink: 0 }}>{item.icon}</span>
+                  <div>
+                    <div style={{ fontFamily: T.serif, color: T.orPale, fontSize: "0.9rem" }}>{item.label}</div>
+                    <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, marginTop: "0.15rem" }}>{item.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-        {/* Bouton */}
-        {err && (
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center", marginBottom: "1rem" }}>{err}</div>
+            {/* Choix plan */}
+            <div style={{ display: "flex", gap: "0.7rem", marginBottom: "1.4rem" }}>
+              {[
+                { id: "monthly", price: "9€", period: "/ mois", sub: "" },
+                { id: "annual",  price: "79€", period: "/ an", sub: "Soit 6,60€/mois · 2 mois offerts" },
+              ].map(p => (
+                <button key={p.id} onClick={() => setPlan(p.id)} style={{
+                  flex: 1, background: plan === p.id ? `${T.or}15` : "transparent",
+                  border: `2px solid ${plan === p.id ? T.or : T.brume + "33"}`,
+                  borderRadius: "10px", padding: "1rem 0.8rem",
+                  cursor: "pointer", textAlign: "center", transition: "all 0.2s",
+                }}>
+                  <div style={{ fontFamily: T.serif, fontSize: "1.5rem", color: plan === p.id ? T.or : T.orPale }}>{p.price}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.2rem" }}>{p.period}</div>
+                  {p.sub && <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", color: `${T.or}99`, marginTop: "0.3rem" }}>{p.sub}</div>}
+                </button>
+              ))}
+            </div>
+
+            {err && <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center", marginBottom: "0.8rem" }}>{err}</div>}
+            <button onClick={startCheckout} disabled={loading} style={{
+              width: "100%", background: loading ? `${T.or}66` : T.or,
+              border: "none", borderRadius: "6px", padding: "1rem",
+              cursor: loading ? "default" : "pointer",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.4em", textTransform: "uppercase",
+              color: T.nuit, transition: "all 0.2s",
+            }}>
+              {loading ? "Ouverture du paiement…" : plan === "annual" ? "Commencer — 79€ / an" : "Commencer — 9€ / mois"}
+            </button>
+          </>
         )}
-        <button
-          onClick={startCheckout}
-          disabled={loading}
-          style={{
-            width: "100%",
-            background: loading ? `${T.or}66` : T.or,
-            border: "none", borderRadius: "6px",
-            padding: "1rem", cursor: loading ? "default" : "pointer",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
-            letterSpacing: "0.4em", textTransform: "uppercase",
-            color: T.nuit, transition: "all 0.2s",
-          }}
-        >
-          {loading ? "Ouverture du paiement…" : "Commencer — 9€ / mois"}
-        </button>
+
+        {/* ── MODE : OFFRIR ── */}
+        {mode === "gift_buy" && (
+          <>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.4rem" }}>
+              Offrez ALBA à quelqu'un qui traverse quelque chose.<br/>
+              Ils recevront un code à activer quand ils voudront.
+            </p>
+
+            {/* Durée */}
+            <div style={{ display: "flex", gap: "0.7rem", marginBottom: "1.2rem" }}>
+              {[
+                { id: "1month", label: "1 mois", price: "9€" },
+                { id: "1year",  label: "1 an",   price: "79€" },
+              ].map(d => (
+                <button key={d.id} onClick={() => setGiftDuration(d.id)} style={{
+                  flex: 1, background: giftDuration === d.id ? `${T.or}15` : "transparent",
+                  border: `2px solid ${giftDuration === d.id ? T.or : T.brume + "33"}`,
+                  borderRadius: "10px", padding: "0.9rem",
+                  cursor: "pointer", textAlign: "center", transition: "all 0.2s",
+                }}>
+                  <div style={{ fontFamily: T.serif, fontSize: "1.3rem", color: giftDuration === d.id ? T.or : T.orPale }}>{d.price}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.2rem" }}>{d.label}</div>
+                </button>
+              ))}
+            </div>
+
+            <input value={senderEmail} onChange={e => setSenderEmail(e.target.value)}
+              placeholder="Votre email (pour recevoir la confirmation)"
+              style={inputStyle} />
+            <input value={recipientName} onChange={e => setRecipientName(e.target.value)}
+              placeholder="Prénom du destinataire (optionnel)"
+              style={inputStyle} />
+            <textarea value={giftMessage} onChange={e => setGiftMessage(e.target.value)}
+              placeholder="Un mot à transmettre avec le code… (optionnel)"
+              rows={3} style={{ ...inputStyle, resize: "none", lineHeight: 1.6 }} />
+
+            {/* Phrase ALBA générée */}
+            <div style={{ padding: "0.8rem 1rem", background: `${T.or}08`, border: `1px solid ${T.or}18`, borderRadius: "6px", marginBottom: "1.2rem" }}>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.orPale}cc`, lineHeight: 1.7, margin: 0 }}>
+                "Quelqu'un pense à toi. ALBA t'attend."
+              </p>
+            </div>
+
+            {err && <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center", marginBottom: "0.8rem" }}>{err}</div>}
+            <button onClick={buyGift} disabled={loading} style={{
+              width: "100%", background: loading ? `${T.or}66` : T.or,
+              border: "none", borderRadius: "6px", padding: "1rem",
+              cursor: loading ? "default" : "pointer",
+              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              letterSpacing: "0.4em", textTransform: "uppercase",
+              color: T.nuit, transition: "all 0.2s",
+            }}>
+              {loading ? "Ouverture du paiement…" : `Offrir ALBA — ${giftDuration === "1year" ? "79€" : "9€"}`}
+            </button>
+          </>
+        )}
+
+        {/* ── MODE : ACTIVER UN CODE ── */}
+        {mode === "gift_redeem" && (
+          <>
+            {redeemSuccess ? (
+              <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
+                <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>✦</div>
+                <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale, lineHeight: 1.9, marginBottom: "0.5rem" }}>
+                  Bienvenue dans ALBA.
+                </p>
+                <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume }}>
+                  {redeemSuccess.durationLabel === "1year" ? "1 an" : "1 mois"} d'accès activé.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.4rem" }}>
+                  Quelqu'un vous a offert ALBA.<br/>
+                  Entrez votre code pour activer l'accès.
+                </p>
+                <input
+                  value={redeemCode} onChange={e => setRedeemCode(e.target.value.toUpperCase())}
+                  placeholder="ALBA-XXXX-XXXX"
+                  style={{ ...inputStyle, fontFamily: "monospace", letterSpacing: "0.15em", fontSize: "1.1rem", textAlign: "center" }}
+                />
+                {err && <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center", marginBottom: "0.8rem" }}>{err}</div>}
+                <button onClick={redeemGift} disabled={loading || !redeemCode.trim()} style={{
+                  width: "100%", background: redeemCode.trim() && !loading ? T.or : `${T.or}44`,
+                  border: "none", borderRadius: "6px", padding: "1rem",
+                  cursor: redeemCode.trim() && !loading ? "pointer" : "default",
+                  fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+                  letterSpacing: "0.4em", textTransform: "uppercase",
+                  color: T.nuit, transition: "all 0.2s",
+                }}>
+                  {loading ? "Activation…" : "Activer mon cadeau"}
+                </button>
+              </>
+            )}
+          </>
+        )}
 
         <button onClick={onClose} style={{
-          width: "100%", marginTop: "0.8rem",
+          width: "100%", marginTop: "1rem",
           background: "none", border: "none", cursor: "pointer",
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
           letterSpacing: "0.3em", textTransform: "uppercase",
           color: T.brume, padding: "0.5rem",
         }}>

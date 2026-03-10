@@ -39,10 +39,24 @@ export async function POST(req) {
   switch (event.type) {
     case "checkout.session.completed": {
       const userKey = object.metadata?.user_key;
-      if (userKey) {
+      const giftCode = object.metadata?.gift_code;
+
+      if (giftCode) {
+        // Paiement cadeau — activer le code
+        const key = SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        await fetch(`${SUPABASE_URL}/rest/v1/alba_gift_codes?code=eq.${giftCode}`, {
+          method: "PATCH",
+          headers: {
+            apikey: key, Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json", Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ status: "active", stripe_session_id: object.id }),
+        });
+      } else if (userKey) {
+        // Abonnement classique
         await upsertSubscription(userKey, {
           status: "active",
-          stripe_customer_id:    object.customer,
+          stripe_customer_id: object.customer,
           stripe_subscription_id: object.subscription,
           updated_at: new Date().toISOString(),
         });
