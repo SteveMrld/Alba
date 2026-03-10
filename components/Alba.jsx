@@ -2645,7 +2645,49 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const isMatin = heure >= 5 && heure < 12;
   const phraseDuJour = getPhraseduJour(cleActive);
 
-  // ── Miroir hebdomadaire ──────────────────────────────────────────────────
+  // ── Mémoire de présence ──────────────────────────────────────────────────
+  const getPresenceAlba = () => {
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const lastVisit = localStorage.getItem("alba_last_visit");
+      const streakRaw = localStorage.getItem("alba_streak") || "0";
+      const streak = parseInt(streakRaw, 10);
+      const alreadyGreeted = localStorage.getItem("alba_greeted_" + today);
+
+      // Mettre à jour le streak et la dernière visite
+      if (!alreadyGreeted) {
+        localStorage.setItem("alba_greeted_" + today, "1");
+        if (lastVisit) {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const wasYesterday = lastVisit === yesterday.toISOString().split("T")[0];
+          localStorage.setItem("alba_streak", wasYesterday ? streak + 1 : 1);
+        } else {
+          localStorage.setItem("alba_streak", "1");
+        }
+        localStorage.setItem("alba_last_visit", today);
+      }
+
+      // Pas de phrase si première visite ou déjà salué aujourd'hui
+      if (!lastVisit || alreadyGreeted) return null;
+
+      const joursAbsence = Math.floor(
+        (new Date(today) - new Date(lastVisit)) / (1000 * 60 * 60 * 24)
+      );
+      const streakActuel = alreadyGreeted ? streak : parseInt(localStorage.getItem("alba_streak") || "1", 10);
+
+      if (joursAbsence >= 14) return "Tu reviens après un long moment. ALBA était là.";
+      if (joursAbsence >= 7)  return "Une semaine. Quelque chose t'a ramené ici.";
+      if (joursAbsence >= 3)  return "Tu étais parti quelques jours. Bienvenue.";
+      if (joursAbsence >= 2)  return "Tu reviens. Quelque chose t'a ramené ici.";
+      if (streakActuel >= 7)  return "Sept jours de suite. Tu as fait de cet endroit quelque chose de réel.";
+      if (streakActuel >= 3)  return `${streakActuel} soirs de suite. Il se passe quelque chose.`;
+      return null;
+    } catch { return null; }
+  };
+  const phrasePresence = getPresenceAlba();
+
+
   // Analyse les mots des post-its des 7 derniers jours
   const getMiroirSemaine = () => {
     if (!progressStats?.allPostits) return null;
@@ -2753,6 +2795,16 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           fontSize: "0.95rem", color: T.brume, lineHeight: 1.6,
           animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0,
         }}>Chemin {cdv} — {chemin.titre}</p>
+
+        {/* Phrase de présence — discrète, éphémère */}
+        {phrasePresence && (
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.82rem", color: `${T.brume}77`,
+            lineHeight: 1.6, marginTop: "0.5rem",
+            animation: "fadeUp 0.8s ease forwards 0.3s", opacity: 0,
+          }}>{phrasePresence}</p>
+        )}
 
         {/* Carte miniature flottante */}
         <div style={{
