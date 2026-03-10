@@ -6902,6 +6902,140 @@ const Journal = ({ data }) => {
 };
 
 // ─── PROFIL ────────────────────────────────────────────────────────────────────
+// ─── MOT SECRET ──────────────────────────────────────────────────────────────
+const MOTS_PAR_PORTE = {
+  1: "Reconnaissance", 2: "Compréhension", 3: "Ressenti",
+  4: "Lâcher-prise",   5: "Réception",     6: "Devenir",
+  7: "Création",       8: "Lien",          9: "Protection",
+  10: "Transmission",  11: "Présence",     12: "Être",
+};
+
+const MotSecret = ({ data, progressStats }) => {
+  const [mot, setMot]     = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const getLundi = () => {
+      const d = new Date();
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const lundi = new Date(d.setDate(diff));
+      return lundi.toISOString().split("T")[0];
+    };
+
+    const cacheKey = `alba_mot_secret_${getLundi()}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { setMot(cached); return; }
+
+    // Construire le contexte depuis les fragments + porte active
+    const fragments = (() => {
+      try {
+        const raw = localStorage.getItem("alba_postits");
+        if (!raw) return [];
+        const all = JSON.parse(raw);
+        return all.slice(-10).map(p => p.texte || p.content || "").filter(Boolean);
+      } catch { return []; }
+    })();
+
+    const porteActive = progressStats?._cleActive || data?.cleActive || 1;
+    const etats = (() => {
+      try {
+        const keys = Object.keys(localStorage).filter(k => k.startsWith("alba_cairn_"));
+        return keys.slice(-5).map(k => localStorage.getItem(k)).filter(Boolean);
+      } catch { return []; }
+    })();
+
+    if (fragments.length === 0 && etats.length === 0) {
+      const fallback = MOTS_PAR_PORTE[porteActive] || "Traversée";
+      localStorage.setItem(cacheKey, fallback);
+      setMot(fallback);
+      return;
+    }
+
+    setLoading(true);
+    const prompt = `Tu accompagnes ${data.prenom || "quelqu'un"} dans son chemin intérieur.
+
+Voici quelques fragments qu'il·elle a écrits récemment dans son Ardoise :
+${fragments.map((f, i) => `- "${f}"`).join("\n") || "(aucun fragment cette semaine)"}
+
+États déposés dans le Ciel cette semaine :
+${etats.join(", ") || "(aucun)"}
+
+Porte active : Porte ${porteActive} — ${MOTS_PAR_PORTE[porteActive] || ""}
+
+En lisant cela, quel est le mot qui représente le mieux ce que cette personne traverse en ce moment ?
+Réponds avec un seul mot. Pas une phrase. Juste un mot. Choisis parmi : Traversée, Courage, Patience, Retour, Éveil, Transformation, Ancrage, Douceur, Lumière, Lâcher, Ouverture, Silence, Réparation, Confiance, Présence, Souffle, Passage, Gardien, Racines, Aube. 
+Ou propose un autre mot si aucun ne convient. Un seul mot.`;
+
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 20,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    })
+      .then(r => r.json())
+      .then(d => {
+        const raw = d.content?.[0]?.text?.trim() || "";
+        const motFinal = raw.split(/[\s\n.,!?]/)[0] || MOTS_PAR_PORTE[porteActive] || "Traversée";
+        localStorage.setItem(cacheKey, motFinal);
+        setMot(motFinal);
+      })
+      .catch(() => {
+        const fallback = MOTS_PAR_PORTE[porteActive] || "Traversée";
+        setMot(fallback);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (!mot && !loading) return null;
+
+  return (
+    <div style={{
+      textAlign: "center",
+      padding: "1.8rem 1.4rem 1.6rem",
+      marginBottom: "0.8rem",
+      background: `${T.or}05`,
+      border: `1px solid ${T.or}15`,
+      borderRadius: "6px",
+      animation: "fadeUp 0.7s ease forwards 0.1s", opacity: 0,
+    }}>
+      <div style={{
+        fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem",
+        letterSpacing: "0.5em", textTransform: "uppercase",
+        color: T.brume, marginBottom: "1rem",
+      }}>
+        Ce que j'entends en toi
+      </div>
+      {loading ? (
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}66` }}>
+          ALBA écoute…
+        </div>
+      ) : (
+        <>
+          <div style={{
+            fontFamily: T.serif, fontWeight: 300,
+            fontSize: "clamp(2rem, 8vw, 2.8rem)",
+            color: T.or, letterSpacing: "0.05em",
+            lineHeight: 1, marginBottom: "0.8rem",
+            filter: `drop-shadow(0 0 20px ${T.or}44)`,
+          }}>
+            {mot}
+          </div>
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.75rem", color: `${T.brume}77`,
+          }}>
+            renouvelé chaque semaine
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
@@ -6976,6 +7110,9 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
           </div>
         ))}
       </div>
+
+      {/* ── Mot Secret ── généré par Claude API chaque lundi ── */}
+      <MotSecret data={data} progressStats={progressStats} />
 
       {/* ── Éclats d'aube ── discret, poétique, pas un score ── */}
       {(() => {
