@@ -222,6 +222,16 @@ const sbAuth = {
     return { user: null, error: "Email ou mot de passe incorrect." };
   },
 
+  // Réinitialisation mot de passe
+  async resetPassword(email) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return r.ok;
+  },
+
   // Charger session depuis localStorage
   loadSession() {
     try {
@@ -1081,13 +1091,14 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
 
 // ─── ÉCRAN AUTH — Magic Link ──────────────────────────────────────────────────
 const AuthScreen = ({ onAuth }) => {
-  const [mode, setMode]         = useState("login");  // login | signup
+  const [mode, setMode]         = useState("login");  // login | signup | forgot
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm]   = useState("");
   const [loading, setLoading]   = useState(false);
   const [errMsg, setErrMsg]     = useState("");
   const [showPwd, setShowPwd]   = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const inputStyle = {
     background: "#1E1A16", border: `1px solid ${T.brume}33`,
@@ -1109,6 +1120,16 @@ const AuthScreen = ({ onAuth }) => {
     setLoading(false);
     if (user) onAuth(user);
     else setErrMsg(error || "Une erreur est survenue.");
+  };
+
+  const handleReset = async () => {
+    setErrMsg("");
+    if (!email.includes("@")) { setErrMsg("Entre ton adresse email."); return; }
+    setLoading(true);
+    const ok = await sbAuth.resetPassword(email.trim().toLowerCase());
+    setLoading(false);
+    if (ok) setResetSent(true);
+    else setErrMsg("Une erreur est survenue. Réessaie.");
   };
 
   return (
@@ -1206,16 +1227,69 @@ const AuthScreen = ({ onAuth }) => {
           {loading ? "…" : mode === "login" ? "Entrer dans ALBA" : "Créer mon compte"}
         </button>
 
+        {/* Mot de passe oublié — login seulement */}
+        {mode === "login" && (
+          <button onClick={() => { setMode("forgot"); setErrMsg(""); setResetSent(false); }} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.78rem", color: `${T.brume}77`,
+            textAlign: "center", padding: "0.2rem",
+          }}>
+            Mot de passe oublié ?
+          </button>
+        )}
+
         {/* Hint */}
-        <div style={{
-          fontFamily: T.serif, fontStyle: "italic",
-          fontSize: "0.75rem", color: `${T.brume}77`,
-          textAlign: "center", lineHeight: 1.6, marginTop: "0.5rem",
-        }}>
-          {mode === "login"
-            ? "Pas encore de compte ? Clique sur \"Créer un compte\"."
-            : "Déjà un compte ? Clique sur \"Se connecter\"."}
-        </div>
+        {mode !== "forgot" && (
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.75rem", color: `${T.brume}77`,
+            textAlign: "center", lineHeight: 1.6, marginTop: "0.5rem",
+          }}>
+            {mode === "login"
+              ? "Pas encore de compte ? Clique sur \"Créer un compte\"."
+              : "Déjà un compte ? Clique sur \"Se connecter\"."}
+          </div>
+        )}
+
+        {/* Écran mot de passe oublié */}
+        {mode === "forgot" && (
+          <div style={{ textAlign: "center" }}>
+            {resetSent ? (
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, lineHeight: 1.8 }}>
+                Un lien t'a été envoyé.<br/>
+                <span style={{ fontSize: "0.75rem", color: T.brume }}>Vérifie ta boîte mail.</span>
+              </div>
+            ) : (
+              <>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.7, marginBottom: "1rem" }}>
+                  Entre ton email.<br/>ALBA t'envoie un lien de réinitialisation.
+                </div>
+                {errMsg && (
+                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", marginBottom: "0.8rem" }}>{errMsg}</div>
+                )}
+                <button onClick={handleReset} disabled={loading} style={{
+                  width: "100%", background: loading ? `${T.or}55` : T.or,
+                  border: "none", borderRadius: "6px", padding: "0.9rem",
+                  cursor: loading ? "default" : "pointer",
+                  fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+                  letterSpacing: "0.4em", textTransform: "uppercase",
+                  color: T.nuit,
+                }}>
+                  {loading ? "Envoi…" : "Envoyer le lien"}
+                </button>
+                <button onClick={() => { setMode("login"); setErrMsg(""); }} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "0.75rem", color: `${T.brume}66`,
+                  marginTop: "0.8rem", padding: "0.2rem",
+                }}>
+                  Retour
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
