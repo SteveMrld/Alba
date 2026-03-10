@@ -94,14 +94,15 @@ export default function ResetPassword() {
             <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.8, marginBottom: "1.5rem" }}>
               Ton mot de passe a été mis à jour.
             </p>
-            <a href="https://alba-gamma.vercel.app" style={{
-              display: "block", background: T.or, borderRadius: "6px",
+            <button onClick={() => { window.location.href = "https://alba-gamma.vercel.app"; }} style={{
+              display: "block", width: "100%", background: T.or, borderRadius: "6px",
               padding: "0.95rem", textAlign: "center", textDecoration: "none",
               fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
               letterSpacing: "0.4em", textTransform: "uppercase", color: T.nuit,
+              border: "none", cursor: "pointer",
             }}>
               Retourner dans ALBA
-            </a>
+            </button>
           </div>
         ) : err && !token ? (
           <div style={{ textAlign: "center" }}>

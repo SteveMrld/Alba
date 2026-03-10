@@ -7003,6 +7003,7 @@ const MotSecret = ({ data, progressStats }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (!data) return;
     const getLundi = () => {
       const d = new Date();
       const day = d.getDay();
