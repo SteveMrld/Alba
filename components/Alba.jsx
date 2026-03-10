@@ -2108,6 +2108,21 @@ const Onboarding = ({ onComplete }) => {
   );
 };
 
+
+// ─── SON DENTELLE ────────────────────────────────────────────────────────────
+const useAlbaSound = () => {
+  const jouer = (nom) => {
+    if (typeof localStorage === "undefined") return;
+    if (localStorage.getItem("alba_son_preference") !== "oui") return;
+    try {
+      const audio = new Audio(`/sons/${nom}.mp3`);
+      audio.volume = 0.22;
+      audio.play().catch(() => {});
+    } catch(e) {}
+  };
+  return { jouer };
+};
+
 // ─── CARTE D'ÂME SVG ─────────────────────────────────────────────────────────
 const CARTE_DATA = {
   1:  { mot: "PIONNIER",   element: "Feu",   forme: "triangle",   palette: ["#E8956D","#C8623A","#F5C4A8"] },
@@ -3845,6 +3860,7 @@ const CielCairn = ({ userId, db }) => {
         clearInterval(holdIntervalRef.current);
         setIsHolding(false);
         setHoldProgress(100);
+        try { const a = new Audio("/sons/cairn.mp3"); a.volume = 0.2; a.play().catch(()=>{}); } catch(e) {}
         setTimeout(() => setEtape(4), 300);
       }
     }, 30);
@@ -7851,6 +7867,7 @@ const SalleDesTrouvailles = ({ data }) => {
               <Btn
                 onClick={() => {
                   if (formData.categorie && formData.titre.length > 2 && formData.pourquoi.length > 10) {
+                    try { const a = new Audio("/sons/trouvaille.mp3"); a.volume = 0.2; a.play().catch(()=>{}); } catch(e) {}
                     setFormSent(true);
                   }
                 }}
@@ -9490,7 +9507,15 @@ export default function Alba() {
         />
       )}
 
-      {view === "splash" && <Splash onEnd={() => setView(authUser ? (userData ? "app" : "onboarding") : "auth")} />}
+      {view === "splash" && <Splash onEnd={() => {
+        const dest = authUser ? (userData ? "app" : "onboarding") : "auth";
+        setView(dest);
+        if (dest === "app" && typeof localStorage !== "undefined" && localStorage.getItem("alba_son_preference") === "oui") {
+          setTimeout(() => {
+            try { const a = new Audio("/sons/aube.mp3"); a.volume = 0.18; a.play().catch(()=>{}); } catch(e) {}
+          }, 800);
+        }
+      }} />}
       {view === "auth"    && <AuthScreen onAuth={handleAuth} />}
       {view === "onboarding" && <Onboarding onComplete={handleComplete} />}
       {view === "portrait" && <Portrait data={userData} onContinue={() => setView("app")} />}
