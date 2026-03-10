@@ -7519,6 +7519,121 @@ Ou propose un autre mot si aucun ne convient. Un seul mot.`;
   );
 };
 
+// ─── BIBLIOTHÈQUE DES SAGESSES ───────────────────────────────────────────────
+const SAGESSES = [
+  { id: "ikigai",     nom: "Ikigai",       origine: "Japonais",  fichier: "ikigai",     texte: "La raison d'être. Ce qui se trouve au croisement de ce qu'on aime, ce qu'on sait faire, ce dont le monde a besoin, et ce pour quoi on peut être rémunéré." },
+  { id: "kintsugi",   nom: "Kintsugi",     origine: "Japonais",  fichier: "kintsugi",   texte: "L'art de réparer avec de l'or. Les cicatrices ne cachent pas la fracture — elles la mettent en lumière. Ce qui est brisé devient plus précieux." },
+  { id: "hygge",      nom: "Hygge",        origine: "Danois",    fichier: "hygge",      texte: "La chaleur de l'instant partagé. Un feu, une bougie, une présence. Ce sentiment d'être exactement là où il faut être." },
+  { id: "sabr",       nom: "Sabr",         origine: "Arabe",     fichier: "sabr",       texte: "La patience active. Pas la résignation — l'endurance consciente. Tenir debout dans l'épreuve sans perdre la foi dans le mouvement." },
+  { id: "wabi-sabi",  nom: "Wabi-Sabi",    origine: "Japonais",  fichier: "wabi-sabi",  texte: "La beauté de l'impermanence et de l'imperfection. Trouver la grâce dans ce qui est incomplet, usé, éphémère." },
+  { id: "tawakkul",   nom: "Tawakkul",     origine: "Arabe",     fichier: "tawakkul",   texte: "La confiance absolue. Faire sa part, puis lâcher prise sur ce qu'on ne contrôle pas. S'en remettre à plus grand que soi." },
+  { id: "ubuntu",     nom: "Ubuntu",       origine: "Bantou",    fichier: "ubuntu",     texte: "Je suis parce que nous sommes. L'humanité comme tissu commun. Ce qui me touche te touche. Ce que tu portes, je l'aide à porter." },
+  { id: "yugen",      nom: "Yūgen",        origine: "Japonais",  fichier: "yugen",      texte: "La conscience profonde de l'univers qui déclenche une émotion trop vaste pour les mots. Ce que l'on ressent devant l'immensité d'un ciel nocturne." },
+  { id: "fitra",      nom: "Fitra",        origine: "Arabe",     fichier: "fitra",      texte: "La nature originelle. L'état de pureté dans lequel chaque être arrive au monde. Un rappel que ce qu'on cherche est déjà là, en nous." },
+  { id: "baraka",     nom: "Baraka",       origine: "Arabe",     fichier: "baraka",     texte: "La bénédiction qui circule. Une énergie sacrée transmise par les lieux, les personnes, les actes. Ce qui fait que certains moments semblent touchés par la grâce." },
+  { id: "ataraxia",   nom: "Ataraxia",     origine: "Grec",      fichier: "ataraxia",   texte: "La tranquillité de l'âme. L'absence de trouble. Un état de sérénité qui n'est pas l'indifférence mais la paix avec ce qui est." },
+  { id: "kaizen",     nom: "Kaizen",       origine: "Japonais",  fichier: "kaizen",     texte: "L'amélioration continue et douce. Pas la révolution — la transformation par petits pas quotidiens. La constance comme forme de courage." },
+  { id: "lagom",      nom: "Lagom",        origine: "Suédois",   fichier: "lagom",      texte: "Ni trop, ni trop peu. Juste ce qu'il faut. Un art de l'équilibre qui récuse l'excès et trouve la plénitude dans la mesure juste." },
+  { id: "sisu",       nom: "Sisu",         origine: "Finnois",   fichier: "sisu",       texte: "La résilience stoïque. Une force intérieure qui ne se voit pas mais qui tient quand tout cède. Ce qui reste quand on a tout donné." },
+  { id: "sankofa",    nom: "Sankofa",      origine: "Akan",      fichier: "sankofa",    texte: "Revenir en arrière pour aller de l'avant. L'oiseau qui vole vers l'avenir en regardant derrière lui. La mémoire comme fondation du mouvement." },
+  { id: "qalb",       nom: "Qalb",         origine: "Arabe",     fichier: "qalb",       texte: "Le cœur qui se retourne. Pas seulement un organe — le centre de l'être, le siège de l'intelligence spirituelle et de la transformation intérieure." },
+  { id: "eudaimonia", nom: "Eudaimonia",   origine: "Grec",      fichier: "eudaimonia", texte: "Le bonheur comme épanouissement. Non pas le plaisir — la vie qui se déploie selon sa nature profonde. Être ce qu'on est censé être." },
+  { id: "arete",      nom: "Areté",        origine: "Grec",      fichier: "arete",      texte: "L'excellence comme vertu. Donner le meilleur de soi non pour briller mais parce que c'est la manière juste d'habiter sa vie." },
+  { id: "maktub",     nom: "Maktub",       origine: "Arabe",     fichier: "maktub",     texte: "Il est écrit. Ce qui devait arriver est arrivé. Non pas la fatalité passive — la confiance que chaque événement a un sens dans la trame plus grande." },
+  { id: "meraki",     nom: "Meraki",       origine: "Grec",      fichier: "meraki",     texte: "Mettre son âme dans ce qu'on fait. Agir avec amour, créativité et intention totale. Laisser une partie de soi dans chaque acte." },
+  { id: "maat",       nom: "Ma'at",        origine: "Égyptien",  fichier: "maat",       texte: "L'ordre, la vérité, la justice cosmique. L'équilibre entre le monde visible et invisible. Vivre en accord avec ce qui est juste." },
+  { id: "satori",     nom: "Satori",       origine: "Japonais",  fichier: "satori",     texte: "L'éveil soudain. Un éclair de compréhension qui change tout. Non pas une accumulation de savoir — une transformation instantanée de la perception." },
+];
+
+const BibliothequeSagesses = () => {
+  const [selected, setSelected] = useState(null);
+
+  if (selected) {
+    const s = selected;
+    return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "#0A0806",
+        display: "flex", flexDirection: "column",
+      }}>
+        {/* Image plein écran */}
+        <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+          <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
+            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}/>
+          {/* Gradient bas */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: "55%",
+            background: "linear-gradient(to top, #0A0806 0%, transparent 100%)",
+          }}/>
+          {/* Bouton retour */}
+          <button onClick={() => setSelected(null)} style={{
+            position: "absolute", top: "1.2rem", left: "1.2rem",
+            background: "rgba(10,8,6,0.6)", border: `1px solid ${T.brume}33`,
+            borderRadius: "6px", padding: "0.5rem 0.9rem",
+            color: T.brume, fontFamily: T.sans, fontSize: "0.5rem",
+            letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+          }}>← Retour</button>
+        </div>
+
+        {/* Texte */}
+        <div style={{ padding: "1.5rem 1.5rem 2.5rem", flexShrink: 0 }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
+            {s.origine}
+          </div>
+          <div style={{ fontFamily: T.serif, fontSize: "clamp(1.6rem, 5vw, 2rem)", color: T.orPale, fontStyle: "italic", marginBottom: "1rem", fontWeight: 300 }}>
+            {s.nom}
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.9rem, 3vw, 1rem)", color: T.aube, lineHeight: 1.85, fontWeight: 300 }}>
+            {s.texte}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: "0 0 4rem" }}>
+      <div style={{ textAlign: "center", padding: "1.5rem 1rem 1rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+          Bibliothèque
+        </div>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300 }}>
+          Les Sagesses du monde
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.4rem", lineHeight: 1.7 }}>
+          22 mots que toutes les langues n'ont pas.
+        </p>
+      </div>
+
+      {/* Grille 2 colonnes */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", padding: "0 2px" }}>
+        {SAGESSES.map(s => (
+          <div key={s.id} onClick={() => setSelected(s)} style={{
+            position: "relative", aspectRatio: "1/1", overflow: "hidden", cursor: "pointer",
+          }}>
+            <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
+              style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }}/>
+            {/* Gradient */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(to top, rgba(10,8,6,0.75) 0%, transparent 50%)",
+            }}/>
+            {/* Nom */}
+            <div style={{
+              position: "absolute", bottom: "0.7rem", left: 0, right: 0,
+              textAlign: "center",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(0.85rem, 2.8vw, 1rem)",
+              color: T.orPale, fontWeight: 300,
+              textShadow: "0 1px 8px rgba(0,0,0,0.8)",
+            }}>{s.nom}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 // ─── LETTRE MENSUELLE ──────────────────────────────────────────────────────
 const LettreMensuelle = ({ userId, isPremium, onShowPaywall }) => {
   const [lettre, setLettre] = useState(null);
@@ -7678,6 +7793,16 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             </div>
           </div>
         ))}
+      </div>
+
+      {/* ── Bibliothèque des Sagesses ── */}
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: T.brume, marginBottom: "1rem",
+        }}>Bibliothèque des Sagesses</div>
+        <BibliothequeSagesses />
       </div>
 
       {/* ── Lettre mensuelle ── */}
