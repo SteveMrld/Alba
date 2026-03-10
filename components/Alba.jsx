@@ -1890,7 +1890,7 @@ const CARTE_IMAGES = {
 const CarteAme = ({ data, small }) => {
   const cdv = cheminDeVie(data.naissance);
   const carte = CARTE_DATA[cdv] || CARTE_DATA[9];
-  const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const bIdx = BLESSURES.findIndex(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()));
   const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
   const [c1, c2, c3] = carte.palette;
 
@@ -2078,10 +2078,11 @@ const CarteAme = ({ data, small }) => {
 
 // ─── PORTRAIT D'ÂME ───────────────────────────────────────────────────────────
 const Portrait = ({ data, onContinue }) => {
+  if (!data) return null;
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const bIdx = Object.values(BLESSURES).findIndex(b =>
-    data.intention.toLowerCase().includes(b.nom.toLowerCase())
+    (data.intention || "").toLowerCase().includes(b.nom.toLowerCase())
   );
   const blessure  = BLESSURES[bIdx >= 0 ? bIdx : 0];
   const livre     = LIVRES[blessure.nom];
@@ -4183,7 +4184,7 @@ const RecommandationsBlock = ({ data }) => {
 
   const cdv = cheminDeVie(data.naissance);
   const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+    || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
     || "Abandon";
   const sens = data.sensibilite || "intuitif";
   const { livres, podcasts } = getRecommandations(nomBlessure, sens, cdv);
@@ -4321,7 +4322,7 @@ const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
     const cdv = cheminDeVie(data.naissance);
     const chemin = CHEMINS[cdv] || CHEMINS[9];
     const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-      || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+      || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
       || "Abandon";
     const sens = data.sensibilite || "intuitif";
 
@@ -4515,7 +4516,7 @@ const CompagnonDuJour = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
   const cle = CLES[0];
   const citation = CITATIONS[cdv % CITATIONS.length];
-  const bIdx = Object.values(BLESSURES).findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const bIdx = Object.values(BLESSURES).findIndex(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()));
   const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
   const livre = LIVRES[blessure.nom];
 
@@ -5668,7 +5669,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
 
 const Evasion = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
-  const bIdx = BLESSURES.findIndex(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()));
+  const bIdx = BLESSURES.findIndex(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()));
   const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
   const { all, categorie } = getPhotos(cdv, blessure.nom);
   const [mode, setMode] = useState("video"); // "photo" | "video"
@@ -7131,7 +7132,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+    || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
     || "Abandon";
   const blessure = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
   const isRationnel = data.sensibilite === "rationnel";
@@ -7794,7 +7795,7 @@ const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
   const cdv     = cheminDeVie(data.naissance);
   const chemin  = CHEMINS[cdv] || CHEMINS[9];
   const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || BLESSURES.find(b => data.intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+    || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
     || "Abandon";
   const blessure  = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
   const isLumiere = ["Croissance","Présence"].includes(blessure.nom);
