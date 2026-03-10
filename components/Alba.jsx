@@ -1154,6 +1154,7 @@ const AuthScreen = ({ onAuth }) => {
 
       <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "0.9rem" }}>
 
+        {mode !== "forgot" && (<>
         {/* Toggle login / inscription */}
         <div style={{ display: "flex", background: "#1E1A16", borderRadius: "6px", padding: "3px", marginBottom: "0.4rem" }}>
           {["login", "signup"].map(m => (
@@ -1226,6 +1227,8 @@ const AuthScreen = ({ onAuth }) => {
         >
           {loading ? "…" : mode === "login" ? "Entrer dans ALBA" : "Créer mon compte"}
         </button>
+
+        </>)}
 
         {/* Mot de passe oublié — login seulement */}
         {mode === "login" && (
