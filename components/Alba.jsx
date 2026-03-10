@@ -4178,6 +4178,13 @@ const RituelCrepuscule = ({ data, onPoser }) => {
 };
 
 // ─── RECOMMANDATIONS ─────────────────────────────────────────────────────────
+const getRecommandations = (nomBlessure, sens, cdv) => {
+  // Retourne livres et podcasts depuis LIVRES/PODCASTS selon la blessure
+  const livres = LIVRES?.[nomBlessure] ? [LIVRES[nomBlessure]] : [];
+  const podcasts = [];
+  return { livres, podcasts };
+};
+
 const RecommandationsBlock = ({ data }) => {
   const [onglet, setOnglet] = useState("livres");
   const [ouvert, setOuvert] = useState(false);
