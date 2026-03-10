@@ -1380,7 +1380,7 @@ const Splash = ({ onEnd }) => {
       {/* Vidéo de fond */}
       <video autoPlay loop muted playsInline style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", opacity: 0.18, pointerEvents: "none",
+        objectFit: "cover", opacity: 0.32, pointerEvents: "none",
       }}>
         <source src={heroVideo} type="video/mp4" />
       </video>
@@ -2133,7 +2133,7 @@ const Portrait = ({ data, onContinue }) => {
       {/* Vidéo ambiante très discrète */}
       <video autoPlay loop muted playsInline style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", opacity: 0.15, pointerEvents: "none",
+        objectFit: "cover", opacity: 0.28, pointerEvents: "none",
       }}>
         <source src={HEURE < 6 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
       </video>
@@ -3007,7 +3007,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         {/* Vidéo de fond hero */}
         <video autoPlay loop muted playsInline style={{
           position: "absolute", inset: 0, width: "100%", height: "100%",
-          objectFit: "cover", zIndex: 0, opacity: 0.18,
+          objectFit: "cover", zIndex: 0, opacity: 0.32,
         }}><source src={heroVideo} type="video/mp4"/></video>
 
         {/* Halo arrière-plan */}
@@ -5438,7 +5438,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
     <div style={{ position: "relative", zIndex: 1, padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
       <style>{`@keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
 
-      {/* Navigation entre Portes — flèches visibles */}
+      {/* Navigation entre Portes — avec verrouillage */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         marginBottom: "1.5rem",
@@ -5468,29 +5468,57 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
             Porte {territoire.index} · {territoire.nom}
           </div>
           <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
-            {tousLesTerrItoires.map((t, i) => (
-              <div key={i} onClick={() => { setPorteIdx(i); setSection("pratique"); }} style={{
-                width: i === porteIdx ? 18 : 7, height: 5, borderRadius: 3,
-                background: i === porteIdx ? territoire.couleur : `${T.brume}40`,
-                transition: "all 0.3s", cursor: "pointer",
-              }}/>
-            ))}
+            {tousLesTerrItoires.map((t, i) => {
+              const debloquee = porteDebloquee(i);
+              return (
+                <div key={i}
+                  onClick={() => { if (debloquee) { setPorteIdx(i); setSection("pratique"); }}}
+                  title={!debloquee ? "Porte verrouillée" : t.nom}
+                  style={{
+                    width: i === porteIdx ? 18 : 7, height: 5, borderRadius: 3,
+                    background: i === porteIdx ? territoire.couleur : debloquee ? `${T.brume}60` : `${T.brume}20`,
+                    transition: "all 0.3s", cursor: debloquee ? "pointer" : "default",
+                    opacity: debloquee ? 1 : 0.4,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
 
         <button
-          onClick={() => { if (porteIdx < tousLesTerrItoires.length - 1) { setPorteIdx(p => p + 1); setSection("pratique"); }}}
+          onClick={() => {
+            const next = porteIdx + 1;
+            if (next < tousLesTerrItoires.length && porteDebloquee(next)) {
+              setPorteIdx(next); setSection("pratique");
+            }
+          }}
           style={{
-            background: porteIdx === tousLesTerrItoires.length - 1 ? "transparent" : `${territoire.couleur}22`,
-            border: porteIdx === tousLesTerrItoires.length - 1 ? `1px solid ${T.brume}22` : `1px solid ${territoire.couleur}55`,
+            background: (porteIdx >= tousLesTerrItoires.length - 1 || !porteDebloquee(porteIdx + 1)) ? "transparent" : `${territoire.couleur}22`,
+            border: (porteIdx >= tousLesTerrItoires.length - 1 || !porteDebloquee(porteIdx + 1)) ? `1px solid ${T.brume}22` : `1px solid ${territoire.couleur}55`,
             borderRadius: "6px", width: 44, height: 44,
-            cursor: porteIdx === tousLesTerrItoires.length - 1 ? "default" : "pointer",
-            color: porteIdx === tousLesTerrItoires.length - 1 ? `${T.brume}40` : territoire.couleur,
+            cursor: (porteIdx >= tousLesTerrItoires.length - 1 || !porteDebloquee(porteIdx + 1)) ? "default" : "pointer",
+            color: (porteIdx >= tousLesTerrItoires.length - 1 || !porteDebloquee(porteIdx + 1)) ? `${T.brume}40` : territoire.couleur,
             fontSize: "1.3rem", display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.2s", flexShrink: 0,
           }}
-        >→</button>
+        >{porteDebloquee(porteIdx + 1) ? "→" : "🔒"}</button>
       </div>
+
+      {/* Message porte verrouillée */}
+      {!porteDebloquee(porteIdx) && (
+        <div style={{
+          textAlign: "center", padding: "2rem 1.5rem",
+          background: `${T.brume}08`, border: `1px solid ${T.brume}18`,
+          borderRadius: "8px", marginBottom: "1.5rem",
+        }}>
+          <div style={{ fontSize: "1.5rem", marginBottom: "0.8rem" }}>🔒</div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8 }}>
+            Cette porte n'est pas encore ouverte.<br/>
+            <span style={{ fontSize: "0.8rem", color: `${T.brume}88` }}>Continue ton chemin pour la franchir.</span>
+          </div>
+        </div>
+      )}
 
       {/* Phrase d'ambiance Porte */}
       <div style={{
@@ -6023,7 +6051,7 @@ const Souffle = ({ onComplete }) => {
       <video key={videoSrc} autoPlay loop muted playsInline style={{
         position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
         objectFit: "cover", zIndex: 0,
-        opacity: active ? 0.18 : 0.07, transition: "opacity 2s ease",
+        opacity: active ? 0.32 : 0.14, transition: "opacity 2s ease",
       }}><source src={videoSrc} type="video/mp4"/></video>
       <div style={{ position: "relative", zIndex: 1 }}>
       <div style={{ marginBottom: "2rem" }}>
@@ -7892,7 +7920,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
     }}>
       <video autoPlay loop muted playsInline style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", opacity: 0.07, pointerEvents: "none",
+        objectFit: "cover", opacity: 0.2, pointerEvents: "none",
       }}>
         <source src={HEURE < 6 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
       </video>
@@ -7930,7 +7958,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
       {/* Vidéo fond très discrète */}
       <video autoPlay loop muted playsInline style={{
         position: "fixed", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", zIndex: 0, opacity: 0.05, pointerEvents: "none",
+        objectFit: "cover", zIndex: 0, opacity: 0.18, pointerEvents: "none",
       }}>
         <source src={HEURE < 6 || HEURE >= 21 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
       </video>
