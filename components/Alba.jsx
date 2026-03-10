@@ -3517,6 +3517,10 @@ const genererEtoilesCiel = (pierresReelles) => {
 };
 
 const CielCairn = ({ userId, db }) => {
+  const [introVue, setIntroVue]     = useState(() => {
+    try { return localStorage.getItem("alba_ciel_intro_vue") === "1"; } catch { return false; }
+  });
+  const [introPhase, setIntroPhase] = useState(0); // 0=texte 1=fondu
   const [etape, setEtape]           = useState(0); // 0=ciel 1=question 2=etats 3=geste 4=envol 5=retour
   const [texte, setTexte]           = useState("");
   const [etatChoisi, setEtatChoisi] = useState(null);
@@ -3664,6 +3668,75 @@ const CielCairn = ({ userId, db }) => {
             Déposer une pierre
           </button>
         )}
+      </div>
+    </div>
+  );
+
+  // ── INTRO — première visite seulement ────────────────────────────────────
+  if (!introVue) return (
+    <div style={{
+      minHeight: "100vh", background: "#060408",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "2.5rem",
+      animation: "fadeIn 1s ease forwards",
+    }}>
+      {/* Étoiles décoratives */}
+      {[...Array(40)].map((_, i) => (
+        <div key={i} style={{
+          position: "absolute",
+          left: `${Math.random()*100}%`, top: `${Math.random()*100}%`,
+          width: Math.random()*2+1, height: Math.random()*2+1,
+          borderRadius: "50%",
+          background: `rgba(${180+Math.floor(Math.random()*60)},${160+Math.floor(Math.random()*60)},${100+Math.floor(Math.random()*80)},${0.3+Math.random()*0.5})`,
+          pointerEvents: "none",
+        }}/>
+      ))}
+
+      <div style={{ textAlign: "center", maxWidth: 320, position: "relative", zIndex: 1 }}>
+        <div style={{ fontSize: "1.8rem", marginBottom: "2rem", filter: "drop-shadow(0 0 12px rgba(200,169,110,0.6))" }}>
+          ✦
+        </div>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          fontStyle: "italic", fontWeight: 300,
+          fontSize: "clamp(1.1rem, 4vw, 1.3rem)",
+          color: "#E8D5B0", lineHeight: 1.9,
+          marginBottom: "1rem",
+          animation: "fadeUp 0.8s ease forwards 0.3s", opacity: 0,
+        }}>
+          Un espace partagé.
+        </p>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          fontStyle: "italic", fontWeight: 300,
+          fontSize: "clamp(1.1rem, 4vw, 1.3rem)",
+          color: "#C8BFB8", lineHeight: 1.9,
+          marginBottom: "2.5rem",
+          animation: "fadeUp 0.8s ease forwards 0.8s", opacity: 0,
+        }}>
+          Chaque pierre déposée ici<br/>devient une étoile.
+        </p>
+        <button
+          onClick={() => {
+            try { localStorage.setItem("alba_ciel_intro_vue", "1"); } catch {}
+            setIntroVue(true);
+          }}
+          style={{
+            background: "none",
+            border: "1px solid rgba(200,169,110,0.35)",
+            borderRadius: "6px",
+            padding: "0.85rem 2.5rem",
+            fontFamily: "'Jost', sans-serif",
+            fontWeight: 200, fontSize: "0.55rem",
+            letterSpacing: "0.5em", textTransform: "uppercase",
+            color: "#C8A96E", cursor: "pointer",
+            animation: "fadeUp 0.8s ease forwards 1.4s", opacity: 0,
+            transition: "all 0.2s",
+          }}
+        >
+          Entrer
+        </button>
       </div>
     </div>
   );
