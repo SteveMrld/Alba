@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── ÉCLATS D'AUBE — Système de progression ───────────────────────────────────
 // Chaque acte dans l'app génère des éclats. Silencieux. Mystérieux.
