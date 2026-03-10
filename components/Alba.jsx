@@ -5665,72 +5665,117 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         animation: "fadeUpCle 0.6s ease forwards",
         position: "relative",
       }}>
-        {/* La Porte */}
-        <div style={{
-          position: "relative",
-          width: 180, margin: "0 auto 1.2rem",
-          display: "flex", flexDirection: "column", alignItems: "center",
-        }}>
-          {/* Arche SVG */}
-          <svg width="180" height="220" viewBox="0 0 180 220" fill="none" style={{ position: "absolute", top: 0, left: 0 }}>
-            {/* Cadre extérieur */}
-            <path d={`M20 220 L20 80 Q20 20 90 20 Q160 20 160 80 L160 220`}
-              stroke={territoire.couleur} strokeWidth="1" fill="none" opacity="0.5"/>
-            {/* Cadre intérieur */}
-            <path d={`M32 220 L32 84 Q32 34 90 34 Q148 34 148 84 L148 220`}
-              stroke={territoire.couleur} strokeWidth="0.6" fill="none" opacity="0.3"/>
-            {/* Fond porte */}
-            <path d={`M32 220 L32 84 Q32 34 90 34 Q148 34 148 84 L148 220`}
-              fill={`${territoire.couleur}06`}/>
-            {/* Ligne seuil bas */}
-            <line x1="20" y1="210" x2="160" y2="210" stroke={territoire.couleur} strokeWidth="0.6" opacity="0.3"/>
-            {/* Clé de voûte */}
-            <path d="M82 20 Q90 14 98 20" stroke={territoire.couleur} strokeWidth="0.8" fill="none" opacity="0.5"/>
-            <circle cx="90" cy="14" r="3" stroke={territoire.couleur} strokeWidth="0.6" fill="none" opacity="0.4"/>
-            {/* Gonds */}
-            <rect x="20" y="100" width="8" height="4" stroke={territoire.couleur} strokeWidth="0.5" fill="none" opacity="0.35"/>
-            <rect x="20" y="160" width="8" height="4" stroke={territoire.couleur} strokeWidth="0.5" fill="none" opacity="0.35"/>
-            {/* Poignée */}
-            <circle cx="138" cy="130" r="4" stroke={territoire.couleur} strokeWidth="0.7" fill="none" opacity="0.4"/>
+        {/* La Porte Ancienne */}
+        <div style={{ position: "relative", width: 200, margin: "0 auto 1.5rem" }}>
+          {/* Calligraphie géante en filigrane derrière */}
+          {GRAVURES_PORTES[territoire.index] && (
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "9rem", lineHeight: 1,
+              color: `${territoire.couleur}06`,
+              fontFamily: GRAVURES_PORTES[territoire.index]?.langue === "ar"
+                ? "'Noto Naskh Arabic', serif" : "'Noto Serif JP', serif",
+              pointerEvents: "none", userSelect: "none",
+              direction: GRAVURES_PORTES[territoire.index]?.langue === "ar" ? "rtl" : "ltr",
+            }}>{GRAVURES_PORTES[territoire.index]?.kanji}</div>
+          )}
+
+          <svg width="200" height="260" viewBox="0 0 200 260" fill="none"
+            stroke={territoire.couleur} strokeLinecap="round" strokeLinejoin="round">
+
+            {/* ── Socle / marches ── */}
+            <line x1="10" y1="252" x2="190" y2="252" strokeWidth="1.2" opacity="0.5"/>
+            <line x1="18" y1="245" x2="182" y2="245" strokeWidth="0.7" opacity="0.3"/>
+
+            {/* ── Pilastres extérieurs ── */}
+            <line x1="22" y1="245" x2="22" y2="95" strokeWidth="1.2" opacity="0.5"/>
+            <line x1="178" y1="245" x2="178" y2="95" strokeWidth="1.2" opacity="0.5"/>
+
+            {/* ── Chapiteaux ── */}
+            <path d="M14 95 Q22 88 30 95" strokeWidth="0.8" fill="none" opacity="0.4"/>
+            <path d="M170 95 Q178 88 186 95" strokeWidth="0.8" fill="none" opacity="0.4"/>
+            <line x1="14" y1="95" x2="186" y2="95" strokeWidth="0.5" opacity="0.2"/>
+
+            {/* ── Arche principale ── */}
+            <path d="M35 245 L35 105 Q35 30 100 30 Q165 30 165 105 L165 245"
+              strokeWidth="1.2" fill={`${territoire.couleur}04`} opacity="0.8"/>
+
+            {/* ── Arche intérieure ── */}
+            <path d="M48 245 L48 110 Q48 46 100 46 Q152 46 152 110 L152 245"
+              strokeWidth="0.6" fill="none" opacity="0.4"/>
+
+            {/* ── Clé de voûte ornementée ── */}
+            <path d="M88 30 Q100 22 112 30" strokeWidth="0.8" fill="none" opacity="0.6"/>
+            <path d="M92 30 Q100 26 108 30" strokeWidth="0.5" fill="none" opacity="0.4"/>
+            <circle cx="100" cy="22" r="4" strokeWidth="0.8" fill="none" opacity="0.5"/>
+            <circle cx="100" cy="22" r="2" strokeWidth="0.5" fill="none" opacity="0.3"/>
+
+            {/* ── Fronton haut ── */}
+            <path d="M22 95 Q22 88 30 88 L170 88 Q178 88 178 95" strokeWidth="0.6" fill="none" opacity="0.3"/>
+
+            {/* ── Panneau supérieur (tympan) ── */}
+            <path d="M52 108 Q52 58 100 58 Q148 58 148 108 L148 118 L52 118 Z"
+              strokeWidth="0.5" fill={`${territoire.couleur}05`} opacity="0.6"/>
+
+            {/* ── Moulures panneau supérieur ── */}
+            <path d="M58 112 Q58 66 100 66 Q142 66 142 112" strokeWidth="0.4" fill="none" opacity="0.25"/>
+
+            {/* ── Panneau principal (milieu) ── */}
+            <rect x="52" y="126" width="96" height="72" rx="2"
+              strokeWidth="0.5" fill={`${territoire.couleur}04`} opacity="0.5"/>
+            <rect x="58" y="131" width="84" height="62" rx="1"
+              strokeWidth="0.3" fill="none" opacity="0.2"/>
+
+            {/* ── Panneau inférieur ── */}
+            <rect x="52" y="206" width="96" height="36" rx="2"
+              strokeWidth="0.5" fill={`${territoire.couleur}03`} opacity="0.4"/>
+            <rect x="60" y="211" width="80" height="26" rx="1"
+              strokeWidth="0.3" fill="none" opacity="0.2"/>
+
+            {/* ── Gonds gauche ── */}
+            <rect x="35" y="130" width="10" height="6" rx="1" strokeWidth="0.6" fill={`${territoire.couleur}15`} opacity="0.5"/>
+            <rect x="35" y="190" width="10" height="6" rx="1" strokeWidth="0.6" fill={`${territoire.couleur}15`} opacity="0.5"/>
+
+            {/* ── Poignée ── */}
+            <path d="M138 165 Q145 161 145 168 Q145 175 138 171" strokeWidth="0.9" fill="none" opacity="0.55"/>
+            <circle cx="136" cy="168" r="2.5" strokeWidth="0.7" fill={`${territoire.couleur}20`} opacity="0.5"/>
+
+            {/* ── Serrure ── */}
+            <rect x="130" y="156" width="14" height="10" rx="2" strokeWidth="0.5" fill="none" opacity="0.3"/>
+            <circle cx="137" cy="159" r="2" strokeWidth="0.5" fill="none" opacity="0.3"/>
+            <line x1="137" y1="161" x2="137" y2="164" strokeWidth="0.5" opacity="0.3"/>
+
+            {/* ── Filets décoratifs ── */}
+            <line x1="52" y1="122" x2="148" y2="122" strokeWidth="0.4" opacity="0.25"/>
+            <line x1="52" y1="202" x2="148" y2="202" strokeWidth="0.4" opacity="0.25"/>
           </svg>
 
-          {/* Contenu intérieur de la porte */}
+          {/* Contenu flottant sur la porte */}
           <div style={{
-            position: "relative", zIndex: 2,
-            width: 116, height: 186, marginLeft: 32, marginTop: 34,
+            position: "absolute",
+            top: "47%", left: "50%",
+            transform: "translate(-50%, -50%)",
             display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
-            gap: "0.8rem",
+            alignItems: "center", gap: "0.6rem",
+            width: 90,
           }}>
             {/* Numéro romain */}
             <div style={{
-              fontFamily: T.serif, fontWeight: 300,
-              fontSize: "0.65rem", letterSpacing: "0.3em",
-              color: `${territoire.couleur}99`,
+              fontFamily: T.sans, fontWeight: 200,
+              fontSize: "0.42rem", letterSpacing: "0.4em",
+              color: `${territoire.couleur}88`,
               textTransform: "uppercase",
-            }}>Porte {["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][territoire.index - 1]}</div>
-
-            {/* Calligraphie filigrane */}
-            {GRAVURES_PORTES[territoire.index] && (
-              <div style={{
-                position: "absolute",
-                fontSize: "5rem", lineHeight: 1,
-                color: `${territoire.couleur}08`,
-                fontFamily: GRAVURES_PORTES[territoire.index]?.langue === "ar"
-                  ? "'Noto Naskh Arabic', serif" : "'Noto Serif JP', serif",
-                pointerEvents: "none", userSelect: "none",
-                direction: GRAVURES_PORTES[territoire.index]?.langue === "ar" ? "rtl" : "ltr",
-              }}>{GRAVURES_PORTES[territoire.index]?.kanji}</div>
-            )}
+            }}>{["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"][territoire.index - 1]}</div>
 
             {/* Gravure */}
-            <GravurePorte index={territoire.index} couleur={territoire.couleur} size={64} />
+            <GravurePorte index={territoire.index} couleur={territoire.couleur} size={52} />
 
-            {/* Nom de la porte */}
+            {/* Nom */}
             <div style={{
               fontFamily: T.serif, fontStyle: "italic",
-              fontSize: "0.85rem", color: territoire.couleur,
-              letterSpacing: "0.05em",
+              fontSize: "0.8rem", color: territoire.couleur,
+              letterSpacing: "0.04em", textAlign: "center",
             }}>{territoire.nom}</div>
           </div>
         </div>
