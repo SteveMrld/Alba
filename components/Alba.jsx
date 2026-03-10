@@ -47,31 +47,31 @@ const PortePicto = ({ index, couleur, size = 44 }) => {
 
 // ─── GRAVURES & CALLIGRAPHIE ──────────────────────────────────────────────────
 const GRAVURES_PORTES = [
-  null, // index 0 unused
-  // I — Reconnaître — 見 (voir) — un œil dans un miroir
-  { kanji: "見", langue: "ja", gravure: `<circle cx="24" cy="18" r="8" stroke-width="0.8"/><ellipse cx="24" cy="18" rx="3" ry="3" stroke-width="0.8"/><path d="M8 18 Q24 8 40 18 Q24 28 8 18Z" stroke-width="0.8" fill="none"/><line x1="24" y1="28" x2="24" y2="38" stroke-width="0.8"/><line x1="16" y1="38" x2="32" y2="38" stroke-width="0.8"/><path d="M12 34 Q24 30 36 34" stroke-width="0.6" fill="none"/>` },
-  // II — Comprendre — ف (Fa — la parole, l'esprit) — livre ouvert avec lumière
-  { kanji: "ف", langue: "ar", gravure: `<path d="M24 8 L14 12 L14 36 L24 40 L34 36 L34 12 Z" stroke-width="0.8" fill="none"/><line x1="24" y1="8" x2="24" y2="40" stroke-width="0.8"/><line x1="16" y1="16" x2="22" y2="16" stroke-width="0.6"/><line x1="16" y1="20" x2="22" y2="20" stroke-width="0.6"/><line x1="16" y1="24" x2="22" y2="24" stroke-width="0.6"/><line x1="26" y1="16" x2="32" y2="16" stroke-width="0.6"/><line x1="26" y1="20" x2="32" y2="20" stroke-width="0.6"/><line x1="26" y1="24" x2="32" y2="24" stroke-width="0.6"/><path d="M18 10 L22 8 L22 12 Z" stroke-width="0.6" fill="none"/>` },
-  // III — Ressentir — 感 (sentir) — cœur avec vagues
-  { kanji: "感", langue: "ja", gravure: `<path d="M24 36 Q12 26 12 20 Q12 14 18 13 Q21 12 24 16 Q27 12 30 13 Q36 14 36 20 Q36 26 24 36Z" stroke-width="0.8" fill="none"/><path d="M10 42 Q17 38 24 40 Q31 38 38 42" stroke-width="0.6" fill="none"/><path d="M12 46 Q18 43 24 44 Q30 43 36 46" stroke-width="0.5" fill="none"/>` },
-  // IV — Lâcher — ن (Nun — la mer, le lâcher) — chaînes qui se défont
-  { kanji: "ن", langue: "ar", gravure: `<circle cx="16" cy="16" r="5" stroke-width="0.8" fill="none"/><circle cx="32" cy="16" r="5" stroke-width="0.8" fill="none"/><line x1="21" y1="16" x2="27" y2="16" stroke-width="0.8"/><path d="M14 22 Q10 32 16 38" stroke-width="0.8" fill="none"/><path d="M34 22 Q40 30 34 36" stroke-width="0.8" fill="none" stroke-dasharray="2,2"/><path d="M20 34 Q24 40 28 34" stroke-width="0.8" fill="none"/>` },
-  // V — Recevoir — 受 (recevoir) — mains ouvertes coupe
-  { kanji: "受", langue: "ja", gravure: `<path d="M12 28 Q12 22 18 20 L24 18 L30 20 Q36 22 36 28" stroke-width="0.8" fill="none"/><path d="M10 30 Q24 36 38 30" stroke-width="0.8" fill="none"/><path d="M18 20 L16 12 M30 20 L32 12" stroke-width="0.6" fill="none"/><circle cx="16" cy="10" r="2" stroke-width="0.6" fill="none"/><circle cx="32" cy="10" r="2" stroke-width="0.6" fill="none"/><path d="M20 34 Q24 40 28 34" stroke-width="0.6" fill="none"/>` },
-  // VI — Devenir — ك (Kaf — la paume) — chrysalide ouverte
-  { kanji: "ك", langue: "ar", gravure: `<ellipse cx="24" cy="24" rx="8" ry="12" stroke-width="0.8" fill="none"/><path d="M16 24 Q8 18 10 10 Q16 6 24 12" stroke-width="0.7" fill="none"/><path d="M32 24 Q40 18 38 10 Q32 6 24 12" stroke-width="0.7" fill="none"/><path d="M20 12 Q24 8 28 12" stroke-width="0.6" fill="none"/><line x1="24" y1="8" x2="24" y2="4" stroke-width="0.6"/>` },
-  // VII — Créer — 創 (créer) — mains qui façonnent argile
-  { kanji: "創", langue: "ja", gravure: `<ellipse cx="24" cy="28" rx="10" ry="6" stroke-width="0.8" fill="none"/><path d="M14 28 L12 20 Q12 14 24 12 Q36 14 36 20 L34 28" stroke-width="0.8" fill="none"/><path d="M18 22 Q24 18 30 22" stroke-width="0.6" fill="none"/><line x1="20" y1="12" x2="18" y2="6" stroke-width="0.6"/><line x1="28" y1="12" x2="30" y2="6" stroke-width="0.6"/>` },
-  // VIII — Relier — و (Waw — et, la connexion) — deux êtres reliés
-  { kanji: "و", langue: "ar", gravure: `<circle cx="16" cy="16" r="5" stroke-width="0.8" fill="none"/><circle cx="32" cy="16" r="5" stroke-width="0.8" fill="none"/><path d="M21 16 Q24 22 27 16" stroke-width="0.8" fill="none"/><line x1="16" y1="21" x2="16" y2="34" stroke-width="0.8"/><line x1="32" y1="21" x2="32" y2="34" stroke-width="0.8"/><path d="M16 34 Q24 40 32 34" stroke-width="0.8" fill="none"/>` },
-  // IX — Protéger — 守 (protéger/garder) — arbre-bouclier
-  { kanji: "守", langue: "ja", gravure: `<path d="M24 8 Q14 12 12 22 Q12 32 24 40 Q36 32 36 22 Q34 12 24 8Z" stroke-width="0.8" fill="none"/><line x1="24" y1="16" x2="24" y2="36" stroke-width="0.7"/><path d="M18 24 L24 20 L30 24" stroke-width="0.6" fill="none"/><path d="M16 30 L24 26 L32 30" stroke-width="0.6" fill="none"/>` },
-  // X — Transmettre — ب (Ba — le commencement) — flamme passée
-  { kanji: "ب", langue: "ar", gravure: `<path d="M16 38 Q14 28 18 20 Q20 14 24 10 Q26 16 24 22 Q22 26 26 28 Q32 26 30 18 Q34 24 34 32 Q34 38 28 40" stroke-width="0.8" fill="none"/><line x1="18" y1="38" x2="30" y2="38" stroke-width="0.8"/><path d="M22 8 Q24 4 26 8" stroke-width="0.6" fill="none"/>` },
-  // XI — Habiter — 住 (habiter) — maison-racines
-  { kanji: "住", langue: "ja", gravure: `<path d="M24 8 L10 20 L14 20 L14 38 L34 38 L34 20 L38 20 Z" stroke-width="0.8" fill="none"/><line x1="20" y1="38" x2="20" y2="28" stroke-width="0.7"/><line x1="20" y1="28" x2="28" y2="28" stroke-width="0.7"/><line x1="28" y1="28" x2="28" y2="38" stroke-width="0.7"/><path d="M16 42 Q20 38 24 42 Q28 38 32 42" stroke-width="0.6" fill="none"/>` },
-  // XII — Être — ق (Qaf — la montagne, l'essentiel) — arbre seul
-  { kanji: "ق", langue: "ar", gravure: `<line x1="24" y1="8" x2="24" y2="38" stroke-width="0.8"/><path d="M14 20 Q24 14 34 20" stroke-width="0.7" fill="none"/><path d="M16 28 Q24 22 32 28" stroke-width="0.7" fill="none"/><path d="M18 34 Q24 30 30 34" stroke-width="0.6" fill="none"/><line x1="16" y1="38" x2="32" y2="38" stroke-width="0.8"/><path d="M20 42 Q24 46 28 42" stroke-width="0.6" fill="none"/>` },
+  null,
+  // I — Reconnaître — 見 — bougie allumée
+  { kanji: "見", langue: "ja", gravure: `<line x1="24" y1="36" x2="24" y2="22" stroke-width="1"/><rect x="20" y="36" width="8" height="4" rx="1" stroke-width="0.8" fill="none"/><path d="M24 20 Q21 15 24 11 Q27 15 24 20" stroke-width="0.9" fill="none"/><path d="M22 13 Q24 9 26 13" stroke-width="0.7" fill="none"/>` },
+  // II — Comprendre — ف — livre ouvert
+  { kanji: "ف", langue: "ar", gravure: `<path d="M24 10 L13 14 L13 38 L24 42 L35 38 L35 14 Z" stroke-width="0.9" fill="none"/><line x1="24" y1="10" x2="24" y2="42" stroke-width="0.8"/><line x1="15" y1="18" x2="22" y2="18" stroke-width="0.6"/><line x1="15" y1="22" x2="22" y2="22" stroke-width="0.6"/><line x1="15" y1="26" x2="22" y2="26" stroke-width="0.6"/><line x1="26" y1="18" x2="33" y2="18" stroke-width="0.6"/><line x1="26" y1="22" x2="33" y2="22" stroke-width="0.6"/>` },
+  // III — Ressentir — 感 — cœur simple
+  { kanji: "感", langue: "ja", gravure: `<path d="M24 37 Q10 26 10 19 Q10 12 17 12 Q21 12 24 17 Q27 12 31 12 Q38 12 38 19 Q38 26 24 37Z" stroke-width="0.9" fill="none"/>` },
+  // IV — Lâcher — ن — oiseau qui s'envole
+  { kanji: "ن", langue: "ar", gravure: `<path d="M24 38 L24 22" stroke-width="0.9"/><path d="M24 22 Q18 16 12 18" stroke-width="0.9" fill="none"/><path d="M24 22 Q30 16 36 18" stroke-width="0.9" fill="none"/><path d="M24 22 Q19 20 16 22" stroke-width="0.6" fill="none"/><path d="M24 22 Q29 20 32 22" stroke-width="0.6" fill="none"/><path d="M20 42 Q24 46 28 42" stroke-width="0.6" fill="none"/>` },
+  // V — Recevoir — 受 — coupe / calice
+  { kanji: "受", langue: "ja", gravure: `<path d="M14 16 Q14 28 24 32 Q34 28 34 16" stroke-width="0.9" fill="none"/><line x1="14" y1="16" x2="34" y2="16" stroke-width="0.8"/><line x1="24" y1="32" x2="24" y2="40" stroke-width="0.8"/><line x1="18" y1="40" x2="30" y2="40" stroke-width="0.8"/><path d="M18 10 Q24 6 30 10" stroke-width="0.6" fill="none"/>` },
+  // VI — Devenir — ك — chrysalide qui s'ouvre
+  { kanji: "ك", langue: "ar", gravure: `<ellipse cx="24" cy="26" rx="7" ry="11" stroke-width="0.9" fill="none"/><path d="M17 18 Q10 14 12 8 Q18 4 24 10" stroke-width="0.7" fill="none"/><path d="M31 18 Q38 14 36 8 Q30 4 24 10" stroke-width="0.7" fill="none"/><line x1="24" y1="8" x2="24" y2="4" stroke-width="0.7"/>` },
+  // VII — Créer — 創 — plume / roseau
+  { kanji: "創", langue: "ja", gravure: `<path d="M34 10 Q36 14 28 22 L16 40" stroke-width="0.9" fill="none"/><path d="M34 10 Q30 8 28 22 L16 40" stroke-width="0.9" fill="none"/><path d="M28 22 L22 20" stroke-width="0.6" fill="none"/><path d="M26 26 L20 24" stroke-width="0.6" fill="none"/><path d="M24 30 L18 28" stroke-width="0.6" fill="none"/>` },
+  // VIII — Relier — و — deux arbres dont les racines se rejoignent
+  { kanji: "و", langue: "ar", gravure: `<line x1="16" y1="8" x2="16" y2="24" stroke-width="0.9"/><line x1="32" y1="8" x2="32" y2="24" stroke-width="0.9"/><path d="M12 14 Q16 10 20 14" stroke-width="0.7" fill="none"/><path d="M28 14 Q32 10 36 14" stroke-width="0.7" fill="none"/><path d="M16 24 Q24 30 32 24" stroke-width="0.8" fill="none"/><path d="M16 28 Q24 36 32 28" stroke-width="0.6" fill="none"/>` },
+  // IX — Protéger — 守 — main ouverte, doigts vers le haut
+  { kanji: "守", langue: "ja", gravure: `<rect x="14" y="26" width="20" height="14" rx="3" stroke-width="0.9" fill="none"/><line x1="17" y1="26" x2="17" y2="14" stroke-width="0.9"/><line x1="21" y1="26" x2="21" y2="10" stroke-width="0.9"/><line x1="25" y1="26" x2="25" y2="10" stroke-width="0.9"/><line x1="29" y1="26" x2="29" y2="14" stroke-width="0.9"/><path d="M17 14 Q15 10 17 8 Q19 10 17 14" stroke-width="0.6" fill="none"/>` },
+  // X — Transmettre — ب — deux bougies, une allume l'autre
+  { kanji: "ب", langue: "ar", gravure: `<line x1="16" y1="38" x2="16" y2="24" stroke-width="0.9"/><rect x="13" y="38" width="6" height="3" rx="1" stroke-width="0.7" fill="none"/><path d="M16 22 Q14 18 16 14 Q18 18 16 22" stroke-width="0.8" fill="none"/><line x1="32" y1="38" x2="32" y2="24" stroke-width="0.9"/><rect x="29" y="38" width="6" height="3" rx="1" stroke-width="0.7" fill="none"/><path d="M32 22 Q30 18 32 14 Q34 18 32 22" stroke-width="0.8" fill="none"/><path d="M18 16 Q24 20 30 16" stroke-width="0.6" fill="none" stroke-dasharray="1.5,1.5"/>` },
+  // XI — Habiter — 住 — maison simple avec seuil
+  { kanji: "住", langue: "ja", gravure: `<path d="M24 8 L10 20 L14 20 L14 38 L34 38 L34 20 L38 20 Z" stroke-width="0.9" fill="none"/><rect x="20" y="28" width="8" height="10" rx="1" stroke-width="0.7" fill="none"/><line x1="10" y1="42" x2="38" y2="42" stroke-width="0.7"/>` },
+  // XII — Être — ق — arbre seul, racines et branches
+  { kanji: "ق", langue: "ar", gravure: `<line x1="24" y1="10" x2="24" y2="38" stroke-width="0.9"/><path d="M14 22 Q24 16 34 22" stroke-width="0.8" fill="none"/><path d="M16 28 Q24 22 32 28" stroke-width="0.7" fill="none"/><path d="M19 33 Q24 29 29 33" stroke-width="0.6" fill="none"/><path d="M18 38 Q24 42 30 38" stroke-width="0.7" fill="none"/><path d="M20 42 Q24 46 28 42" stroke-width="0.6" fill="none"/>` },
 ];
 
 const GravurePorte = ({ index, couleur, size = 120 }) => {
@@ -5666,7 +5666,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         position: "relative",
       }}>
         {/* La Porte Ancienne */}
-        <div style={{ position: "relative", width: 200, margin: "0 auto 1.5rem" }}>
+        <div style={{ position: "relative", width: 240, margin: "0 auto 1.5rem" }}>
           {/* Calligraphie géante en filigrane derrière */}
           {GRAVURES_PORTES[territoire.index] && (
             <div style={{
@@ -5681,7 +5681,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
             }}>{GRAVURES_PORTES[territoire.index]?.kanji}</div>
           )}
 
-          <svg width="200" height="260" viewBox="0 0 200 260" fill="none"
+          <svg width="240" height="300" viewBox="0 0 200 260" fill="none"
             stroke={territoire.couleur} strokeLinecap="round" strokeLinejoin="round">
 
             {/* ── Socle / marches ── */}
