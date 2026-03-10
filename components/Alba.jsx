@@ -8113,6 +8113,12 @@ export default function Alba() {
       if (hash && hash.includes("access_token")) {
         const params = new URLSearchParams(hash.replace("#", ""));
         const access_token = params.get("access_token");
+        const type = params.get("type");
+        // Lien de réinitialisation mot de passe → rediriger vers /reset-password
+        if (type === "recovery" && access_token) {
+          window.location.href = "/reset-password" + hash;
+          return;
+        }
         const refresh_token = params.get("refresh_token");
         if (access_token) {
           try {
