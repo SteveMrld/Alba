@@ -7236,7 +7236,93 @@ Ou propose un autre mot si aucun ne convient. Un seul mot.`;
   );
 };
 
-const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
+// ─── LETTRE MENSUELLE ──────────────────────────────────────────────────────
+const LettreMensuelle = ({ userId, isPremium, onShowPaywall }) => {
+  const [lettre, setLettre] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [lue, setLue] = useState(false);
+  const mois = new Date().toISOString().slice(0, 7);
+  const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+
+  useEffect(() => {
+    if (!isPremium || !userId) { setLoading(false); return; }
+    fetch(`/api/lettre-mensuelle?user_id=${userId}&mois=${mois}`)
+      .then(r => r.json())
+      .then(d => { setLettre(d.lettre || null); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [userId, isPremium, mois]);
+
+  if (!isPremium) return (
+    <div style={{ textAlign: "center", padding: "2.5rem 1.5rem" }}>
+      <div style={{ fontSize: "1.4rem", marginBottom: "1rem", opacity: 0.6 }}>✉</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.5rem" }}>
+        Chaque mois, ALBA t'écrit une lettre personnelle.<br/>
+        <span style={{ fontSize: "0.85rem", color: `${T.brume}88` }}>Réservé aux membres.</span>
+      </p>
+      <button onClick={onShowPaywall} style={{
+        background: "none", border: `1px solid ${T.or}44`, borderRadius: "6px",
+        padding: "0.75rem 2rem", fontFamily: T.sans, fontWeight: 200,
+        fontSize: "0.52rem", letterSpacing: "0.45em", textTransform: "uppercase",
+        color: T.or, cursor: "pointer",
+      }}>Devenir membre</button>
+    </div>
+  );
+
+  if (loading) return (
+    <div style={{ textAlign: "center", padding: "2rem", color: T.brume, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem" }}>
+      ALBA écrit…
+    </div>
+  );
+
+  if (!lettre) return (
+    <div style={{ textAlign: "center", padding: "2rem 1.5rem" }}>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, lineHeight: 1.8 }}>
+        La lettre de {nomMois} n'est pas encore arrivée.<br/>
+        <span style={{ fontSize: "0.8rem", color: `${T.brume}77` }}>Elle arrive le 1er de chaque mois.</span>
+      </p>
+    </div>
+  );
+
+  return (
+    <div style={{
+      background: `${T.nuit2}CC`,
+      border: `1px solid ${T.or}22`,
+      borderRadius: "10px",
+      padding: "2rem 1.5rem",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+      {/* Filigrane subtil */}
+      <div style={{
+        position: "absolute", top: "1rem", right: "1.2rem",
+        fontFamily: T.serif, fontSize: "0.6rem", letterSpacing: "0.3em",
+        textTransform: "uppercase", color: `${T.or}33`,
+      }}>ALBA · {nomMois}</div>
+
+      {/* Ligne décorative */}
+      <div style={{ width: 28, height: 1, background: `${T.or}55`, marginBottom: "1.5rem" }} />
+
+      {/* Corps de la lettre */}
+      <div style={{
+        fontFamily: T.serif, fontSize: "clamp(0.95rem, 3.5vw, 1.05rem)",
+        color: T.aube, lineHeight: 2, fontWeight: 300,
+        whiteSpace: "pre-wrap",
+        animation: lue ? "none" : "fadeUp 0.8s ease forwards",
+      }}>
+        {lettre.contenu}
+      </div>
+
+      {/* Signature */}
+      <div style={{ marginTop: "2rem", display: "flex", alignItems: "center", gap: "0.8rem" }}>
+        <div style={{ flex: 1, height: 1, background: `${T.or}22` }} />
+        <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.or}88` }}>ALBA</span>
+        <div style={{ flex: 1, height: 1, background: `${T.or}22` }} />
+      </div>
+    </div>
+  );
+};
+
+const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
@@ -7309,6 +7395,16 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut }) => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* ── Lettre mensuelle ── */}
+      <div style={{ marginBottom: "2rem" }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: T.brume, marginBottom: "1rem",
+        }}>La lettre du mois</div>
+        <LettreMensuelle userId={data?.user_id} isPremium={isPremium} onShowPaywall={onShowPaywall} />
       </div>
 
       {/* ── Mot Secret ── généré par Claude API chaque lundi ── */}
