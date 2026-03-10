@@ -8157,7 +8157,16 @@ export default function Alba() {
         } catch {}
       }
       // Profil
-      const profile = await db.loadProfile();
+      const rawProfile = await db.loadProfile();
+      const profile = rawProfile ? {
+        prenom: "", naissance: "01/01/1990", sensibilite: "intuitif",
+        intention: "", cleActive: 0,
+        ...rawProfile,
+        intention: rawProfile.intention || "",
+        prenom: rawProfile.prenom || "",
+        naissance: rawProfile.naissance || "01/01/1990",
+        sensibilite: rawProfile.sensibilite || "intuitif",
+      } : null;
       if (profile) {
         setUserData(profile);
         if (existingUser) {
