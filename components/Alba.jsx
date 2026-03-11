@@ -3385,13 +3385,18 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           position: "relative", zIndex: 1,
         }}>{momentLabel} · {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}</div>
 
-        {/* Salutation */}
+        {/* Salutation — TypedPhrase pour première visite du jour */}
         <h1 style={{
           fontFamily: T.serif, fontWeight: 300,
           fontSize: "clamp(1.8rem, 6vw, 2.4rem)",
           color: T.orPale, lineHeight: 1.2, marginBottom: "0.5rem",
-          animation: "fadeUp 0.7s ease forwards 0.1s", opacity: 0,
-        }}>{salut},<br/>{data.prenom}.</h1>
+        }}>
+          <TypedPhrase
+            text={`${salut}, ${data.prenom}.`}
+            speed={45}
+            style={{ color: T.orPale, fontFamily: T.serif }}
+          />
+        </h1>
 
         {/* Sous-titre chemin */}
         <p style={{
@@ -3453,15 +3458,17 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           </div>
 
           {/* La phrase — grande, italique, présente */}
-          <p style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "clamp(1.05rem, 3.2vw, 1.25rem)",
-            color: T.orPale, lineHeight: 1.85,
-            margin: 0,
-            letterSpacing: "0.01em",
-          }}>
-            {phraseDuJour}
-          </p>
+          <TypedPhrase
+            text={phraseDuJour}
+            speed={35}
+            style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(1.05rem, 3.2vw, 1.25rem)",
+              color: T.orPale, lineHeight: 1.85,
+              letterSpacing: "0.01em",
+              display: "block",
+            }}
+          />
         </div>
       </div>
 
@@ -5794,6 +5801,93 @@ const LumiereDuJour = () => {
   );
 };
 
+// ─── CONSTELLATION DES 6 CLÉS ─────────────────────────────────────────────────
+// 6 étoiles disposées en arc, chaque clé = 2 portes (12 portes au total)
+const NOMS_CLES = ["Reconnaître", "Comprendre", "Ressentir", "Lâcher", "Recevoir", "Devenir"];
+const COULEURS_CLES = ["#C8A96E", "#9EA8C8", "#A8C8A0", "#C8A0A8", "#A0C0C8", "#C8B8A0"];
+
+const ConstellationCles = ({ cleActive, porteIdx, porteDebloquee, onSelectPorte, couleur }) => {
+  const W = 280, H = 72;
+  // 6 étoiles en arc léger
+  const stars = NOMS_CLES.map((nom, i) => {
+    const t = i / 5; // 0 → 1
+    const x = 24 + t * (W - 48);
+    const y = H / 2 + Math.sin(t * Math.PI) * -14; // arc vers le haut
+    const porteA = i * 2;
+    const porteB = i * 2 + 1;
+    const debloqueeA = porteDebloquee(porteA);
+    const debloqueeB = porteDebloquee(porteB);
+    const active = i === cleActive;
+    const accessible = debloqueeA;
+    return { nom, x, y, porteA, porteB, active, accessible, debloqueeA, debloqueeB, couleur: COULEURS_CLES[i] };
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem" }}>
+      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ overflow: "visible" }}>
+        {/* Lignes de connexion */}
+        {stars.map((s, i) => {
+          if (i === 0) return null;
+          const prev = stars[i - 1];
+          return (
+            <line key={`line-${i}`}
+              x1={prev.x} y1={prev.y} x2={s.x} y2={s.y}
+              stroke={s.accessible ? `${T.brume}40` : `${T.brume}18`}
+              strokeWidth="0.8"
+              strokeDasharray={s.accessible ? "none" : "3 3"}
+            />
+          );
+        })}
+
+        {/* Étoiles */}
+        {stars.map((s, i) => {
+          const r = s.active ? 7 : s.accessible ? 5 : 3.5;
+          const fill = s.active ? s.couleur : s.accessible ? `${s.couleur}60` : `${T.brume}25`;
+          const glow = s.active ? `drop-shadow(0 0 6px ${s.couleur}88)` : "none";
+          return (
+            <g key={i} onClick={() => s.accessible && onSelectPorte(s.porteA)}
+               style={{ cursor: s.accessible ? "pointer" : "default" }}>
+              {/* Halo pour étoile active */}
+              {s.active && (
+                <circle cx={s.x} cy={s.y} r={r + 5}
+                  fill="none" stroke={s.couleur} strokeWidth="0.5" opacity="0.3" />
+              )}
+              {/* Étoile SVG à 5 branches */}
+              <polygon
+                points={Array.from({length: 10}, (_, j) => {
+                  const angle = (j * 36 - 90) * Math.PI / 180;
+                  const radius = j % 2 === 0 ? r : r * 0.42;
+                  return `${s.x + radius * Math.cos(angle)},${s.y + radius * Math.sin(angle)}`;
+                }).join(" ")}
+                fill={fill}
+                style={{ filter: glow, transition: "all 0.4s" }}
+              />
+              {/* Points sous-portes */}
+              {s.accessible && (
+                <>
+                  <circle cx={s.x - 4} cy={s.y + r + 5} r="1.5"
+                    fill={s.debloqueeA ? s.couleur : `${T.brume}40`} />
+                  <circle cx={s.x + 4} cy={s.y + r + 5} r="1.5"
+                    fill={s.debloqueeB ? s.couleur : `${T.brume}40`} />
+                </>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+
+      {/* Label de la clé active */}
+      <div style={{
+        fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
+        letterSpacing: "0.35em", textTransform: "uppercase",
+        color: couleur, opacity: 0.9,
+      }}>
+        {NOMS_CLES[cleActive]}
+      </div>
+    </div>
+  );
+};
+
 const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
   const [section, setSection] = useState("pratique");
   const [niveauPratique, setNiveauPratique] = useState(0);
@@ -5904,23 +5998,14 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           }}>
             Porte {territoire.index} · {territoire.nom}
           </div>
-          <div style={{ display: "flex", gap: "5px", justifyContent: "center" }}>
-            {tousLesTerrItoires.map((t, i) => {
-              const debloquee = porteDebloquee(i);
-              return (
-                <div key={i}
-                  onClick={() => { if (debloquee) { setPorteIdx(i); setSection("pratique"); }}}
-                  title={!debloquee ? "Porte verrouillée" : t.nom}
-                  style={{
-                    width: i === porteIdx ? 18 : 7, height: 5, borderRadius: 3,
-                    background: i === porteIdx ? territoire.couleur : debloquee ? `${T.brume}60` : `${T.brume}35`,
-                    transition: "all 0.3s", cursor: debloquee ? "pointer" : "default",
-                    opacity: debloquee ? 1 : 0.4,
-                  }}
-                />
-              );
-            })}
-          </div>
+          {/* ── Constellation des 6 Clés — chemin de vie SVG ── */}
+          <ConstellationCles
+            cleActive={Math.floor(porteIdx / 2)}
+            porteIdx={porteIdx}
+            porteDebloquee={porteDebloquee}
+            onSelectPorte={(i) => { if (porteDebloquee(i)) { setPorteIdx(i); setSection("pratique"); }}}
+            couleur={territoire.couleur}
+          />
         </div>
 
         <button
