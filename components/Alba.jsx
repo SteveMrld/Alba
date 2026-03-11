@@ -2338,7 +2338,7 @@ const Portrait = ({ data, onContinue }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const { blessure } = getContextProfil(data);
-  const livre     = LIVRES[blessure.nom];
+  const livre     = LIVRES[blessure.nom] || LIVRES["Abandon"];
   const citation  = CITATIONS[cdv % CITATIONS.length];
   const cle       = CLES[0];
   const sens      = data.sensibilite || "intuitif";
@@ -3140,7 +3140,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const cle = CLES[cleActive] || CLES[0];
   const citation = CITATIONS[cdv % CITATIONS.length];
   const { blessure, hasCroissance, hasDual } = getContextProfil(data);
-  const livre = LIVRES[blessure.nom];
+  const livre = LIVRES[blessure.nom] || LIVRES["Abandon"];
 
   const heure = new Date().getHours();
   const salut = heure < 6 ? "Tu veilles encore" : heure < 12 ? "Bonjour" : heure < 18 ? "Bon après-midi" : "Bonsoir";
@@ -4859,7 +4859,7 @@ const CompagnonDuJour = ({ data }) => {
   const cle = CLES[0];
   const citation = CITATIONS[cdv % CITATIONS.length];
   const { blessure } = getContextProfil(data);
-  const livre = LIVRES[blessure.nom];
+  const livre = LIVRES[blessure.nom] || LIVRES["Abandon"];
 
   return (
     <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
