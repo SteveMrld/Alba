@@ -1600,31 +1600,57 @@ const Step = ({ num, label, children, onNext, onBack, canNext }) => (
 
 const MOIS_NOMS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 
+const PictoSens = ({ id, couleur, size = 26 }) => {
+  const s = { width: size, height: size, flexShrink: 0 };
+  if (id === "intuitif") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke={couleur} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={s}>
+      <path d="M12 21c0 0-7-5-7-11a7 7 0 0 1 14 0c0 6-7 11-7 11z" />
+      <path d="M12 10 Q9 14 12 17 Q15 14 12 10z" fill={couleur} fillOpacity="0.25" stroke="none"/>
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  );
+  if (id === "spirituel") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke={couleur} strokeWidth="1.2" strokeLinecap="round" style={s}>
+      <path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z" fill={couleur} fillOpacity="0.18" />
+    </svg>
+  );
+  if (id === "rationnel") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke={couleur} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={s}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M8 12 Q10 8 12 12 Q14 16 16 12" />
+      <circle cx="12" cy="12" r="1.2" fill={couleur} fillOpacity="0.5" stroke="none"/>
+    </svg>
+  );
+  if (id === "transition") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke={couleur} strokeWidth="1.3" strokeLinecap="round" style={s}>
+      <path d="M2 14 Q5 8 8 14 Q11 20 14 14 Q17 8 22 12" />
+      <path d="M2 10 Q5 4 8 10 Q11 16 14 10 Q17 4 22 8" opacity="0.35"/>
+    </svg>
+  );
+  return null;
+};
+
 const SENSIBILITES = [
   {
     id: "intuitif",
-    emoji: "🌿",
     titre: "Je ressens les choses profondément",
     desc: "Sensibilité intuitive, ouverture au symbolique",
     couleur: "#7BA88A",
   },
   {
     id: "spirituel",
-    emoji: "✦",
     titre: "Je cherche du sens dans les signes",
     desc: "Numérologie, astrologie, spiritualité, synchronicités",
     couleur: "#C8A96E",
   },
   {
     id: "rationnel",
-    emoji: "🧠",
     titre: "Je fonctionne plutôt par la raison",
     desc: "Psychologie, concret, ancrage dans le réel",
     couleur: "#7B9EA8",
   },
   {
     id: "transition",
-    emoji: "🌊",
     titre: "Je suis en transition, je cherche",
     desc: "Ni l'un ni l'autre — ouvert(e) à découvrir",
     couleur: "#A87BC8",
@@ -1636,6 +1662,7 @@ const Onboarding = ({ onComplete }) => {
   const [prenom, setPrenom] = useState("");
   const [sensibilite, setSensibilite] = useState("");
   const [intention, setIntention] = useState("");
+  const [intentionSoleil, setIntentionSoleil] = useState("");
   const [jour, setJour] = useState("");
   const [mois, setMois] = useState("");
   const [annee, setAnnee] = useState(1980);
@@ -1745,7 +1772,7 @@ const Onboarding = ({ onComplete }) => {
                 textAlign: "left", transition: "all 0.25s",
                 display: "flex", alignItems: "center", gap: "1rem",
               }}>
-                <span style={{ fontSize: "1.4rem", flexShrink: 0 }}>{s.emoji}</span>
+                <PictoSens id={s.id} couleur={sel ? s.couleur : T.brume + "99"} size={26} />
                 <div>
                   <div style={{ fontFamily: T.serif, fontSize: "1rem", color: sel ? T.orPale : T.aube, fontStyle: "italic", marginBottom: "0.25rem" }}>
                     {sel ? "✦ " : ""}{s.titre}
@@ -1871,7 +1898,7 @@ const Onboarding = ({ onComplete }) => {
             {INTENTIONS_TEMPETE.map(i => {
               const sel = intention === i;
               return (
-                <button key={i} onClick={() => setIntention(i)} style={{
+                <button key={i} onClick={() => setIntention(sel ? "" : i)} style={{
                   background: sel ? `${T.aurore}15` : "transparent",
                   border: `1px solid ${sel ? T.aurore + "66" : T.brume + "22"}`,
                   color: sel ? T.orPale : `${T.aube}bb`,
@@ -1888,7 +1915,7 @@ const Onboarding = ({ onComplete }) => {
         {/* Séparateur */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "1.4rem 0" }}>
           <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: T.brume }}>ou</span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: T.brume }}>et / ou</span>
           <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
         </div>
 
@@ -1899,9 +1926,9 @@ const Onboarding = ({ onComplete }) => {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
             {INTENTIONS_SOLEIL.map(i => {
-              const sel = intention === i;
+              const sel = intentionSoleil === i;
               return (
-                <button key={i} onClick={() => setIntention(i)} style={{
+                <button key={i} onClick={() => setIntentionSoleil(sel ? "" : i)} style={{
                   background: sel ? `${T.or}12` : "transparent",
                   border: `1px solid ${sel ? T.or + "55" : T.brume + "22"}`,
                   color: sel ? T.orPale : `${T.aube}bb`,
@@ -1931,7 +1958,7 @@ const Onboarding = ({ onComplete }) => {
         )}
 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
-          {intention && (intention !== "Autre chose…" || autreTexte.length > 2) &&
+          {(intention || intentionSoleil) && (intention !== "Autre chose…" || autreTexte.length > 2) &&
             <Btn onClick={() => setStep(4)}>Continuer</Btn>
           }
           <Btn secondary small onClick={() => setStep(2)}>Revenir</Btn>
@@ -2011,7 +2038,8 @@ const Onboarding = ({ onComplete }) => {
           {couleurPred && <Btn onClick={() => onComplete({
             prenom,
             naissance: dateStr,
-            intention: intention === "Autre chose…" ? autreTexte : intention,
+            intention: intention === "Autre chose…" ? autreTexte : (intention || intentionSoleil),
+            intentionSecondaire: intention && intentionSoleil ? intentionSoleil : "",
             sensibilite,
             signe,
             couleur: couleurPred,
@@ -2569,8 +2597,14 @@ const Portrait = ({ data, onContinue }) => {
           width: 40, height: 54, flexShrink: 0,
           background: `linear-gradient(135deg, ${T.or}33, ${T.aurore}22)`,
           border: `1px solid ${T.or}44`, borderRadius: "2px",
-          display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem",
-        }}>📖</div>
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke={T.or} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20 }}>
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            <line x1="9" y1="7" x2="15" y2="7" opacity="0.6"/>
+            <line x1="9" y1="11" x2="13" y2="11" opacity="0.4"/>
+          </svg></div>
         <div>
           <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>Lecture pour toi</div>
           <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>{livre.titre}</div>
