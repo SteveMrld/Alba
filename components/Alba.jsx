@@ -606,7 +606,7 @@ const T = {
   or:      "#C8A96E",
   orPale:  "#F0E2BC",
   aube:    "#FAF6F0",
-  brume:   "#C8BFB8",
+  brume:   "#D4CCC5",
   aurore:  "#E8B89A",
   aurore2: "#D4856A",
   fond:    "#141210",
@@ -1018,7 +1018,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
             <button key={m.id} onClick={() => { setMode(m.id); setErr(null); }} style={{
               flex: 1, background: "none", border: "none", cursor: "pointer",
               padding: "0.7rem 0",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
               letterSpacing: "0.35em", textTransform: "uppercase",
               color: mode === m.id ? T.or : T.brume,
               borderBottom: `2px solid ${mode === m.id ? T.or : "transparent"}`,
@@ -1045,7 +1045,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
                   <span style={{ fontSize: "1rem", flexShrink: 0 }}>{item.icon}</span>
                   <div>
                     <div style={{ fontFamily: T.serif, color: T.orPale, fontSize: "0.9rem" }}>{item.label}</div>
-                    <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume, marginTop: "0.15rem" }}>{item.desc}</div>
+                    <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.7rem", color: T.brume, marginTop: "0.15rem" }}>{item.desc}</div>
                   </div>
                 </div>
               ))}
@@ -1064,8 +1064,8 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
                   cursor: "pointer", textAlign: "center", transition: "all 0.2s",
                 }}>
                   <div style={{ fontFamily: T.serif, fontSize: "1.5rem", color: plan === p.id ? T.or : T.orPale }}>{p.price}</div>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.2rem" }}>{p.period}</div>
-                  {p.sub && <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", color: `${T.or}99`, marginTop: "0.3rem" }}>{p.sub}</div>}
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.2rem" }}>{p.period}</div>
+                  {p.sub && <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", color: `${T.or}EE`, marginTop: "0.3rem" }}>{p.sub}</div>}
                 </button>
               ))}
             </div>
@@ -1075,7 +1075,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
               width: "100%", background: loading ? `${T.or}66` : T.or,
               border: "none", borderRadius: "6px", padding: "1rem",
               cursor: loading ? "default" : "pointer",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
               letterSpacing: "0.4em", textTransform: "uppercase",
               color: T.nuit, transition: "all 0.2s",
             }}>
@@ -1105,7 +1105,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
                   cursor: "pointer", textAlign: "center", transition: "all 0.2s",
                 }}>
                   <div style={{ fontFamily: T.serif, fontSize: "1.3rem", color: giftDuration === d.id ? T.or : T.orPale }}>{d.price}</div>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.2rem" }}>{d.label}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.2rem" }}>{d.label}</div>
                 </button>
               ))}
             </div>
@@ -1122,7 +1122,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
 
             {/* Phrase ALBA générée */}
             <div style={{ padding: "0.8rem 1rem", background: `${T.or}08`, border: `1px solid ${T.or}18`, borderRadius: "6px", marginBottom: "1.2rem" }}>
-              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.orPale}cc`, lineHeight: 1.7, margin: 0 }}>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.orPale}EE`, lineHeight: 1.7, margin: 0 }}>
                 "Quelqu'un pense à toi. ALBA t'attend."
               </p>
             </div>
@@ -1132,7 +1132,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
               width: "100%", background: loading ? `${T.or}66` : T.or,
               border: "none", borderRadius: "6px", padding: "1rem",
               cursor: loading ? "default" : "pointer",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
               letterSpacing: "0.4em", textTransform: "uppercase",
               color: T.nuit, transition: "all 0.2s",
             }}>
@@ -1150,7 +1150,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
                 <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale, lineHeight: 1.9, marginBottom: "0.5rem" }}>
                   Bienvenue dans ALBA.
                 </p>
-                <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: T.brume }}>
+                <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.7rem", color: T.brume }}>
                   {redeemSuccess.durationLabel === "1year" ? "1 an" : "1 mois"} d'accès activé.
                 </p>
               </div>
@@ -1170,7 +1170,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
                   width: "100%", background: redeemCode.trim() && !loading ? T.or : `${T.or}44`,
                   border: "none", borderRadius: "6px", padding: "1rem",
                   cursor: redeemCode.trim() && !loading ? "pointer" : "default",
-                  fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
                   letterSpacing: "0.4em", textTransform: "uppercase",
                   color: T.nuit, transition: "all 0.2s",
                 }}>
@@ -1184,7 +1184,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
         <button onClick={onClose} style={{
           width: "100%", marginTop: "1rem",
           background: "none", border: "none", cursor: "pointer",
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
           letterSpacing: "0.3em", textTransform: "uppercase",
           color: T.brume, padding: "0.5rem",
         }}>
@@ -1268,7 +1268,7 @@ const AuthScreen = ({ onAuth }) => {
               flex: 1, padding: "0.6rem", border: "none", borderRadius: "4px",
               background: mode === m ? `${T.or}22` : "transparent",
               color: mode === m ? T.or : T.brume,
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
               letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
               transition: "all 0.2s",
             }}>
@@ -1326,7 +1326,7 @@ const AuthScreen = ({ onAuth }) => {
             background: loading ? `${T.or}55` : T.or,
             border: "none", borderRadius: "6px",
             padding: "0.95rem", cursor: loading ? "default" : "pointer",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
             color: T.nuit, transition: "all 0.2s", marginTop: "0.2rem",
           }}
@@ -1341,7 +1341,7 @@ const AuthScreen = ({ onAuth }) => {
           <button onClick={() => { setMode("forgot"); setErrMsg(""); setResetSent(false); }} style={{
             background: "none", border: "none", cursor: "pointer",
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.78rem", color: `${T.brume}77`,
+            fontSize: "0.78rem", color: `${T.brume}BB`,
             textAlign: "center", padding: "0.2rem",
           }}>
             Mot de passe oublié ?
@@ -1352,7 +1352,7 @@ const AuthScreen = ({ onAuth }) => {
         {mode !== "forgot" && (
           <div style={{
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.75rem", color: `${T.brume}77`,
+            fontSize: "0.75rem", color: `${T.brume}BB`,
             textAlign: "center", lineHeight: 1.6, marginTop: "0.5rem",
           }}>
             {mode === "login"
@@ -1392,7 +1392,7 @@ const AuthScreen = ({ onAuth }) => {
                   width: "100%", background: loading ? `${T.or}55` : T.or,
                   border: "none", borderRadius: "6px", padding: "0.9rem",
                   cursor: loading ? "default" : "pointer",
-                  fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
                   letterSpacing: "0.4em", textTransform: "uppercase",
                   color: T.nuit,
                 }}>
@@ -1401,7 +1401,7 @@ const AuthScreen = ({ onAuth }) => {
                 <button onClick={() => { setMode("login"); setErrMsg(""); }} style={{
                   background: "none", border: "none", cursor: "pointer",
                   fontFamily: T.serif, fontStyle: "italic",
-                  fontSize: "0.75rem", color: `${T.brume}66`,
+                  fontSize: "0.75rem", color: `${T.brume}BB`,
                   marginTop: "0.8rem", padding: "0.2rem",
                 }}>
                   Retour
@@ -1459,7 +1459,7 @@ const Splash = ({ onEnd }) => {
             animation: "logoFadeIn 1.4s ease forwards, shimmer 3s linear infinite",
           }}>ALBA</div>
           <div style={{
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
             letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
             marginTop: "1.2rem",
             animation: "taglineFade 1.2s ease forwards 0.9s", opacity: 0,
@@ -1531,7 +1531,7 @@ const Splash = ({ onEnd }) => {
         }}>ALBA</div>
 
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
           letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
           marginBottom: "3rem",
           animation: "landFadeIn 0.8s ease forwards 0.3s", opacity: 0,
@@ -1570,7 +1570,7 @@ const Splash = ({ onEnd }) => {
               background: `linear-gradient(135deg, ${T.or}, #D4A058)`,
               border: "none", borderRadius: "2px",
               padding: "1rem 2rem",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
               letterSpacing: "0.45em", textTransform: "uppercase",
               color: T.nuit, cursor: "pointer",
               boxShadow: `0 0 40px ${T.or}33`,
@@ -1591,9 +1591,9 @@ const Splash = ({ onEnd }) => {
         }}>
           {["Présent chaque jour", "Gratuit pour commencer", "Sans publicité"].map((t, i) => (
             <div key={i} style={{
-              fontFamily: T.sans, fontWeight: 200,
-              fontSize: "0.45rem", letterSpacing: "0.3em",
-              textTransform: "uppercase", color: `${T.brume}99`,
+              fontFamily: T.sans, fontWeight: 300,
+              fontSize: "0.58rem", letterSpacing: "0.3em",
+              textTransform: "uppercase", color: `${T.brume}DD`,
               textAlign: "center",
             }}>{t}</div>
           ))}
@@ -1621,7 +1621,7 @@ const inputStyle = {
 
 const Label = ({ children }) => (
   <div style={{
-    fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+    fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
     letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume,
     marginBottom: "1.5rem", textAlign: "center",
   }}>{children}</div>
@@ -1631,7 +1631,7 @@ const Step = ({ num, label, children, onNext, onBack, canNext }) => (
   <Screen centered>
     <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
       <div style={{
-        fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+        fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
         letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "3rem",
       }}>ALBA &nbsp;·&nbsp; Étape {num} / 3</div>
 
@@ -1799,7 +1799,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 1) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
           ALBA &nbsp;·&nbsp; Étape 2 / 6
         </div>
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 4vw, 1.7rem)", color: T.orPale, textAlign: "center", marginBottom: "0.6rem", lineHeight: 1.3 }}>
@@ -1825,7 +1825,7 @@ const Onboarding = ({ onComplete }) => {
                   <div style={{ fontFamily: T.serif, fontSize: "1rem", color: sel ? T.orPale : T.aube, fontStyle: "italic", marginBottom: "0.25rem" }}>
                     {sel ? "✦ " : ""}{s.titre}
                   </div>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.7rem", color: sel ? s.couleur : T.brume, letterSpacing: "0.05em" }}>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.7rem", color: sel ? s.couleur : T.brume, letterSpacing: "0.05em" }}>
                     {s.desc}
                   </div>
                 </div>
@@ -1853,7 +1853,7 @@ const Onboarding = ({ onComplete }) => {
 
       {/* Jour */}
       <div style={{ marginBottom: "1.5rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "0.8rem" }}>Jour</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "0.8rem" }}>Jour</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center" }}>
           {Array.from({length: jourMax}, (_,i) => String(i+1)).map(j => (
             <button key={j} onClick={() => setJour(j === jour ? "" : j)}
@@ -1866,7 +1866,7 @@ const Onboarding = ({ onComplete }) => {
 
       {/* Mois */}
       <div style={{ marginBottom: "1.5rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "0.8rem" }}>Mois</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "0.8rem" }}>Mois</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "center" }}>
           {MOIS_NOMS.map((m, i) => {
             const val = String(i+1);
@@ -1882,7 +1882,7 @@ const Onboarding = ({ onComplete }) => {
 
       {/* Année */}
       <div style={{ marginBottom: "0.5rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "1rem" }}>Année</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, textAlign: "center", marginBottom: "1rem" }}>Année</div>
         <div style={{ textAlign: "center", marginBottom: "1.2rem" }}>
           <span style={{
             fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(2.2rem, 8vw, 3rem)",
@@ -1901,7 +1901,7 @@ const Onboarding = ({ onComplete }) => {
           {[1920,1940,1960,1980,2000,2010].map(y => (
             <button key={y} onClick={() => { setAnnee(y); setAnneeConfirm(false); }} style={{
               background: "none", border: "none", cursor: "pointer",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
               letterSpacing: "0.05em", color: T.brume, padding: "0.2rem",
             }}>{y}</button>
           ))}
@@ -1911,7 +1911,7 @@ const Onboarding = ({ onComplete }) => {
             background: anneeConfirm ? `${T.or}22` : "transparent",
             border: `1px solid ${anneeConfirm ? T.or + "77" : T.brume + "44"}`,
             color: anneeConfirm ? T.or : T.aube,
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
             letterSpacing: "0.35em", textTransform: "uppercase",
             padding: "0.6rem 1.8rem", borderRadius: "2px", cursor: "pointer", transition: "all 0.25s",
           }}>{anneeConfirm ? `✦ ${annee} confirmé` : `Confirmer ${annee}`}</button>
@@ -1931,7 +1931,7 @@ const Onboarding = ({ onComplete }) => {
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
           letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem",
         }}>ALBA &nbsp;·&nbsp; Étape 4 / 4</div>
 
@@ -1939,10 +1939,10 @@ const Onboarding = ({ onComplete }) => {
 
         {/* Groupe tempête */}
         <div style={{ marginBottom: "0.5rem" }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingLeft: "0.2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingLeft: "0.2rem" }}>
             Je traverse quelque chose
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.68rem" }}>
             {INTENTIONS_TEMPETE.map(i => {
               const sel = intentions.includes(i);
               const maxAtteint = intentions.length >= 2 && !sel;
@@ -1953,7 +1953,7 @@ const Onboarding = ({ onComplete }) => {
                 }} style={{
                   background: sel ? `${T.aurore}15` : "transparent",
                   border: `1px solid ${sel ? T.aurore + "66" : maxAtteint ? T.brume + "11" : T.brume + "22"}`,
-                  color: sel ? T.orPale : maxAtteint ? `${T.aube}44` : `${T.aube}bb`,
+                  color: sel ? T.orPale : maxAtteint ? `${T.aube}88` : `${T.aube}EE`,
                   fontFamily: T.serif, fontStyle: "italic",
                   fontSize: "clamp(0.9rem, 2.4vw, 1rem)",
                   padding: "0.75rem 1.1rem", borderRadius: "4px",
@@ -1974,17 +1974,17 @@ const Onboarding = ({ onComplete }) => {
 
         {/* Groupe soleil */}
         <div style={{ marginBottom: "0.5rem" }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingLeft: "0.2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingLeft: "0.2rem" }}>
             Je cherche un espace pour grandir
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.68rem" }}>
             {INTENTIONS_SOLEIL.map(i => {
               const sel = intentionSoleil === i;
               return (
                 <button key={i} onClick={() => setIntentionSoleil(sel ? "" : i)} style={{
                   background: sel ? `${T.or}12` : "transparent",
                   border: `1px solid ${sel ? T.or + "55" : T.brume + "22"}`,
-                  color: sel ? T.orPale : `${T.aube}bb`,
+                  color: sel ? T.orPale : `${T.aube}EE`,
                   fontFamily: T.serif, fontStyle: "italic",
                   fontSize: "clamp(0.9rem, 2.4vw, 1rem)",
                   padding: "0.75rem 1.1rem", borderRadius: "4px", cursor: "pointer",
@@ -2011,7 +2011,7 @@ const Onboarding = ({ onComplete }) => {
         )}
 
         {intentions.length >= 2 && (
-          <div style={{ textAlign: "center", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}99`, marginTop: "0.5rem" }}>
+          <div style={{ textAlign: "center", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}DD`, marginTop: "0.5rem" }}>
             Tu peux choisir jusqu'à 2 intentions
           </div>
         )}
@@ -2030,7 +2030,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 4) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
           ALBA &nbsp;·&nbsp; Étape 5 / 6
         </div>
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
@@ -2053,7 +2053,7 @@ const Onboarding = ({ onComplete }) => {
               }}>
                 <div style={{
                   width: 36, height: 36,
-                  color: sel ? T.or : `${T.brume}99`,
+                  color: sel ? T.or : `${T.brume}DD`,
                   filter: sel ? `drop-shadow(0 0 4px ${T.or}88)` : "none",
                   transition: "all 0.25s",
                 }}>
@@ -2061,7 +2061,7 @@ const Onboarding = ({ onComplete }) => {
                 </div>
                 <span style={{
                   fontFamily: T.serif, fontSize: "0.62rem", fontStyle: "italic",
-                  color: sel ? T.orPale : `${T.brume}88`,
+                  color: sel ? T.orPale : `${T.brume}CC`,
                   letterSpacing: "0.03em",
                   transition: "color 0.25s",
                 }}>{s.label}</span>
@@ -2081,7 +2081,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 5) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
           ALBA &nbsp;·&nbsp; Étape 6 / 6
         </div>
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
@@ -2479,7 +2479,7 @@ const Portrait = ({ data, onContinue }) => {
             </div>
             <div style={{
               marginTop: "0.8rem",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
               letterSpacing: "0.6em", textTransform: "uppercase",
               color: T.brume, ...fade(phase >= 1, 0.5),
             }}>
@@ -2510,7 +2510,7 @@ const Portrait = ({ data, onContinue }) => {
             {sens === "spirituel" && !isRationnel && (
               <div style={{
                 marginTop: "0.6rem",
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
                 color: T.brume, letterSpacing: "0.2em",
                 ...fade(phase >= 2, 0.4),
               }}>
@@ -2557,7 +2557,7 @@ const Portrait = ({ data, onContinue }) => {
             </p>
             <p style={{
               marginTop: "0.6rem",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
               letterSpacing: "0.35em", color: T.brume,
             }}>— {citation.auteur}</p>
 
@@ -2589,7 +2589,7 @@ const Portrait = ({ data, onContinue }) => {
       {/* ── En-tête : prénom + carte ── */}
       <div className="portrait-card" style={{ textAlign: "center", marginBottom: "2.5rem", animationDelay: "0s" }}>
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
           letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem",
         }}>{isRationnel ? "profil d'accompagnement" : "portrait d'âme"}</div>
 
@@ -2604,7 +2604,7 @@ const Portrait = ({ data, onContinue }) => {
                 background: `radial-gradient(circle, ${T.or}10 0%, transparent 70%)`,
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                <span style={{ fontFamily: T.serif, fontSize: "2.8rem", color: T.or, opacity: 0.65 }}>◎</span>
+                <span style={{ fontFamily: T.serif, fontSize: "2.8rem", color: T.or, opacity: 0.85 }}>◎</span>
               </div>
             )
           }
@@ -2625,14 +2625,14 @@ const Portrait = ({ data, onContinue }) => {
         animationDelay: "0.15s",
       }}>
         <div style={{ position: "absolute", top: -40, right: -40, width: 140, height: 140, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}10, transparent 70%)` }} />
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.7rem" }}>{labelChemin}</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.7rem" }}>{labelChemin}</div>
         <div style={{ display: "flex", alignItems: "baseline", gap: "0.8rem", marginBottom: "0.5rem" }}>
           {!isRationnel && <span style={{ fontFamily: T.serif, fontSize: "2.6rem", fontWeight: 300, color: T.or, lineHeight: 1 }}>{cdv}</span>}
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>{chemin.titre}</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>{chemin.essence}</p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.92, lineHeight: 1.75 }}>{chemin.essence}</p>
         {sens === "spirituel" && !isRationnel && (
-          <div style={{ marginTop: "0.7rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem", color: T.brume, letterSpacing: "0.15em" }}>
+          <div style={{ marginTop: "0.7rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", color: T.brume, letterSpacing: "0.15em" }}>
             {CARTE_DATA[cdv]?.element || ""} · {CARTE_DATA[cdv]?.mot || ""}
           </div>
         )}
@@ -2644,12 +2644,12 @@ const Portrait = ({ data, onContinue }) => {
         border: `1px solid ${blessure.couleur}44`, borderRadius: "6px", padding: "1.5rem",
         marginBottom: "1rem", animationDelay: "0.3s",
       }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>{labelBlessure}</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>{labelBlessure}</div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
           <div style={{ width: 7, height: 7, background: blessure.couleur, borderRadius: "50%", boxShadow: `0 0 6px ${blessure.couleur}` }} />
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.15rem", color: T.orPale }}>{blessure.nom}</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.aube, opacity: 0.75, lineHeight: 1.75 }}>{blessure.question}</p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.aube, opacity: 0.88, lineHeight: 1.75 }}>{blessure.question}</p>
       </div>
 
       {/* ── Citation ── */}
@@ -2660,7 +2660,7 @@ const Portrait = ({ data, onContinue }) => {
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.85, marginBottom: "0.5rem" }}>
           « {citation.texte} »
         </p>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem", letterSpacing: "0.3em", color: T.brume }}>— {citation.auteur}</p>
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.3em", color: T.brume }}>— {citation.auteur}</p>
       </div>
 
       {/* ── Livre ── */}
@@ -2683,9 +2683,9 @@ const Portrait = ({ data, onContinue }) => {
             <line x1="9" y1="11" x2="13" y2="11" opacity="0.4"/>
           </svg></div>
         <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>Lecture pour toi</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>Lecture pour toi</div>
           <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>{livre.titre}</div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.65rem", color: T.brume, marginTop: "0.2rem" }}>{livre.auteur}</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", color: T.brume, marginTop: "0.2rem" }}>{livre.auteur}</div>
         </div>
       </div>
 
@@ -2695,10 +2695,10 @@ const Portrait = ({ data, onContinue }) => {
         marginBottom: "2.5rem", background: `${cle.couleur}08`, animationDelay: "0.75s",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
-          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.8rem", color: cle.couleur, opacity: 0.8 }}>Clé {cle.num}</span>
+          <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.8rem", color: cle.couleur, opacity: 0.92 }}>Clé {cle.num}</span>
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale }}>{cle.nom}</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>{cle.desc}</p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.aube, opacity: 0.92, lineHeight: 1.75 }}>{cle.desc}</p>
       </div>
 
       <div className="portrait-card" style={{ textAlign: "center", animationDelay: "0.9s" }}>
@@ -2719,7 +2719,7 @@ const NavItem = ({ icon, label, active, onClick }) => (
     flexShrink: 0,
   }}>
     <span style={{ fontSize: "1.1rem" }}>{icon}</span>
-    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase" }}>{label}</span>
+    <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase" }}>{label}</span>
   </button>
 );
 
@@ -2979,13 +2979,13 @@ const ProgressionCles = ({ stats, clesDebloquees, onSelectCle, cleActive }) => {
 
   return (
     <div style={{ padding: "0 1.5rem 2rem" }}>
-      <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
+      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
         Ton chemin · {clesDebloquees + 1} / 6
       </div>
 
       {/* Barre de progression globale */}
       <div style={{ marginBottom: "1.8rem" }}>
-        <div style={{ height: 2, background: `${T.brume}20`, borderRadius: 1, overflow: "hidden" }}>
+        <div style={{ height: 2, background: `${T.brume}35`, borderRadius: 1, overflow: "hidden" }}>
           <div style={{
             height: "100%",
             width: `${((clesDebloquees) / 5) * 100}%`,
@@ -3047,12 +3047,12 @@ const ProgressionCles = ({ stats, clesDebloquees, onSelectCle, cleActive }) => {
                         color: debloquee ? T.orPale : T.brume,
                       }}>{cle.nom}</span>
                       {estActive && (
-                        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.35em", textTransform: "uppercase", color: cle.couleur, opacity: 0.8 }}>
+                        <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase", color: cle.couleur, opacity: 0.92 }}>
                           en cours
                         </span>
                       )}
                       {!debloquee && estSuivante && (
-                        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, opacity: 0.5 }}>
+                        <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, opacity: 0.5 }}>
                           prochaine
                         </span>
                       )}
@@ -3082,7 +3082,7 @@ const ProgressionCles = ({ stats, clesDebloquees, onSelectCle, cleActive }) => {
                   padding: "0.9rem 1.1rem 1rem 1.1rem",
                   animation: "fadeUp 0.2s ease forwards",
                 }}>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", opacity: 0.6 }}>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", opacity: 0.6 }}>
                     Pour débloquer
                   </div>
                   {conditions.map((c, ci) => (
@@ -3091,11 +3091,11 @@ const ProgressionCles = ({ stats, clesDebloquees, onSelectCle, cleActive }) => {
                         <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: c.done ? T.or : T.aube, opacity: c.done ? 1 : 0.6 }}>
                           {c.done ? "✦ " : ""}{c.label}
                         </span>
-                        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", color: T.brume, opacity: 0.5 }}>
+                        <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", color: T.brume, opacity: 0.5 }}>
                           {c.val}/{c.max}
                         </span>
                       </div>
-                      <div style={{ height: 2, background: `${T.brume}20`, borderRadius: 1 }}>
+                      <div style={{ height: 2, background: `${T.brume}35`, borderRadius: 1 }}>
                         <div style={{
                           height: "100%", borderRadius: 1,
                           width: `${(c.val / c.max) * 100}%`,
@@ -3311,7 +3311,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
 
         {/* Moment du jour */}
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
           letterSpacing: "0.55em", textTransform: "uppercase",
           color: T.brume, marginBottom: "0.6rem",
           animation: "fadeUp 0.6s ease forwards",
@@ -3337,7 +3337,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         {phrasePresence && (
           <p style={{
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.82rem", color: `${T.brume}77`,
+            fontSize: "0.82rem", color: `${T.brume}BB`,
             lineHeight: 1.6, marginTop: "0.5rem",
             animation: "fadeUp 0.8s ease forwards 0.3s", opacity: 0,
           }}>{phrasePresence}</p>
@@ -3378,7 +3378,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           }}>
             <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.or, opacity: 0.7 }} />
             <span style={{
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
               letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume,
             }}>{isMatin ? "Rituel du matin" : "Pour ce moment"}</span>
           </div>
@@ -3412,7 +3412,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
             <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.or, opacity: 0.6 }} />
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
               Miroir de la semaine
             </span>
           </div>
@@ -3434,7 +3434,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
                 padding: "0.3rem 0.9rem",
                 fontFamily: T.serif, fontStyle: "italic",
                 fontSize: "0.95rem",
-                color: i === 0 ? T.or : `${T.orPale}99`,
+                color: i === 0 ? T.or : `${T.orPale}DD`,
                 background: i === 0 ? `${T.or}08` : "transparent",
                 transition: "all 0.2s",
               }}>
@@ -3472,8 +3472,8 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
             <div style={{ width: 3, height: 3, borderRadius: "50%", background: T.brume, opacity: 0.5 }} />
             <span style={{
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem",
-              letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}88`,
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
+              letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}CC`,
             }}>
               Il y a {fragmentMémoire.diff} jour{fragmentMémoire.diff > 1 ? "s" : ""}, tu écrivais
             </span>
@@ -3508,13 +3508,13 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.8rem" }}>
             <div style={{ width: 3, height: 3, borderRadius: "50%", background: T.brume, opacity: 0.4 }} />
             <span style={{
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.43rem",
-              letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}66`,
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
+              letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}BB`,
             }}>Quelqu'un a déposé ceci</span>
           </div>
           <p style={{
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.9rem", color: `${T.brume}99`,
+            fontSize: "0.9rem", color: `${T.brume}DD`,
             lineHeight: 1.75, margin: 0,
           }}>
             "{getEchoHumain()}"
@@ -3538,7 +3538,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           width: 80, height: 80, borderRadius: "50%",
           background: `radial-gradient(circle, ${cle.couleur}10, transparent 70%)`,
         }}/>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
           Clé du jour
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.6rem" }}>
@@ -3550,7 +3550,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           }}>{cle.num}</div>
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>{cle.nom}</span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>{cle.desc}</p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.aube, opacity: 0.92, lineHeight: 1.75 }}>{cle.desc}</p>
       </div>
 
       {/* ── MINI PROGRESSION ── */}
@@ -3563,7 +3563,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0,
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume }}>
+          <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume }}>
             Chemin des clés
           </span>
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.7rem", color: T.or }}>
@@ -3574,7 +3574,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           {CLES.map((k, i) => (
             <div key={i} style={{
               flex: 1, height: 3, borderRadius: 2,
-              background: i <= cleActive ? k.couleur : `${T.brume}20`,
+              background: i <= cleActive ? k.couleur : `${T.brume}35`,
               transition: "background 0.4s ease",
               opacity: i === cleActive ? 1 : i < cleActive ? 0.6 : 0.25,
             }}/>
@@ -3592,14 +3592,14 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.85, marginBottom: "0.4rem" }}>
           « {citation.texte} »
         </p>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.56rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume }}>
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.56rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume }}>
           — {citation.auteur}
         </p>
       </div>
 
       {/* ── ENTRÉES RAPIDES ── */}
       <div style={{ margin: "1.5rem 1.5rem 0" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
           Où veux-tu aller ?
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.7rem" }}>
@@ -3616,7 +3616,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
               <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, marginBottom: "0.25rem" }}>
                 {e.label}
               </div>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.56rem", letterSpacing: "0.2em", color: T.brume, opacity: 0.7 }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.56rem", letterSpacing: "0.2em", color: T.brume, opacity: 0.7 }}>
                 {e.desc}
               </div>
             </button>
@@ -3649,7 +3649,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
 
         return (
           <div style={{ margin: "1rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.75s", opacity: 0 }}>
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
               Pour toi · Ce moment
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -3673,7 +3673,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
                       )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.35em", textTransform: "uppercase", color: acc, marginBottom: "0.25rem", opacity: 0.8 }}>
+                      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.35em", textTransform: "uppercase", color: acc, marginBottom: "0.25rem", opacity: 0.92 }}>
                         {isLivre ? "Livre" : "Podcast"} · {r.auteur}
                       </div>
                       <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.orPale, lineHeight: 1.3, marginBottom: "0.3rem" }}>{r.titre}</div>
@@ -3702,16 +3702,16 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.6rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: blessure.couleur, flexShrink: 0 }}/>
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: blessure.couleur }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: blessure.couleur }}>
               {hasDual ? "En chemin · " : "En traversée · "}{blessure.nom}
             </span>
           </div>
           {/* Hint "répondre" */}
-          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: blessure.couleur, opacity: 0.6 }}>
+          <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.3em", textTransform: "uppercase", color: blessure.couleur, opacity: 0.6 }}>
             Répondre →
           </span>
         </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.8, lineHeight: 1.75 }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.92, lineHeight: 1.75 }}>
           {blessure.question}
         </p>
       </button>
@@ -3737,7 +3737,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
       {progressStats && (
         <div style={{ margin: "1.5rem 0 0" }}>
           <div style={{ padding: "0 1.5rem", marginBottom: "0.4rem" }}>
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
               Parcours des clés
             </div>
           </div>
@@ -3939,7 +3939,7 @@ const CielCairn = ({ userId, db }) => {
 
       {/* Compteur discret */}
       <div style={{ position: "absolute", bottom: "7rem", left: 0, right: 0, textAlign: "center" }}>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55` }}>
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55` }}>
           {pierres.length + 200} présences dans ce ciel
         </p>
       </div>
@@ -3947,7 +3947,7 @@ const CielCairn = ({ userId, db }) => {
       {/* Bouton déposer / déjà fait */}
       <div style={{ position: "absolute", bottom: "3.5rem", left: 0, right: 0, display: "flex", justifyContent: "center" }}>
         {dejaFaitAujd && etape !== 5 ? (
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}66` }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}BB` }}>
             Ta pierre est dans le ciel ce soir.
           </p>
         ) : etape === 5 ? (
@@ -3958,9 +3958,9 @@ const CielCairn = ({ userId, db }) => {
           <button onClick={() => setEtape(1)} style={{
             background: "transparent", border: `1px solid ${T.or}33`,
             borderRadius: "30px", padding: "0.8rem 2rem",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
             letterSpacing: "0.5em", textTransform: "uppercase",
-            color: `${T.or}99`, cursor: "pointer",
+            color: `${T.or}EE`, cursor: "pointer",
             transition: "all 0.4s ease",
           }}>
             Déposer une pierre
@@ -4009,7 +4009,7 @@ const CielCairn = ({ userId, db }) => {
           fontFamily: "'Cormorant Garamond', Georgia, serif",
           fontStyle: "italic", fontWeight: 300,
           fontSize: "clamp(1.1rem, 4vw, 1.3rem)",
-          color: "#C8BFB8", lineHeight: 1.9,
+          color: "#D4CCC5", lineHeight: 1.9,
           marginBottom: "2.5rem",
           animation: "fadeUp 0.8s ease forwards 0.8s", opacity: 0,
         }}>
@@ -4026,7 +4026,7 @@ const CielCairn = ({ userId, db }) => {
             borderRadius: "6px",
             padding: "0.85rem 2.5rem",
             fontFamily: "'Jost', sans-serif",
-            fontWeight: 200, fontSize: "0.55rem",
+            fontWeight: 300, fontSize: "0.68rem",
             letterSpacing: "0.5em", textTransform: "uppercase",
             color: "#C8A96E", cursor: "pointer",
             animation: "fadeUp 0.8s ease forwards 1.4s", opacity: 0,
@@ -4066,7 +4066,7 @@ const CielCairn = ({ userId, db }) => {
         <button onClick={() => setEtape(2)} style={{
           marginTop: "2rem", background: "transparent", border: `1px solid ${T.or}30`,
           borderRadius: "30px", padding: "0.75rem 1.8rem",
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
           letterSpacing: "0.45em", textTransform: "uppercase",
           color: `${T.or}88`, cursor: "pointer", display: "block",
           margin: "2rem auto 0", transition: "all 0.3s",
@@ -4091,12 +4091,12 @@ const CielCairn = ({ userId, db }) => {
               borderLeft: `3px solid ${e.couleur}55`,
               borderRadius: "6px", padding: "0.85rem 1.2rem",
               fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem",
-              color: `${T.aube}bb`, cursor: "pointer", textAlign: "left",
+              color: `${T.aube}EE`, cursor: "pointer", textAlign: "left",
               transition: "all 0.2s", animation: `fadeUp 0.4s ease forwards ${i * 0.04}s`,
               opacity: 0,
             }}
             onMouseEnter={e2 => { e2.currentTarget.style.background = `${e.couleur}12`; e2.currentTarget.style.color = T.aube; }}
-            onMouseLeave={e2 => { e2.currentTarget.style.background = "transparent"; e2.currentTarget.style.color = `${T.aube}bb`; }}
+            onMouseLeave={e2 => { e2.currentTarget.style.background = "transparent"; e2.currentTarget.style.color = `${T.aube}EE`; }}
           >
             {e.label}
           </button>
@@ -4168,7 +4168,7 @@ const CielCairn = ({ userId, db }) => {
         />
       </div>
 
-      <p style={{ marginTop: "2.5rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, animation: "fadeUp 1s ease forwards 0.5s", opacity: 0, position: "relative", zIndex: 1 }}>
+      <p style={{ marginTop: "2.5rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, animation: "fadeUp 1s ease forwards 0.5s", opacity: 0, position: "relative", zIndex: 1 }}>
         {holdProgress < 100 ? "Maintiens pour déposer" : "…"}
       </p>
     </div>
@@ -4203,7 +4203,7 @@ const CielCairn = ({ userId, db }) => {
           }
         `}</style>
 
-        <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}88`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0 }}>
+        <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}CC`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0 }}>
           Ta lumière a rejoint le ciel.
         </p>
       </div>
@@ -4257,7 +4257,7 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
   if (rituelFait && etape === 0) return (
     <div style={{ margin: "1rem 1.5rem 0", padding: "1rem 1.4rem", border: `1px solid ${T.or}15`, borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.7rem" }}>
       <span style={{ color: T.or, fontSize: "0.9rem" }}>✦</span>
-      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}99`, margin: 0 }}>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}DD`, margin: 0 }}>
         Rituel du matin accompli. Bonne journée, {data.prenom}.
       </p>
     </div>
@@ -4315,7 +4315,7 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
   };
 
   const labelStyle = {
-    fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+    fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
     letterSpacing: "0.55em", textTransform: "uppercase", color: `${T.or}88`,
     marginBottom: "1.2rem", display: "flex", alignItems: "center", gap: "0.5rem",
   };
@@ -4324,7 +4324,7 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
     <button onClick={onClick} style={{
       marginTop: "1.4rem", background: `${T.or}15`, border: `1px solid ${T.or}40`,
       borderRadius: "6px", padding: "0.75rem 1.4rem",
-      fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+      fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
       letterSpacing: "0.35em", textTransform: "uppercase",
       color: T.or, cursor: "pointer", transition: "all 0.2s",
       display: "block", width: "100%",
@@ -4377,11 +4377,11 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
             transform: souffleEtat === "inspire" ? "scale(1.1)" : souffleEtat === "expire" ? "scale(0.9)" : "scale(1)",
             boxShadow: `0 0 ${souffleEtat === "tiens" ? "20px" : "8px"} ${souffleCouleurs[souffleEtat]}22`,
           }}>
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "1.8rem", color: souffleCouleurs[souffleEtat] }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "1.8rem", color: souffleCouleurs[souffleEtat] }}>
               {souffleCount}
             </span>
           </div>
-          <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem", letterSpacing: "0.5em", textTransform: "uppercase", color: souffleCouleurs[souffleEtat] }}>
+          <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.5em", textTransform: "uppercase", color: souffleCouleurs[souffleEtat] }}>
             {souffleLabels[souffleEtat]}
           </p>
           {/* Barre de progression cycles */}
@@ -4390,7 +4390,7 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
               <div key={i} style={{ width: 24, height: 3, borderRadius: 2, background: i < souffleCycles ? T.or : `${T.brume}25`, transition: "background 0.4s" }} />
             ))}
           </div>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}66`, marginTop: "0.8rem" }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}BB`, marginTop: "0.8rem" }}>
             {souffleCycles < 3 ? `${3 - souffleCycles} cycle${3 - souffleCycles > 1 ? "s" : ""} restant${3 - souffleCycles > 1 ? "s" : ""}` : "…"}
           </p>
         </div>
@@ -4439,7 +4439,7 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
       <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.05rem, 3.2vw, 1.2rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "1.4rem" }}>
         {rituel.intention}
       </p>
-      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88`, lineHeight: 1.7 }}>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}CC`, lineHeight: 1.7 }}>
         Porte cette phrase avec toi aujourd'hui. Elle n'a pas besoin d'être vraie tout de suite.
       </p>
       {btnNext("C'est noté ✦", () => { setEtape(5); marquerFait(); })}
@@ -4497,7 +4497,7 @@ const RituelCrepuscule = ({ data, onPoser }) => {
 
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
         <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.aurore, opacity: 0.7 }} />
-        <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.aurore}99` }}>
+        <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.aurore}99` }}>
           Rituel du crépuscule
         </span>
       </div>
@@ -4576,7 +4576,7 @@ const RecommandationsBlock = ({ data }) => {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <div style={{ width: 4, height: 4, borderRadius: "50%", background: T.brume, opacity: 0.5 }} />
-          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+          <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
             Pour toi en ce moment
           </span>
         </div>
@@ -4592,7 +4592,7 @@ const RecommandationsBlock = ({ data }) => {
                 background: onglet === o ? `${T.or}12` : "transparent",
                 border: `1px solid ${onglet === o ? T.or + "44" : T.brume + "22"}`,
                 borderRadius: "20px", padding: "0.35rem 0.9rem",
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
                 letterSpacing: "0.3em", textTransform: "uppercase",
                 color: onglet === o ? T.or : T.brume,
                 cursor: "pointer", transition: "all 0.2s",
@@ -4619,7 +4619,7 @@ const RecommandationsBlock = ({ data }) => {
                 }}>{onglet === "livres" ? "📖" : "🎙"}</div>
                 <div>
                   <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.98rem", color: T.orPale, lineHeight: 1.3 }}>{item.titre}</div>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.62rem", color: T.brume, marginTop: "0.25rem" }}>{item.auteur}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", color: T.brume, marginTop: "0.25rem" }}>{item.auteur}</div>
                 </div>
               </div>
             ))}
@@ -4751,7 +4751,7 @@ Signe simplement : ALBA`;
 
       {/* ── En-tête ── */}
       <div style={{ padding: "1.5rem 0 1rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>
           Lettres d'ALBA
         </div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${T.brume}cc`, lineHeight: 1.8 }}>
@@ -4799,7 +4799,7 @@ Signe simplement : ALBA`;
           padding: "0.8rem 1rem", marginBottom: "1.5rem",
           border: `1px solid ${T.brume}15`, borderRadius: "6px",
         }}>
-          <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume }}>
+          <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume }}>
             Prochaine lettre disponible dans quelques jours
           </p>
         </div>
@@ -4826,7 +4826,7 @@ Signe simplement : ALBA`;
               onMouseEnter={e => e.currentTarget.style.borderColor = `${T.or}33`}
               onMouseLeave={e => e.currentTarget.style.borderColor = i === 0 ? `${T.or}28` : `${T.brume}15`}
             >
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>
                 {semaineFmt(l.date)} · {l.fragments} fragment{l.fragments > 1 ? "s" : ""}
               </div>
               <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.orPale, lineHeight: 1.5 }}>
@@ -4856,10 +4856,10 @@ Signe simplement : ALBA`;
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "2rem" }}>
               <div>
-                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.3rem" }}>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.3rem" }}>
                   Lettre d'ALBA
                 </div>
-                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", color: T.brume }}>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", color: T.brume }}>
                   {semaineFmt(lettreOuverte.date)}
                 </div>
               </div>
@@ -4898,12 +4898,12 @@ const CompagnonDuJour = ({ data }) => {
   return (
     <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
       <div style={{ marginBottom: "2rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Aujourd'hui</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Aujourd'hui</div>
         <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>Bonjour, {data.prenom}.</h2>
       </div>
       <div style={{ borderLeft: `2px solid ${T.or}55`, padding: "1.2rem 1.5rem", marginBottom: "1.2rem" }}>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.8, marginBottom: "0.5rem" }}>« {citation.texte} »</p>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.62rem", letterSpacing: "0.3em", color: T.brume }}>— {citation.auteur}</p>
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.3em", color: T.brume }}>— {citation.auteur}</p>
       </div>
     </div>
   );
@@ -5652,7 +5652,7 @@ const LumiereDuJour = () => {
       {/* En-tête */}
       <div style={{ textAlign: "center", marginBottom: "2rem", animation: "fadeUpL 0.5s ease forwards" }}>
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: couleur, marginBottom: "0.5rem",
         }}>Lumière du jour · {lumiere.famille}</div>
@@ -5692,7 +5692,7 @@ const LumiereDuJour = () => {
         }}
       >
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
           letterSpacing: "0.4em", textTransform: "uppercase",
           color: couleur, marginBottom: "0.6rem",
         }}>Pour aujourd'hui</div>
@@ -5704,7 +5704,7 @@ const LumiereDuJour = () => {
         {acteVu && (
           <div style={{
             marginTop: "0.8rem",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
             letterSpacing: "0.3em", textTransform: "uppercase",
             color: couleur,
           }}>✓ Lu aujourd'hui</div>
@@ -5715,7 +5715,7 @@ const LumiereDuJour = () => {
       <div style={{
         marginTop: "2rem", textAlign: "center",
         fontFamily: T.serif, fontStyle: "italic",
-        fontSize: "0.78rem", color: `${T.brume}88`, lineHeight: 1.7,
+        fontSize: "0.78rem", color: `${T.brume}CC`, lineHeight: 1.7,
         animation: "fadeUpL 0.6s ease forwards 0.3s", opacity: 0,
       }}>
         Une lumière par jour.<br/>
@@ -5829,7 +5829,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
 
         <div style={{ textAlign: "center", flex: 1 }}>
           <div style={{
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
             letterSpacing: "0.5em", textTransform: "uppercase",
             color: territoire.couleur, marginBottom: "0.5rem",
           }}>
@@ -5844,7 +5844,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
                   title={!debloquee ? "Porte verrouillée" : t.nom}
                   style={{
                     width: i === porteIdx ? 18 : 7, height: 5, borderRadius: 3,
-                    background: i === porteIdx ? territoire.couleur : debloquee ? `${T.brume}60` : `${T.brume}20`,
+                    background: i === porteIdx ? territoire.couleur : debloquee ? `${T.brume}60` : `${T.brume}35`,
                     transition: "all 0.3s", cursor: debloquee ? "pointer" : "default",
                     opacity: debloquee ? 1 : 0.4,
                   }}
@@ -5883,7 +5883,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           <div style={{ fontSize: "1.5rem", marginBottom: "0.8rem" }}>🔒</div>
           <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8 }}>
             Cette porte n'est pas encore ouverte.<br/>
-            <span style={{ fontSize: "0.8rem", color: `${T.brume}88` }}>Continue ton chemin pour la franchir.</span>
+            <span style={{ fontSize: "0.8rem", color: `${T.brume}CC` }}>Continue ton chemin pour la franchir.</span>
           </div>
         </div>
       )}
@@ -5999,7 +5999,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           }}>
             {/* Numéro romain */}
             <div style={{
-              fontFamily: T.sans, fontWeight: 200,
+              fontFamily: T.sans, fontWeight: 300,
               fontSize: "0.42rem", letterSpacing: "0.4em",
               color: `${territoire.couleur}88`,
               textTransform: "uppercase",
@@ -6021,7 +6021,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           </div>
         </div>
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: territoire.couleur, marginBottom: "0.3rem",
         }}>Clé {territoire.index}</div>
@@ -6047,7 +6047,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
             flex: 1, padding: "0.7rem",
             background: section === id ? `${territoire.couleur}22` : "transparent",
             border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
             letterSpacing: "0.3em", textTransform: "uppercase",
             color: section === id ? territoire.couleur : T.brume,
             borderRight: id === "pratique" ? `1px solid ${territoire.couleur}33` : "none",
@@ -6067,7 +6067,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
                 background: niveauPratique === i ? territoire.couleur : "transparent",
                 border: `1px solid ${niveauPratique === i ? territoire.couleur : territoire.couleur + "44"}`,
                 borderRadius: "20px", cursor: "pointer",
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
                 letterSpacing: "0.25em", textTransform: "uppercase",
                 color: niveauPratique === i ? T.nuit : territoire.couleur,
                 transition: "all 0.2s",
@@ -6076,7 +6076,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           </div>
 
           <div style={{
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
             color: `${territoire.couleur}88`, marginBottom: "1.2rem", textAlign: "center",
           }}>3 exercices · niveau {pratique.label.toLowerCase()}</div>
@@ -6135,7 +6135,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           <div style={{
             marginTop: "2rem", textAlign: "center",
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.78rem", color: `${T.brume}88`,
+            fontSize: "0.78rem", color: `${T.brume}CC`,
           }}>
             Appuie sur un exercice pour le marquer comme fait.<br/>
             Chaque acte génère des Éclats d'aube.
@@ -6147,7 +6147,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
       {section === "questions" && (
         <div style={{ animation: "fadeUpCle 0.5s ease forwards" }}>
           <div style={{
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
             color: `${territoire.couleur}88`, marginBottom: "1.5rem", textAlign: "center",
           }}>3 questions à méditer</div>
@@ -6174,7 +6174,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           <div style={{
             marginTop: "2rem", textAlign: "center",
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.78rem", color: `${T.brume}88`, lineHeight: 1.7,
+            fontSize: "0.78rem", color: `${T.brume}CC`, lineHeight: 1.7,
           }}>
             Ces questions ne demandent pas de réponse immédiate.<br/>
             Laisse-les travailler en toi.
@@ -6223,7 +6223,7 @@ const Evasion = ({ data }) => {
       {/* ── HEADER ── */}
       <div style={{ padding: "1.5rem 1.5rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>
             Évasion · {mode === "video" ? "Ambiances" : catLabel[categorie] || ""}
           </div>
           <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>
@@ -6303,7 +6303,7 @@ const Evasion = ({ data }) => {
         </div>
 
         {/* Compteur */}
-        <div style={{ position: "absolute", top: 12, right: 14, fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.3em", color: "rgba(255,255,255,0.5)" }}>
+        <div style={{ position: "absolute", top: 12, right: 14, fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.3em", color: "rgba(255,255,255,0.5)" }}>
           {actif + 1} / {items.length}
         </div>
 
@@ -6340,7 +6340,7 @@ const Evasion = ({ data }) => {
             {mode === "video" && (
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "1.2rem" }}>▶</div>
-                <div style={{ fontFamily: T.sans, fontSize: "0.45rem", color: T.brume, letterSpacing: "0.1em" }}>{p.label}</div>
+                <div style={{ fontFamily: T.sans, fontSize: "0.58rem", color: T.brume, letterSpacing: "0.1em" }}>{p.label}</div>
               </div>
             )}
           </button>
@@ -6420,7 +6420,7 @@ const SouffleInline = () => {
             flex: 1, background: mode === i ? `${mo.couleur}15` : "transparent",
             border: `1px solid ${mode === i ? mo.couleur + "55" : T.brume + "22"}`,
             borderRadius: "4px", padding: "0.45rem 0.2rem",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
             letterSpacing: "0.25em", textTransform: "uppercase",
             color: mode === i ? mo.couleur : T.brume,
             cursor: "pointer", transition: "all 0.2s",
@@ -6443,7 +6443,7 @@ const SouffleInline = () => {
           {active ? (
             <div style={{ textAlign: "center" }}>
               <div style={{ fontFamily: T.serif, fontSize: "1.4rem", color: m.couleur, lineHeight: 1 }}>{count}</div>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.3em", textTransform: "uppercase", color: m.couleur, opacity: 0.8, marginTop: "0.2rem" }}>{phaseLabel}</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.3em", textTransform: "uppercase", color: m.couleur, opacity: 0.92, marginTop: "0.2rem" }}>{phaseLabel}</div>
             </div>
           ) : (
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: m.couleur, opacity: 0.6 }} />
@@ -6461,7 +6461,7 @@ const SouffleInline = () => {
           }}>{active ? "Pause" : cyclesDone > 0 ? "Continuer" : "Commencer"}</button>
 
           {cyclesDone > 0 && (
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", color: T.brume }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.3em", color: T.brume }}>
               {cyclesDone} cycle{cyclesDone > 1 ? "s" : ""}
             </span>
           )}
@@ -6538,7 +6538,7 @@ const Souffle = ({ onComplete }) => {
       }}><source src={videoSrc} type="video/mp4"/></video>
       <div style={{ position: "relative", zIndex: 1 }}>
       <div style={{ marginBottom: "2rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Espace</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Espace</div>
         <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>Le Souffle</h2>
       </div>
 
@@ -6549,7 +6549,7 @@ const Souffle = ({ onComplete }) => {
             background: mode === i ? `${mo.couleur}22` : "transparent",
             border: `1px solid ${mode === i ? mo.couleur + "77" : T.brume + "33"}`,
             color: mode === i ? mo.couleur : T.brume,
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.62rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
             letterSpacing: "0.25em", textTransform: "uppercase",
             padding: "0.5rem 0.9rem", borderRadius: "2px", cursor: "pointer",
             transition: "all 0.25s",
@@ -6587,7 +6587,7 @@ const Souffle = ({ onComplete }) => {
           {active ? (
             <>
               <div style={{ fontFamily: T.serif, fontSize: "2.5rem", fontWeight: 300, color: m.couleur, lineHeight: 1 }}>{count}</div>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: m.couleur, opacity: 0.8, marginTop: "0.3rem" }}>{phaseLabel}</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: m.couleur, opacity: 0.92, marginTop: "0.3rem" }}>{phaseLabel}</div>
             </>
           ) : (
             <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume }}>prêt(e) ?</div>
@@ -6661,8 +6661,8 @@ const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange, isP
           <button key={o.id} onClick={() => setSousOnglet(o.id)} style={{
             flex: 1, background: "none", border: "none", cursor: "pointer",
             padding: "0.85rem 0",
-            fontFamily: T.sans, fontWeight: 200,
-            fontSize: "0.52rem", letterSpacing: "0.35em", textTransform: "uppercase",
+            fontFamily: T.sans, fontWeight: 300,
+            fontSize: "0.65rem", letterSpacing: "0.35em", textTransform: "uppercase",
             color: sousOnglet === o.id ? T.or : T.brume,
             borderBottom: `2px solid ${sousOnglet === o.id ? T.or : "transparent"}`,
             transition: "all 0.25s",
@@ -6913,7 +6913,7 @@ ${extrait}
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.9rem" }}>
             <span style={{ color: T.or, fontSize: "0.65rem", opacity: 0.6 }}>✦</span>
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}66` }}>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}66` }}>
               Ce que j'entends cette semaine
             </span>
           </div>
@@ -6927,7 +6927,7 @@ ${extrait}
           ) : (
             <p style={{
               fontFamily: T.serif, fontStyle: "italic",
-              fontSize: "1rem", color: `${T.orPale}cc`,
+              fontSize: "1rem", color: `${T.orPale}EE`,
               lineHeight: 1.85, margin: 0, letterSpacing: "0.01em",
             }}>
               {synthesePoetique}
@@ -6967,7 +6967,7 @@ ${extrait}
               <span style={{ color: T.or, fontSize: "1.1rem" }}>✦</span>
             </div>
 
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "1.5rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "1.5rem" }}>
               ALBA se souvient
             </div>
 
@@ -6986,7 +6986,7 @@ ${extrait}
               <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.8 }}>
                 « {tempeteReveil.texte} »
               </p>
-              <p style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.3em", color: T.brume }}>
+              <p style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.3em", color: T.brume }}>
                 {new Date(tempeteReveil.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
               </p>
             </div>
@@ -7003,7 +7003,7 @@ ${extrait}
       {/* ── HEADER ── */}
       <div style={{ padding: "1.5rem 1.5rem 1rem", display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
         <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.35rem" }}>Ardoise</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.35rem" }}>Ardoise</div>
           <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.4rem", color: T.orPale, lineHeight: 1.1 }}>
             {jourActif === todayKey
               ? new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })
@@ -7028,7 +7028,7 @@ ${extrait}
             <button onClick={genererBilan} style={{
               display: "flex", alignItems: "center", gap: "0.5rem",
               background: "transparent", border: `1px solid ${T.or}44`,
-              color: T.or, fontFamily: T.sans, fontWeight: 200,
+              color: T.or, fontFamily: T.sans, fontWeight: 300,
               fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase",
               padding: "0.5rem 0.9rem", borderRadius: "2px", cursor: "pointer",
               transition: "all 0.25s",
@@ -7055,7 +7055,7 @@ ${extrait}
             padding: "2rem 1.8rem 3rem",
             animation: "fadeUp 0.35s ease forwards",
           }}>
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
               Boîte des Tempêtes
             </div>
             <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.5rem" }}>
@@ -7085,7 +7085,7 @@ ${extrait}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.2rem" }}>
               <button onClick={() => { setShowTempeteForm(false); setTempeteTexte(""); }} style={{
                 background: "none", border: "none", color: T.brume,
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
                 letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
               }}>Annuler</button>
 
@@ -7118,7 +7118,7 @@ ${extrait}
                 border: `1px solid ${isActive ? T.or + "50" : T.brume + "20"}`,
                 borderRadius: "6px", cursor: "pointer", transition: "all 0.2s",
               }}>
-                <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.2em", textTransform: "uppercase", color: isActive ? T.or : T.brume, opacity: 0.7 }}>
+                <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.2em", textTransform: "uppercase", color: isActive ? T.or : T.brume, opacity: 0.7 }}>
                   {d.label}
                 </span>
                 <span style={{ fontFamily: T.serif, fontSize: "0.95rem", color: isActive ? T.or : T.aube, opacity: isActive ? 1 : 0.5, fontWeight: isActive ? 400 : 300 }}>
@@ -7142,9 +7142,9 @@ ${extrait}
         {POSTIT_TYPES.map(t => (
           <div key={t.id} style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: t.couleur, opacity: 0.7 }}/>
-            <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.25em", textTransform: "uppercase", color: T.brume, opacity: 0.7 }}>{t.label}</span>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.25em", textTransform: "uppercase", color: T.brume, opacity: 0.7 }}>{t.label}</span>
             {stats.find(s => s.id === t.id) && (
-              <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", color: t.couleur, opacity: 0.8 }}>
+              <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", color: t.couleur, opacity: 0.92 }}>
                 ×{stats.find(s => s.id === t.id).count}
               </span>
             )}
@@ -7251,12 +7251,12 @@ ${extrait}
                 }}>
                   {ICONS[p.type]?.(t.couleur)}
                   <span style={{
-                    fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
-                    letterSpacing: "0.4em", textTransform: "uppercase", color: t.couleur, opacity: 0.8,
+                    fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
+                    letterSpacing: "0.4em", textTransform: "uppercase", color: t.couleur, opacity: 0.92,
                   }}>{t.label}</span>
                   <span style={{
                     marginLeft: "auto",
-                    fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+                    fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
                     color: T.brume, opacity: 0.5,
                   }}>{p.heure}</span>
                 </div>
@@ -7273,7 +7273,7 @@ ${extrait}
                     display: "flex", alignItems: "center", justifyContent: "center",
                     background: "rgba(0,0,0,0.5)",
                   }}>
-                    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", color: "#fff", textTransform: "uppercase" }}>Supprimer</span>
+                    <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.4em", color: "#fff", textTransform: "uppercase" }}>Supprimer</span>
                   </div>
                 )}
               </div>
@@ -7285,7 +7285,7 @@ ${extrait}
       {/* ── HINT SUPPRESSION ── */}
       {postits.length > 0 && (
         <div style={{ textAlign: "center", marginTop: "0.6rem" }}>
-          <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume, opacity: 0.35 }}>
+          <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume, opacity: 0.35 }}>
             Maintenir pour supprimer
           </span>
         </div>
@@ -7311,7 +7311,7 @@ ${extrait}
                 background: type === t.id ? `${t.couleur}18` : "transparent",
                 border: `1px solid ${type === t.id ? t.couleur + "60" : T.brume + "25"}`,
                 color: type === t.id ? t.couleur : T.brume,
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
                 letterSpacing: "0.2em", textTransform: "uppercase",
                 padding: "0.32rem 0.65rem", borderRadius: "20px", cursor: "pointer",
                 transition: "all 0.2s",
@@ -7341,7 +7341,7 @@ ${extrait}
             <button onClick={() => { setShowForm(false); setTexte(""); }} style={{
               display: "flex", alignItems: "center", gap: "0.4rem",
               background: "none", border: "none", color: T.brume,
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
               letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
             }}>
               {ICONS.fermer(T.brume)} Annuler
@@ -7383,7 +7383,7 @@ ${extrait}
           }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1.8rem" }}>
               <div>
-                <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.4rem" }}>Bilan d'ALBA</div>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.or, marginBottom: "0.4rem" }}>Bilan d'ALBA</div>
                 <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume }}>
                   {postits.length} fragment{postits.length > 1 ? "s" : ""} lu{postits.length > 1 ? "s" : ""}
                 </div>
@@ -7458,7 +7458,7 @@ const Journal = ({ data }) => {
   return (
     <div style={{ padding: "1.5rem 0 6rem", maxWidth: 520, margin: "0 auto" }}>
       <div style={{ marginBottom: "2rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Journal d'âme</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>Journal d'âme</div>
         <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.6rem", color: T.orPale }}>{today}</h2>
       </div>
 
@@ -7468,7 +7468,7 @@ const Journal = ({ data }) => {
         padding: "1.5rem", marginBottom: "1.5rem",
         animation: "fadeUp 0.8s ease forwards",
       }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>Question du jour</div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>Question du jour</div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale, lineHeight: 1.8, marginBottom: "1.5rem" }}>{question}</p>
         <textarea
           value={current}
@@ -7495,14 +7495,14 @@ const Journal = ({ data }) => {
 
       {entries.length > 0 && (
         <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>Tes pages</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>Tes pages</div>
           {entries.map((e, i) => (
             <div key={i} style={{
               borderLeft: `2px solid ${T.or}33`, padding: "1rem 1.2rem",
               marginBottom: "1rem", animation: "fadeIn 0.6s ease forwards",
             }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>{e.date}</div>
-              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.75, lineHeight: 1.7 }}>{e.texte.length > 120 ? e.texte.slice(0, 120) + "…" : e.texte}</p>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume, marginBottom: "0.4rem" }}>{e.date}</div>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, opacity: 0.88, lineHeight: 1.7 }}>{e.texte.length > 120 ? e.texte.slice(0, 120) + "…" : e.texte}</p>
             </div>
           ))}
         </div>
@@ -7614,14 +7614,14 @@ Ou propose un autre mot si aucun ne convient. Un seul mot.`;
       animation: "fadeUp 0.7s ease forwards 0.1s", opacity: 0,
     }}>
       <div style={{
-        fontFamily: T.sans, fontWeight: 200, fontSize: "0.42rem",
+        fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem",
         letterSpacing: "0.5em", textTransform: "uppercase",
         color: T.brume, marginBottom: "1rem",
       }}>
         Ce que j'entends en toi
       </div>
       {loading ? (
-        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}66` }}>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}BB` }}>
           ALBA écoute…
         </div>
       ) : (
@@ -7637,7 +7637,7 @@ Ou propose un autre mot si aucun ne convient. Un seul mot.`;
           </div>
           <div style={{
             fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.75rem", color: `${T.brume}77`,
+            fontSize: "0.75rem", color: `${T.brume}BB`,
           }}>
             renouvelé chaque semaine
           </div>
@@ -7776,7 +7776,7 @@ const SalleDesTrouvailles = ({ data }) => {
 
         {/* Catégorie */}
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: `${T.or}88`, marginBottom: "0.8rem",
         }}>{c.label}</div>
@@ -7795,7 +7795,7 @@ const SalleDesTrouvailles = ({ data }) => {
 
         {/* Texte anonyme */}
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
           letterSpacing: "0.3em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>Quelqu'un a écrit…</div>
@@ -7811,8 +7811,8 @@ const SalleDesTrouvailles = ({ data }) => {
         {/* Jours */}
         <div style={{
           marginTop: "2.5rem",
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem",
-          letterSpacing: "0.3em", color: `${T.brume}66`,
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
+          letterSpacing: "0.3em", color: `${T.brume}BB`,
         }}>Laissé ici il y a {selected.jours} {selected.jours === 1 ? "jour" : "jours"}</div>
       </div>
     );
@@ -7860,7 +7860,7 @@ const SalleDesTrouvailles = ({ data }) => {
 
             {/* Catégorie */}
             <div style={{ marginBottom: "1.2rem" }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Catégorie</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Catégorie</div>
               <select value={formData.categorie} onChange={e => setFormData({...formData, categorie: e.target.value})} style={{
                 width: "100%", background: `${T.nuit2}`, border: `1px solid ${T.brume}33`,
                 borderRadius: "4px", padding: "0.7rem 0.8rem",
@@ -7877,7 +7877,7 @@ const SalleDesTrouvailles = ({ data }) => {
 
             {/* Titre */}
             <div style={{ marginBottom: "1.2rem" }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Titre</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Titre</div>
               <input value={formData.titre} onChange={e => setFormData({...formData, titre: e.target.value})}
                 placeholder="Le nom du livre, du film, de la pratique…"
                 maxLength={100}
@@ -7892,7 +7892,7 @@ const SalleDesTrouvailles = ({ data }) => {
 
             {/* Pourquoi */}
             <div style={{ marginBottom: "2rem" }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Pourquoi ça t'a aidé</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Pourquoi ça t'a aidé</div>
               <textarea value={formData.pourquoi} onChange={e => setFormData({...formData, pourquoi: e.target.value})}
                 placeholder="Quelques mots sincères. Pas besoin de tout expliquer."
                 maxLength={280}
@@ -7904,7 +7904,7 @@ const SalleDesTrouvailles = ({ data }) => {
                   outline: "none", resize: "none", boxSizing: "border-box",
                 }}
               />
-              <div style={{ textAlign: "right", fontFamily: T.sans, fontSize: "0.5rem", color: `${T.brume}66`, marginTop: "0.3rem" }}>
+              <div style={{ textAlign: "right", fontFamily: T.sans, fontSize: "0.5rem", color: `${T.brume}BB`, marginTop: "0.3rem" }}>
                 {formData.pourquoi.length} / 280
               </div>
             </div>
@@ -7947,7 +7947,7 @@ const SalleDesTrouvailles = ({ data }) => {
     <div style={{ paddingBottom: "5rem" }}>
       {/* En-tête */}
       <div style={{ textAlign: "center", padding: "1.5rem 1rem 1rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
           La Salle des
         </div>
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.4rem, 4.5vw, 1.8rem)", color: T.orPale, fontWeight: 300, marginBottom: "0.6rem" }}>
@@ -8019,7 +8019,7 @@ const SalleDesTrouvailles = ({ data }) => {
                 pointerEvents: "none",
               }}/>
               {/* Catégorie */}
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.4rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.6rem" }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.6rem" }}>
                 {c.emoji} {c.label}
               </div>
               {/* Titre */}
@@ -8027,7 +8027,7 @@ const SalleDesTrouvailles = ({ data }) => {
                 {t.titre}
               </div>
               {/* Jours */}
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}55` }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}55` }}>
                 il y a {t.jours}j
               </div>
             </div>
@@ -8105,7 +8105,7 @@ const BibliothequeSagesses = () => {
 
         {/* Texte */}
         <div style={{ padding: "1.5rem 1.5rem 2.5rem", flexShrink: 0 }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
             {s.origine}
           </div>
           <div style={{ fontFamily: T.serif, fontSize: "clamp(1.6rem, 5vw, 2rem)", color: T.orPale, fontStyle: "italic", marginBottom: "1rem", fontWeight: 300 }}>
@@ -8122,7 +8122,7 @@ const BibliothequeSagesses = () => {
   return (
     <div style={{ padding: "0 0 4rem" }}>
       <div style={{ textAlign: "center", padding: "1.5rem 1rem 1rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
           Bibliothèque
         </div>
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300 }}>
@@ -8215,12 +8215,12 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
       <div style={{ fontSize: "1.4rem", marginBottom: "1rem", opacity: 0.6 }}>✉</div>
       <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.5rem" }}>
         Chaque mois, ALBA t'écrit une lettre personnelle.<br/>
-        <span style={{ fontSize: "0.85rem", color: `${T.brume}88` }}>Réservé aux membres.</span>
+        <span style={{ fontSize: "0.85rem", color: `${T.brume}CC` }}>Réservé aux membres.</span>
       </p>
       <button onClick={onShowPaywall} style={{
         background: "none", border: `1px solid ${T.or}44`, borderRadius: "6px",
-        padding: "0.75rem 2rem", fontFamily: T.sans, fontWeight: 200,
-        fontSize: "0.52rem", letterSpacing: "0.45em", textTransform: "uppercase",
+        padding: "0.75rem 2rem", fontFamily: T.sans, fontWeight: 300,
+        fontSize: "0.65rem", letterSpacing: "0.45em", textTransform: "uppercase",
         color: T.or, cursor: "pointer",
       }}>Devenir membre</button>
     </div>
@@ -8236,7 +8236,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
     <div style={{ textAlign: "center", padding: "2rem 1.5rem" }}>
       <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, lineHeight: 1.8 }}>
         La lettre de {nomMois} n'est pas encore arrivée.<br/>
-        <span style={{ fontSize: "0.8rem", color: `${T.brume}77` }}>Elle arrive le 1er de chaque mois.</span>
+        <span style={{ fontSize: "0.8rem", color: `${T.brume}BB` }}>Elle arrive le 1er de chaque mois.</span>
       </p>
     </div>
   );
@@ -8324,7 +8324,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.8rem", color: T.orPale, marginBottom: "0.3rem" }}>
           {data.prenom}
         </h2>
-        <p style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
           {isRationnel ? "Profil" : `Chemin ${cdv}`} · {chemin.titre}
         </p>
       </div>
@@ -8342,7 +8342,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             border: `1px solid ${T.brume}18`, borderRadius: "6px",
             animation: `fadeUp 0.6s ease forwards ${i * 0.08}s`, opacity: 0,
           }}>
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
               {item.label}
             </div>
             <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>
@@ -8355,7 +8355,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
       {/* ── Bibliothèque des Sagesses ── */}
       <div style={{ marginBottom: "2rem" }}>
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>Bibliothèque des Sagesses</div>
@@ -8365,7 +8365,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
       {/* ── Lettre mensuelle ── */}
       <div style={{ marginBottom: "2rem" }}>
         <div style={{
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>La lettre du mois</div>
@@ -8398,7 +8398,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             animation: "fadeUp 0.7s ease forwards 0.25s", opacity: 0,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.9rem" }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.or }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.or }}>
                 Éclats d'aube
               </div>
               <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.or}88` }}>
@@ -8406,7 +8406,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
               </div>
             </div>
             {/* Barre de progression — sans chiffre */}
-            <div style={{ height: 2, background: `${T.brume}20`, borderRadius: 1, overflow: "hidden", marginBottom: "0.9rem" }}>
+            <div style={{ height: 2, background: `${T.brume}35`, borderRadius: 1, overflow: "hidden", marginBottom: "0.9rem" }}>
               <div style={{
                 height: "100%",
                 width: `${pct}%`,
@@ -8431,12 +8431,12 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         animation: "fadeUp 0.7s ease forwards 0.3s", opacity: 0,
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem" }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: blessure.couleur }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: blessure.couleur }}>
             Ce que tu traverses
           </div>
           <button onClick={() => setEditIntention(true)} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem",
             letterSpacing: "0.3em", textTransform: "uppercase",
             color: T.brume,
           }}>Changer →</button>
@@ -8445,7 +8445,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           {data.intention}
         </div>
         {data.intentionSecondaire && (
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.or, marginTop: "0.3rem", opacity: 0.75 }}>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.or, marginTop: "0.3rem", opacity: 0.88 }}>
             et aussi · {data.intentionSecondaire}
           </div>
         )}
@@ -8454,7 +8454,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
       {/* ── Tempêtes archivées ── */}
       {tempetes.length > 0 && (
         <div style={{ marginBottom: "0.8rem", animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0 }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingTop: "0.4rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingTop: "0.4rem" }}>
             Boîte des Tempêtes
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -8471,7 +8471,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
                   <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.vue ? `${T.or}cc` : `${T.aube}88`, lineHeight: 1.7 }}>
                     {t.texte}
                   </p>
-                  <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.4rem" }}>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.3em", color: T.brume, marginTop: "0.4rem" }}>
                     {new Date(t.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                     {t.vue ? " · traversée" : ""}
                   </div>
@@ -8497,7 +8497,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
 
       {/* ── Accès Souffle ── */}
       <div style={{ marginTop: "1.5rem", marginBottom: "0.5rem", animation: "fadeUp 0.7s ease forwards 0.6s", opacity: 0 }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
           Prendre un moment
         </div>
         <SouffleInline />
@@ -8508,7 +8508,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         <div style={{ marginTop: "0.5rem", textAlign: "center" }}>
           <button onClick={onSignOut} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
             color: `${T.brume}33`,
           }}>Se déconnecter</button>
@@ -8520,7 +8520,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
             color: `${T.brume}44`,
           }}>Recommencer depuis le début</button>
@@ -8529,7 +8529,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             <button onClick={() => setResetConfirm(false)} style={{
               background: "none", border: `1px solid ${T.brume}22`,
               borderRadius: "20px", padding: "0.5rem 1rem",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
               letterSpacing: "0.3em", color: T.brume, cursor: "pointer",
             }}>Annuler</button>
             <button onClick={() => {
@@ -8538,7 +8538,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             }} style={{
               background: "none", border: `1px solid #A87B7B44`,
               borderRadius: "20px", padding: "0.5rem 1rem",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
               letterSpacing: "0.3em", color: "#A87B7B", cursor: "pointer",
             }}>Oui, tout effacer</button>
           </div>
@@ -8561,12 +8561,12 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             padding: "2rem 1.8rem 3rem",
             animation: "fadeUp 0.35s ease forwards",
           }}>
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
               Qu'est-ce qui t'amène en ce moment ?
             </div>
 
             {/* Groupe tempête */}
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
               Je traverse quelque chose
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "1rem" }}>
@@ -8596,7 +8596,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             </div>
 
             {/* Groupe soleil */}
-            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
               Je cherche un espace pour grandir
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
@@ -8626,7 +8626,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             <button onClick={() => setEditIntention(false)} style={{
               marginTop: "1.5rem", width: "100%", padding: "0.8rem",
               background: "transparent", border: `1px solid ${T.or}33`,
-              borderRadius: "6px", fontFamily: T.sans, fontWeight: 200,
+              borderRadius: "6px", fontFamily: T.sans, fontWeight: 300,
               fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase",
               color: T.or, cursor: "pointer",
             }}>Enregistrer</button>
@@ -8753,11 +8753,11 @@ const FilDeVie = ({ data, db }) => {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 <span style={{ fontSize: "0.9rem", color: typeInfo(carteOuverte.type).couleur }}>{typeInfo(carteOuverte.type).symbole}</span>
-                <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: typeInfo(carteOuverte.type).couleur }}>
+                <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.4em", textTransform: "uppercase", color: typeInfo(carteOuverte.type).couleur }}>
                   {typeInfo(carteOuverte.type).label}
                 </span>
               </div>
-              <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", color: `${T.brume}77` }}>
+              <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", color: `${T.brume}BB` }}>
                 {formatDate(carteOuverte.date)}
               </span>
             </div>
@@ -8773,7 +8773,7 @@ const FilDeVie = ({ data, db }) => {
                 setCarteOuverte(null);
               }} style={{
                 marginTop: "2rem", background: "none", border: "none",
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.47rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem",
                 letterSpacing: "0.4em", textTransform: "uppercase",
                 color: `${T.brume}44`, cursor: "pointer",
               }}>Retirer ce moment</button>
@@ -8796,12 +8796,12 @@ const FilDeVie = ({ data, db }) => {
           <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume }}>Supprimer ce moment ?</span>
           <button onClick={() => { saveMoments(moments.filter(m => m.id !== deletingId)); setDeletingId(null); }} style={{
             background: "none", border: `1px solid #A87B7B44`, borderRadius: "4px",
-            padding: "0.3rem 0.7rem", color: "#A87B7B", fontFamily: T.sans, fontWeight: 200,
+            padding: "0.3rem 0.7rem", color: "#A87B7B", fontFamily: T.sans, fontWeight: 300,
             fontSize: "0.5rem", letterSpacing: "0.3em", cursor: "pointer",
           }}>Oui</button>
           <button onClick={() => setDeletingId(null)} style={{
             background: "none", border: "none", color: T.brume,
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
             letterSpacing: "0.3em", cursor: "pointer",
           }}>Non</button>
         </div>
@@ -8809,7 +8809,7 @@ const FilDeVie = ({ data, db }) => {
 
       {/* ── En-tête ── */}
       <div style={{ textAlign: "center", marginBottom: "0.5rem", padding: "0 1.5rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
           Fil de Vie
         </div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, lineHeight: 1.8 }}>
@@ -8828,7 +8828,7 @@ const FilDeVie = ({ data, db }) => {
           background: ajout ? `${T.or}18` : "transparent",
           border: `1px solid ${ajout ? T.or + "77" : T.brume + "33"}`,
           color: ajout ? T.or : T.brume,
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
           letterSpacing: "0.35em", textTransform: "uppercase",
           padding: "0.55rem 1.4rem", borderRadius: "2px", cursor: "pointer",
           transition: "all 0.25s",
@@ -8842,7 +8842,7 @@ const FilDeVie = ({ data, db }) => {
           border: `1px solid ${T.or}33`, borderRadius: "6px",
           padding: "1.5rem", animation: "fadeUp 0.4s ease forwards",
         }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
             Quel moment veux-tu garder ?
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.2rem" }}>
@@ -8851,7 +8851,7 @@ const FilDeVie = ({ data, db }) => {
                 background: type === t.id ? `${t.couleur}22` : "transparent",
                 border: `1px solid ${type === t.id ? t.couleur + "88" : T.brume + "33"}`,
                 color: type === t.id ? t.couleur : T.brume,
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.58rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
                 letterSpacing: "0.15em", padding: "0.4rem 0.8rem",
                 borderRadius: "2px", cursor: "pointer", transition: "all 0.2s",
                 display: "flex", alignItems: "center", gap: "0.4rem",
@@ -8872,7 +8872,7 @@ const FilDeVie = ({ data, db }) => {
               background: texte.trim().length > 3 ? `${T.or}22` : "transparent",
               border: `1px solid ${texte.trim().length > 3 ? T.or + "77" : T.brume + "33"}`,
               color: texte.trim().length > 3 ? T.or : T.brume,
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.6rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
               letterSpacing: "0.3em", textTransform: "uppercase",
               padding: "0.55rem 1.4rem", borderRadius: "2px", cursor: "pointer",
               transition: "all 0.25s",
@@ -8957,10 +8957,10 @@ const FilDeVie = ({ data, db }) => {
                     userSelect: "none",
                   }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                    <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>
+                    <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume }}>
                       {formatDate(m.date)}
                     </span>
-                    {ti.symbole.endsWith?.(".svg") ? <img src={ti.symbole} width={14} height={14} alt="" style={{ opacity: 0.8 }} /> : <span style={{ fontSize: "0.65rem", color: ti.couleur, opacity: 0.8 }}>{ti.symbole}</span>}
+                    {ti.symbole.endsWith?.(".svg") ? <img src={ti.symbole} width={14} height={14} alt="" style={{ opacity: 0.92 }} /> : <span style={{ fontSize: "0.65rem", color: ti.couleur, opacity: 0.92 }}>{ti.symbole}</span>}
                   </div>
                   <p style={{
                     fontFamily: T.serif, fontStyle: "italic",
@@ -8969,11 +8969,11 @@ const FilDeVie = ({ data, db }) => {
                     display: "-webkit-box", WebkitLineClamp: 4,
                     WebkitBoxOrient: "vertical", overflow: "hidden",
                   }}>{m.texte}</p>
-                  <div style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.46rem", letterSpacing: "0.25em", textTransform: "uppercase", color: ti.couleur, opacity: 0.7 }}>
+                  <div style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.46rem", letterSpacing: "0.25em", textTransform: "uppercase", color: ti.couleur, opacity: 0.7 }}>
                     {ti.label}
                   </div>
                   {!isDemo && (
-                    <div style={{ marginTop: "0.3rem", fontFamily: T.sans, fontWeight: 200, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}44` }}>
+                    <div style={{ marginTop: "0.3rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}44` }}>
                       Appui long pour suppr.
                     </div>
                   )}
@@ -9129,7 +9129,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
         <button onClick={() => setPhase("idle")} style={{
           marginTop: "3rem", background: "none", border: `1px solid ${T.brume}25`,
           borderRadius: "20px", padding: "0.5rem 1.4rem",
-          fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
           letterSpacing: "0.4em", textTransform: "uppercase",
           color: T.brume, cursor: "pointer",
         }}>Revenir</button>
@@ -9153,7 +9153,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
         {/* ── En-tête ── */}
         <div style={{ marginBottom: "3rem", animation: "fadeUp 0.7s ease forwards" }}>
           <div style={{
-            fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
             letterSpacing: "0.55em", textTransform: "uppercase",
             color: T.brume, marginBottom: "1.2rem",
           }}>Le Miroir</div>
@@ -9280,7 +9280,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
             {/* Signature */}
             <p style={{
               marginTop: "1.2rem",
-              fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
               letterSpacing: "0.5em", textTransform: "uppercase",
               color: T.brume,
             }}>ALBA</p>
@@ -9295,7 +9295,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
                 cursor: "pointer", transition: "all 0.25s",
               }}
                 onMouseEnter={e => { e.target.style.borderColor = `${T.or}44`; e.target.style.color = T.or; }}
-                onMouseLeave={e => { e.target.style.borderColor = `${T.brume}28`; e.target.style.color = `${T.brume}88`; }}
+                onMouseLeave={e => { e.target.style.borderColor = `${T.brume}28`; e.target.style.color = `${T.brume}CC`; }}
               >
                 Poser autre chose
               </button>
@@ -9326,10 +9326,10 @@ class AlbaErrorBoundary extends React.Component {
           <div style={{ fontSize:"0.75rem", color:"#7A7060", marginBottom:"1rem", maxWidth:300, lineHeight:1.6 }}>
             {this.state.error.message}
           </div>
-          <div style={{ fontSize:"0.55rem", color:"#5A5040", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
+          <div style={{ fontSize:"0.68rem", color:"#5A5040", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
             {this.state.stack?.split("\n").slice(0,6).join("\n")}
           </div>
-          <div style={{ fontSize:"0.55rem", color:"#4A8A5A", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
+          <div style={{ fontSize:"0.68rem", color:"#4A8A5A", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
             PROFILE: {this.state.profile}
           </div>
           <button onClick={() => {
@@ -9782,7 +9782,7 @@ function AlbaInner() {
             {/* Droite : onglet courant */}
             <div style={{ minWidth: 60, textAlign: "right" }}>
               <span style={{
-                fontFamily: T.sans, fontWeight: 200, fontSize: "0.52rem",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
                 letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume,
               }}>
                 {TABS.find(t => t.id === tab)?.label}
@@ -9820,12 +9820,12 @@ function AlbaInner() {
                 display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
                 padding: "0.3rem 0.6rem",
                 transition: "opacity 0.2s",
-                opacity: tab === t.id ? 1 : 0.85,
+                opacity: tab === t.id ? 1 : 0.95,
               }}>
                 <NavIcon id={t.id} active={tab === t.id} />
                 <span style={{
                   fontFamily: T.sans, fontWeight: tab === t.id ? 300 : 200,
-                  fontSize: "0.45rem", letterSpacing: "0.3em", textTransform: "uppercase",
+                  fontSize: "0.58rem", letterSpacing: "0.3em", textTransform: "uppercase",
                   color: tab === t.id ? T.or : T.aube,
                   transition: "color 0.2s",
                 }}>{t.label}</span>
