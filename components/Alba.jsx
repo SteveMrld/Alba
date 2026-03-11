@@ -676,6 +676,7 @@ const LIVRES = {
 // ─── HELPER CENTRAL — contexte profil double intention ────────────────────────
 // Source unique de vérité pour tous les composants et prompts IA
 const getContextProfil = (data) => {
+  if (!data) return { blessure: BLESSURES[0], blessure2: null, nomBlessure: "Abandon", nomBlessure2: null, hasTempete: true, hasCroissance: false, hasDual: false, texteContexte: "" };
   const intentionPrincipale   = data.intention           || "";
   const intentionSecondaire   = data.intentionSecondaire || "";
 
