@@ -8163,6 +8163,9 @@ const BibliothequeSagesses = () => {
 };
 
 // ─── LETTRE MENSUELLE ──────────────────────────────────────────────────────
+const SUPABASE_URL_LM = "https://yuwqokjkpooozgtsvfkc.supabase.co";
+const SUPABASE_KEY_LM = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
+
 const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   const [lettre, setLettre] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -8171,13 +8174,15 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   const mois = new Date().toISOString().slice(0, 7);
   const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
-  // Vérification premium directe (indépendante de la prop)
+  // Vérification premium directement via Supabase côté client
   useEffect(() => {
     const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
     if (!uk) return;
-    fetch(`/api/subscription?user_key=${encodeURIComponent(uk)}`)
+    fetch(`${SUPABASE_URL_LM}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(uk)}&select=is_premium&limit=1`, {
+      headers: { apikey: SUPABASE_KEY_LM, Authorization: `Bearer ${SUPABASE_KEY_LM}` }
+    })
       .then(r => r.json())
-      .then(d => { if (d.premium) setPremiumLocal(true); })
+      .then(rows => { if (rows?.[0]?.is_premium) setPremiumLocal(true); })
       .catch(() => {});
   }, [userKey]);
 
