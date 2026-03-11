@@ -9279,7 +9279,9 @@ class AlbaErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null, stack: "" }; }
   static getDerivedStateFromError(err) { return { error: err }; }
   componentDidCatch(err, info) {
-    this.setState({ stack: info?.componentStack || "" });
+    let profile = "";
+    try { profile = localStorage.getItem("alba_profile") || "null"; } catch {}
+    this.setState({ stack: info?.componentStack || "", profile });
     console.error("ALBA crash:", err.message, info?.componentStack);
   }
   render() {
@@ -9291,8 +9293,11 @@ class AlbaErrorBoundary extends React.Component {
           <div style={{ fontSize:"0.75rem", color:"#7A7060", marginBottom:"1rem", maxWidth:300, lineHeight:1.6 }}>
             {this.state.error.message}
           </div>
-          <div style={{ fontSize:"0.55rem", color:"#5A5040", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap" }}>
+          <div style={{ fontSize:"0.55rem", color:"#5A5040", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
             {this.state.stack?.split("\n").slice(0,6).join("\n")}
+          </div>
+          <div style={{ fontSize:"0.55rem", color:"#4A8A5A", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
+            PROFILE: {this.state.profile}
           </div>
           <button onClick={() => {
             try { localStorage.removeItem("alba_profile"); } catch {}
