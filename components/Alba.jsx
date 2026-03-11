@@ -9534,9 +9534,8 @@ function AlbaInner() {
 
   const handleAuth = async (user) => {
     setAuthUser(user);
-    // Mettre à jour le userKey avec l'ID auth
+    // Mettre à jour le userKey dans localStorage avec l'auth ID
     if (user.id) {
-      userKey.current = user.id;
       try { localStorage.setItem("alba_user_key", user.id); } catch {}
     }
     // Vérifier statut premium
@@ -9545,16 +9544,32 @@ function AlbaInner() {
       const pd = await pr.json();
       setIsPremium(pd.premium === true);
     } catch {}
-    // Recharger le profil avec le bon user_key (auth ID)
-    try { localStorage.removeItem("alba_profile"); } catch {}
-    const rawProfile = await db.loadProfile();
-    if (rawProfile) {
-      const profile = {
-        prenom: "", naissance: "01/01/1990", sensibilite: "intuitif",
-        intention: "", intentionSecondaire: "", cleActive: 0,
-        ...rawProfile,
-      };
-      setUserData(profile);
+    // Charger le profil directement depuis Supabase avec l'auth ID
+    try {
+      localStorage.removeItem("alba_profile");
+      const SUPABASE_URL = "https://yuwqokjkpooozgtsvfkc.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(user.id)}&limit=1`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      const rows = await r.json();
+      const row = rows?.[0];
+      if (row) {
+        const profile = {
+          prenom: row.prenom || "",
+          naissance: row.naissance || "01/01/1990",
+          sensibilite: row.sensibilite || "intuitif",
+          intention: row.intention || "",
+          intentionSecondaire: row.intention_secondaire || "",
+        };
+        try { localStorage.setItem("alba_profile", JSON.stringify(profile)); } catch {}
+        setUserData(profile);
+        setView("app");
+        return;
+      }
+    } catch {}
+    // Pas de profil → onboarding
+    if (userData) {
       setView("app");
     } else {
       setView("onboarding");
