@@ -8190,7 +8190,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
     if (isPremium) setPremiumLocal(true);
   }, [isPremium]);
 
-  const estPremium = premiumLocal || isPremium;
+  const estPremium = true; // BETA: premium activé pour tous
 
   useEffect(() => {
     const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
@@ -9349,7 +9349,7 @@ class AlbaErrorBoundary extends React.Component {
 function AlbaInner() {
   const [view, setView] = useState("splash");
   const [authUser, setAuthUser] = useState(null);
-  const [isPremium, setIsPremium] = useState(false);
+  const [isPremium, setIsPremium] = useState(true); // BETA: premium activé pour tous
   const [showPaywall, setShowPaywall] = useState(false);
   const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState("compagnon");
