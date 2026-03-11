@@ -438,6 +438,7 @@ const useAlbaDB = () => {
       prenom: data.prenom,
       naissance: data.naissance,
       intention: data.intention,
+      intention_secondaire: data.intentionSecondaire || "",
       sensibilite: data.sensibilite || "intuitif",
     });
   }, []);
@@ -449,7 +450,13 @@ const useAlbaDB = () => {
     } catch {}
     const row = await sb.get("alba_profiles", { user_key: userKey.current });
     if (row) {
-      const data = { prenom: row.prenom, naissance: row.naissance, intention: row.intention, sensibilite: row.sensibilite || "intuitif" };
+      const data = {
+        prenom: row.prenom,
+        naissance: row.naissance,
+        intention: row.intention,
+        intentionSecondaire: row.intention_secondaire || "",
+        sensibilite: row.sensibilite || "intuitif",
+      };
       try { localStorage.setItem("alba_profile", JSON.stringify(data)); } catch {}
       return data;
     }
@@ -664,6 +671,46 @@ const LIVRES = {
   "Rejet":       { titre: "Du chaos naît une étoile",   auteur: "Steve Moradel",       mot: "Sur le retour à soi" },
   "Croissance":  { titre: "L'Homme en quête de sens",   auteur: "Viktor Frankl",       mot: "Sur le sens" },
   "Présence":    { titre: "Le Pouvoir du moment présent",auteur: "Eckhart Tolle",      mot: "Sur l'instant" },
+};
+
+// ─── HELPER CENTRAL — contexte profil double intention ────────────────────────
+// Source unique de vérité pour tous les composants et prompts IA
+const getContextProfil = (data) => {
+  const intentionPrincipale   = data.intention           || "";
+  const intentionSecondaire   = data.intentionSecondaire || "";
+
+  const resoudreNomBlessure = (intention) =>
+    BLESSURES_PAR_INTENTION[intention]
+    || BLESSURES.find(b => intention.toLowerCase().includes(b.nom.toLowerCase()))?.nom
+    || null;
+
+  const nomBlessure1 = resoudreNomBlessure(intentionPrincipale);
+  const nomBlessure2 = intentionSecondaire ? resoudreNomBlessure(intentionSecondaire) : null;
+
+  // Utilise la première intention trouvée comme blessure principale
+  const nomBlessureFinal = nomBlessure1 || nomBlessure2 || "Abandon";
+  const blessure  = BLESSURES.find(b => b.nom === nomBlessureFinal) || BLESSURES[0];
+  const blessure2 = nomBlessure2 && nomBlessure2 !== nomBlessureFinal
+    ? BLESSURES.find(b => b.nom === nomBlessure2) || null
+    : null;
+
+  const NOMS_CROISSANCE = ["Croissance", "Présence"];
+  const hasTempete   = blessure  && !NOMS_CROISSANCE.includes(blessure.nom);
+  const hasCroissance = (blessure2 && NOMS_CROISSANCE.includes(blessure2.nom))
+    || NOMS_CROISSANCE.includes(blessure.nom);
+  const hasDual      = hasTempete && hasCroissance;
+
+  // Texte synthétique pour les prompts IA
+  let texteContexte;
+  if (hasDual) {
+    texteContexte = `${data.prenom} traverse à la fois ${intentionPrincipale.toLowerCase()} et cherche à grandir (${intentionSecondaire.toLowerCase()}). Blessure principale : ${blessure.nom}. Aussi en chemin de croissance.`;
+  } else if (hasCroissance) {
+    texteContexte = `${data.prenom} cherche à grandir et à se construire. Chemin : ${blessure.nom}.`;
+  } else {
+    texteContexte = `${data.prenom} traverse : ${intentionPrincipale}. Blessure principale : ${blessure.nom}.`;
+  }
+
+  return { blessure, blessure2, nomBlessure: nomBlessureFinal, nomBlessure2, hasTempete, hasCroissance, hasDual, texteContexte };
 };
 
 // Citations enrichies — dont les phrases adaptées de Steve
@@ -2100,8 +2147,7 @@ const CARTE_IMAGES = {
 const CarteAme = ({ data, small }) => {
   const cdv = cheminDeVie(data.naissance);
   const carte = CARTE_DATA[cdv] || CARTE_DATA[9];
-  const bIdx = BLESSURES.findIndex(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const { blessure } = getContextProfil(data);
   const [c1, c2, c3] = carte.palette;
 
   const W = small ? 180 : 280;
@@ -2291,10 +2337,7 @@ const Portrait = ({ data, onContinue }) => {
   if (!data) return null;
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
-  const bIdx = Object.values(BLESSURES).findIndex(b =>
-    (data.intention || "").toLowerCase().includes(b.nom.toLowerCase())
-  );
-  const blessure  = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const { blessure } = getContextProfil(data);
   const livre     = LIVRES[blessure.nom];
   const citation  = CITATIONS[cdv % CITATIONS.length];
   const cle       = CLES[0];
@@ -3096,9 +3139,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const cle = CLES[cleActive] || CLES[0];
   const citation = CITATIONS[cdv % CITATIONS.length];
-  const intentionStr = (data.intention || "").toLowerCase();
-  const bIdx = Object.values(BLESSURES).findIndex(b => intentionStr.includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const { blessure, hasCroissance, hasDual } = getContextProfil(data);
   const livre = LIVRES[blessure.nom];
 
   const heure = new Date().getHours();
@@ -3553,14 +3594,20 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
       {(() => {
         // Mapper l'intention/état vers les thèmes de recommandation
         const intentionBasse = (data.intention || "").toLowerCase();
+        const intentionBasse2 = (data.intentionSecondaire || "").toLowerCase();
         const etatsDetectes = [];
-        if (intentionBasse.includes("rupture") || intentionBasse.includes("séparation") || intentionBasse.includes("separation")) etatsDetectes.push("separation");
-        if (intentionBasse.includes("deuil") || intentionBasse.includes("perte") || intentionBasse.includes("perdu")) etatsDetectes.push("deuil");
-        if (intentionBasse.includes("épuisement") || intentionBasse.includes("epuisement") || intentionBasse.includes("burn")) etatsDetectes.push("burn-out");
-        if (intentionBasse.includes("anxiété") || intentionBasse.includes("anxiete") || intentionBasse.includes("anxieux")) etatsDetectes.push("anxiete");
-        if (intentionBasse.includes("trahison")) etatsDetectes.push("relation-toxique");
-        if (intentionBasse.includes("maladie") || intentionBasse.includes("diagnostic")) etatsDetectes.push("maladie");
-        if (intentionBasse.includes("qui je suis") || intentionBasse.includes("perdu")) etatsDetectes.push("quete-de-sens");
+        const detecter = (s) => {
+          if (s.includes("rupture") || s.includes("séparation") || s.includes("separation")) etatsDetectes.push("separation");
+          if (s.includes("deuil") || s.includes("perte") || s.includes("perdu")) etatsDetectes.push("deuil");
+          if (s.includes("épuisement") || s.includes("epuisement") || s.includes("burn")) etatsDetectes.push("burn-out");
+          if (s.includes("anxiété") || s.includes("anxiete") || s.includes("anxieux")) etatsDetectes.push("anxiete");
+          if (s.includes("trahison")) etatsDetectes.push("relation-toxique");
+          if (s.includes("maladie") || s.includes("diagnostic")) etatsDetectes.push("maladie");
+          if (s.includes("qui je suis") || s.includes("perdu")) etatsDetectes.push("quete-de-sens");
+          if (s.includes("grandir") || s.includes("explorer") || s.includes("connaître") || s.includes("connaitre")) etatsDetectes.push("croissance");
+        };
+        detecter(intentionBasse);
+        if (intentionBasse2) detecter(intentionBasse2);
         if (etatsDetectes.length === 0) etatsDetectes.push("quete-de-sens");
 
         const recos = getRecommandationsPersonnalisees(etatsDetectes, cleActive + 1, 2);
@@ -3622,7 +3669,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: blessure.couleur, flexShrink: 0 }}/>
             <span style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase", color: blessure.couleur }}>
-              En traversée · {blessure.nom}
+              {hasDual ? "En chemin · " : "En traversée · "}{blessure.nom}
             </span>
           </div>
           {/* Hint "répondre" */}
@@ -4480,9 +4527,7 @@ const RecommandationsBlock = ({ data }) => {
   const [ouvert, setOuvert] = useState(false);
 
   const cdv = cheminDeVie(data.naissance);
-  const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
-    || "Abandon";
+  const { nomBlessure } = getContextProfil(data);
   const sens = data.sensibilite || "intuitif";
   const { livres, podcasts } = getRecommandations(nomBlessure, sens, cdv);
   const items = onglet === "livres" ? livres : podcasts;
@@ -4618,13 +4663,13 @@ const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
 
     const cdv = cheminDeVie(data.naissance);
     const chemin = CHEMINS[cdv] || CHEMINS[9];
-    const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-      || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
-      || "Abandon";
+    const { nomBlessure, hasDual, hasCroissance, texteContexte } = getContextProfil(data);
     const sens = data.sensibilite || "intuitif";
 
     const prompt = `Tu es ALBA. Tu écris une lettre à ${data.prenom}.
-Profil : Chemin ${cdv} — ${chemin.titre}. Blessure/Chemin : ${nomBlessure}. Sensibilité : ${sens}.
+Profil : Chemin ${cdv} — ${chemin.titre}. Sensibilité : ${sens}.
+Contexte : ${texteContexte}
+${hasDual ? `Note : ${data.prenom} traverse quelque chose de difficile ET cherche à grandir simultanément. Ta lettre doit honorer les deux dimensions — la blessure sans la nier, le chemin de croissance sans le forcer.` : ""}
 
 Voici les fragments que ${data.prenom} a posés cette semaine sur son ardoise :
 ${fragments.map((f,i) => `${i+1}. "${f}"`).join("\n")}
@@ -4813,8 +4858,7 @@ const CompagnonDuJour = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
   const cle = CLES[0];
   const citation = CITATIONS[cdv % CITATIONS.length];
-  const bIdx = Object.values(BLESSURES).findIndex(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const { blessure } = getContextProfil(data);
   const livre = LIVRES[blessure.nom];
 
   return (
@@ -6110,8 +6154,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
 
 const Evasion = ({ data }) => {
   const cdv = cheminDeVie(data.naissance);
-  const bIdx = BLESSURES.findIndex(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()));
-  const blessure = BLESSURES[bIdx >= 0 ? bIdx : 0];
+  const { blessure } = getContextProfil(data);
   const { all, categorie } = getPhotos(cdv, blessure.nom);
   const [mode, setMode] = useState("video"); // "photo" | "video"
   const [actif, setActif] = useState(0);
@@ -6741,9 +6784,10 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange
     setLoading(true); setShowBilan(true);
     const cdv = cheminDeVie(data.naissance);
     const chemin = CHEMINS[cdv] || CHEMINS[9];
+    const { texteContexte } = getContextProfil(data);
     const resume = postits.map(p => `[${POSTIT_TYPES.find(t=>t.id===p.type)?.label}] ${p.texte}`).join("\n");
     const prompt = `Tu es ALBA. Tu lis les pensées que ${data.prenom} a posées sur son ardoise aujourd'hui.
-Profil : Chemin ${cdv} — ${chemin.titre}.
+Profil : Chemin ${cdv} — ${chemin.titre}. Contexte : ${texteContexte}
 Voici ce qu'il/elle a posé :
 ${resume}
 Écris une courte lettre — 4 à 7 phrases. Pas un résumé. Une lettre intime et vraie. Nomme ce que tu entends entre les lignes. Termine par une phrase qui ouvre. Signe "ALBA".`;
@@ -8126,10 +8170,7 @@ const LettreMensuelle = ({ userId, isPremium, onShowPaywall }) => {
 const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
-  const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
-    || "Abandon";
-  const blessure = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
+  const { blessure, hasDual, hasCroissance } = getContextProfil(data);
   const isRationnel = data.sensibilite === "rationnel";
 
   const [tempetes, setTempetes] = useState([]);
@@ -8289,6 +8330,11 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>
           {data.intention}
         </div>
+        {data.intentionSecondaire && (
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.or, marginTop: "0.3rem", opacity: 0.75 }}>
+            et aussi · {data.intentionSecondaire}
+          </div>
+        )}
       </div>
 
       {/* ── Tempêtes archivées ── */}
@@ -8405,23 +8451,71 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
               Qu'est-ce qui t'amène en ce moment ?
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {[...INTENTIONS_TEMPETE, ...INTENTIONS_LUMIERE].map(intent => (
-                <button key={intent} onClick={() => {
-                  if (onUpdateData) onUpdateData({ ...data, intention: intent });
-                  setEditIntention(false);
-                }} style={{
-                  background: data.intention === intent ? `${T.or}10` : "transparent",
-                  border: `1px solid ${data.intention === intent ? T.or + "44" : T.brume + "18"}`,
-                  borderRadius: "6px", padding: "0.8rem 1rem",
-                  fontFamily: T.serif, fontStyle: "italic",
-                  fontSize: "0.95rem",
-                  color: data.intention === intent ? T.or : `${T.aube}88`,
-                  cursor: "pointer", textAlign: "left",
-                  transition: "all 0.2s",
-                }}>{intent}</button>
-              ))}
+            {/* Groupe tempête */}
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
+              Je traverse quelque chose
             </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "1rem" }}>
+              {INTENTIONS_TEMPETE.map(intent => {
+                const sel = data.intention === intent;
+                return (
+                  <button key={intent} onClick={() => {
+                    const newIntention = sel ? "" : intent;
+                    if (onUpdateData) onUpdateData({ ...data, intention: newIntention });
+                  }} style={{
+                    background: sel ? `${T.aurore}15` : "transparent",
+                    border: `1px solid ${sel ? T.aurore + "55" : T.brume + "18"}`,
+                    borderRadius: "6px", padding: "0.75rem 1rem",
+                    fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
+                    color: sel ? T.orPale : `${T.aube}88`,
+                    cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+                  }}>{sel ? "✦ " : ""}{intent}</button>
+                );
+              })}
+            </div>
+
+            {/* Séparateur */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "0.5rem 0 1rem" }}>
+              <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
+              <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.7rem", color: T.brume }}>et / ou</span>
+              <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
+            </div>
+
+            {/* Groupe soleil */}
+            <div style={{ fontFamily: T.sans, fontWeight: 200, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
+              Je cherche un espace pour grandir
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+              {INTENTIONS_LUMIERE.map(intent => {
+                const sel = data.intentionSecondaire === intent || (!data.intentionSecondaire && data.intention === intent);
+                return (
+                  <button key={intent} onClick={() => {
+                    // Si pas de tempête sélectionnée, soleil va dans intention principale
+                    if (!data.intention) {
+                      if (onUpdateData) onUpdateData({ ...data, intention: sel ? "" : intent, intentionSecondaire: "" });
+                    } else {
+                      const newSec = sel ? "" : intent;
+                      if (onUpdateData) onUpdateData({ ...data, intentionSecondaire: newSec });
+                    }
+                  }} style={{
+                    background: sel ? `${T.or}12` : "transparent",
+                    border: `1px solid ${sel ? T.or + "55" : T.brume + "18"}`,
+                    borderRadius: "6px", padding: "0.75rem 1rem",
+                    fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem",
+                    color: sel ? T.or : `${T.aube}88`,
+                    cursor: "pointer", textAlign: "left", transition: "all 0.2s",
+                  }}>{sel ? "✦ " : ""}{intent}</button>
+                );
+              })}
+            </div>
+
+            <button onClick={() => setEditIntention(false)} style={{
+              marginTop: "1.5rem", width: "100%", padding: "0.8rem",
+              background: "transparent", border: `1px solid ${T.or}33`,
+              borderRadius: "6px", fontFamily: T.sans, fontWeight: 200,
+              fontSize: "0.5rem", letterSpacing: "0.4em", textTransform: "uppercase",
+              color: T.or, cursor: "pointer",
+            }}>Enregistrer</button>
           </div>
         </div>
       )}
@@ -8809,11 +8903,7 @@ const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
 
   const cdv     = cheminDeVie(data.naissance);
   const chemin  = CHEMINS[cdv] || CHEMINS[9];
-  const nomBlessure = BLESSURES_PAR_INTENTION[data.intention]
-    || BLESSURES.find(b => (data.intention || "").toLowerCase().includes(b.nom.toLowerCase()))?.nom
-    || "Abandon";
-  const blessure  = BLESSURES.find(b => b.nom === nomBlessure) || BLESSURES[0];
-  const isLumiere = ["Croissance","Présence"].includes(blessure.nom);
+  const { blessure, hasDual, hasTempete, hasCroissance, texteContexte } = getContextProfil(data);
   const sens      = data.sensibilite || "intuitif";
 
   // Quelques mots d'attente — variés, jamais les mêmes
@@ -8827,7 +8917,8 @@ const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
 
   const SYSTEM_MIROIR = `Tu es ALBA. Tu es un miroir intérieur — pas un coach, pas un assistant, pas un thérapeute.
 Tu lis ce que ${data.prenom} vient de poser.
-Profil : ${chemin.titre}. ${isLumiere ? "Elle cherche à grandir." : `Blessure traversée : ${blessure.nom}.`}
+Profil : ${chemin.titre}. Contexte : ${texteContexte}
+${hasDual ? `Note importante : ${data.prenom} traverse quelque chose de difficile ET cherche à grandir en même temps. Ce n'est pas une contradiction — c'est une complexité humaine. Ton reflet peut tenir les deux.` : hasCroissance ? "Elle cherche à grandir, à se construire." : `Blessure traversée : ${blessure.nom}.`}
 Sensibilité : ${sens}.
 ${sens === "spirituel" ? "Tu peux utiliser un langage symbolique, archétypal, mais sobrement." : ""}
 ${sens === "rationnel" ? "Zéro ésotérisme. Ancré, sobre, psychologique." : ""}
@@ -9224,9 +9315,10 @@ export default function Alba() {
       const rawProfile = await db.loadProfile();
       const profile = rawProfile ? {
         prenom: "", naissance: "01/01/1990", sensibilite: "intuitif",
-        intention: "", cleActive: 0,
+        intention: "", intentionSecondaire: "", cleActive: 0,
         ...rawProfile,
         intention: rawProfile.intention || "",
+        intentionSecondaire: rawProfile.intentionSecondaire || "",
         prenom: rawProfile.prenom || "",
         naissance: rawProfile.naissance || "01/01/1990",
         sensibilite: rawProfile.sensibilite || "intuitif",

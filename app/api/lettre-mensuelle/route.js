@@ -53,7 +53,7 @@ export async function POST(req) {
 
       // Données parallèles
       const [profils, postits, cairn, progress] = await Promise.allSettled([
-        sbFetch(`alba_profiles?user_id=eq.${uid}&select=prenom,intention,sensibilite,cle_active,naissance`, { service: true }),
+        sbFetch(`alba_profiles?user_id=eq.${uid}&select=prenom,intention,intention_secondaire,sensibilite,cle_active,naissance`, { service: true }),
         sbFetch(`alba_postits?user_id=eq.${uid}&created_at=gte.${debutMois}&select=contenu,created_at&order=created_at.desc&limit=20`, { service: true }),
         sbFetch(`alba_cairn?user_id=eq.${uid}&created_at=gte.${debutMois}&select=etat&order=created_at.desc&limit=30`, { service: true }),
         sbFetch(`alba_progress?user_id=eq.${uid}&select=stats,cle_active`, { service: true }),
@@ -62,11 +62,20 @@ export async function POST(req) {
       const p = profils.value?.[0] || {};
       const prenom = p.prenom || "toi";
       const intention = p.intention || "";
+      const intentionSecondaire = p.intention_secondaire || "";
       const sensibilite = p.sensibilite || "";
       const cleActive = progress.value?.[0]?.cle_active || p.cle_active || 1;
 
       const NOMS_PORTES = ["","Reconnaître","Comprendre","Ressentir","Lâcher","Recevoir","Devenir","Créer","Relier","Protéger","Transmettre","Habiter","Être"];
       const nomPorte = NOMS_PORTES[Math.min(cleActive, 12)] || "Reconnaître";
+
+      // Contexte double intention
+      let contexteIntention;
+      if (intention && intentionSecondaire) {
+        contexteIntention = `${intention} — et simultanément : ${intentionSecondaire}`;
+      } else {
+        contexteIntention = intention || "non précisée";
+      }
 
       const fragments = (postits.value || []).map(x => x.contenu).filter(Boolean).slice(0, 8).join("\n—\n");
       const etats = (cairn.value || []).map(x => x.etat).filter(Boolean);
@@ -77,7 +86,7 @@ export async function POST(req) {
 
 DONNÉES DU MOIS :
 - Prénom : ${prenom}
-- Intention portée : ${intention || "non précisée"}
+- Intention portée : ${contexteIntention}
 - Sensibilité dominante : ${sensibilite || "non précisée"}
 - Porte traversée : Porte ${cleActive} — ${nomPorte}
 - États intérieurs déposés dans le Cairn : ${etatsTexte || "peu de données ce mois"}
