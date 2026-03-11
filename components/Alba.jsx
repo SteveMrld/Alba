@@ -1709,7 +1709,7 @@ const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [prenom, setPrenom] = useState("");
   const [sensibilite, setSensibilite] = useState("");
-  const [intention, setIntention] = useState("");
+  const [intentions, setIntentions] = useState([]);  // multi-select tempête, max 2
   const [intentionSoleil, setIntentionSoleil] = useState("");
   const [jour, setJour] = useState("");
   const [mois, setMois] = useState("");
@@ -1944,15 +1944,20 @@ const Onboarding = ({ onComplete }) => {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
             {INTENTIONS_TEMPETE.map(i => {
-              const sel = intention === i;
+              const sel = intentions.includes(i);
+              const maxAtteint = intentions.length >= 2 && !sel;
               return (
-                <button key={i} onClick={() => setIntention(sel ? "" : i)} style={{
+                <button key={i} onClick={() => {
+                  if (maxAtteint) return;
+                  setIntentions(sel ? intentions.filter(x => x !== i) : [...intentions, i]);
+                }} style={{
                   background: sel ? `${T.aurore}15` : "transparent",
-                  border: `1px solid ${sel ? T.aurore + "66" : T.brume + "22"}`,
-                  color: sel ? T.orPale : `${T.aube}bb`,
+                  border: `1px solid ${sel ? T.aurore + "66" : maxAtteint ? T.brume + "11" : T.brume + "22"}`,
+                  color: sel ? T.orPale : maxAtteint ? `${T.aube}44` : `${T.aube}bb`,
                   fontFamily: T.serif, fontStyle: "italic",
                   fontSize: "clamp(0.9rem, 2.4vw, 1rem)",
-                  padding: "0.75rem 1.1rem", borderRadius: "4px", cursor: "pointer",
+                  padding: "0.75rem 1.1rem", borderRadius: "4px",
+                  cursor: maxAtteint ? "default" : "pointer",
                   transition: "all 0.2s", textAlign: "left",
                 }}>{sel ? "✦ " : ""}{i}</button>
               );
@@ -1990,7 +1995,7 @@ const Onboarding = ({ onComplete }) => {
           </div>
         </div>
 
-        {intention === "Autre chose…" && (
+        {intentions.includes("Autre chose…") && (
           <input
             value={autreTexte}
             onChange={e => setAutreTexte(e.target.value)}
@@ -2005,8 +2010,14 @@ const Onboarding = ({ onComplete }) => {
           />
         )}
 
+        {intentions.length >= 2 && (
+          <div style={{ textAlign: "center", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}99`, marginTop: "0.5rem" }}>
+            Tu peux choisir jusqu'à 2 intentions
+          </div>
+        )}
+
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem", marginTop: "2.5rem" }}>
-          {(intention || intentionSoleil) && (intention !== "Autre chose…" || autreTexte.length > 2) &&
+          {(intentions.length > 0 || intentionSoleil) && (!intentions.includes("Autre chose…") || autreTexte.length > 2) &&
             <Btn onClick={() => setStep(4)}>Continuer</Btn>
           }
           <Btn secondary small onClick={() => setStep(2)}>Revenir</Btn>
@@ -2083,15 +2094,21 @@ const Onboarding = ({ onComplete }) => {
           ))}
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-          {couleurPred && <Btn onClick={() => onComplete({
-            prenom,
-            naissance: dateStr,
-            intention: intention === "Autre chose…" ? autreTexte : (intention || intentionSoleil),
-            intentionSecondaire: intention && intentionSoleil ? intentionSoleil : "",
-            sensibilite,
-            signe,
-            couleur: couleurPred,
-          })}>Entrer dans l'aube</Btn>}
+          {couleurPred && <Btn onClick={() => {
+            const intentPrincipale = intentions[0] === "Autre chose…" ? autreTexte : (intentions[0] || intentionSoleil || "");
+            const intentSecondaire = intentions[1]
+              ? (intentions[1] === "Autre chose…" ? autreTexte : intentions[1])
+              : (intentions[0] && intentionSoleil ? intentionSoleil : "");
+            onComplete({
+              prenom,
+              naissance: dateStr,
+              intention: intentPrincipale,
+              intentionSecondaire: intentSecondaire,
+              sensibilite,
+              signe,
+              couleur: couleurPred,
+            });
+          }}>Entrer dans l'aube</Btn>}
           <Btn secondary small onClick={() => setStep(4)}>Revenir</Btn>
         </div>
       </div>
@@ -2357,7 +2374,7 @@ const Portrait = ({ data, onContinue }) => {
   const [phase, setPhase] = useState(0);
 
   useEffect(() => {
-    const delays = [2200, 2000, 2400, 2200, 2600];
+    const delays = [3200, 3400, 3800, 3600, 4000];
     let t;
     const advance = (p) => {
       t = setTimeout(() => {
@@ -2372,7 +2389,7 @@ const Portrait = ({ data, onContinue }) => {
   const fade = (visible, delay = 0) => ({
     opacity: visible ? 1 : 0,
     transform: visible ? "translateY(0)" : "translateY(18px)",
-    transition: `opacity 1.2s ease ${delay}s, transform 1.2s ease ${delay}s`,
+    transition: `opacity 1.8s ease ${delay}s, transform 1.8s ease ${delay}s`,
   });
 
   // ── Phase 0–4 : révélation séquentielle plein écran ─────────────────────
