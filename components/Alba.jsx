@@ -9534,15 +9534,27 @@ function AlbaInner() {
 
   const handleAuth = async (user) => {
     setAuthUser(user);
+    // Mettre à jour le userKey avec l'ID auth
+    if (user.id) {
+      userKey.current = user.id;
+      try { localStorage.setItem("alba_user_key", user.id); } catch {}
+    }
     // Vérifier statut premium
     try {
-      const userKey = user.id || localStorage.getItem("alba_user_key") || "local";
-      const pr = await fetch(`/api/subscription?user_key=${encodeURIComponent(userKey)}`);
+      const pr = await fetch(`/api/subscription?user_key=${encodeURIComponent(user.id)}`);
       const pd = await pr.json();
       setIsPremium(pd.premium === true);
     } catch {}
-    // Si profil déjà existant → app directement
-    if (userData) {
+    // Recharger le profil avec le bon user_key (auth ID)
+    try { localStorage.removeItem("alba_profile"); } catch {}
+    const rawProfile = await db.loadProfile();
+    if (rawProfile) {
+      const profile = {
+        prenom: "", naissance: "01/01/1990", sensibilite: "intuitif",
+        intention: "", intentionSecondaire: "", cleActive: 0,
+        ...rawProfile,
+      };
+      setUserData(profile);
       setView("app");
     } else {
       setView("onboarding");
