@@ -8185,7 +8185,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
     if (isPremium) setPremiumLocal(true);
   }, [isPremium]);
 
-  const estPremium = premiumLocal || isPremium;
+  const estPremium = true; // Beta: pas de verrou premium
 
   useEffect(() => {
     const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
