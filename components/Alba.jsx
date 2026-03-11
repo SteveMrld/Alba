@@ -8248,7 +8248,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   );
 };
 
-const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall }) => {
+const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const { blessure, hasDual, hasCroissance } = getContextProfil(data);
@@ -8337,7 +8337,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>La lettre du mois</div>
-        <LettreMensuelle userKey={localStorage.getItem('alba_user_key') || data?.user_key} isPremium={isPremium} onShowPaywall={onShowPaywall} />
+        <LettreMensuelle userKey={authUserKey} isPremium={isPremium} onShowPaywall={onShowPaywall} />
       </div>
 
       {/* ── Mot Secret ── généré par Claude API chaque lundi ── */}
@@ -9767,7 +9767,7 @@ function AlbaInner() {
             {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
             {tab === "lumiere"   && <LumiereDuJour />}
             {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={authUser?.id || localStorage.getItem("alba_user_key")} />}
           </div>
 
           {/* ── BOTTOM NAV ── */}
