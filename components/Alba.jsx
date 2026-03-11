@@ -7680,10 +7680,29 @@ const SalleDesTrouvailles = ({ data }) => {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ categorie: "", titre: "", pourquoi: "" });
   const [formSent, setFormSent] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
+  const [trouvailles, setTrouvailles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const cat = CATEGORIES_TROUVAILLES.find(c => c.id === filtre);
-  const filtered = TROUVAILLES_DEMO.filter(t => filtre === "tout" || t.categorie === filtre);
-  const getCat = (id) => CATEGORIES_TROUVAILLES.find(c => c.id === id) || { emoji: "✦", label: id };
+  // Charger les trouvailles approuvées depuis Supabase
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/trouvailles?limit=60`);
+        const d = await res.json();
+        setTrouvailles(d.trouvailles || []);
+      } catch {
+        // Fallback silencieux — grille vide
+        setTrouvailles([]);
+      }
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const filtered = trouvailles.filter(t => filtre === "tout" || t.categorie === filtre);
+  const getCat = (id) => CATEGORIES_TROUVAILLES.find(c => c.id === id) || { emoji: "✦", label: id, img: null };
 
   // Vue carte ouverte
   if (selected) {
@@ -7858,14 +7877,30 @@ const SalleDesTrouvailles = ({ data }) => {
 
             <div style={{ textAlign: "center" }}>
               <Btn
-                onClick={() => {
+                onClick={async () => {
                   if (formData.categorie && formData.titre.length > 2 && formData.pourquoi.length > 10) {
-                    try { const a = new Audio("/sons/trouvaille.mp3"); a.volume = 0.2; a.play().catch(()=>{}); } catch(e) {}
-                    setFormSent(true);
+                    setFormLoading(true);
+                    try {
+                      await fetch("/api/trouvailles", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          categorie: formData.categorie,
+                          titre: formData.titre,
+                          pourquoi: formData.pourquoi,
+                          user_key: localStorage.getItem("alba_user_key") || null,
+                        }),
+                      });
+                      try { const a = new Audio("/sons/trouvaille.mp3"); a.volume = 0.2; a.play().catch(()=>{}); } catch(e) {}
+                      setFormSent(true);
+                    } catch {
+                      setFormSent(true); // Afficher succès même si erreur réseau
+                    }
+                    setFormLoading(false);
                   }
                 }}
-                disabled={!formData.categorie || formData.titre.length < 3 || formData.pourquoi.length < 10}
-              >Déposer dans la salle</Btn>
+                disabled={formLoading || !formData.categorie || formData.titre.length < 3 || formData.pourquoi.length < 10}
+              >{formLoading ? "Dépôt en cours…" : "Déposer dans la salle"}</Btn>
             </div>
           </div>
         )}
@@ -7909,6 +7944,17 @@ const SalleDesTrouvailles = ({ data }) => {
       </div>
 
       {/* Grille cartes */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "3rem 1rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume }}>
+          …
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "3rem 1rem" }}>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8 }}>
+            Aucune trouvaille ici encore.<br/>Sois le premier à en laisser une.
+          </div>
+        </div>
+      ) : (
       <div style={{ padding: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.8rem" }}>
         {filtered.map(t => {
           const c = getCat(t.categorie);
@@ -7954,6 +8000,7 @@ const SalleDesTrouvailles = ({ data }) => {
           );
         })}
       </div>
+      )} {/* fin conditionnel grille */}
 
       {/* Bouton déposer */}
       <div style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
