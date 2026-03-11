@@ -11,13 +11,23 @@ export async function GET(req) {
 
   try {
     const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/alba_subscriptions?user_key=eq.${encodeURIComponent(userKey)}&limit=1`,
-      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+      `${SUPABASE_URL}/rest/v1/alba_subscriptions?user_key=eq.${encodeURIComponent(userKey)}&select=status&limit=1`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
     );
-    const rows = await r.json();
-    const premium = rows?.[0]?.status === "active";
-    return NextResponse.json({ premium });
-  } catch {
-    return NextResponse.json({ premium: false });
+    const text = await r.text();
+    console.log("subscription check:", userKey, "→", text);
+    const rows = JSON.parse(text);
+    const premium = Array.isArray(rows) && rows[0]?.status === "active";
+    return NextResponse.json({ premium, debug: text });
+  } catch (e) {
+    console.error("subscription error:", e.message);
+    return NextResponse.json({ premium: false, error: e.message });
   }
 }

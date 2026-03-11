@@ -8185,7 +8185,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
     if (isPremium) setPremiumLocal(true);
   }, [isPremium]);
 
-  const estPremium = true; // Beta: pas de verrou premium
+  const estPremium = premiumLocal || isPremium;
 
   useEffect(() => {
     const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
@@ -8195,6 +8195,10 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
       .then(d => { setLettre(d.lettre || null); setLoading(false); })
       .catch(() => setLoading(false));
   }, [userKey, estPremium, mois]);
+
+  if (loading && !estPremium) return (
+    <div style={{ textAlign: "center", padding: "2rem", color: T.brume, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem" }}>Vérification…</div>
+  );
 
   if (!estPremium) return (
     <div style={{ textAlign: "center", padding: "2.5rem 1.5rem" }}>
