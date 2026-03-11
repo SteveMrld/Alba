@@ -1,4 +1,45 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
+
+// ─── TYPED PHRASE — Apparition lettre par lettre ─────────────────────────────
+const TypedPhrase = ({ text, style = {}, speed = 22, className = "" }) => {
+  const [displayed, setDisplayed] = React.useState("");
+  const [done, setDone] = React.useState(false);
+  const prevText = React.useRef("");
+
+  React.useEffect(() => {
+    if (!text) { setDisplayed(""); setDone(false); return; }
+    if (text === prevText.current) return; // même texte, pas de re-type
+    prevText.current = text;
+    setDisplayed("");
+    setDone(false);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(interval);
+        setDone(true);
+      }
+    }, speed);
+    return () => clearInterval(interval);
+  }, [text, speed]);
+
+  return (
+    <span className={className} style={{ ...style }}>
+      {displayed}
+      {!done && (
+        <span style={{
+          display: "inline-block", width: "1px", height: "1em",
+          background: style.color || "#C8A96E",
+          marginLeft: "1px", verticalAlign: "text-bottom",
+          animation: "albaCursorBlink 0.7s step-end infinite",
+        }} />
+      )}
+    </span>
+  );
+};
 
 // ─── ÉCLATS D'AUBE — Système de progression ───────────────────────────────────
 // Chaque acte dans l'app génère des éclats. Silencieux. Mystérieux.
@@ -556,7 +597,11 @@ const FontLoader = () => (
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #C8A96E44; border-radius: 2px; }
-    @keyframes fadeUp {
+    @keyframes albaCursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+@keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
     }
@@ -1627,6 +1672,17 @@ const Label = ({ children }) => (
   }}>{children}</div>
 );
 
+const FadeSlide = ({ children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -12 }}
+    transition={{ duration: 0.38, ease: [0.25, 0.1, 0.25, 1] }}
+  >
+    {children}
+  </motion.div>
+);
+
 const Step = ({ num, label, children, onNext, onBack, canNext }) => (
   <Screen centered>
     <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
@@ -1707,6 +1763,10 @@ const SENSIBILITES = [
 
 const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
+  const [stepDir, setStepDir] = useState(1); // 1=forward, -1=backward
+
+  const goNext = (s) => { setStepDir(1); setStep(s); };
+  const goBack = (s) => { setStepDir(-1); setStep(s); };
   const [prenom, setPrenom] = useState("");
   const [sensibilite, setSensibilite] = useState("");
   const [intentions, setIntentions] = useState([]);  // multi-select tempête, max 2
@@ -1781,6 +1841,13 @@ const Onboarding = ({ onComplete }) => {
   });
 
   const pct = ((annee - 1920) / (2010 - 1920) * 100).toFixed(1);
+
+  // ── Variant Framer Motion pour transitions entre étapes ──────────────────────
+  const stepVariants = {
+    initial: (dir) => ({ opacity: 0, x: dir > 0 ? 24 : -24 }),
+    animate: { opacity: 1, x: 0 },
+    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -24 : 24 }),
+  };
 
   // ── ÉTAPE 0 — Prénom ──────────────────────────────────────────────────────
   if (step === 0) return (
@@ -3335,12 +3402,14 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
 
         {/* Phrase de présence — discrète, éphémère */}
         {phrasePresence && (
-          <p style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.82rem", color: `${T.brume}BB`,
-            lineHeight: 1.6, marginTop: "0.5rem",
-            animation: "fadeUp 0.8s ease forwards 0.3s", opacity: 0,
-          }}>{phrasePresence}</p>
+          <TypedPhrase
+            text={phrasePresence}
+            style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "0.82rem", color: `${T.brume}BB`,
+              lineHeight: 1.6, marginTop: "0.5rem", display: "block",
+            }}
+          />
         )}
 
         {/* Carte miniature flottante */}
@@ -9266,16 +9335,18 @@ Tu n'es pas Claude. Tu es ALBA.`;
             {/* Ligne séparatrice */}
             <div style={{ width: 40, height: 1, background: `linear-gradient(to right, transparent, ${T.or}55, transparent)`, margin: "0 auto 2.5rem" }} />
 
-            {/* Le reflet ALBA — grand, lumineux */}
-            <p style={{
-              fontFamily: T.serif, fontStyle: "italic",
-              fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
-              color: T.orPale, lineHeight: 1.9,
-              maxWidth: 380, margin: "0 auto",
-              letterSpacing: "0.01em",
-            }}>
-              {reflet}
-            </p>
+            {/* Le reflet ALBA — grand, lumineux — apparition lettre par lettre */}
+            <TypedPhrase
+              text={reflet}
+              style={{
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
+                color: T.orPale, lineHeight: 1.9,
+                maxWidth: 380, margin: "0 auto",
+                letterSpacing: "0.01em", display: "block",
+              }}
+              speed={28}
+            />
 
             {/* Signature */}
             <p style={{
@@ -9554,6 +9625,19 @@ function AlbaInner() {
       const nouvelle = calcProgressionCle(updated);
       if (nouvelle > cleActive) {
         setCleActive(nouvelle);
+        // Confetti dorés — moment symbolique de franchissement
+        setTimeout(() => {
+          confetti({
+            particleCount: 60,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ["#C8A96E", "#F0E2BC", "#D4B896", "#E8D4A8", "#FAF6F0"],
+            scalar: 0.9,
+            gravity: 0.8,
+            drift: 0.2,
+            ticks: 180,
+          });
+        }, 400);
         // Déclencher l'animation de la Porte
         setPorteOuverte(nouvelle);
         // Programmer la lettre pour dans 3-8h (aléatoire, mystérieux)
@@ -9738,11 +9822,29 @@ function AlbaInner() {
         }
       }} />}
       {view === "auth"    && <AuthScreen onAuth={handleAuth} />}
-      {view === "onboarding" && <Onboarding onComplete={handleComplete} />}
+      {view === "onboarding" && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="onboarding"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Onboarding onComplete={handleComplete} />
+          </motion.div>
+        </AnimatePresence>
+      )}
       {view === "portrait" && <Portrait data={userData} onContinue={() => setView("app")} />}
 
       {view === "app" && (
-        <div style={{ position: "relative", zIndex: 2, maxWidth: 560, margin: "0 auto" }}>
+        <motion.div
+          key="app"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ position: "relative", zIndex: 2, maxWidth: 560, margin: "0 auto" }}
+        >
 
           {/* ── HEADER ── */}
           <div style={{
@@ -9790,18 +9892,27 @@ function AlbaInner() {
             </div>
           </div>
 
-          {/* ── CONTENT ── */}
-          <div style={{ padding: "0 0" }}>
-            {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
-            {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
-            {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
-            {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
-            {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
-            {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
-            {tab === "lumiere"   && <LumiereDuJour />}
-            {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-            {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={authUser?.id || localStorage.getItem("alba_user_key")} />}
-          </div>
+          {/* ── CONTENT avec transitions Framer Motion ── */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={tab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+              style={{ padding: "0 0" }}
+            >
+              {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
+              {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
+              {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+              {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
+              {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
+              {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
+              {tab === "lumiere"   && <LumiereDuJour />}
+              {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
+              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={authUser?.id || localStorage.getItem("alba_user_key")} />}
+            </motion.div>
+          </AnimatePresence>
 
           {/* ── BOTTOM NAV ── */}
           <div style={{
@@ -9815,24 +9926,42 @@ function AlbaInner() {
             zIndex: 50,
           }}>
             {TABS.map(t => (
-              <button key={t.id} onClick={() => goTab(t.id)} style={{
-                background: "none", border: "none", cursor: "pointer",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
-                padding: "0.3rem 0.6rem",
-                transition: "opacity 0.2s",
-                opacity: tab === t.id ? 1 : 0.95,
-              }}>
+              <motion.button
+                key={t.id}
+                onClick={() => goTab(t.id)}
+                whileTap={{ scale: 0.88 }}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
+                  padding: "0.3rem 0.6rem",
+                  opacity: tab === t.id ? 1 : 0.95,
+                  position: "relative",
+                }}
+              >
                 <NavIcon id={t.id} active={tab === t.id} />
                 <span style={{
-                  fontFamily: T.sans, fontWeight: tab === t.id ? 300 : 200,
+                  fontFamily: T.sans, fontWeight: tab === t.id ? 400 : 300,
                   fontSize: "0.58rem", letterSpacing: "0.3em", textTransform: "uppercase",
                   color: tab === t.id ? T.or : T.aube,
-                  transition: "color 0.2s",
+                  transition: "color 0.25s",
                 }}>{t.label}</span>
-              </button>
+                {tab === t.id && (
+                  <motion.div
+                    layoutId="navActiveIndicator"
+                    style={{
+                      position: "absolute", bottom: -2, left: "50%",
+                      transform: "translateX(-50%)",
+                      width: 16, height: 1,
+                      background: T.or,
+                      borderRadius: 1,
+                    }}
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </motion.button>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
