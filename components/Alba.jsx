@@ -8167,18 +8167,36 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   const [lettre, setLettre] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lue, setLue] = useState(false);
+  const [premiumLocal, setPremiumLocal] = useState(isPremium);
   const mois = new Date().toISOString().slice(0, 7);
   const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
+  // Vérification premium directe (indépendante de la prop)
   useEffect(() => {
-    if (!isPremium || !userKey) { setLoading(false); return; }
-    fetch(`/api/lettre-mensuelle?user_key=${userKey}&mois=${mois}`)
+    const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
+    if (!uk) return;
+    fetch(`/api/subscription?user_key=${encodeURIComponent(uk)}`)
+      .then(r => r.json())
+      .then(d => { if (d.premium) setPremiumLocal(true); })
+      .catch(() => {});
+  }, [userKey]);
+
+  useEffect(() => {
+    if (isPremium) setPremiumLocal(true);
+  }, [isPremium]);
+
+  const estPremium = premiumLocal || isPremium;
+
+  useEffect(() => {
+    const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
+    if (!estPremium || !uk) { setLoading(false); return; }
+    fetch(`/api/lettre-mensuelle?user_key=${uk}&mois=${mois}`)
       .then(r => r.json())
       .then(d => { setLettre(d.lettre || null); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [userKey, isPremium, mois]);
+  }, [userKey, estPremium, mois]);
 
-  if (!isPremium) return (
+  if (!estPremium) return (
     <div style={{ textAlign: "center", padding: "2.5rem 1.5rem" }}>
       <div style={{ fontSize: "1.4rem", marginBottom: "1rem", opacity: 0.6 }}>✉</div>
       <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.5rem" }}>
