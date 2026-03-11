@@ -9276,11 +9276,11 @@ Tu n'es pas Claude. Tu es ALBA.`;
 
 // ─── ERROR BOUNDARY ───────────────────────────────────────────────────────────
 class AlbaErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { error: null }; }
+  constructor(props) { super(props); this.state = { error: null, stack: "" }; }
   static getDerivedStateFromError(err) { return { error: err }; }
-  componentDidCatch(err) {
-    // En cas de crash : vider le localStorage corrompu et recharger
-    console.error("ALBA crash:", err.message);
+  componentDidCatch(err, info) {
+    this.setState({ stack: info?.componentStack || "" });
+    console.error("ALBA crash:", err.message, info?.componentStack);
   }
   render() {
     if (this.state.error) {
@@ -9288,8 +9288,11 @@ class AlbaErrorBoundary extends React.Component {
         <div style={{ background:"#1A1714", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"2rem", fontFamily:"serif", color:"#C8A96E", textAlign:"center" }}>
           <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>✦</div>
           <div style={{ fontSize:"1.1rem", fontStyle:"italic", marginBottom:"0.5rem" }}>Alba a rencontré un problème.</div>
-          <div style={{ fontSize:"0.75rem", color:"#7A7060", marginBottom:"2rem", maxWidth:300, lineHeight:1.6 }}>
+          <div style={{ fontSize:"0.75rem", color:"#7A7060", marginBottom:"1rem", maxWidth:300, lineHeight:1.6 }}>
             {this.state.error.message}
+          </div>
+          <div style={{ fontSize:"0.55rem", color:"#5A5040", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap" }}>
+            {this.state.stack?.split("\n").slice(0,6).join("\n")}
           </div>
           <button onClick={() => {
             try { localStorage.removeItem("alba_profile"); } catch {}
