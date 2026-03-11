@@ -1720,18 +1720,18 @@ const Onboarding = ({ onComplete }) => {
   const [couleurPred, setCouleurPred] = useState("");
 
   const SIGNES = [
-    { id: "belier",     label: "Bélier",      symbole: "♈" },
-    { id: "taureau",    label: "Taureau",      symbole: "♉" },
-    { id: "gemeaux",    label: "Gémeaux",      symbole: "♊" },
-    { id: "cancer",     label: "Cancer",       symbole: "♋" },
-    { id: "lion",       label: "Lion",         symbole: "♌" },
-    { id: "vierge",     label: "Vierge",       symbole: "♍" },
-    { id: "balance",    label: "Balance",      symbole: "♎" },
-    { id: "scorpion",   label: "Scorpion",     symbole: "♏" },
-    { id: "sagittaire", label: "Sagittaire",   symbole: "♐" },
-    { id: "capricorne", label: "Capricorne",   symbole: "♑" },
-    { id: "verseau",    label: "Verseau",      symbole: "♒" },
-    { id: "poissons",   label: "Poissons",     symbole: "♓" },
+    { id: "belier",     label: "Bélier",      svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 28 C20 28 20 18 20 15"/><path d="M20 15 C20 8 12 5 10 10 C8 15 12 18 16 16"/><path d="M20 15 C20 8 28 5 30 10 C32 15 28 18 24 16"/><circle cx="13" cy="10" r="3.5" fill="none"/><circle cx="27" cy="10" r="3.5" fill="none"/><path d="M17 28 L23 28" strokeWidth="1.2"/></svg> },
+    { id: "taureau",    label: "Taureau",      svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><circle cx="20" cy="22" r="9"/><path d="M11 22 C11 14 8 9 6 8"/><path d="M29 22 C29 14 32 9 34 8"/><path d="M6 8 C8 6 12 7 14 10"/><path d="M34 8 C32 6 28 7 26 10"/></svg> },
+    { id: "gemeaux",    label: "Gémeaux",      svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><line x1="13" y1="8" x2="13" y2="32"/><line x1="27" y1="8" x2="27" y2="32"/><path d="M10 8 Q20 11 30 8"/><path d="M10 32 Q20 29 30 32"/><line x1="13" y1="20" x2="27" y2="20" strokeWidth="1"/></svg> },
+    { id: "cancer",     label: "Cancer",       svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M10 20 C10 13 16 9 20 12 C24 15 24 22 20 24 C16 26 12 24 13 20 C14 16 18 15 20 18"/><path d="M30 20 C30 27 24 31 20 28 C16 25 16 18 20 16 C24 14 28 16 27 20 C26 24 22 25 20 22"/></svg> },
+    { id: "lion",       label: "Lion",         svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><circle cx="17" cy="16" r="7"/><path d="M24 16 C28 16 32 19 32 23 C32 28 28 31 24 30 C22 29.5 21 28 21 26"/><path d="M32 28 C33 30 35 34 34 36"/></svg> },
+    { id: "vierge",     label: "Vierge",       svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="8" x2="12" y2="32"/><path d="M12 8 C15 8 22 9 22 15 C22 20 16 21 12 20"/><path d="M12 20 C16 20 24 21 24 27 C24 31 20 32 17 32"/><path d="M22 32 C24 32 28 31 28 28 C28 25 25 25 24 27"/></svg> },
+    { id: "balance",    label: "Balance",      svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="32" x2="32" y2="32"/><line x1="20" y1="32" x2="20" y2="14"/><line x1="9" y1="14" x2="31" y2="14"/><path d="M9 14 L14 22 L20 14 L26 22 L31 14"/><path d="M13 22 L27 22" strokeWidth="0.8" strokeDasharray="2 2"/></svg> },
+    { id: "scorpion",   label: "Scorpion",     svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><line x1="10" y1="8" x2="10" y2="26"/><line x1="20" y1="8" x2="20" y2="26"/><path d="M10 8 C13 8 20 9 20 15 C20 20 15 22 10 20"/><path d="M20 26 Q28 26 30 22 Q32 18 28 16 L30 18 L32 14"/></svg> },
+    { id: "sagittaire", label: "Sagittaire",   svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="10" y1="30" x2="30" y2="10"/><polyline points="18,10 30,10 30,22"/><line x1="8" y1="32" x2="14" y2="26"/></svg> },
+    { id: "capricorne", label: "Capricorne",   svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M10 8 C10 8 10 22 10 26 C10 30 13 33 17 33 C22 33 25 29 25 26"/><path d="M10 14 C13 12 18 13 20 17 C22 21 20 26 17 27"/><path d="M25 26 C25 22 28 19 31 22 C33 24 32 28 29 30"/></svg> },
+    { id: "verseau",    label: "Verseau",      svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M7 17 Q11 13 15 17 Q19 21 23 17 Q27 13 33 17"/><path d="M7 25 Q11 21 15 25 Q19 29 23 25 Q27 21 33 25"/></svg> },
+    { id: "poissons",   label: "Poissons",     svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M8 20 C8 14 12 8 20 8 C28 8 32 14 32 20"/><path d="M8 20 C8 26 12 32 20 32 C28 32 32 26 32 20"/><line x1="8" y1="20" x2="32" y2="20" strokeWidth="0.8"/><path d="M5 16 L8 20 L5 24"/><path d="M35 16 L32 20 L35 24"/></svg> },
   ];
 
   const COULEURS_PRED = [
@@ -2040,18 +2040,34 @@ const Onboarding = ({ onComplete }) => {
           Pas une croyance. Une langue parmi d'autres.
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.6rem", marginBottom: "2rem" }}>
-          {SIGNES.map(s => (
-            <button key={s.id} onClick={() => setSigne(s.id)} style={{
-              background: signe === s.id ? `${T.or}18` : "transparent",
-              border: `1px solid ${signe === s.id ? T.or + "66" : T.brume + "22"}`,
-              borderRadius: "6px", padding: "0.7rem 0.4rem",
-              cursor: "pointer", transition: "all 0.2s",
-              display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
-            }}>
-              <span style={{ fontSize: "1.2rem", color: signe === s.id ? T.or : T.brume }}>{s.symbole}</span>
-              <span style={{ fontFamily: T.serif, fontSize: "0.7rem", color: signe === s.id ? T.orPale : T.brume, fontStyle: "italic" }}>{s.label}</span>
-            </button>
-          ))}
+          {SIGNES.map(s => {
+            const sel = signe === s.id;
+            return (
+              <button key={s.id} onClick={() => setSigne(s.id)} style={{
+                background: sel ? `${T.or}12` : "transparent",
+                border: `1px solid ${sel ? T.or + "55" : T.brume + "18"}`,
+                borderRadius: "8px", padding: "0.8rem 0.3rem 0.6rem",
+                cursor: "pointer", transition: "all 0.25s",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem",
+                boxShadow: sel ? `0 0 14px ${T.or}22` : "none",
+              }}>
+                <div style={{
+                  width: 36, height: 36,
+                  color: sel ? T.or : `${T.brume}99`,
+                  filter: sel ? `drop-shadow(0 0 4px ${T.or}88)` : "none",
+                  transition: "all 0.25s",
+                }}>
+                  {s.svg}
+                </div>
+                <span style={{
+                  fontFamily: T.serif, fontSize: "0.62rem", fontStyle: "italic",
+                  color: sel ? T.orPale : `${T.brume}88`,
+                  letterSpacing: "0.03em",
+                  transition: "color 0.25s",
+                }}>{s.label}</span>
+              </button>
+            );
+          })}
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
           <Btn onClick={() => setStep(5)} canNext={!!signe} disabled={!signe} style={{ opacity: signe ? 1 : 0.4 }}>Continuer</Btn>
