@@ -8195,9 +8195,14 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   useEffect(() => {
     const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
     if (!estPremium || !uk) { setLoading(false); return; }
-    fetch(`/api/lettre-mensuelle?user_key=${uk}&mois=${mois}`)
+    // Lecture directe Supabase côté client
+    const SB_URL = "https://yuwqokjkpooozgtsvfkc.supabase.co";
+    const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
+    fetch(`${SB_URL}/rest/v1/alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(uk)}&mois=eq.${mois}&select=contenu&limit=1`, {
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+    })
       .then(r => r.json())
-      .then(d => { setLettre(d.lettre || null); setLoading(false); })
+      .then(rows => { setLettre(rows?.[0]?.contenu || null); setLoading(false); })
       .catch(() => setLoading(false));
   }, [userKey, estPremium, mois]);
 
