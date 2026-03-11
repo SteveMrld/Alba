@@ -8163,7 +8163,7 @@ const BibliothequeSagesses = () => {
 };
 
 // ─── LETTRE MENSUELLE ──────────────────────────────────────────────────────
-const LettreMensuelle = ({ userId, isPremium, onShowPaywall }) => {
+const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   const [lettre, setLettre] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lue, setLue] = useState(false);
@@ -8171,12 +8171,12 @@ const LettreMensuelle = ({ userId, isPremium, onShowPaywall }) => {
   const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
   useEffect(() => {
-    if (!isPremium || !userId) { setLoading(false); return; }
-    fetch(`/api/lettre-mensuelle?user_id=${userId}&mois=${mois}`)
+    if (!isPremium || !userKey) { setLoading(false); return; }
+    fetch(`/api/lettre-mensuelle?user_key=${userKey}&mois=${mois}`)
       .then(r => r.json())
       .then(d => { setLettre(d.lettre || null); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [userId, isPremium, mois]);
+  }, [userKey, isPremium, mois]);
 
   if (!isPremium) return (
     <div style={{ textAlign: "center", padding: "2.5rem 1.5rem" }}>
@@ -8337,7 +8337,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>La lettre du mois</div>
-        <LettreMensuelle userId={data?.user_id} isPremium={isPremium} onShowPaywall={onShowPaywall} />
+        <LettreMensuelle userKey={localStorage.getItem('alba_user_key') || data?.user_key} isPremium={isPremium} onShowPaywall={onShowPaywall} />
       </div>
 
       {/* ── Mot Secret ── généré par Claude API chaque lundi ── */}
