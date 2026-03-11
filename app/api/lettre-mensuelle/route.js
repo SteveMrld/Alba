@@ -26,37 +26,36 @@ const sbFetch = async (path, opts = {}) => {
 export async function POST(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const targetUserId = searchParams.get("user_id") || null;
+    const targetUserKey = searchParams.get("user_key") || null;
     const mois = new Date().toISOString().slice(0, 7);
     const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
     // Récupérer les abonnés premium actifs
-    const filter = targetUserId
-      ? `status=eq.active&user_id=eq.${targetUserId}`
+    const filter = targetUserKey
+      ? `status=eq.active&user_key=eq.${encodeURIComponent(targetUserKey)}`
       : `status=eq.active`;
-    const subs = await sbFetch(`alba_subscriptions?${filter}&select=user_id,user_key`, { service: true });
+    const subs = await sbFetch(`alba_subscriptions?${filter}&select=user_key`, { service: true });
 
     const resultats = [];
 
     for (const sub of subs || []) {
-      const uid = sub.user_id;
       const uk = sub.user_key;
 
       // Déjà générée ce mois ?
       const existante = await sbFetch(
-        `alba_lettres_mensuelles?user_id=eq.${uid}&mois=eq.${mois}&select=id`,
+        `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(uk)}&mois=eq.${mois}&select=id`,
         { service: true }
       ).catch(() => []);
-      if (existante?.length > 0) { resultats.push({ uid, status: "already_done" }); continue; }
+      if (existante?.length > 0) { resultats.push({ uk, status: "already_done" }); continue; }
 
       const debutMois = `${mois}-01T00:00:00Z`;
 
       // Données parallèles
       const [profils, postits, cairn, progress] = await Promise.allSettled([
-        sbFetch(`alba_profiles?user_id=eq.${uid}&select=prenom,intention,intention_secondaire,sensibilite,cle_active,naissance`, { service: true }),
-        sbFetch(`alba_postits?user_id=eq.${uid}&created_at=gte.${debutMois}&select=contenu,created_at&order=created_at.desc&limit=20`, { service: true }),
-        sbFetch(`alba_cairn?user_id=eq.${uid}&created_at=gte.${debutMois}&select=etat&order=created_at.desc&limit=30`, { service: true }),
-        sbFetch(`alba_progress?user_id=eq.${uid}&select=stats,cle_active`, { service: true }),
+        sbFetch(`alba_profiles?user_key=eq.${encodeURIComponent(uk)}&select=prenom,intention,intention_secondaire,sensibilite,cle_active,naissance`, { service: true }),
+        sbFetch(`alba_postits?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=texte,created_at&order=created_at.desc&limit=20`, { service: true }),
+        sbFetch(`alba_cairn?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=etat&order=created_at.desc&limit=30`, { service: true }),
+        sbFetch(`alba_progress?user_key=eq.${encodeURIComponent(uk)}&select=cle_active`, { service: true }),
       ]);
 
       const p = profils.value?.[0] || {};
@@ -77,7 +76,7 @@ export async function POST(req) {
         contexteIntention = intention || "non précisée";
       }
 
-      const fragments = (postits.value || []).map(x => x.contenu).filter(Boolean).slice(0, 8).join("\n—\n");
+      const fragments = (postits.value || []).map(x => x.texte).filter(Boolean).slice(0, 8).join("\n—\n");
       const etats = (cairn.value || []).map(x => x.etat).filter(Boolean);
       const etatsFreq = etats.reduce((acc, e) => { acc[e] = (acc[e]||0)+1; return acc; }, {});
       const etatsTexte = Object.entries(etatsFreq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([e,n])=>`${e} (${n} fois)`).join(", ");
@@ -118,17 +117,17 @@ CONSIGNES ABSOLUES :
         }),
       });
 
-      if (!aiRes.ok) { resultats.push({ uid, status: "api_error" }); continue; }
+      if (!aiRes.ok) { resultats.push({ uk, status: "api_error" }); continue; }
       const ai = await aiRes.json();
       const contenu = ai.content?.[0]?.text || "";
 
       await sbFetch("alba_lettres_mensuelles", {
         method: "POST",
         service: true,
-        body: JSON.stringify({ user_id: uid, user_key: uk, mois, contenu, lue: false, created_at: new Date().toISOString() }),
+        body: JSON.stringify({ user_key: uk, mois, contenu, lue: false, created_at: new Date().toISOString() }),
       });
 
-      resultats.push({ uid, status: "generated", words: contenu.split(" ").length });
+      resultats.push({ uk, status: "generated", words: contenu.split(" ").length });
     }
 
     return Response.json({ ok: true, mois, resultats });
@@ -141,13 +140,13 @@ CONSIGNES ABSOLUES :
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("user_id");
+    const userKey = searchParams.get("user_key");
     const mois = searchParams.get("mois") || new Date().toISOString().slice(0, 7);
 
-    if (!userId) return Response.json({ lettre: null });
+    if (!userKey) return Response.json({ lettre: null });
 
     const data = await sbFetch(
-      `alba_lettres_mensuelles?user_id=eq.${userId}&mois=eq.${mois}&select=*`,
+      `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(userKey)}&mois=eq.${mois}&select=*`,
       { service: true }
     ).catch(() => []);
 
