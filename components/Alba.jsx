@@ -9603,7 +9603,8 @@ function AlbaInner() {
       souffle:   "/icons/navigation_souffle.svg",
     };
     if (id === "trouvailles") return (
-      <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.2" strokeLinecap="round">
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={active ? "#C8A96E" : "#B0A59A"} strokeWidth="1.2" strokeLinecap="round"
+        style={{ opacity: active ? 1 : 0.85, transition: "all 0.25s" }}>
         <path d="M12 3l1.5 4.5H18l-3.75 2.7 1.5 4.5L12 12l-3.75 2.7 1.5-4.5L6 7.5h4.5z"/>
         <circle cx="12" cy="12" r="9" strokeDasharray="2 3" opacity="0.4"/>
       </svg>
