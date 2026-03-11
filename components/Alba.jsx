@@ -9450,12 +9450,16 @@ function AlbaInner() {
       const existingUser = sbAuth.loadSession();
       if (existingUser) {
         setAuthUser(existingUser);
-        // Vérifier statut premium
+        // Vérifier statut premium directement via Supabase (client-side)
         try {
-          const userKey = existingUser.id || localStorage.getItem("alba_user_key") || "local";
-          const pr = await fetch(`/api/subscription?user_key=${encodeURIComponent(userKey)}`);
-          const pd = await pr.json();
-          setIsPremium(pd.premium === true);
+          const _sbUrl = "https://yuwqokjkpooozgtsvfkc.supabase.co";
+          const _sbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
+          const _uk = existingUser.id || localStorage.getItem("alba_user_key") || "local";
+          const _pr = await fetch(`${_sbUrl}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(_uk)}&select=is_premium&limit=1`, {
+            headers: { apikey: _sbKey, Authorization: `Bearer ${_sbKey}` }
+          });
+          const _rows = await _pr.json();
+          if (_rows?.[0]?.is_premium === true) setIsPremium(true);
         } catch {}
       }
       // Profil
@@ -9566,13 +9570,7 @@ function AlbaInner() {
     if (user.id) {
       try { localStorage.setItem("alba_user_key", user.id); } catch {}
     }
-    // Vérifier statut premium
-    try {
-      const pr = await fetch(`/api/subscription?user_key=${encodeURIComponent(user.id)}`);
-      const pd = await pr.json();
-      setIsPremium(pd.premium === true);
-    } catch {}
-    // Charger le profil directement depuis Supabase avec l'auth ID
+    // Charger profil + premium directement depuis Supabase
     try {
       localStorage.removeItem("alba_profile");
       const SUPABASE_URL = "https://yuwqokjkpooozgtsvfkc.supabase.co";
@@ -9583,6 +9581,8 @@ function AlbaInner() {
       const rows = await r.json();
       const row = rows?.[0];
       if (row) {
+        // Premium depuis le profil
+        if (row.is_premium === true) setIsPremium(true);
         const profile = {
           prenom: row.prenom || "",
           naissance: row.naissance || "01/01/1990",
