@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 // ─── ÉCLATS D'AUBE — Système de progression ───────────────────────────────────
 // Chaque acte dans l'app génère des éclats. Silencieux. Mystérieux.
@@ -9240,8 +9240,38 @@ Tu n'es pas Claude. Tu es ALBA.`;
   );
 };
 
+// ─── ERROR BOUNDARY ───────────────────────────────────────────────────────────
+class AlbaErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
+  componentDidCatch(err) {
+    // En cas de crash : vider le localStorage corrompu et recharger
+    console.error("ALBA crash:", err.message);
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ background:"#1A1714", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"2rem", fontFamily:"serif", color:"#C8A96E", textAlign:"center" }}>
+          <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>✦</div>
+          <div style={{ fontSize:"1.1rem", fontStyle:"italic", marginBottom:"0.5rem" }}>Alba a rencontré un problème.</div>
+          <div style={{ fontSize:"0.75rem", color:"#7A7060", marginBottom:"2rem", maxWidth:300, lineHeight:1.6 }}>
+            {this.state.error.message}
+          </div>
+          <button onClick={() => {
+            try { localStorage.removeItem("alba_profile"); } catch {}
+            window.location.reload();
+          }} style={{ background:"transparent", border:"1px solid #C8A96E55", borderRadius:"6px", padding:"0.7rem 1.5rem", color:"#C8A96E", cursor:"pointer", fontFamily:"serif", fontStyle:"italic" }}>
+            Réinitialiser et relancer
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
-export default function Alba() {
+function AlbaInner() {
   const [view, setView] = useState("splash");
   const [authUser, setAuthUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
@@ -9702,5 +9732,13 @@ export default function Alba() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Alba() {
+  return (
+    <AlbaErrorBoundary>
+      <AlbaInner />
+    </AlbaErrorBoundary>
   );
 }
