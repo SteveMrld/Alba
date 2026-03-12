@@ -8736,7 +8736,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
         whiteSpace: "pre-wrap",
         animation: lue ? "none" : "fadeUp 0.8s ease forwards",
       }}>
-        {lettre.contenu}
+        {typeof lettre === "string" ? lettre : lettre?.contenu}
       </div>
 
       {/* Signature */}
