@@ -8661,7 +8661,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
     if (isPremium) setPremiumLocal(true);
   }, [isPremium]);
 
-  const estPremium = true; // BETA: premium activé pour tous
+  const estPremium = isPremium || premiumLocal;
 
   useEffect(() => {
     const uk = userKey || (typeof localStorage !== "undefined" ? localStorage.getItem("alba_user_key") : null);
@@ -10022,7 +10022,7 @@ const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
 function AlbaInner() {
   const [view, setView] = useState("splash");
   const [authUser, setAuthUser] = useState(null);
-  const [isPremium, setIsPremium] = useState(true); // BETA: premium activé pour tous
+  const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState("compagnon");
@@ -10132,7 +10132,7 @@ function AlbaInner() {
         try {
           const _sbUrl = "https://yuwqokjkpooozgtsvfkc.supabase.co";
           const _sbKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
-          const _uk = existingUser.id || localStorage.getItem("alba_user_key") || "local";
+          const _uk = localStorage.getItem("alba_user_key") || existingUser.id || "local";
           const _pr = await fetch(`${_sbUrl}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(_uk)}&select=is_premium&limit=1`, {
             headers: { apikey: _sbKey, Authorization: `Bearer ${_sbKey}` }
           });
@@ -10518,7 +10518,7 @@ function AlbaInner() {
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={authUser?.id || localStorage.getItem("alba_user_key")} />}
+              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} />}
             </motion.div>
           </AnimatePresence>
 
