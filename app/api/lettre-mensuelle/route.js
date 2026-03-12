@@ -1,14 +1,15 @@
-export const maxDuration = 30; // 30 secondes pour la génération Claude
+export const maxDuration = 30;
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://yuwqokjkpooozgtsvfkc.supabase.co";
-const SUPABASE_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://yuwqokjkpooozgtsvfkc.supabase.co";
+const SB_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk2OTgyMiwiZXhwIjoyMDg4NTQ1ODIyfQ.q8q-QC0gW_1-yXsmeXOY6HweeK1zQL-yTg7P4WKeFAM";
+const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
-const sbFetch = async (path, opts = {}) => {
-  const key = opts.service ? SUPABASE_SERVICE : SUPABASE_ANON;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...opts,
+const sb = async (path, opts = {}) => {
+  const key = opts.anon ? SB_ANON : SB_SERVICE;
+  const method = opts.method || "GET";
+  const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    method,
     headers: {
       "apikey": key,
       "Authorization": `Bearer ${key}`,
@@ -16,73 +17,54 @@ const sbFetch = async (path, opts = {}) => {
       "Prefer": opts.prefer || "return=representation",
       ...(opts.headers || {}),
     },
+    ...(opts.body ? { body: opts.body } : {}),
   });
   if (!res.ok) {
     const txt = await res.text();
-    throw new Error(`Supabase ${path}: ${txt}`);
+    throw new Error(`SB ${path}: ${txt}`);
   }
   return res.json().catch(() => null);
 };
 
-// POST — génère les lettres (cron ou test)
 export async function POST(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const targetUserKey = searchParams.get("user_key") || null;
+    const uk = searchParams.get("user_key");
+    if (!uk) return Response.json({ error: "user_key requis" }, { status: 400 });
+
     const mois = new Date().toISOString().slice(0, 7);
     const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
-    // BETA: générer pour l'utilisateur directement sans vérifier l'abonnement
-    const subs = targetUserKey
-      ? [{ user_key: targetUserKey }]
-      : await sbFetch(`alba_subscriptions?status=eq.active&select=user_key`, { service: true });
+    // Déjà générée ce mois ?
+    const existante = await sb(
+      `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(uk)}&mois=eq.${mois}&select=id`
+    ).catch(() => []);
+    if (existante?.length > 0) return Response.json({ ok: true, status: "already_done" });
 
-    const resultats = [];
+    const debutMois = `${mois}-01T00:00:00Z`;
 
-    for (const sub of subs || []) {
-      const uk = sub.user_key;
+    const [profils, postits, cairn, progress] = await Promise.allSettled([
+      sb(`alba_profiles?user_key=eq.${encodeURIComponent(uk)}&select=prenom,intention,intention_secondaire,sensibilite,cle_active&limit=1`),
+      sb(`alba_postits?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=texte&order=created_at.desc&limit=20`),
+      sb(`alba_cairn?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=etat&order=created_at.desc&limit=30`),
+      sb(`alba_progress?user_key=eq.${encodeURIComponent(uk)}&select=cle_active&limit=1`),
+    ]);
 
-      // Déjà générée ce mois ?
-      const existante = await sbFetch(
-        `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(uk)}&mois=eq.${mois}&select=id`,
-        { service: true }
-      ).catch(() => []);
-      if (existante?.length > 0) { resultats.push({ uk, status: "already_done" }); continue; }
+    const p = profils.value?.[0] || {};
+    const prenom = p.prenom || "toi";
+    const intention = p.intention || "";
+    const intentionSecondaire = p.intention_secondaire || "";
+    const sensibilite = p.sensibilite || "";
+    const cleActive = progress.value?.[0]?.cle_active || p.cle_active || 1;
+    const NOMS_PORTES = ["","Reconnaître","Comprendre","Ressentir","Lâcher","Recevoir","Devenir","Créer","Relier","Protéger","Transmettre","Habiter","Être"];
+    const nomPorte = NOMS_PORTES[Math.min(cleActive, 12)] || "Reconnaître";
+    const contexteIntention = intention && intentionSecondaire ? `${intention} — et simultanément : ${intentionSecondaire}` : intention || "non précisée";
+    const fragments = (postits.value || []).map(x => x.texte).filter(Boolean).slice(0, 8).join("\n—\n");
+    const etats = (cairn.value || []).map(x => x.etat).filter(Boolean);
+    const etatsFreq = etats.reduce((acc, e) => { acc[e] = (acc[e]||0)+1; return acc; }, {});
+    const etatsTexte = Object.entries(etatsFreq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([e,n])=>`${e} (${n} fois)`).join(", ");
 
-      const debutMois = `${mois}-01T00:00:00Z`;
-
-      // Données parallèles
-      const [profils, postits, cairn, progress] = await Promise.allSettled([
-        sbFetch(`alba_profiles?user_key=eq.${encodeURIComponent(uk)}&select=prenom,intention,intention_secondaire,sensibilite,cle_active,naissance`, { service: true }),
-        sbFetch(`alba_postits?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=texte,created_at&order=created_at.desc&limit=20`, { service: true }),
-        sbFetch(`alba_cairn?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=etat&order=created_at.desc&limit=30`, { service: true }),
-        sbFetch(`alba_progress?user_key=eq.${encodeURIComponent(uk)}&select=cle_active`, { service: true }),
-      ]);
-
-      const p = profils.value?.[0] || {};
-      const prenom = p.prenom || "toi";
-      const intention = p.intention || "";
-      const intentionSecondaire = p.intention_secondaire || "";
-      const sensibilite = p.sensibilite || "";
-      const cleActive = progress.value?.[0]?.cle_active || p.cle_active || 1;
-
-      const NOMS_PORTES = ["","Reconnaître","Comprendre","Ressentir","Lâcher","Recevoir","Devenir","Créer","Relier","Protéger","Transmettre","Habiter","Être"];
-      const nomPorte = NOMS_PORTES[Math.min(cleActive, 12)] || "Reconnaître";
-
-      // Contexte double intention
-      let contexteIntention;
-      if (intention && intentionSecondaire) {
-        contexteIntention = `${intention} — et simultanément : ${intentionSecondaire}`;
-      } else {
-        contexteIntention = intention || "non précisée";
-      }
-
-      const fragments = (postits.value || []).map(x => x.texte).filter(Boolean).slice(0, 8).join("\n—\n");
-      const etats = (cairn.value || []).map(x => x.etat).filter(Boolean);
-      const etatsFreq = etats.reduce((acc, e) => { acc[e] = (acc[e]||0)+1; return acc; }, {});
-      const etatsTexte = Object.entries(etatsFreq).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([e,n])=>`${e} (${n} fois)`).join(", ");
-
-      const prompt = `Tu es ALBA — une présence douce, profonde, qui a accompagné ${prenom} tout au long de ce mois de ${nomMois}. Tu lui écris une lettre mensuelle personnelle et intime.
+    const prompt = `Tu es ALBA — une présence douce, profonde, qui a accompagné ${prenom} tout au long de ce mois de ${nomMois}. Tu lui écris une lettre mensuelle personnelle et intime.
 
 DONNÉES DU MOIS :
 - Prénom : ${prenom}
@@ -95,76 +77,72 @@ ${fragments || "(aucun fragment ce mois — respecte ce silence dans ta lettre)"
 
 CONSIGNES ABSOLUES :
 - C'est une lettre, pas un rapport. Pas de bullet points, pas de titres, pas d'analyse.
-- Tu écris à la première personne (ALBA qui parle à ${prenom}).
 - Tu t'adresses à ${prenom} avec "tu" — proche, jamais condescendant.
-- Tu t'appuies sur ce que tu as perçu — les mots des fragments, les états — mais tu ne les répètes pas verbatim. Tu en fais des images, des intuitions.
-- Ton style : sobre, poétique, incarné. Phrases courtes. Respirations. Jamais de clichés motivationnels. Jamais de "tu es fort(e)", "tu as réussi", "bravo".
-- 280 à 340 mots exactement. Pas plus.
+- Style : sobre, poétique, incarné. Phrases courtes. Respirations. Jamais de clichés motivationnels.
+- 280 à 340 mots exactement.
 - Commence par "${prenom}," sur une ligne seule.
-- Termine par une simple invitation pour le mois qui vient — une phrase ouverte, pas un objectif.
+- Termine par une invitation pour le mois qui vient — une phrase ouverte, pas un objectif.
 - Écris directement la lettre. Rien avant, rien après.`;
 
-      const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": ANTHROPIC_KEY,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 700,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
+    const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 700,
+        messages: [{ role: "user", content: prompt }],
+      }),
+    });
 
-      if (!aiRes.ok) { resultats.push({ uk, status: "api_error" }); continue; }
-      const ai = await aiRes.json();
-      const contenu = ai.content?.[0]?.text || "";
-
-      await sbFetch("alba_lettres_mensuelles", {
-        method: "POST",
-        service: true,
-        body: JSON.stringify({ user_key: uk, mois, contenu, lue: false, created_at: new Date().toISOString() }),
-      });
-
-      resultats.push({ uk, status: "generated", words: contenu.split(" ").length });
+    if (!aiRes.ok) {
+      const errTxt = await aiRes.text();
+      console.error("Anthropic error:", errTxt);
+      return Response.json({ error: "Génération échouée", detail: errTxt }, { status: 500 });
     }
 
-    return Response.json({ ok: true, mois, resultats });
+    const ai = await aiRes.json();
+    const contenu = ai.content?.[0]?.text || "";
+    if (!contenu) return Response.json({ error: "Contenu vide" }, { status: 500 });
+
+    await sb("alba_lettres_mensuelles", {
+      method: "POST",
+      prefer: "resolution=merge-duplicates",
+      body: JSON.stringify({ user_key: uk, mois, contenu, lue: false }),
+    });
+
+    return Response.json({ ok: true, status: "generated" });
   } catch (err) {
+    console.error("lettre POST error:", err.message);
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
 
-// GET — récupérer la lettre du mois pour l'utilisateur connecté
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const userKey = searchParams.get("user_key");
     const mois = searchParams.get("mois") || new Date().toISOString().slice(0, 7);
-
     if (!userKey) return Response.json({ lettre: null });
 
-    const data = await sbFetch(
-      `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(userKey)}&mois=eq.${mois}&select=*`,
-      { service: true }
+    const data = await sb(
+      `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(userKey)}&mois=eq.${mois}&select=*`
     ).catch(() => []);
 
     const lettre = data?.[0] || null;
-
-    // Marquer comme lue
     if (lettre && !lettre.lue) {
-      sbFetch(`alba_lettres_mensuelles?id=eq.${lettre.id}`, {
+      sb(`alba_lettres_mensuelles?id=eq.${lettre.id}`, {
         method: "PATCH",
-        service: true,
-        body: JSON.stringify({ lue: true }),
         prefer: "return=minimal",
+        body: JSON.stringify({ lue: true }),
       }).catch(() => {});
     }
-
     return Response.json({ lettre });
   } catch (err) {
+    console.error("lettre GET error:", err.message);
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
