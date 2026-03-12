@@ -3367,6 +3367,138 @@ const getEchoHumain = () => {
 };
 
 // ─── ACCUEIL ──────────────────────────────────────────────────────────────────
+// ─── BAROMÈTRE NERVEUX ────────────────────────────────────────────────────────
+// Basé sur la théorie polyvagale de Stephen Porges
+const ETATS_NERVEUX = [
+  {
+    id: "securite",
+    label: "En sécurité",
+    sous: "Je me sens ancré, présent",
+    couleur: "#7BA88A",
+    icone: "◉",
+    description: "Ton système nerveux est en mode connexion. C'est le sol fertile pour réfléchir, créer, ressentir en profondeur.",
+    suggestion: "Profite de cette clarté — c'est le bon moment pour explorer quelque chose de nouveau.",
+  },
+  {
+    id: "mobilise",
+    label: "Mobilisé",
+    sous: "Agité, tendu ou hyperactif",
+    couleur: "#C8A040",
+    icone: "◈",
+    description: "Ton système sympathique est activé. Ton corps est en alerte. Ce n'est pas un défaut — c'est de l'énergie.",
+    suggestion: "Avant d'aller plus loin, essaie 4 respirations lentes. Expire deux fois plus long que l'inspire.",
+  },
+  {
+    id: "fige",
+    label: "Figé",
+    sous: "Engourdi, déconnecté",
+    couleur: "#8888AA",
+    icone: "◌",
+    description: "Ton système nerveux est en mode protection. Le gel est une réponse sage face à l'accablement.",
+    suggestion: "Pose une main sur ton cœur. Sens sa chaleur. Tu n'as rien à faire d'autre pour l'instant.",
+  },
+  {
+    id: "effondre",
+    label: "Effondré",
+    sous: "Épuisé, submergé",
+    couleur: "#A87878",
+    icone: "○",
+    description: "Tu portes beaucoup. Le système nerveux peut s'épuiser. Ce que tu ressens est réel et légitime.",
+    suggestion: "Aujourd'hui, une seule chose compte : te reposer sans te juger. ALBA reste là.",
+  },
+];
+
+const BarometreNerveux = () => {
+  const todayKey = new Date().toISOString().split("T")[0];
+  const storageKey = "alba_barometre_" + todayKey;
+
+  const [etatChoisi, setEtatChoisi] = useState(() => {
+    try { return localStorage.getItem(storageKey) || null; } catch { return null; }
+  });
+  const [expanded, setExpanded] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [pressed, setPressed] = useState(null);
+
+  const choisir = (id) => {
+    setEtatChoisi(id);
+    try { localStorage.setItem(storageKey, id); } catch {}
+    setTimeout(() => setShowDetail(true), 300);
+  };
+
+  const etat = ETATS_NERVEUX.find(e => e.id === etatChoisi);
+
+  if (etatChoisi && !showDetail) return null;
+
+  return (
+    <div style={{ margin: "1.5rem 1rem 0", padding: "1.2rem 1.2rem 1rem", background: `linear-gradient(135deg, #161310, #1A1612)`, borderRadius: "8px", border: `1px solid ${T.or}18` }}>
+
+      {!etatChoisi ? (
+        <>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.6rem" }}>
+            <div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.brume, marginBottom: "0.25rem" }}>
+                Baromètre nerveux
+              </div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube }}>
+                Où est ton système nerveux là ?
+              </div>
+            </div>
+            <div style={{ fontSize: "0.65rem", color: `${T.brume}66`, fontFamily: T.sans }}>Polyvagal</div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.55rem", marginTop: "1rem" }}>
+            {ETATS_NERVEUX.map(e => (
+              <button
+                key={e.id}
+                onMouseDown={() => setPressed(e.id)}
+                onMouseUp={() => setPressed(null)}
+                onTouchStart={() => setPressed(e.id)}
+                onTouchEnd={() => setPressed(null)}
+                onClick={() => choisir(e.id)}
+                style={{
+                  background: pressed === e.id ? `${e.couleur}20` : `${e.couleur}0C`,
+                  border: `1px solid ${e.couleur}${pressed === e.id ? "66" : "33"}`,
+                  borderRadius: "6px", padding: "0.75rem 0.6rem",
+                  cursor: "pointer", textAlign: "left",
+                  transform: pressed === e.id ? "scale(0.96)" : "scale(1)",
+                  transition: "all 0.15s ease",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <div style={{ fontSize: "1rem", color: e.couleur, marginBottom: "0.3rem" }}>{e.icone}</div>
+                <div style={{ fontFamily: T.serif, fontSize: "0.88rem", color: T.aube, fontStyle: "italic", marginBottom: "0.15rem" }}>{e.label}</div>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem", color: `${T.brume}AA`, letterSpacing: "0.02em", lineHeight: 1.4 }}>{e.sous}</div>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : etat ? (
+        <div style={{ animation: "fadeUp 0.6s ease forwards" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", marginBottom: "0.8rem" }}>
+            <div style={{ fontSize: "1.1rem", color: etat.couleur }}>{etat.icone}</div>
+            <div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube }}>{etat.label}</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${etat.couleur}AA` }}>aujourd'hui</div>
+            </div>
+            <button onClick={() => { setEtatChoisi(null); setShowDetail(false); try { localStorage.removeItem(storageKey); } catch {} }} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: `${T.brume}55`, fontSize: "0.7rem", fontFamily: T.sans }}>
+              changer
+            </button>
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, lineHeight: 1.75, margin: "0 0 0.7rem" }}>
+            {etat.description}
+          </p>
+          <div style={{ borderTop: `1px solid ${etat.couleur}22`, paddingTop: "0.7rem" }}>
+            <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.75rem", color: `${etat.couleur}DD`, letterSpacing: "0.02em", lineHeight: 1.6, margin: 0 }}>
+              → {etat.suggestion}
+            </p>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
+// ─── ACCUEIL ─────────────────────────────────────────────────────────────────
 const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   if (!data) return null;
   const cdv = cheminDeVie(data.naissance);
@@ -3924,6 +4056,9 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           {blessure.question}
         </p>
       </button>
+
+      {/* ── BAROMÈTRE NERVEUX ── */}
+      <BarometreNerveux />
 
       {/* ── RITUEL DU MATIN ── (visible avant midi) */}
       {isMatin && <RituelMatin data={data} cleActive={cleActive} onComplete={() => {}} />}
