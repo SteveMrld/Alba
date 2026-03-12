@@ -8183,7 +8183,7 @@ const getCatVisuel = (categorieId) => {
   return VISUELS_TROUVAILLES.default;
 };
 
-
+const SalleDesTrouvailles = ({ data }) => {
   const [filtre, setFiltre] = useState("tout");
   const [selected, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -8467,7 +8467,7 @@ const getCatVisuel = (categorieId) => {
         </div>
       </div>
 
-      {/* Grille cartes */}
+      {/* Cartes temple */}
       {loading ? (
         <div style={{ textAlign: "center", padding: "3rem 1rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume }}>
           …
@@ -8479,56 +8479,92 @@ const getCatVisuel = (categorieId) => {
           </div>
         </div>
       ) : (
-      <div style={{ padding: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.8rem" }}>
+      <div style={{ padding: "0 1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         {filtered.map(t => {
           const c = getCat(t.categorie);
           const v = getCatVisuel(t.categorie);
           return (
             <div key={t.id} onClick={() => setSelected(t)} style={{
-              background: `linear-gradient(145deg, ${v.bg[0]}, ${v.bg[1]})`,
-              border: `1px solid ${v.accent}22`,
-              borderRadius: "8px", padding: "1.2rem 1rem",
-              cursor: "pointer", transition: "all 0.3s",
+              background: `linear-gradient(135deg, ${v.bg[0]} 0%, ${v.bg[1]} 100%)`,
+              border: `1px solid ${v.accent}30`,
+              borderRadius: "12px",
+              cursor: "pointer",
               position: "relative", overflow: "hidden",
-              minHeight: 120,
+              minHeight: 140,
+              display: "flex", alignItems: "stretch",
             }}>
-              {/* Visuel SVG en fond */}
-              <svg viewBox="0 0 48 48" style={{
-                position: "absolute", bottom: -4, right: -4,
-                width: 80, height: 80, opacity: 0.12,
-                color: v.accent, pointerEvents: "none",
-              }} dangerouslySetInnerHTML={{ __html: v.svg }} />
-              {/* Halo couleur */}
+              {/* Bande colorée gauche */}
               <div style={{
-                position: "absolute", bottom: 0, right: 0,
-                width: 100, height: 100, borderRadius: "50%",
-                background: `radial-gradient(circle, ${v.accent}15 0%, transparent 70%)`,
-                pointerEvents: "none",
+                width: 4, flexShrink: 0,
+                background: `linear-gradient(to bottom, ${v.accent}BB, ${v.accent}33)`,
               }}/>
-              {/* Gradient overlay */}
+
+              {/* Icône latérale */}
               <div style={{
-                position: "absolute", inset: 0,
-                background: `linear-gradient(135deg, ${v.bg[0]}EE 40%, transparent 100%)`,
-                pointerEvents: "none",
-              }}/>
-              {/* Catégorie */}
-              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.6rem" }}>
-                {c.emoji} {c.label}
-              </div>
-              {/* Titre */}
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.82rem, 2.5vw, 0.95rem)", color: T.orPale, fontWeight: 300, lineHeight: 1.4, marginBottom: t.auteur ? "0.3rem" : "0.8rem" }}>
-                {t.titre}
-              </div>
-              {/* Auteur */}
-              {t.auteur && (
-                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.2em", color: `${T.brume}88`, marginBottom: "0.8rem" }}>
-                  {t.auteur}
+                width: 72, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: "1.2rem 0",
+              }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: `radial-gradient(circle, ${v.accent}20, transparent 70%)`,
+                  border: `1px solid ${v.accent}33`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <svg viewBox="0 0 48 48" style={{ width: 28, height: 28, color: v.accent, opacity: 0.85 }}
+                    dangerouslySetInnerHTML={{ __html: v.svg }} />
                 </div>
-              )}
-              {/* Source */}
-              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}55` }}>
-                {t.source === "ALBA" ? "✦ ALBA" : t.jours ? `il y a ${t.jours}j` : ""}
               </div>
+
+              {/* Contenu */}
+              <div style={{ flex: 1, padding: "1.2rem 1rem 1.2rem 0.2rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                <div>
+                  {/* Catégorie */}
+                  <div style={{
+                    fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem",
+                    letterSpacing: "0.45em", textTransform: "uppercase",
+                    color: v.accent, marginBottom: "0.5rem", opacity: 0.9,
+                  }}>{c.label}</div>
+                  {/* Titre */}
+                  <div style={{
+                    fontFamily: T.serif, fontStyle: "italic",
+                    fontSize: "clamp(1rem, 3.5vw, 1.15rem)",
+                    color: T.orPale, fontWeight: 300, lineHeight: 1.35,
+                    marginBottom: "0.3rem",
+                  }}>{t.titre}</div>
+                  {/* Auteur */}
+                  {t.auteur && (
+                    <div style={{
+                      fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
+                      letterSpacing: "0.15em", color: `${T.brume}99`,
+                    }}>{t.auteur}</div>
+                  )}
+                </div>
+                {/* Extrait */}
+                <div style={{
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "clamp(0.75rem, 2.5vw, 0.82rem)",
+                  color: `${T.brume}BB`, lineHeight: 1.6, marginTop: "0.8rem",
+                  display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}>{t.pourquoi}</div>
+
+                {/* Pied */}
+                <div style={{
+                  marginTop: "0.8rem",
+                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem",
+                  letterSpacing: "0.25em", color: `${v.accent}66`,
+                  textTransform: "uppercase",
+                }}>{t.source === "ALBA" ? "✦ Sélection ALBA" : t.jours ? `Partagé il y a ${t.jours}j` : "Communauté"}</div>
+              </div>
+
+              {/* Halo droit */}
+              <div style={{
+                position: "absolute", right: -20, top: "50%", transform: "translateY(-50%)",
+                width: 120, height: 120, borderRadius: "50%",
+                background: `radial-gradient(circle, ${v.accent}10 0%, transparent 70%)`,
+                pointerEvents: "none",
+              }}/>
             </div>
           );
         })}
@@ -8536,8 +8572,8 @@ const getCatVisuel = (categorieId) => {
       )} {/* fin conditionnel grille */}
 
       {/* Bouton déposer */}
-      <div style={{ textAlign: "center", padding: "1.5rem 1rem" }}>
-        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginBottom: "1rem", lineHeight: 1.7 }}>
+      <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, marginBottom: "1rem", lineHeight: 1.8 }}>
           Tu as quelque chose à laisser ici ?
         </div>
         <Btn onClick={() => setShowForm(true)}>Déposer une trouvaille</Btn>
