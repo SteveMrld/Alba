@@ -1726,14 +1726,107 @@ const FadeSlide = ({ children }) => (
   </motion.div>
 );
 
+// ── Breadcrumb dots ──────────────────────────────────────────────────────────
+const BreadcrumbDots = ({ current, total = 6 }) => (
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.55rem", marginBottom: "2.8rem" }}>
+    {Array.from({ length: total }, (_, i) => {
+      const isPast    = i < current;
+      const isActive  = i === current;
+      const isFuture  = i > current;
+      return (
+        <div key={i} style={{
+          width:  isActive ? 20 : isPast ? 7 : 5,
+          height: isActive ? 5  : isPast ? 7 : 5,
+          borderRadius: isActive ? "3px" : "50%",
+          background: isActive
+            ? T.or
+            : isPast
+            ? `${T.or}CC`
+            : `${T.brume}33`,
+          boxShadow: isActive ? `0 0 8px ${T.or}88` : "none",
+          transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          flexShrink: 0,
+        }} />
+      );
+    })}
+  </div>
+);
+
+// ── AHA Moment ───────────────────────────────────────────────────────────────
+const AHA_PHRASES = [
+  "Tu n'as rien à prouver ici.",
+  "Ce que tu portes a de la valeur.",
+  "Tu es déjà exactement là où tu dois être.",
+  "Certaines choses n'ont pas besoin d'être résolues. Juste entendues.",
+  "Il n'y a pas d'erreur dans ce que tu ressens.",
+];
+
+const AhaMoment = ({ prenom, onContinue }) => {
+  const [phase, setPhase] = useState(0);
+  const phrase = AHA_PHRASES[Math.floor((prenom.charCodeAt(0) || 0) % AHA_PHRASES.length)];
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 1200);
+    const t2 = setTimeout(() => setPhase(2), 2800);
+    const t3 = setTimeout(() => setPhase(3), 4200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  const f = (v, d = 0) => ({
+    opacity: v ? 1 : 0,
+    transform: v ? "translateY(0)" : "translateY(12px)",
+    transition: `opacity 1.4s ease ${d}s, transform 1.4s ease ${d}s`,
+  });
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: T.nuit,
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      zIndex: 100, padding: "2rem",
+    }}>
+      <div style={{ position: "absolute", width: 320, height: 320, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}08 0%, transparent 70%)`, animation: "albaHaloPulse 5s ease-in-out infinite", pointerEvents: "none" }} />
+
+      <div style={{ position: "relative", zIndex: 2, textAlign: "center", maxWidth: 320 }}>
+        <div style={f(phase >= 0)}>
+          <p style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.6rem, 7vw, 2.4rem)", color: T.orPale, letterSpacing: "0.1em", margin: 0 }}>
+            {prenom}.
+          </p>
+        </div>
+
+        <div style={{ marginTop: "2rem", ...f(phase >= 1) }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.05rem, 4vw, 1.3rem)", color: T.brume, lineHeight: 1.8, margin: 0 }}>
+            {phrase}
+          </p>
+        </div>
+
+        <div style={{ marginTop: "1rem", ...f(phase >= 2) }}>
+          <div style={{ width: 20, height: 1, background: `linear-gradient(90deg, transparent, ${T.or}88, transparent)`, margin: "0 auto" }} />
+        </div>
+
+        {phase >= 3 && (
+          <div style={{ marginTop: "3rem", animation: "albaBtnAppear 0.8s ease both" }}>
+            <button onClick={onContinue} style={{
+              background: "transparent", border: `1px solid ${T.or}66`,
+              borderRadius: "3px", padding: "0.85rem 2.4rem",
+              color: T.orPale, fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", letterSpacing: "0.05em", cursor: "pointer",
+              transition: "border-color 0.3s",
+              WebkitTapHighlightColor: "transparent",
+            }}>
+              Je continue
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const Step = ({ num, label, children, onNext, onBack, canNext }) => (
   <Screen centered>
     <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-      <div style={{
-        fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
-        letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "3rem",
-      }}>ALBA &nbsp;·&nbsp; Étape {num} / 3</div>
-
+      <BreadcrumbDots current={num - 1} total={6} />
       <Label>{label}</Label>
       {children}
 
@@ -1806,7 +1899,8 @@ const SENSIBILITES = [
 
 const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
-  const [stepDir, setStepDir] = useState(1); // 1=forward, -1=backward
+  const [stepDir, setStepDir] = useState(1);
+  const [showAha, setShowAha] = useState(false);
 
   const goNext = (s) => { setStepDir(1); setStep(s); };
   const goBack = (s) => { setStepDir(-1); setStep(s); };
@@ -1894,7 +1988,7 @@ const Onboarding = ({ onComplete }) => {
 
   // ── ÉTAPE 0 — Prénom ──────────────────────────────────────────────────────
   if (step === 0) return (
-    <Step num={1} label="Comment t'appelles-tu ?" onNext={() => setStep(1)} canNext={prenom.length > 1}>
+    <Step num={1} label="Comment t'appelles-tu ?" onNext={() => { setShowAha(true); }} canNext={prenom.length > 1}>
       <input style={inputStyle} placeholder="Ton prénom…" value={prenom}
         onChange={e => setPrenom(e.target.value)}
         onFocus={e => e.target.style.borderColor = T.or}
@@ -1905,13 +1999,16 @@ const Onboarding = ({ onComplete }) => {
     </Step>
   );
 
+  // ── AHA MOMENT ──────────────────────────────────────────────────────────
+  if (showAha) return (
+    <AhaMoment prenom={prenom} onContinue={() => { setShowAha(false); setStep(1); }} />
+  );
+
   // ── ÉTAPE 1 — Sensibilité ─────────────────────────────────────────────────
   if (step === 1) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
-          ALBA &nbsp;·&nbsp; Étape 2 / 6
-        </div>
+        <BreadcrumbDots current={1} total={6} />
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 4vw, 1.7rem)", color: T.orPale, textAlign: "center", marginBottom: "0.6rem", lineHeight: 1.3 }}>
           Comment tu te situes, {prenom} ?
         </div>
@@ -2040,10 +2137,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 3) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem",
-          letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem",
-        }}>ALBA &nbsp;·&nbsp; Étape 4 / 4</div>
+        <BreadcrumbDots current={3} total={6} />
 
         <Label>Qu'est-ce qui t'amène ici, {prenom} ?</Label>
 
@@ -2140,9 +2234,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 4) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
-          ALBA &nbsp;·&nbsp; Étape 5 / 6
-        </div>
+        <BreadcrumbDots current={4} total={6} />
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
           Ton signe, {prenom} ?
         </div>
@@ -2191,9 +2283,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 5) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", color: T.brume, textAlign: "center", marginBottom: "2.5rem" }}>
-          ALBA &nbsp;·&nbsp; Étape 6 / 6
-        </div>
+        <BreadcrumbDots current={5} total={6} />
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
           Ta couleur, {prenom} ?
         </div>
