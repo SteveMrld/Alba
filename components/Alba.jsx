@@ -282,6 +282,16 @@ let _authToken = null;
 let _authUser  = null;
 
 const sbAuth = {
+  // Magic link (OTP)
+  async sendMagicLink(email) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/otp`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, create_user: true }),
+    });
+    return r.ok;
+  },
+
   // Inscription
   async signUp(email, password) {
     const r = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
@@ -1285,44 +1295,19 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
 
 // ─── ÉCRAN AUTH — Magic Link ──────────────────────────────────────────────────
 const AuthScreen = ({ onAuth }) => {
-  const [mode, setMode]         = useState("login");  // login | signup | forgot
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm]   = useState("");
-  const [loading, setLoading]   = useState(false);
-  const [errMsg, setErrMsg]     = useState("");
-  const [showPwd, setShowPwd]   = useState(false);
-  const [resetSent, setResetSent] = useState(false);
+  const [email, setEmail]   = useState("");
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent]     = useState(false);
+  const [errMsg, setErrMsg] = useState("");
+  const [pressed, setPressed] = useState(false);
 
-  const inputStyle = {
-    background: "#1E1A16", border: `1px solid ${T.brume}33`,
-    borderRadius: "6px", padding: "0.85rem 1.1rem",
-    fontFamily: T.sans, fontSize: "0.95rem", color: T.aube,
-    outline: "none", width: "100%", boxSizing: "border-box",
-    transition: "border 0.2s",
-  };
-
-  const handleSubmit = async () => {
+  const handleSend = async () => {
     setErrMsg("");
     if (!email.includes("@")) { setErrMsg("Adresse email invalide."); return; }
-    if (password.length < 6)  { setErrMsg("Le mot de passe doit faire au moins 6 caractères."); return; }
-    if (mode === "signup" && password !== confirm) { setErrMsg("Les mots de passe ne correspondent pas."); return; }
     setLoading(true);
-    const { user, error } = mode === "login"
-      ? await sbAuth.signIn(email.trim().toLowerCase(), password)
-      : await sbAuth.signUp(email.trim().toLowerCase(), password);
+    const ok = await sbAuth.sendMagicLink(email.trim().toLowerCase());
     setLoading(false);
-    if (user) onAuth(user);
-    else setErrMsg(error || "Une erreur est survenue.");
-  };
-
-  const handleReset = async () => {
-    setErrMsg("");
-    if (!email.includes("@")) { setErrMsg("Entre ton adresse email."); return; }
-    setLoading(true);
-    const ok = await sbAuth.resetPassword(email.trim().toLowerCase());
-    setLoading(false);
-    if (ok) setResetSent(true);
+    if (ok) setSent(true);
     else setErrMsg("Une erreur est survenue. Réessaie.");
   };
 
@@ -1344,158 +1329,90 @@ const AuthScreen = ({ onAuth }) => {
 
       {/* Logo */}
       <div style={{ fontFamily: T.serif, fontSize: "2.2rem", letterSpacing: "0.28em", color: T.or, marginBottom: "0.3rem" }}>ALBA</div>
-      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, marginBottom: "2.5rem" }}>L'aube en toi</div>
+      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, marginBottom: "2.8rem" }}>L'aube en toi</div>
 
-      <div style={{ width: "100%", maxWidth: 340, display: "flex", flexDirection: "column", gap: "0.9rem" }}>
+      <div style={{ width: "100%", maxWidth: 320, display: "flex", flexDirection: "column", gap: "1rem", animation: "fadeUp 0.7s ease forwards" }}>
 
-        {mode !== "forgot" && (<>
-        {/* Toggle login / inscription */}
-        <div style={{ display: "flex", background: "#1E1A16", borderRadius: "6px", padding: "3px", marginBottom: "0.4rem" }}>
-          {["login", "signup"].map(m => (
-            <button key={m} onClick={() => { setMode(m); setErrMsg(""); }} style={{
-              flex: 1, padding: "0.6rem", border: "none", borderRadius: "4px",
-              background: mode === m ? `${T.or}22` : "transparent",
-              color: mode === m ? T.or : T.brume,
-              fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
-              letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
-              transition: "all 0.2s",
-            }}>
-              {m === "login" ? "Se connecter" : "Créer un compte"}
-            </button>
-          ))}
-        </div>
+        {!sent ? (
+          <>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, textAlign: "center", lineHeight: 1.8, margin: "0 0 0.5rem" }}>
+              Entre ton email.<br/>ALBA t'envoie un lien de connexion.
+            </p>
 
-        {/* Email */}
-        <input
-          type="email" value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="ton@email.com" autoFocus
-          style={inputStyle}
-        />
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleSend()}
+              placeholder="ton@email.com"
+              autoFocus
+              style={{
+                background: "#1E1A16",
+                border: `1px solid ${T.brume}33`,
+                borderRadius: "6px", padding: "0.95rem 1.1rem",
+                fontFamily: T.sans, fontSize: "0.95rem", color: T.aube,
+                outline: "none", width: "100%", boxSizing: "border-box",
+                transition: "border 0.2s",
+                textAlign: "center",
+              }}
+              onFocus={e => e.target.style.borderColor = `${T.or}55`}
+              onBlur={e => e.target.style.borderColor = `${T.brume}33`}
+            />
 
-        {/* Mot de passe */}
-        <div style={{ position: "relative" }}>
-          <input
-            type={showPwd ? "text" : "password"}
-            value={password} onChange={e => setPassword(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && !confirm && handleSubmit()}
-            placeholder="Mot de passe"
-            style={{ ...inputStyle, paddingRight: "3rem" }}
-          />
-          <button onClick={() => setShowPwd(v => !v)} style={{
-            position: "absolute", right: "0.8rem", top: "50%", transform: "translateY(-50%)",
-            background: "none", border: "none", cursor: "pointer",
-            color: T.brume, fontSize: "0.75rem", padding: "0.2rem",
-          }}>{showPwd ? "Cacher" : "Voir"}</button>
-        </div>
-
-        {/* Confirmation (inscription seulement) */}
-        {mode === "signup" && (
-          <input
-            type={showPwd ? "text" : "password"}
-            value={confirm} onChange={e => setConfirm(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSubmit()}
-            placeholder="Confirmer le mot de passe"
-            style={inputStyle}
-          />
-        )}
-
-        {/* Erreur */}
-        {errMsg && (
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center" }}>
-            {errMsg}
-          </div>
-        )}
-
-        {/* Bouton principal */}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          style={{
-            background: loading ? `${T.or}55` : T.or,
-            border: "none", borderRadius: "6px",
-            padding: "0.95rem", cursor: loading ? "default" : "pointer",
-            fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
-            letterSpacing: "0.4em", textTransform: "uppercase",
-            color: T.nuit, transition: "all 0.2s", marginTop: "0.2rem",
-          }}
-        >
-          {loading ? "…" : mode === "login" ? "Entrer dans ALBA" : "Créer mon compte"}
-        </button>
-
-        </>)}
-
-        {/* Mot de passe oublié — login seulement */}
-        {mode === "login" && (
-          <button onClick={() => { setMode("forgot"); setErrMsg(""); setResetSent(false); }} style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.78rem", color: `${T.brume}BB`,
-            textAlign: "center", padding: "0.2rem",
-          }}>
-            Mot de passe oublié ?
-          </button>
-        )}
-
-        {/* Hint */}
-        {mode !== "forgot" && (
-          <div style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.75rem", color: `${T.brume}BB`,
-            textAlign: "center", lineHeight: 1.6, marginTop: "0.5rem",
-          }}>
-            {mode === "login"
-              ? "Pas encore de compte ? Clique sur \"Créer un compte\"."
-              : "Déjà un compte ? Clique sur \"Se connecter\"."}
-          </div>
-        )}
-
-        {/* Écran mot de passe oublié */}
-        {mode === "forgot" && (
-          <div style={{ textAlign: "center" }}>
-            {resetSent ? (
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, lineHeight: 1.8 }}>
-                Un lien t'a été envoyé.<br/>
-                <span style={{ fontSize: "0.75rem", color: T.brume }}>Vérifie ta boîte mail.</span>
+            {errMsg && (
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center" }}>
+                {errMsg}
               </div>
-            ) : (
-              <>
-                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.7, marginBottom: "1rem" }}>
-                  Entre ton email.<br/>ALBA t'envoie un lien de réinitialisation.
-                </div>
-                <input
-                  type="email" value={email} onChange={e => setEmail(e.target.value)}
-                  placeholder="ton@email.com" autoFocus
-                  style={{
-                    background: "#1E1A16", border: `1px solid ${T.brume}33`,
-                    borderRadius: "6px", padding: "0.85rem 1.1rem",
-                    fontFamily: T.sans, fontSize: "0.95rem", color: T.aube,
-                    outline: "none", width: "100%", boxSizing: "border-box",
-                    marginBottom: "0.8rem",
-                  }}
-                />
-                {errMsg && (
-                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", marginBottom: "0.8rem" }}>{errMsg}</div>
-                )}
-                <button onClick={handleReset} disabled={loading} style={{
-                  width: "100%", background: loading ? `${T.or}55` : T.or,
-                  border: "none", borderRadius: "6px", padding: "0.9rem",
-                  cursor: loading ? "default" : "pointer",
-                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
-                  letterSpacing: "0.4em", textTransform: "uppercase",
-                  color: T.nuit,
-                }}>
-                  {loading ? "Envoi…" : "Envoyer le lien"}
-                </button>
-                <button onClick={() => { setMode("login"); setErrMsg(""); }} style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  fontFamily: T.serif, fontStyle: "italic",
-                  fontSize: "0.75rem", color: `${T.brume}BB`,
-                  marginTop: "0.8rem", padding: "0.2rem",
-                }}>
-                  Retour
-                </button>
-              </>
             )}
+
+            <button
+              onClick={handleSend}
+              disabled={loading || !email.includes("@")}
+              onMouseDown={() => setPressed(true)}
+              onMouseUp={() => setPressed(false)}
+              onTouchStart={() => setPressed(true)}
+              onTouchEnd={() => setPressed(false)}
+              style={{
+                background: loading ? `${T.or}55` : T.or,
+                border: "none", borderRadius: "4px",
+                padding: "1rem", cursor: loading ? "default" : "pointer",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
+                letterSpacing: "0.45em", textTransform: "uppercase",
+                color: T.nuit, transition: "all 0.2s",
+                transform: pressed ? "scale(0.97)" : "scale(1)",
+                opacity: !email.includes("@") ? 0.45 : 1,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              {loading ? "Envoi…" : "Recevoir mon lien"}
+            </button>
+
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.72rem", color: `${T.brume}66`, textAlign: "center", lineHeight: 1.6, margin: "0.2rem 0 0" }}>
+              Pas de mot de passe. Un lien suffit.
+            </p>
+          </>
+        ) : (
+          <div style={{ textAlign: "center", animation: "fadeUp 0.6s ease forwards" }}>
+            <div style={{ fontSize: "2rem", color: T.or, marginBottom: "1.2rem" }}>✦</div>
+            <p style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.1rem", color: T.orPale, lineHeight: 1.7, marginBottom: "0.8rem" }}>
+              Vérifie ta boîte mail.
+            </p>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, lineHeight: 1.8, marginBottom: "2rem" }}>
+              Un lien t'attend.<br/>Clique dessus — ALBA s'ouvre.
+            </p>
+            <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", color: `${T.brume}55`, letterSpacing: "0.1em" }}>
+              {email}
+            </p>
+            <button
+              onClick={() => { setSent(false); setEmail(""); }}
+              style={{
+                marginTop: "1.5rem", background: "none", border: "none",
+                cursor: "pointer", fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "0.75rem", color: `${T.brume}77`, padding: "0.3rem",
+              }}
+            >
+              Changer d'email
+            </button>
           </div>
         )}
       </div>
