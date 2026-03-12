@@ -8608,58 +8608,17 @@ const LettreMensuelleCTA = ({ nomMois, mois, userKey, onLettre }) => {
   const generer = async (uk) => {
     setGenerating(true); setErr(null);
     try {
-      // Profil utilisateur
-      const profR = await fetch(`${SB_URL}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(uk)}&select=prenom,chemin,sensibilite&limit=1`, {
-        headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
-      });
-      const profRows = await profR.json();
-      const prof = profRows?.[0] || {};
-      const prenom = prof.prenom || "toi";
-      const chemin = prof.chemin || "";
-      const sensibilite = prof.sensibilite || "";
-
-      // Post-its récents pour contexte
-      const postR = await fetch(`${SB_URL}/rest/v1/alba_cairn?user_key=eq.${encodeURIComponent(uk)}&select=etat&order=created_at.desc&limit=10`, {
-        headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
-      });
-      const postits = await postR.json();
-      const etats = (postits || []).map(p => p.etat).filter(Boolean).slice(0, 6).join(", ");
-
-      // Génération Claude
-      const prompt = `Tu es ALBA, une présence douce et lumineuse. Tu écris une lettre mensuelle personnelle et intime à ${prenom}.
-
-Contexte :
-- Chemin de vie : ${chemin || "non précisé"}
-- Sensibilité : ${sensibilite || "non précisée"}  
-- Ce qu'elle a traversé récemment : ${etats || "rien de partagé encore"}
-- Mois : ${nomMois}
-
-Écris une lettre de 3-4 paragraphes en français, à la deuxième personne (tu/toi). Style doux, poétique, intime. Commence directement par une phrase forte adressée à ${prenom}. Termine sur une image ou une invitation intérieure. Pas de formule de politesse.`;
-
-      const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
+      // Passer par la route API Vercel (clé Anthropic côté serveur)
+      const res = await fetch(`/api/lettre-mensuelle?user_key=${encodeURIComponent(uk)}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          messages: [{ role: "user", content: prompt }]
-        })
       });
-      const aiData = await aiRes.json();
-      const contenu = aiData.content?.[0]?.text;
+      if (!res.ok) throw new Error("Erreur serveur");
+
+      // Récupérer la lettre générée
+      const getRes = await fetch(`/api/lettre-mensuelle?user_key=${encodeURIComponent(uk)}&mois=${mois}`);
+      const data = await getRes.json();
+      const contenu = data?.lettre?.contenu;
       if (!contenu) throw new Error("vide");
-
-      // Sauvegarde Supabase — une seule fois par mois
-      await fetch(`${SB_URL}/rest/v1/alba_lettres_mensuelles`, {
-        method: "POST",
-        headers: {
-          apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`,
-          "Content-Type": "application/json",
-          Prefer: "resolution=merge-duplicates"
-        },
-        body: JSON.stringify({ user_key: uk, mois, contenu })
-      });
-
       onLettre(contenu);
     } catch(e) {
       setErr("ALBA n'a pas pu écrire ce mois-ci. Réessaie dans un moment.");
