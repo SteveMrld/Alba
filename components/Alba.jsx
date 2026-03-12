@@ -601,6 +601,15 @@ const FontLoader = () => (
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+@keyframes albaRipple {
+  from { transform: scale(0); opacity: 1; }
+  to   { transform: scale(3.5); opacity: 0; }
+}
+@keyframes albaTapPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.93); }
+  100% { transform: scale(1); }
+}
 @keyframes fadeUp {
       from { opacity: 0; transform: translateY(24px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -909,10 +918,31 @@ const Horizon = () => (
 // ─── BOUTON ────────────────────────────────────────────────────────────────────
 const Btn = ({ children, onClick, secondary, small }) => {
   const [hov, setHov] = useState(false);
+  const [pressed, setPressed] = useState(false);
+  const [ripple, setRipple] = useState(null);
+
+  const handlePress = (e) => {
+    setPressed(true);
+    if (!secondary) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left;
+      const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top;
+      setRipple({ x, y, id: Date.now() });
+      setTimeout(() => setRipple(null), 550);
+    }
+  };
+
   return (
-    <button onClick={onClick}
-      onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => { setHov(false); setPressed(false); }}
+      onMouseDown={handlePress}
+      onMouseUp={() => setPressed(false)}
+      onTouchStart={handlePress}
+      onTouchEnd={() => setPressed(false)}
       style={{
+        position: "relative", overflow: "hidden",
         background: secondary ? "transparent" : hov ? T.orPale : T.or,
         color: secondary ? (hov ? T.orPale : T.brume) : T.nuit,
         border: secondary ? `1px solid ${T.brume}44` : "none",
@@ -921,9 +951,21 @@ const Btn = ({ children, onClick, secondary, small }) => {
         letterSpacing: "0.35em", textTransform: "uppercase",
         padding: small ? "0.55rem 1.4rem" : "0.85rem 2.4rem",
         borderRadius: "1px", cursor: "pointer",
-        transition: "all 0.35s ease",
+        transition: "all 0.25s ease, transform 0.12s ease",
         display: "inline-flex", alignItems: "center", gap: "0.6rem",
+        transform: pressed ? "scale(0.95)" : "scale(1)",
+        WebkitTapHighlightColor: "transparent",
       }}>
+      {ripple && (
+        <span key={ripple.id} style={{
+          position: "absolute",
+          left: ripple.x - 60, top: ripple.y - 60,
+          width: 120, height: 120, borderRadius: "50%",
+          background: `${T.nuit}22`,
+          animation: "albaRipple 0.55s ease-out forwards",
+          pointerEvents: "none",
+        }} />
+      )}
       {children}
     </button>
   );
