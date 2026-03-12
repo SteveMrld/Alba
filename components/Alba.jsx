@@ -3408,6 +3408,52 @@ const ETATS_NERVEUX = [
   },
 ];
 
+// Analyse des patterns du baromètre sur 14 jours
+const analysePatternNerveux = () => {
+  try {
+    const history = JSON.parse(localStorage.getItem("alba_barometre_history") || "{}");
+    const entries = Object.entries(history)
+      .sort(([a], [b]) => b.localeCompare(a))
+      .slice(0, 14);
+
+    if (entries.length < 5) return null;
+
+    const counts = { securite: 0, mobilise: 0, fige: 0, effondre: 0 };
+    entries.forEach(([, etat]) => { if (counts[etat] !== undefined) counts[etat]++; });
+
+    const total = entries.length;
+    const dominant = Object.entries(counts).sort(([,a],[,b]) => b - a)[0];
+    const [id, count] = dominant;
+    const pct = Math.round((count / total) * 100);
+
+    // Détecter les alternances mobilisé/effondré
+    const vals = entries.map(([,e]) => e);
+    let alternances = 0;
+    for (let i = 0; i < vals.length - 1; i++) {
+      if ((vals[i] === "mobilise" && vals[i+1] === "effondre") ||
+          (vals[i] === "effondre" && vals[i+1] === "mobilise")) alternances++;
+    }
+
+    if (alternances >= 3) {
+      return { type: "cycle", message: "Ton système nerveux oscille entre mobilisation et effondrement depuis plusieurs jours. Ce cycle est épuisant — et reconnaissable." };
+    }
+
+    if (id === "securite" && pct >= 60) {
+      return { type: "stable", message: `Sur ${total} jours observés, tu étais ancré ${pct}% du temps. Quelque chose te stabilise en ce moment.` };
+    }
+    if (id === "effondre" && pct >= 50) {
+      return { type: "alerte", message: `Plusieurs jours de suite en mode effondrement. Ce n'est pas une fragilité — c'est un signal. Ton corps demande quelque chose.` };
+    }
+    if (id === "mobilise" && pct >= 60) {
+      return { type: "tension", message: `Tu es en état d'alerte depuis ${count} jours sur ${total}. Ton système sympathique travaille fort. Il mérite du repos.` };
+    }
+    if (id === "fige" && pct >= 40) {
+      return { type: "gel", message: `L'engourdissement revient souvent. Le gel est une protection — mais il mérite d'être nommé, doucement.` };
+    }
+    return null;
+  } catch { return null; }
+};
+
 const BarometreNerveux = () => {
   const todayKey = new Date().toISOString().split("T")[0];
   const storageKey = "alba_barometre_" + todayKey;
@@ -3415,24 +3461,27 @@ const BarometreNerveux = () => {
   const [etatChoisi, setEtatChoisi] = useState(() => {
     try { return localStorage.getItem(storageKey) || null; } catch { return null; }
   });
-  const [expanded, setExpanded] = useState(false);
-  const [showDetail, setShowDetail] = useState(false);
+  const [showDetail, setShowDetail] = useState(!!localStorage.getItem(storageKey));
   const [pressed, setPressed] = useState(null);
 
   const choisir = (id) => {
     setEtatChoisi(id);
-    try { localStorage.setItem(storageKey, id); } catch {}
+    try {
+      localStorage.setItem(storageKey, id);
+      // Historique pour pattern detection
+      const history = JSON.parse(localStorage.getItem("alba_barometre_history") || "{}");
+      history[todayKey] = id;
+      localStorage.setItem("alba_barometre_history", JSON.stringify(history));
+    } catch {}
     setTimeout(() => setShowDetail(true), 300);
   };
 
   const etat = ETATS_NERVEUX.find(e => e.id === etatChoisi);
 
-  if (etatChoisi && !showDetail) return null;
-
   return (
     <div style={{ margin: "1.5rem 1rem 0", padding: "1.2rem 1.2rem 1rem", background: `linear-gradient(135deg, #161310, #1A1612)`, borderRadius: "8px", border: `1px solid ${T.or}18` }}>
 
-      {!etatChoisi ? (
+      {!etatChoisi || !showDetail ? (
         <>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.6rem" }}>
             <div>
@@ -9580,6 +9629,19 @@ Tu n'es pas Claude. Tu es ALBA.`;
             letterSpacing: "0.55em", textTransform: "uppercase",
             color: T.brume, marginBottom: "1.2rem",
           }}>Le Miroir</div>
+
+          {/* Pattern nerveux si disponible */}
+          {(() => {
+            const pattern = analysePatternNerveux();
+            if (!pattern) return null;
+            const couleurPattern = pattern.type === "stable" ? "#7BA88A" : pattern.type === "alerte" ? "#A87878" : pattern.type === "cycle" ? "#C8A040" : "#8888AA";
+            return (
+              <div style={{ margin: "0 0 2rem", padding: "0.9rem 1rem", background: `${couleurPattern}0C`, border: `1px solid ${couleurPattern}33`, borderRadius: "6px", textAlign: "left", animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0 }}>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: couleurPattern, marginBottom: "0.4rem" }}>Pattern nerveux · 14 jours</div>
+                <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, lineHeight: 1.7, margin: 0 }}>{pattern.message}</p>
+              </div>
+            );
+          })()}
 
           {/* Cercle pulsant */}
           <div style={{
