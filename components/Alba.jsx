@@ -337,6 +337,26 @@ const sbAuth = {
     return { user: null, error: "Email ou mot de passe incorrect." };
   },
 
+  // Vérifier le code OTP
+  async verifyOtp(email, token) {
+    const r = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
+      method: "POST",
+      headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, token, type: "email" }),
+    });
+    const data = await r.json();
+    if (data.access_token) {
+      _authToken = data.access_token;
+      _authUser  = data.user;
+      try {
+        localStorage.setItem("alba_auth_token", data.access_token);
+        localStorage.setItem("alba_auth_user",  JSON.stringify(data.user));
+      } catch {}
+      return { user: data.user, error: null };
+    }
+    return { user: null, error: "Code invalide ou expiré." };
+  },
+
   // Réinitialisation mot de passe
   async resetPassword(email) {
     const r = await fetch(`${SUPABASE_URL}/auth/v1/recover`, {
@@ -1300,19 +1320,39 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
 
 // ─── ÉCRAN AUTH — Magic Link ──────────────────────────────────────────────────
 const AuthScreen = ({ onAuth }) => {
-  const [email, setEmail]   = useState("");
+  const [email, setEmail]     = useState("");
+  const [code, setCode]       = useState("");
+  const [step, setStep]       = useState("email"); // email | code | link_sent
   const [loading, setLoading] = useState(false);
-  const [sent, setSent]     = useState(false);
-  const [errMsg, setErrMsg] = useState("");
+  const [errMsg, setErrMsg]   = useState("");
   const [pressed, setPressed] = useState(false);
 
-  const handleSend = async () => {
+  const handleSendCode = async () => {
     setErrMsg("");
     if (!email.includes("@")) { setErrMsg("Adresse email invalide."); return; }
     setLoading(true);
     const ok = await sbAuth.sendMagicLink(email.trim().toLowerCase());
     setLoading(false);
-    if (ok) setSent(true);
+    if (ok) setStep("code");
+    else setErrMsg("Une erreur est survenue. Réessaie.");
+  };
+
+  const handleVerifyCode = async () => {
+    setErrMsg("");
+    if (code.length < 4) { setErrMsg("Entre ton code."); return; }
+    setLoading(true);
+    const { user, error } = await sbAuth.verifyOtp(email.trim().toLowerCase(), code.trim());
+    setLoading(false);
+    if (user) onAuth(user);
+    else setErrMsg(error || "Code invalide ou expiré.");
+  };
+
+  const handleMagicLink = async () => {
+    setErrMsg("");
+    setLoading(true);
+    const ok = await sbAuth.sendMagicLink(email.trim().toLowerCase());
+    setLoading(false);
+    if (ok) setStep("link_sent");
     else setErrMsg("Une erreur est survenue. Réessaie.");
   };
 
@@ -1323,7 +1363,6 @@ const AuthScreen = ({ onAuth }) => {
       alignItems: "center", justifyContent: "center",
       padding: "2rem",
     }}>
-      {/* Halo */}
       <div style={{
         position: "absolute", top: "15%", left: "50%",
         transform: "translateX(-50%)",
@@ -1332,19 +1371,18 @@ const AuthScreen = ({ onAuth }) => {
         pointerEvents: "none",
       }}/>
 
-      {/* Logo */}
       <div style={{ fontFamily: T.serif, fontSize: "2.2rem", letterSpacing: "0.28em", color: T.or, marginBottom: "0.3rem" }}>ALBA</div>
       <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, marginBottom: "2.8rem" }}>L'aube en toi</div>
 
-      <div style={{ width: "100%", maxWidth: 320, display: "flex", flexDirection: "column", gap: "1rem", animation: "fadeUp 0.7s ease forwards" }}>
+      <div style={{ width: "100%", maxWidth: 320, display: "flex", flexDirection: "column", gap: "1rem" }}>
 
-        {!sent ? (
+        {/* ── ÉTAPE 1 : saisie email ── */}
+        {step === "email" && (
           <>
-            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.brume, textAlign: "center", lineHeight: 1.8, margin: "0 0 0.5rem" }}>
-              Entre ton email.<br/>ALBA t'envoie un lien de connexion.
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.92rem", color: T.brume, textAlign: "center", lineHeight: 1.8, margin: "0 0 0.4rem" }}>
+              Connexion ou création de compte.
             </p>
 
-            {/* Bouton Google */}
             <button
               onClick={() => sbAuth.signInWithGoogle()}
               style={{
@@ -1354,11 +1392,8 @@ const AuthScreen = ({ onAuth }) => {
                 borderRadius: "6px", cursor: "pointer",
                 fontFamily: T.sans, fontWeight: 300, fontSize: "0.75rem",
                 letterSpacing: "0.08em", color: T.aube,
-                transition: "border-color 0.2s",
                 WebkitTapHighlightColor: "transparent",
               }}
-              onMouseOver={e => e.currentTarget.style.borderColor = `${T.brume}66`}
-              onMouseOut={e => e.currentTarget.style.borderColor = `${T.brume}33`}
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -1369,8 +1404,7 @@ const AuthScreen = ({ onAuth }) => {
               Continuer avec Google
             </button>
 
-            {/* Séparateur */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "0.2rem 0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
               <div style={{ flex: 1, height: 1, background: `${T.brume}22` }} />
               <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.72rem", color: `${T.brume}55` }}>ou</span>
               <div style={{ flex: 1, height: 1, background: `${T.brume}22` }} />
@@ -1380,16 +1414,14 @@ const AuthScreen = ({ onAuth }) => {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSend()}
+              onKeyDown={e => e.key === "Enter" && handleSendCode()}
               placeholder="ton@email.com"
               autoFocus
               style={{
-                background: "#1E1A16",
-                border: `1px solid ${T.brume}33`,
+                background: "#1E1A16", border: `1px solid ${T.brume}33`,
                 borderRadius: "6px", padding: "0.95rem 1.1rem",
                 fontFamily: T.sans, fontSize: "0.95rem", color: T.aube,
                 outline: "none", width: "100%", boxSizing: "border-box",
-                transition: "border 0.2s",
                 textAlign: "center",
               }}
               onFocus={e => e.target.style.borderColor = `${T.or}55`}
@@ -1403,32 +1435,106 @@ const AuthScreen = ({ onAuth }) => {
             )}
 
             <button
-              onClick={handleSend}
+              onClick={handleSendCode}
               disabled={loading || !email.includes("@")}
-              onMouseDown={() => setPressed(true)}
-              onMouseUp={() => setPressed(false)}
-              onTouchStart={() => setPressed(true)}
-              onTouchEnd={() => setPressed(false)}
               style={{
                 background: loading ? `${T.or}55` : T.or,
-                border: "none", borderRadius: "4px",
-                padding: "1rem", cursor: loading ? "default" : "pointer",
+                border: "none", borderRadius: "4px", padding: "1rem",
+                cursor: loading ? "default" : "pointer",
                 fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
                 letterSpacing: "0.45em", textTransform: "uppercase",
-                color: T.nuit, transition: "all 0.2s",
-                transform: pressed ? "scale(0.97)" : "scale(1)",
-                opacity: !email.includes("@") ? 0.45 : 1,
+                color: T.nuit, opacity: !email.includes("@") ? 0.45 : 1,
                 WebkitTapHighlightColor: "transparent",
               }}
             >
-              {loading ? "Envoi…" : "Recevoir mon lien"}
+              {loading ? "Envoi…" : "Continuer"}
+            </button>
+          </>
+        )}
+
+        {/* ── ÉTAPE 2 : saisie du code ── */}
+        {step === "code" && (
+          <div style={{ textAlign: "center", animation: "fadeUp 0.6s ease forwards" }}>
+            <div style={{ fontSize: "1.6rem", color: T.or, marginBottom: "1rem" }}>✦</div>
+            <p style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1rem", color: T.orPale, lineHeight: 1.7, marginBottom: "0.4rem" }}>
+              Code envoyé à
+            </p>
+            <p style={{ fontFamily: T.sans, fontSize: "0.75rem", color: T.brume, marginBottom: "1.4rem", letterSpacing: "0.05em" }}>
+              {email}
+            </p>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, lineHeight: 1.8, marginBottom: "1.2rem" }}>
+              Entre le code à 6 chiffres reçu par email.
+            </p>
+
+            <input
+              type="number"
+              inputMode="numeric"
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onKeyDown={e => e.key === "Enter" && handleVerifyCode()}
+              placeholder="_ _ _ _ _ _"
+              autoFocus
+              style={{
+                background: "#1E1A16", border: `1px solid ${T.or}55`,
+                borderRadius: "6px", padding: "1rem 1.2rem",
+                fontFamily: T.sans, fontSize: "1.5rem", color: T.orPale,
+                outline: "none", width: "100%", boxSizing: "border-box",
+                textAlign: "center", letterSpacing: "0.4em",
+              }}
+            />
+
+            {errMsg && (
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: "#D4856A", textAlign: "center", marginTop: "0.8rem" }}>
+                {errMsg}
+              </div>
+            )}
+
+            <button
+              onClick={handleVerifyCode}
+              disabled={loading || code.length < 4}
+              style={{
+                marginTop: "1rem",
+                background: loading ? `${T.or}55` : T.or,
+                border: "none", borderRadius: "4px", padding: "1rem",
+                cursor: loading ? "default" : "pointer",
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
+                letterSpacing: "0.45em", textTransform: "uppercase",
+                color: T.nuit, width: "100%",
+                opacity: code.length < 4 ? 0.45 : 1,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              {loading ? "Vérification…" : "Se connecter"}
             </button>
 
-            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.72rem", color: `${T.brume}66`, textAlign: "center", lineHeight: 1.6, margin: "0.2rem 0 0" }}>
-              Pas de mot de passe. Un lien suffit.
-            </p>
-          </>
-        ) : (
+            <div style={{ marginTop: "1.4rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <button
+                onClick={handleMagicLink}
+                disabled={loading}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "0.78rem", color: `${T.or}99`, padding: "0.2rem",
+                }}
+              >
+                Recevoir un lien à cliquer
+              </button>
+              <button
+                onClick={() => { setStep("email"); setCode(""); setErrMsg(""); }}
+                style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "0.72rem", color: `${T.brume}66`, padding: "0.2rem",
+                }}
+              >
+                Changer d'email
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── ÉTAPE 3 : lien envoyé ── */}
+        {step === "link_sent" && (
           <div style={{ textAlign: "center", animation: "fadeUp 0.6s ease forwards" }}>
             <div style={{ fontSize: "2rem", color: T.or, marginBottom: "1.2rem" }}>✦</div>
             <p style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.1rem", color: T.orPale, lineHeight: 1.7, marginBottom: "0.8rem" }}>
@@ -1441,7 +1547,7 @@ const AuthScreen = ({ onAuth }) => {
               {email}
             </p>
             <button
-              onClick={() => { setSent(false); setEmail(""); }}
+              onClick={() => { setStep("email"); setEmail(""); setCode(""); }}
               style={{
                 marginTop: "1.5rem", background: "none", border: "none",
                 cursor: "pointer", fontFamily: T.serif, fontStyle: "italic",
@@ -1452,10 +1558,12 @@ const AuthScreen = ({ onAuth }) => {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );
 };
+
 
 // ─── SPLASH ────────────────────────────────────────────────────────────────────
 const VIDEOS_AMBIANCE = {
