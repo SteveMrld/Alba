@@ -30,11 +30,10 @@ export async function POST(req) {
     const mois = new Date().toISOString().slice(0, 7);
     const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
-    // Récupérer les abonnés premium actifs
-    const filter = targetUserKey
-      ? `status=eq.active&user_key=eq.${encodeURIComponent(targetUserKey)}`
-      : `status=eq.active`;
-    const subs = await sbFetch(`alba_subscriptions?${filter}&select=user_key`, { service: true });
+    // BETA: générer pour l'utilisateur directement sans vérifier l'abonnement
+    const subs = targetUserKey
+      ? [{ user_key: targetUserKey }]
+      : await sbFetch(`alba_subscriptions?status=eq.active&select=user_key`, { service: true });
 
     const resultats = [];
 
