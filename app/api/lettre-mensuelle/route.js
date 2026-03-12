@@ -1,27 +1,24 @@
 export const maxDuration = 30;
 
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://yuwqokjkpooozgtsvfkc.supabase.co";
-const SB_SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mjk2OTgyMiwiZXhwIjoyMDg4NTQ1ODIyfQ.q8q-QC0gW_1-yXsmeXOY6HweeK1zQL-yTg7P4WKeFAM";
+const SB_URL = "https://yuwqokjkpooozgtsvfkc.supabase.co";
 const SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1d3Fva2prcG9vb3pndHN2ZmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5Njk4MjIsImV4cCI6MjA4ODU0NTgyMn0.5IHYvE6lnwl-PTAhcpT9c2lkhlxSu6w9rGksfCEfCPc";
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 
 const sb = async (path, opts = {}) => {
-  const key = opts.anon ? SB_ANON : SB_SERVICE;
   const method = opts.method || "GET";
   const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
     method,
     headers: {
-      "apikey": key,
-      "Authorization": `Bearer ${key}`,
+      "apikey": SB_ANON,
+      "Authorization": `Bearer ${SB_ANON}`,
       "Content-Type": "application/json",
       "Prefer": opts.prefer || "return=representation",
-      ...(opts.headers || {}),
     },
     ...(opts.body ? { body: opts.body } : {}),
   });
   if (!res.ok) {
     const txt = await res.text();
-    throw new Error(`SB ${path}: ${txt}`);
+    throw new Error(`SB ${method} ${path}: ${txt}`);
   }
   return res.json().catch(() => null);
 };
@@ -31,23 +28,21 @@ export async function POST(req) {
     const { searchParams } = new URL(req.url);
     const uk = searchParams.get("user_key");
     if (!uk) return Response.json({ error: "user_key requis" }, { status: 400 });
+    if (!ANTHROPIC_KEY) return Response.json({ error: "ANTHROPIC_API_KEY manquante" }, { status: 500 });
 
     const mois = new Date().toISOString().slice(0, 7);
     const nomMois = new Date().toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 
     // Déjà générée ce mois ?
-    const existante = await sb(
-      `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(uk)}&mois=eq.${mois}&select=id`
-    ).catch(() => []);
+    const existante = await sb(`alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(uk)}&mois=eq.${mois}&select=id`).catch(() => []);
     if (existante?.length > 0) return Response.json({ ok: true, status: "already_done" });
 
     const debutMois = `${mois}-01T00:00:00Z`;
 
-    const [profils, postits, cairn, progress] = await Promise.allSettled([
+    const [profils, postits, cairn] = await Promise.allSettled([
       sb(`alba_profiles?user_key=eq.${encodeURIComponent(uk)}&select=prenom,intention,intention_secondaire,sensibilite,cle_active&limit=1`),
       sb(`alba_postits?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=texte&order=created_at.desc&limit=20`),
       sb(`alba_cairn?user_key=eq.${encodeURIComponent(uk)}&created_at=gte.${debutMois}&select=etat&order=created_at.desc&limit=30`),
-      sb(`alba_progress?user_key=eq.${encodeURIComponent(uk)}&select=cle_active&limit=1`),
     ]);
 
     const p = profils.value?.[0] || {};
@@ -55,7 +50,7 @@ export async function POST(req) {
     const intention = p.intention || "";
     const intentionSecondaire = p.intention_secondaire || "";
     const sensibilite = p.sensibilite || "";
-    const cleActive = progress.value?.[0]?.cle_active || p.cle_active || 1;
+    const cleActive = p.cle_active || 1;
     const NOMS_PORTES = ["","Reconnaître","Comprendre","Ressentir","Lâcher","Recevoir","Devenir","Créer","Relier","Protéger","Transmettre","Habiter","Être"];
     const nomPorte = NOMS_PORTES[Math.min(cleActive, 12)] || "Reconnaître";
     const contexteIntention = intention && intentionSecondaire ? `${intention} — et simultanément : ${intentionSecondaire}` : intention || "non précisée";
@@ -86,16 +81,8 @@ CONSIGNES ABSOLUES :
 
     const aiRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: {
-        "x-api-key": ANTHROPIC_KEY,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 700,
-        messages: [{ role: "user", content: prompt }],
-      }),
+      headers: { "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 700, messages: [{ role: "user", content: prompt }] }),
     });
 
     if (!aiRes.ok) {
@@ -128,21 +115,17 @@ export async function GET(req) {
     const mois = searchParams.get("mois") || new Date().toISOString().slice(0, 7);
     if (!userKey) return Response.json({ lettre: null });
 
-    const data = await sb(
-      `alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(userKey)}&mois=eq.${mois}&select=*`
-    ).catch(() => []);
-
+    const data = await sb(`alba_lettres_mensuelles?user_key=eq.${encodeURIComponent(userKey)}&mois=eq.${mois}&select=*`).catch(() => []);
     const lettre = data?.[0] || null;
+
     if (lettre && !lettre.lue) {
       sb(`alba_lettres_mensuelles?id=eq.${lettre.id}`, {
-        method: "PATCH",
-        prefer: "return=minimal",
+        method: "PATCH", prefer: "return=minimal",
         body: JSON.stringify({ lue: true }),
       }).catch(() => {});
     }
     return Response.json({ lettre });
   } catch (err) {
-    console.error("lettre GET error:", err.message);
     return Response.json({ error: err.message }, { status: 500 });
   }
 }
