@@ -8141,7 +8141,49 @@ const TROUVAILLES_ALBA = [
 ];
 
 
-const SalleDesTrouvailles = ({ data }) => {
+const VISUELS_TROUVAILLES = {
+  livre: { bg: ["#1A1208","#2D1F0A"], accent: "#C8A96E",
+    svg: `<rect x="14" y="8" width="20" height="32" rx="2" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+          <rect x="12" y="10" width="20" height="32" rx="2" fill="none" stroke="currentColor" strokeWidth="0.6" opacity="0.4"/>
+          <line x1="19" y1="16" x2="29" y2="16" stroke="currentColor" strokeWidth="0.8"/>
+          <line x1="19" y1="20" x2="29" y2="20" stroke="currentColor" strokeWidth="0.8"/>
+          <line x1="19" y1="24" x2="25" y2="24" stroke="currentColor" strokeWidth="0.8"/>` },
+  podcast: { bg: ["#0D1218","#1A2030"], accent: "#8BA8C8",
+    svg: `<circle cx="24" cy="20" r="8" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+          <line x1="24" y1="28" x2="24" y2="34" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M18 26 Q18 34 24 34 Q30 34 30 26" fill="none" stroke="currentColor" strokeWidth="1"/>
+          <line x1="20" y1="38" x2="28" y2="38" stroke="currentColor" strokeWidth="0.8"/>` },
+  film: { bg: ["#120A18","#1F1028"], accent: "#A88BC8",
+    svg: `<rect x="10" y="14" width="28" height="20" rx="2" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+          <polygon points="20,18 20,30 31,24" fill="none" stroke="currentColor" strokeWidth="1"/>
+          <line x1="10" y1="18" x2="38" y2="18" stroke="currentColor" strokeWidth="0.5" opacity="0.4"/>
+          <line x1="10" y1="30" x2="38" y2="30" stroke="currentColor" strokeWidth="0.5" opacity="0.4"/>` },
+  musique: { bg: ["#0A120A","#102018"], accent: "#8BC88B",
+    svg: `<path d="M18 30 Q18 22 26 20 L34 16 L34 24 Q34 22 26 24 L26 32 Q26 36 22 36 Q18 36 18 32Z" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+          <circle cx="22" cy="33" r="3" fill="none" stroke="currentColor" strokeWidth="0.8"/>` },
+  pratique: { bg: ["#0A1410","#102018"], accent: "#8BC8A8",
+    svg: `<path d="M24 10 Q28 16 28 22 Q28 30 24 34 Q20 30 20 22 Q20 16 24 10Z" fill="none" stroke="currentColor" strokeWidth="1.2"/>
+          <path d="M24 34 L24 40" stroke="currentColor" strokeWidth="1"/>
+          <path d="M20 40 L28 40" stroke="currentColor" strokeWidth="0.8"/>
+          <path d="M16 22 Q20 20 24 22" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>` },
+  citation: { bg: ["#120E08","#201808"], accent: "#C8B88B",
+    svg: `<text x="12" y="28" fontFamily="Georgia,serif" fontSize="28" fill="currentColor" opacity="0.9">"</text>
+          <text x="26" y="38" fontFamily="Georgia,serif" fontSize="28" fill="currentColor" opacity="0.5">"</text>` },
+  default: { bg: ["#141210","#211E1A"], accent: "#C8A96E",
+    svg: `<path d="M24 12 L27 20 L36 20 L29 25 L31 34 L24 29 L17 34 L19 25 L12 20 L21 20 Z" fill="none" stroke="currentColor" strokeWidth="1"/>` },
+};
+
+const getCatVisuel = (categorieId) => {
+  if (["livre"].includes(categorieId)) return VISUELS_TROUVAILLES.livre;
+  if (["podcast"].includes(categorieId)) return VISUELS_TROUVAILLES.podcast;
+  if (["film","serie"].includes(categorieId)) return VISUELS_TROUVAILLES.film;
+  if (["musique","album"].includes(categorieId)) return VISUELS_TROUVAILLES.musique;
+  if (["pratique","meditation","respiration","rituel","mouvement","sport"].includes(categorieId)) return VISUELS_TROUVAILLES.pratique;
+  if (["citation","poeme","philosophie","priere"].includes(categorieId)) return VISUELS_TROUVAILLES.citation;
+  return VISUELS_TROUVAILLES.default;
+};
+
+
   const [filtre, setFiltre] = useState("tout");
   const [selected, setSelected] = useState(null);
   const [showForm, setShowForm] = useState(false);
@@ -8199,14 +8241,19 @@ const SalleDesTrouvailles = ({ data }) => {
           letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
         }}>← Retour</button>
 
-        {/* Image objet */}
-        {c.img ? (
-          <img src={`/trouvailles/${c.img}.jpg`} alt={c.label}
-            style={{ width: 100, height: 100, objectFit: "cover", borderRadius: "8px", opacity: 0.85, marginBottom: "1.5rem" }}
-          />
-        ) : (
-          <div style={{ fontSize: "2.5rem", marginBottom: "1.5rem", opacity: 0.7 }}>{c.emoji}</div>
-        )}
+        {/* Visuel catégorie */}
+        {(() => { const v = getCatVisuel(selected.categorie); return (
+          <div style={{
+            width: 80, height: 80, borderRadius: "50%", marginBottom: "1.5rem",
+            background: `radial-gradient(circle, ${v.bg[1]}, ${v.bg[0]})`,
+            border: `1px solid ${v.accent}33`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            position: "relative",
+          }}>
+            <svg viewBox="0 0 48 48" style={{ width: 44, height: 44, color: v.accent, opacity: 0.9 }}
+              dangerouslySetInnerHTML={{ __html: v.svg }} />
+          </div>
+        ); })()}
 
         {/* Catégorie */}
         <div style={{
@@ -8435,30 +8482,33 @@ const SalleDesTrouvailles = ({ data }) => {
       <div style={{ padding: "1rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.8rem" }}>
         {filtered.map(t => {
           const c = getCat(t.categorie);
+          const v = getCatVisuel(t.categorie);
           return (
             <div key={t.id} onClick={() => setSelected(t)} style={{
-              background: `${T.nuit2}`,
-              border: `1px solid ${T.brume}18`,
+              background: `linear-gradient(145deg, ${v.bg[0]}, ${v.bg[1]})`,
+              border: `1px solid ${v.accent}22`,
               borderRadius: "8px", padding: "1.2rem 1rem",
               cursor: "pointer", transition: "all 0.3s",
               position: "relative", overflow: "hidden",
               minHeight: 120,
             }}>
-              {/* Image objet en fond */}
-              {getCat(t.categorie).img && (
-                <img src={`/trouvailles/${getCat(t.categorie).img}.jpg`}
-                  style={{
-                    position: "absolute", bottom: -10, right: -10,
-                    width: 90, height: 90, objectFit: "cover",
-                    opacity: 0.18, borderRadius: "4px",
-                    pointerEvents: "none",
-                  }}
-                />
-              )}
+              {/* Visuel SVG en fond */}
+              <svg viewBox="0 0 48 48" style={{
+                position: "absolute", bottom: -4, right: -4,
+                width: 80, height: 80, opacity: 0.12,
+                color: v.accent, pointerEvents: "none",
+              }} dangerouslySetInnerHTML={{ __html: v.svg }} />
+              {/* Halo couleur */}
+              <div style={{
+                position: "absolute", bottom: 0, right: 0,
+                width: 100, height: 100, borderRadius: "50%",
+                background: `radial-gradient(circle, ${v.accent}15 0%, transparent 70%)`,
+                pointerEvents: "none",
+              }}/>
               {/* Gradient overlay */}
               <div style={{
                 position: "absolute", inset: 0,
-                background: `linear-gradient(135deg, ${T.nuit2} 40%, transparent 100%)`,
+                background: `linear-gradient(135deg, ${v.bg[0]}EE 40%, transparent 100%)`,
                 pointerEvents: "none",
               }}/>
               {/* Catégorie */}
