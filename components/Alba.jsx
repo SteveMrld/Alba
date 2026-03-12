@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 // ─── TYPED PHRASE — Apparition lettre par lettre ─────────────────────────────
 const TypedPhrase = ({ text, style = {}, speed = 22, className = "" }) => {
@@ -6885,6 +6886,7 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange
   const pressing = useRef(null);
   const pressTimer = useRef(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [gridParent] = useAutoAnimate({ duration: 280, easing: "ease-out" });
 
   // ── Boîte des Tempêtes ───────────────────────────────────────────────────
   const [tempetes, setTempetes] = useState([]); // [{ id, texte, date, vue }]
@@ -7389,7 +7391,7 @@ ${extrait}
         )}
 
         {/* Grille de post-its */}
-        <div style={{
+        <div ref={gridParent} style={{
           display: "grid",
           gridTemplateColumns: "repeat(2, 1fr)",
           gap: "0.8rem",
