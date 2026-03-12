@@ -8957,7 +8957,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>La lettre du mois</div>
-        <div style={{fontFamily:"monospace",fontSize:"0.6rem",color:"#4A8A5A",marginBottom:"0.5rem",padding:"0 1rem"}}>debug: premium={String(isPremium)} key={authUserKey?.slice(0,8)}</div>
+
         <LettreMensuelle userKey={authUserKey} isPremium={isPremium} onShowPaywall={onShowPaywall} />
       </div>
 
