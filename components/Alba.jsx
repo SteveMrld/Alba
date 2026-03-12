@@ -9501,6 +9501,195 @@ class AlbaErrorBoundary extends React.Component {
   }
 }
 
+// ─── WELCOME SILENCIEUX ───────────────────────────────────────────────────────
+const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
+  const [phase, setPhase] = useState(0);
+  const [skipped, setSkipped] = useState(false);
+
+  useEffect(() => {
+    const delays = [2200, 2400, 2000, 2600];
+    let timers = [];
+    delays.forEach((d, i) => {
+      const total = delays.slice(0, i + 1).reduce((a, b) => a + b, 0);
+      timers.push(setTimeout(() => setPhase(i + 1), total));
+    });
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  const skip = () => {
+    if (skipped) return;
+    setSkipped(true);
+    setPhase(4);
+  };
+
+  const fade = (visible, delay = 0) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(14px)",
+    transition: `opacity 1.6s ease ${delay}s, transform 1.6s ease ${delay}s`,
+    pointerEvents: "none",
+  });
+
+  return (
+    <div
+      onClick={phase < 4 ? skip : undefined}
+      style={{
+        position: "fixed", inset: 0,
+        background: T.nuit,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        zIndex: 100, userSelect: "none", cursor: phase < 4 ? "pointer" : "default",
+      }}
+    >
+      <style>{`
+        @keyframes albaHaloPulse { 0%,100%{opacity:.35;transform:scale(1)} 50%{opacity:.55;transform:scale(1.08)} }
+        @keyframes albaStarFloat { 0%,100%{transform:rotate(0deg) scale(1)} 50%{transform:rotate(180deg) scale(1.12)} }
+        @keyframes albaLineGrow { from{transform:scaleX(0)} to{transform:scaleX(1)} }
+        @keyframes albaBtnAppear { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+      `}</style>
+
+      {/* Halo doré central — très subtil */}
+      <div style={{
+        position: "absolute", width: 440, height: 440, borderRadius: "50%",
+        background: `radial-gradient(circle, ${T.or}0D 0%, transparent 68%)`,
+        animation: "albaHaloPulse 5s ease-in-out infinite",
+        pointerEvents: "none",
+      }} />
+
+      {/* Contenu centré */}
+      <div style={{ position: "relative", zIndex: 2, textAlign: "center", padding: "2rem", maxWidth: 340 }}>
+
+        {/* Phase 0 — Phrase d'ouverture */}
+        <div style={fade(phase >= 0)}>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1.25rem, 5vw, 1.65rem)",
+            color: T.brume, letterSpacing: "0.02em", lineHeight: 1.7,
+            margin: 0,
+          }}>
+            Il n'y a rien à réparer.
+          </p>
+        </div>
+
+        {/* Phase 1 */}
+        <div style={{ marginTop: "1.6rem", ...fade(phase >= 1) }}>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1.05rem, 4vw, 1.35rem)",
+            color: `${T.brume}CC`, letterSpacing: "0.02em", lineHeight: 1.8,
+            margin: 0,
+          }}>
+            Seulement quelque chose à entendre.
+          </p>
+        </div>
+
+        {/* Phase 2 — "En toi." isolé */}
+        <div style={{ marginTop: "0.8rem", ...fade(phase >= 2) }}>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1.05rem, 4vw, 1.35rem)",
+            color: `${T.or}CC`, letterSpacing: "0.06em", lineHeight: 1.8,
+            margin: 0,
+          }}>
+            En toi.
+          </p>
+        </div>
+
+        {/* Phase 3 — Logo ALBA */}
+        <div style={{ marginTop: "3.2rem", ...fade(phase >= 3) }}>
+          {/* Séparateur doré */}
+          <div style={{
+            width: 28, height: 1,
+            background: `linear-gradient(90deg, transparent, ${T.or}, transparent)`,
+            margin: "0 auto 2rem",
+            animation: phase >= 3 ? "albaLineGrow 1.2s ease 0.3s both" : "none",
+            transformOrigin: "center",
+          }} />
+          {/* Étoile */}
+          <div style={{
+            fontSize: "0.85rem", color: T.or,
+            animation: "albaStarFloat 10s linear infinite",
+            display: "inline-block", marginBottom: "1.2rem",
+          }}>✦</div>
+          {/* Titre */}
+          <div style={{
+            fontFamily: T.serif, fontWeight: 300,
+            fontSize: "clamp(2.4rem, 10vw, 3.8rem)",
+            color: T.orPale, letterSpacing: "0.22em",
+            lineHeight: 1, marginBottom: "0.6rem",
+          }}>
+            ALBA
+          </div>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 300,
+            fontSize: "0.62rem", letterSpacing: "0.55em",
+            textTransform: "uppercase", color: `${T.brume}99`,
+            ...fade(phase >= 3, 0.5),
+          }}>
+            l'aube en toi
+          </div>
+        </div>
+
+        {/* Phase 4 — CTA */}
+        {phase >= 4 && (
+          <div style={{ marginTop: "3.5rem", animation: "albaBtnAppear 0.9s ease both" }}>
+            <button
+              onClick={onCommencer}
+              style={{
+                display: "block", width: "100%",
+                padding: "0.95rem 2rem",
+                background: "transparent",
+                border: `1px solid ${T.or}88`,
+                borderRadius: "4px",
+                color: T.orPale,
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "1.05rem", letterSpacing: "0.04em",
+                cursor: "pointer",
+                transition: "border-color 0.3s, color 0.3s",
+              }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = T.or; e.currentTarget.style.color = T.or; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = `${T.or}88`; e.currentTarget.style.color = T.orPale; }}
+            >
+              Commencer
+            </button>
+            <button
+              onClick={onConnexion}
+              style={{
+                display: "block", width: "100%",
+                marginTop: "1rem",
+                padding: "0.6rem",
+                background: "transparent", border: "none",
+                color: `${T.brume}77`,
+                fontFamily: T.sans, fontSize: "0.72rem",
+                letterSpacing: "0.12em", textTransform: "uppercase",
+                cursor: "pointer",
+                transition: "color 0.3s",
+              }}
+              onMouseOver={e => e.currentTarget.style.color = T.brume}
+              onMouseOut={e => e.currentTarget.style.color = `${T.brume}77`}
+            >
+              J'ai déjà un compte
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Hint tap discret */}
+      {phase < 4 && (
+        <div style={{
+          position: "absolute", bottom: "2.5rem",
+          fontFamily: T.sans, fontSize: "0.6rem",
+          letterSpacing: "0.18em", textTransform: "uppercase",
+          color: `${T.brume}44`,
+          ...fade(phase >= 1, 1),
+          pointerEvents: "none",
+        }}>
+          toucher pour continuer
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
 function AlbaInner() {
   const [view, setView] = useState("splash");
@@ -9897,8 +10086,14 @@ function AlbaInner() {
         />
       )}
 
+      {view === "welcome" && (
+        <WelcomeSilencieux
+          onCommencer={() => setView("auth")}
+          onConnexion={() => setView("auth")}
+        />
+      )}
       {view === "splash" && <Splash onEnd={() => {
-        const dest = authUser ? (userData ? "app" : "onboarding") : "auth";
+        const dest = authUser ? (userData ? "app" : "onboarding") : "welcome";
         setView(dest);
         if (dest === "app" && typeof localStorage !== "undefined" && localStorage.getItem("alba_son_preference") === "oui") {
           setTimeout(() => {
