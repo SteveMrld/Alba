@@ -8108,20 +8108,38 @@ const CATEGORIES_TROUVAILLES = [
   { id: "silence",      label: "Silence",       emoji: "◌",  img: "silence" },
 ];
 
-const TROUVAILLES_DEMO = [
-  { id:1, categorie:"livre", titre:"L'homme qui voulait être heureux", pourquoi:"Je l'ai lu dans une période où j'étais perdu. Il m'a rappelé que nous avons plus de liberté que nous le croyons.", jours:17 },
-  { id:2, categorie:"pratique", titre:"La méditation Vipassana", pourquoi:"Dix jours de silence. Je ne savais pas que j'avais autant de bruit en moi.", jours:34 },
-  { id:3, categorie:"film", titre:"Paterson", pourquoi:"Un film sur la beauté du quotidien. Sur l'idée que la vie ordinaire peut être un poème.", jours:8 },
-  { id:4, categorie:"citation", titre:"'Ce qui ne me tue pas me rend plus fort'", pourquoi:"Je l'ai relu le soir d'une rupture. Ce soir-là, ça m'a suffi.", jours:52 },
-  { id:5, categorie:"musique", titre:"Nuvole Bianche — Ludovico Einaudi", pourquoi:"Quand les mots ne venaient plus, cette musique parlait à ma place.", jours:3 },
-  { id:6, categorie:"voyage", titre:"Kyoto en novembre", pourquoi:"Les érables rouges. Le silence des temples tôt le matin. J'ai compris quelque chose sur le passage du temps.", jours:91 },
-  { id:7, categorie:"priere", titre:"La prière de la sérénité", pourquoi:"Accepter ce qu'on ne peut pas changer. Je la dis encore chaque matin.", jours:22 },
-  { id:8, categorie:"podcast", titre:"On Being — Krista Tippett", pourquoi:"Des conversations sur ce qui compte vraiment. Je me sens moins seul après chaque épisode.", jours:14 },
-  { id:9, categorie:"rituel", titre:"Écrire trois choses le soir", pourquoi:"Pas de la gratitude forcée. Juste observer ce qui s'est passé. Ça change le regard.", jours:45 },
-  { id:10, categorie:"lieu", titre:"La forêt de Fontainebleau au lever du soleil", pourquoi:"Il y a une lumière là-bas qui remet les choses à leur juste place.", jours:6 },
-  { id:11, categorie:"philosophie", titre:"Le stoïcisme — Marc Aurèle", pourquoi:"Pensées pour moi-même. Écrit par un empereur pour lui-même, jamais pour être publié. C'est ce qui le rend si honnête.", jours:28 },
-  { id:12, categorie:"respiration", titre:"La cohérence cardiaque", pourquoi:"5 minutes. Trois fois par jour. Je ne croyais pas que respirer pouvait changer autant de choses.", jours:19 },
+const TROUVAILLES_ALBA = [
+  // Livres
+  { id:"a1", source:"ALBA", categorie:"livre", titre:"L'art de la joie", auteur:"Goliarda Sapienza", pourquoi:"Un roman qui refuse la résignation. Modesta construit sa liberté pièce par pièce, dans une Sicile du XXe siècle qui ne lui fait aucun cadeau. L'un des livres les plus vivants qui soient." },
+  { id:"a2", source:"ALBA", categorie:"livre", titre:"Pensées pour moi-même", auteur:"Marc Aurèle", pourquoi:"Écrit par un empereur pour lui-même, jamais pour être publié. C'est ce qui le rend si honnête. Une leçon quotidienne sur ce qu'on peut contrôler — et ce qu'on ne peut pas." },
+  { id:"a3", source:"ALBA", categorie:"livre", titre:"Le Prophète", auteur:"Kahlil Gibran", pourquoi:"26 méditations sur l'amour, la douleur, la liberté, la mort. Chaque page est une porte. On y revient différemment selon les années de sa vie." },
+  { id:"a4", source:"ALBA", categorie:"livre", titre:"Les Buddenbrook", auteur:"Thomas Mann", pourquoi:"Une fresque sur ce que le temps fait aux familles, aux ambitions, aux illusions. Et sur la beauté étrange de ce qui se défait." },
+  { id:"a5", source:"ALBA", categorie:"livre", titre:"La Consolation de la Philosophie", auteur:"Boèce", pourquoi:"Écrit en prison, en attendant l'exécution. L'un des textes les plus lucides jamais écrits sur ce que signifie tenir debout." },
+  { id:"a6", source:"ALBA", categorie:"livre", titre:"Voyage au bout de la nuit", auteur:"Louis-Ferdinand Céline", pourquoi:"Une traversée de la nuit humaine. Bardamu voit tout ce que les autres font semblant de ne pas voir. Pas consolant — mais profondément libérateur." },
+  { id:"a7", source:"ALBA", categorie:"livre", titre:"Siddhartha", auteur:"Hermann Hesse", pourquoi:"Un homme cherche. Cherche encore. Se trompe. Apprend. Un récit initiatique qui parle à tous ceux qui ont l'impression de faire fausse route." },
+  { id:"a8", source:"ALBA", categorie:"livre", titre:"La Nuit", auteur:"Elie Wiesel", pourquoi:"Un témoignage d'une précision déchirante. Ce qu'on survit. Ce qu'on ne peut pas oublier. Ce que la mémoire nous demande de porter." },
+
+  // Podcasts
+  { id:"a9", source:"ALBA", categorie:"podcast", titre:"On Being", auteur:"Krista Tippett", pourquoi:"Des conversations sur ce qui compte vraiment — la foi, la perte, la grâce, la science. Krista Tippett écoute comme personne d'autre. On se sent moins seul après chaque épisode." },
+  { id:"a10", source:"ALBA", categorie:"podcast", titre:"Huberman Lab", auteur:"Andrew Huberman", pourquoi:"De la neurologie appliquée à la vie réelle. Sommeil, stress, lumière, dopamine. Comprendre son corps pour mieux l'habiter." },
+  { id:"a11", source:"ALBA", categorie:"podcast", titre:"Feel Better, Live More", auteur:"Dr Rangan Chatterjee", pourquoi:"Des conversations sur la santé au sens large — corps, esprit, relations. Sans jargon, avec de la chaleur." },
+  { id:"a12", source:"ALBA", categorie:"podcast", titre:"The Tim Ferriss Show", auteur:"Tim Ferriss", pourquoi:"Des entretiens longs avec des gens qui ont appris des choses difficiles. Les meilleurs épisodes parlent d'échec, de reconstruction, de rituel." },
+  { id:"a13", source:"ALBA", categorie:"podcast", titre:"Présence", auteur:"Anne-Laure Buffet", pourquoi:"Un podcast francophone sur la pleine conscience, la lenteur, l'attention. Pour ceux qui cherchent une voix douce dans le bruit." },
+
+  // Films
+  { id:"a14", source:"ALBA", categorie:"film", titre:"Paterson", auteur:"Jim Jarmusch", pourquoi:"Un film sur la beauté du quotidien. Un conducteur de bus écrit de la poésie dans un carnet. La vie ordinaire peut être un poème." },
+  { id:"a15", source:"ALBA", categorie:"film", titre:"The Tree of Life", auteur:"Terrence Malick", pourquoi:"Une méditation sur l'enfance, la grâce et la nature. On ne regarde pas ce film — on le traverse." },
+  { id:"a16", source:"ALBA", categorie:"film", titre:"Into the Wild", auteur:"Sean Penn", pourquoi:"Un homme abandonne tout pour aller au bout de lui-même. L'histoire vraie de Christopher McCandless. Bouleversante et nécessaire." },
+
+  // Musique
+  { id:"a17", source:"ALBA", categorie:"musique", titre:"Nuvole Bianche", auteur:"Ludovico Einaudi", pourquoi:"Quand les mots ne viennent plus, cette musique parle à leur place. Un piano, une fenêtre, du temps qui ralentit." },
+  { id:"a18", source:"ALBA", categorie:"musique", titre:"Comptine d'un autre été", auteur:"Yann Tiersen", pourquoi:"La mélodie d'Amélie Poulain. Elle contient quelque chose de la mélancolie joyeuse qu'on ressent parfois en regardant par une fenêtre." },
+
+  // Pratiques
+  { id:"a19", source:"ALBA", categorie:"pratique", titre:"La cohérence cardiaque", auteur:"David O'Hare", pourquoi:"5 minutes. Trois fois par jour. 5 secondes d'inspiration, 5 secondes d'expiration. Le système nerveux se régule. Ça marche." },
+  { id:"a20", source:"ALBA", categorie:"pratique", titre:"Pages du matin", auteur:"Julia Cameron", pourquoi:"Trois pages manuscrites, chaque matin, avant de penser. Pas un journal — un déversoir. La pratique qui libère tout le reste." },
 ];
+
 
 const SalleDesTrouvailles = ({ data }) => {
   const [filtre, setFiltre] = useState("tout");
@@ -8140,10 +8158,11 @@ const SalleDesTrouvailles = ({ data }) => {
       try {
         const res = await fetch(`/api/trouvailles?limit=60`);
         const d = await res.json();
-        setTrouvailles(d.trouvailles || []);
+        // Merge : ALBA en premier, puis dépôts utilisateurs
+        const userTrouvailles = d.trouvailles || [];
+        setTrouvailles([...TROUVAILLES_ALBA, ...userTrouvailles]);
       } catch {
-        // Fallback silencieux — grille vide
-        setTrouvailles([]);
+        setTrouvailles(TROUVAILLES_ALBA);
       }
       setLoading(false);
     };
@@ -8202,18 +8221,27 @@ const SalleDesTrouvailles = ({ data }) => {
           fontSize: "clamp(1.3rem, 4vw, 1.7rem)",
           color: T.orPale, fontWeight: 300,
           textAlign: "center", lineHeight: 1.4,
-          marginBottom: "2rem", maxWidth: 380,
+          marginBottom: selected.auteur ? "0.4rem" : "2rem", maxWidth: 380,
         }}>{selected.titre}</div>
+
+        {/* Auteur si ALBA */}
+        {selected.auteur && (
+          <div style={{
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem",
+            letterSpacing: "0.3em", textTransform: "uppercase",
+            color: `${T.brume}99`, marginBottom: "2rem",
+          }}>{selected.auteur}</div>
+        )}
 
         {/* Séparateur */}
         <div style={{ width: 40, height: 1, background: `${T.or}44`, marginBottom: "2rem" }}/>
 
-        {/* Texte anonyme */}
+        {/* Label source */}
         <div style={{
           fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
           letterSpacing: "0.3em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
-        }}>Quelqu'un a écrit…</div>
+        }}>{selected.source === "ALBA" ? "ALBA recommande…" : "Quelqu'un a écrit…"}</div>
 
         <p style={{
           fontFamily: T.serif, fontStyle: "italic",
@@ -8438,12 +8466,18 @@ const SalleDesTrouvailles = ({ data }) => {
                 {c.emoji} {c.label}
               </div>
               {/* Titre */}
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.82rem, 2.5vw, 0.95rem)", color: T.orPale, fontWeight: 300, lineHeight: 1.4, marginBottom: "0.8rem" }}>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.82rem, 2.5vw, 0.95rem)", color: T.orPale, fontWeight: 300, lineHeight: 1.4, marginBottom: t.auteur ? "0.3rem" : "0.8rem" }}>
                 {t.titre}
               </div>
-              {/* Jours */}
+              {/* Auteur */}
+              {t.auteur && (
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.2em", color: `${T.brume}88`, marginBottom: "0.8rem" }}>
+                  {t.auteur}
+                </div>
+              )}
+              {/* Source */}
               <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.brume}55` }}>
-                il y a {t.jours}j
+                {t.source === "ALBA" ? "✦ ALBA" : t.jours ? `il y a ${t.jours}j` : ""}
               </div>
             </div>
           );
@@ -8463,33 +8497,36 @@ const SalleDesTrouvailles = ({ data }) => {
 };
 
 // ─── BIBLIOTHÈQUE DES SAGESSES ───────────────────────────────────────────────
+// porteMin : nombre de portes traversées minimum pour débloquer (0 = toujours libre)
 const SAGESSES = [
-  { id: "ikigai", nom: "Ikigai", origine: "Japonais", fichier: "ikigai", texte: "Quelqu'un t'a demandé un jour ce que tu voulais faire de ta vie. Tu as peut-être répondu quelque chose de raisonnable. Mais l'Ikigai pose une autre question — quatre en réalité, simultanément : qu'est-ce qui me passionne ? Qu'est-ce que je sais faire vraiment ? Ce que je fais est-il utile au monde ? Puis-je en vivre ? L'Ikigai, c'est le point où ces quatre cercles se rejoignent. Pour certains, il est évident depuis l'enfance. Pour d'autres, il se révèle à cinquante ans, après une crise, après un deuil. Mais il est là. Il a toujours été là." },
-  { id: "kintsugi", nom: "Kintsugi", origine: "Japonais", fichier: "kintsugi", texte: "Un bol tombe. Se brise en sept morceaux. Dans la plupart des maisons du monde, on jette ou on cache. Au Japon, on prend de la laque mêlée d'or et on réassemble — lentement, soigneusement. Les fractures deviennent les parties les plus visibles. Les plus lumineuses. Il n'y a pas de honte dans ce qui a été brisé. Il y a une histoire. Et cette histoire mérite d'être portée en or. Tu n'as pas à effacer ce qui t'a cassé. Tu peux choisir de le réparer à la vue de tous." },
-  { id: "hygge", nom: "Hygge", origine: "Danois", fichier: "hygge", texte: "Ce n'est pas un objet qu'on achète ni un endroit où l'on va. C'est une qualité de présence. Une bougie allumée un soir de novembre. Une conversation qui dure trop longtemps autour d'une table. Un plaid, un livre, la pluie dehors. Les Danois ont un mot pour ce que beaucoup cherchent sans savoir le nommer : cet état où l'on n'a nulle part à être sinon là, avec les gens qu'on aime, dans la lumière douce de l'instant qui suffit." },
-  { id: "sabr", nom: "Sabr", origine: "Arabe", fichier: "sabr", texte: "On traduit souvent Sabr par patience. Mais c'est insuffisant. La patience peut être passive, résignée, épuisée. Le Sabr est autre chose — une endurance active, lucide, presque guerrière. C'est tenir debout dans l'épreuve sans perdre la foi dans le mouvement. C'est savoir que la tempête a une durée, même quand on ne voit pas la rive. Dans la tradition soufie, le Sabr n'est pas la soumission à la douleur — c'est la dignité qu'on garde au milieu d'elle." },
-  { id: "wabi-sabi", nom: "Wabi-Sabi", origine: "Japonais", fichier: "wabi-sabi", texte: "Une tasse ébréchée. Un visage qui a vieilli. Un jardin que l'automne a défait. L'esthétique japonaise du Wabi-Sabi enseigne que la beauté n'est pas dans la perfection — elle est dans l'impermanence, dans le passage du temps laissé visible, dans ce qui est incomplet parce que la vie l'est aussi. Rien n'est permanent. Rien n'est achevé. Rien n'est parfait. Et c'est exactement pour cette raison que tout peut être beau." },
-  { id: "tawakkul", nom: "Tawakkul", origine: "Arabe", fichier: "tawakkul", texte: "Il y a un récit qu'on aime dans la tradition islamique : un homme attache son chameau avant de dormir, puis dit 'je fais confiance à Dieu'. Un sage lui répond : 'Attache ton chameau, puis fais confiance à Dieu.' Le Tawakkul n'est pas l'abandon de l'effort — c'est la paix qui suit l'effort. Faire sa part, complètement, honnêtement. Puis lâcher ce qu'on ne peut pas contrôler. Cette frontière entre responsabilité et lâcher-prise est l'une des plus difficiles à trouver. Et l'une des plus libératrices." },
-  { id: "ubuntu", nom: "Ubuntu", origine: "Bantou", fichier: "ubuntu", texte: "Un anthropologue proposa un jour un jeu à des enfants d'un village africain. Il posa un panier de friandises sous un arbre et dit : le premier arrivé gagne tout. Il s'attendait à voir les enfants courir séparément. Ils se prirent par la main et coururent ensemble. Ils partagèrent. Quand il leur demanda pourquoi, ils répondirent : Ubuntu. Comment l'un d'entre nous pourrait-il être heureux si les autres ne le sont pas ? Je suis parce que nous sommes." },
-  { id: "yugen", nom: "Yūgen", origine: "Japonais", fichier: "yugen", texte: "Il n'existe pas de traduction exacte. C'est ce qu'on ressent en regardant la brume descendre sur une montagne le soir. C'est l'émotion qui monte quand on voit des oies sauvages disparaître dans les nuages. C'est la conscience soudaine et vertigineuse que l'univers est infiniment plus vaste que soi — et que cette vastitude, au lieu d'écraser, libère. Le Yūgen ne s'explique pas. Il se reconnaît quand il traverse, comme une onde, le centre de la poitrine." },
-  { id: "fitra", nom: "Fitra", origine: "Arabe", fichier: "fitra", texte: "Avant que le monde ne t'apprenne qui être, avant les peurs héritées et les masques construits, il y avait quelque chose. Une nature originelle. Intacte, pure, orientée vers la lumière comme une plante vers le soleil. La tradition islamique appelle ça la Fitra — l'état dans lequel chaque être arrive au monde. Toute la vie spirituelle, dans cette perspective, n'est pas une conquête. C'est un retour. Un lent désapprentissage de ce qui t'a éloigné de ce que tu étais déjà." },
-  { id: "baraka", nom: "Baraka", origine: "Arabe", fichier: "baraka", texte: "Certains lieux semblent chargés d'une énergie invisible. Certaines personnes entrent dans une pièce et quelque chose change. Certains moments — un coucher de soleil, une étreinte, une prière collective — semblent touchés par autre chose que le hasard. Dans les traditions arabes et africaines, on appelle ça la Baraka : une bénédiction qui circule, qui se transmet, qui se reçoit. Elle n'est pas réservée aux saints. Elle passe par les actes justes, les intentions pures, les mains qui donnent sans compter." },
-  { id: "ataraxia", nom: "Ataraxia", origine: "Grec", fichier: "ataraxia", texte: "Les épicuriens et les stoïciens avaient des visions différentes du bonheur mais s'accordaient sur un point : l'Ataraxia, la tranquillité de l'âme, était le but. Non pas l'euphorie — l'euphorie s'effondre. Non pas l'absence de sensation — c'est la mort. Mais un état stable, une paix qui ne dépend pas des circonstances extérieures. Quelque chose qu'aucun événement ne peut complètement défaire. Les Grecs croyaient qu'on pouvait y arriver. Qu'il suffisait de travailler sa pensée comme on travaille son corps." },
-  { id: "kaizen", nom: "Kaizen", origine: "Japonais", fichier: "kaizen", texte: "Après la défaite de 1945, le Japon était en ruine. Ce qui allait suivre n'a pas été une révolution spectaculaire — ce fut des millions de petits gestes quotidiens d'amélioration. Kai : changer. Zen : pour le mieux. Chaque jour, un peu mieux qu'hier. Pas de grand soir, pas de transformation radicale. Juste la discipline douce de ne jamais s'arrêter de progresser. Le Kaizen enseigne que la constance est plus puissante que l'intensité. Que ce qu'on fait chaque jour est plus important que ce qu'on fait parfois." },
-  { id: "lagom", nom: "Lagom", origine: "Suédois", fichier: "lagom", texte: "La légende dit que le mot vient des Vikings qui passaient un bol de bière à la ronde : 'laget om', pour le groupe. Chacun buvait sa juste part, ni trop ni trop peu, pour que tous puissent partager. Aujourd'hui, Lagom désigne cet art suédois de l'équilibre juste — dans l'alimentation, le travail, la décoration, la vie sociale. Ni excès ni manque. Juste assez. Dans un monde qui valorise le toujours plus, le Lagom est presque une forme de rébellion douce." },
-  { id: "sisu", nom: "Sisu", origine: "Finnois", fichier: "sisu", texte: "Les Finlandais ont survécu à des hivers qui auraient tué d'autres peuples. Pas grâce à l'optimisme — grâce au Sisu. C'est une force qui ne se voit pas dans les moments faciles. Elle n'apparaît que quand tout est épuisé : l'énergie, l'espoir, les ressources. Et là, au fond, il reste quelque chose. Une résistance sans spectacle, sans discours. Juste la décision silencieuse de continuer. Le Sisu ne promet pas que ça va aller. Il dit seulement : je ne m'arrête pas là." },
-  { id: "sankofa", nom: "Sankofa", origine: "Akan", fichier: "sankofa", texte: "Dans la tradition Akan du Ghana, on représente le Sankofa par un oiseau qui vole vers l'avant en tournant la tête vers l'arrière, tenant dans son bec un œuf — l'avenir. Le message est simple et profond : il n'est jamais trop tard pour retourner chercher ce qu'on a oublié. Les erreurs du passé ne sont pas des fardeaux — elles sont des enseignements. Les racines ne retiennent pas — elles nourrissent. Pour avancer vraiment, il faut savoir d'où on vient." },
-  { id: "qalb", nom: "Qalb", origine: "Arabe", fichier: "qalb", texte: "En arabe, Qalb signifie cœur — mais aussi ce qui se retourne, ce qui oscille. Ce n'est pas l'image romantique du cœur occidental. C'est quelque chose de plus profond et plus instable : le centre de l'être humain, le siège de la conscience, le lieu où se jouent les transformations réelles. Dans la spiritualité soufie, le Qalb est un miroir. Quand il est poli par l'attention et la sincérité, il reflète la lumière divine. Quand il est encombré, il ne voit plus rien." },
-  { id: "eudaimonia", nom: "Eudaimonia", origine: "Grec", fichier: "eudaimonia", texte: "Aristote n'a jamais cru que le bonheur était une sensation. Pour lui, l'Eudaimonia — souvent traduit par 'bonheur' mais qui signifie littéralement 'bon démon, bon génie intérieur' — c'est une activité. C'est la vie qui se déploie selon ce qu'on est profondément. Non pas ce qui fait plaisir, mais ce qui permet à la nature la plus haute de l'être humain de s'exprimer. L'Eudaimonia n'est pas un état qu'on atteint. C'est une direction dans laquelle on marche, chaque jour, en faisant le choix d'être pleinement ce qu'on est." },
-  { id: "arete", nom: "Areté", origine: "Grec", fichier: "arete", texte: "Pour les Grecs anciens, l'Areté n'était pas réservée aux héros. Un cheval qui court vite a son Areté. Un couteau bien aiguisé a le sien. Chaque être a une excellence qui lui est propre — une manière d'être pleinement ce qu'il est censé être. L'Areté humaine, c'est donner le meilleur de soi non pour être admiré, mais parce que c'est la seule manière juste d'habiter sa vie. C'est l'artisan qui soigne le dos de la statue que personne ne verra jamais. Parce que lui, il sait." },
-  { id: "maktub", nom: "Maktub", origine: "Arabe", fichier: "maktub", texte: "Paulo Coelho l'a rendu célèbre. Mais avant le roman, le mot existait dans les souks, dans les mosquées, dans les lettres entre voyageurs. Maktub : c'est écrit. Pas au sens d'une fatalité qui écrase — au sens d'une trame plus grande que soi dans laquelle chaque événement a un sens qu'on ne voit pas toujours immédiatement. Ce qui devait arriver est arrivé. Ce qu'on a perdu avait peut-être à partir. Et ce qui vient — même si on ne peut pas encore le nommer — est déjà en chemin." },
-  { id: "meraki", nom: "Meraki", origine: "Grec", fichier: "meraki", texte: "Les Grecs modernes utilisent ce mot pour décrire ce qu'on met dans ce qu'on fait quand on le fait vraiment. La cuisinière qui prépare le repas en pensant à chaque convive. Le musicien qui joue pour une salle vide avec autant d'âme que pour mille personnes. L'artisan qui peaufine un détail que personne ne remarquera. Le Meraki, c'est quand l'acte et la personne ne font plus qu'un. Quand on n'est plus en train de faire quelque chose — on est ce qu'on fait." },
-  { id: "maat", nom: "Ma'at", origine: "Égyptien", fichier: "maat", texte: "Dans l'Égypte ancienne, Ma'at était à la fois une déesse et un principe cosmique. Elle représentait l'ordre, la vérité, la justice, l'harmonie — tout ce qui maintient le monde en équilibre. Après la mort, le cœur du défunt était pesé contre sa plume. Si le cœur était alourdi par le mensonge, l'injustice, les actes contraires à Ma'at, la balance penchait. Vivre selon Ma'at, c'était vivre de façon à ce que son cœur reste léger. Pas innocent — juste." },
-  { id: "satori", nom: "Satori", origine: "Japonais", fichier: "satori", texte: "On ne peut pas décider d'avoir un Satori. On ne peut pas le provoquer, le planifier, le mériter par accumulation d'efforts. C'est un éveil soudain — un instant où la réalité se voit telle qu'elle est, sans les filtres habituels de l'ego et du mental. Les maîtres Zen créaient des conditions pour que cela arrive : méditation, kōan, travail, silence. Mais le Satori lui-même arrive comme la lumière entre les nuages. Bref, total, transformateur. Et après, on ne voit plus les choses tout à fait pareil." },
+  { id: "ikigai", nom: "Ikigai", origine: "Japonais", porteMin: 0, fichier: "ikigai", texte: "Quelqu'un t'a demandé un jour ce que tu voulais faire de ta vie. Tu as peut-être répondu quelque chose de raisonnable. Mais l'Ikigai pose une autre question — quatre en réalité, simultanément : qu'est-ce qui me passionne ? Qu'est-ce que je sais faire vraiment ? Ce que je fais est-il utile au monde ? Puis-je en vivre ? L'Ikigai, c'est le point où ces quatre cercles se rejoignent. Pour certains, il est évident depuis l'enfance. Pour d'autres, il se révèle à cinquante ans, après une crise, après un deuil. Mais il est là. Il a toujours été là." },
+  { id: "kintsugi", nom: "Kintsugi", origine: "Japonais", porteMin: 0, fichier: "kintsugi", texte: "Un bol tombe. Se brise en sept morceaux. Dans la plupart des maisons du monde, on jette ou on cache. Au Japon, on prend de la laque mêlée d'or et on réassemble — lentement, soigneusement. Les fractures deviennent les parties les plus visibles. Les plus lumineuses. Il n'y a pas de honte dans ce qui a été brisé. Il y a une histoire. Et cette histoire mérite d'être portée en or. Tu n'as pas à effacer ce qui t'a cassé. Tu peux choisir de le réparer à la vue de tous." },
+  { id: "hygge", nom: "Hygge", origine: "Danois", porteMin: 0, fichier: "hygge", texte: "Ce n'est pas un objet qu'on achète ni un endroit où l'on va. C'est une qualité de présence. Une bougie allumée un soir de novembre. Une conversation qui dure trop longtemps autour d'une table. Un plaid, un livre, la pluie dehors. Les Danois ont un mot pour ce que beaucoup cherchent sans savoir le nommer : cet état où l'on n'a nulle part à être sinon là, avec les gens qu'on aime, dans la lumière douce de l'instant qui suffit." },
+  { id: "sabr", nom: "Sabr", origine: "Arabe", porteMin: 0, fichier: "sabr", texte: "On traduit souvent Sabr par patience. Mais c'est insuffisant. La patience peut être passive, résignée, épuisée. Le Sabr est autre chose — une endurance active, lucide, presque guerrière. C'est tenir debout dans l'épreuve sans perdre la foi dans le mouvement. C'est savoir que la tempête a une durée, même quand on ne voit pas la rive. Dans la tradition soufie, le Sabr n'est pas la soumission à la douleur — c'est la dignité qu'on garde au milieu d'elle." },
+  { id: "wabi-sabi", nom: "Wabi-Sabi", origine: "Japonais", porteMin: 2, fichier: "wabi-sabi", texte: "Une tasse ébréchée. Un visage qui a vieilli. Un jardin que l'automne a défait. L'esthétique japonaise du Wabi-Sabi enseigne que la beauté n'est pas dans la perfection — elle est dans l'impermanence, dans le passage du temps laissé visible, dans ce qui est incomplet parce que la vie l'est aussi. Rien n'est permanent. Rien n'est achevé. Rien n'est parfait. Et c'est exactement pour cette raison que tout peut être beau." },
+  { id: "tawakkul", nom: "Tawakkul", origine: "Arabe", porteMin: 2, fichier: "tawakkul", texte: "Il y a un récit qu'on aime dans la tradition islamique : un homme attache son chameau avant de dormir, puis dit 'je fais confiance à Dieu'. Un sage lui répond : 'Attache ton chameau, puis fais confiance à Dieu.' Le Tawakkul n'est pas l'abandon de l'effort — c'est la paix qui suit l'effort. Faire sa part, complètement, honnêtement. Puis lâcher ce qu'on ne peut pas contrôler. Cette frontière entre responsabilité et lâcher-prise est l'une des plus difficiles à trouver. Et l'une des plus libératrices." },
+  { id: "ubuntu", nom: "Ubuntu", origine: "Bantou", porteMin: 2, fichier: "ubuntu", texte: "Un anthropologue proposa un jour un jeu à des enfants d'un village africain. Il posa un panier de friandises sous un arbre et dit : le premier arrivé gagne tout. Il s'attendait à voir les enfants courir séparément. Ils se prirent par la main et coururent ensemble. Ils partagèrent. Quand il leur demanda pourquoi, ils répondirent : Ubuntu. Comment l'un d'entre nous pourrait-il être heureux si les autres ne le sont pas ? Je suis parce que nous sommes." },
+  { id: "yugen", nom: "Yūgen", origine: "Japonais", porteMin: 2, fichier: "yugen", texte: "Il n'existe pas de traduction exacte. C'est ce qu'on ressent en regardant la brume descendre sur une montagne le soir. C'est l'émotion qui monte quand on voit des oies sauvages disparaître dans les nuages. C'est la conscience soudaine et vertigineuse que l'univers est infiniment plus vaste que soi — et que cette vastitude, au lieu d'écraser, libère. Le Yūgen ne s'explique pas. Il se reconnaît quand il traverse, comme une onde, le centre de la poitrine." },
+  { id: "fitra", nom: "Fitra", origine: "Arabe", porteMin: 4, fichier: "fitra", texte: "Avant que le monde ne t'apprenne qui être, avant les peurs héritées et les masques construits, il y avait quelque chose. Une nature originelle. Intacte, pure, orientée vers la lumière comme une plante vers le soleil. La tradition islamique appelle ça la Fitra — l'état dans lequel chaque être arrive au monde. Toute la vie spirituelle, dans cette perspective, n'est pas une conquête. C'est un retour. Un lent désapprentissage de ce qui t'a éloigné de ce que tu étais déjà." },
+  { id: "baraka", nom: "Baraka", origine: "Arabe", porteMin: 4, fichier: "baraka", texte: "Certains lieux semblent chargés d'une énergie invisible. Certaines personnes entrent dans une pièce et quelque chose change. Certains moments — un coucher de soleil, une étreinte, une prière collective — semblent touchés par autre chose que le hasard. Dans les traditions arabes et africaines, on appelle ça la Baraka : une bénédiction qui circule, qui se transmet, qui se reçoit. Elle n'est pas réservée aux saints. Elle passe par les actes justes, les intentions pures, les mains qui donnent sans compter." },
+  { id: "ataraxia", nom: "Ataraxia", origine: "Grec", porteMin: 4, fichier: "ataraxia", texte: "Les épicuriens et les stoïciens avaient des visions différentes du bonheur mais s'accordaient sur un point : l'Ataraxia, la tranquillité de l'âme, était le but. Non pas l'euphorie — l'euphorie s'effondre. Non pas l'absence de sensation — c'est la mort. Mais un état stable, une paix qui ne dépend pas des circonstances extérieures. Quelque chose qu'aucun événement ne peut complètement défaire. Les Grecs croyaient qu'on pouvait y arriver. Qu'il suffisait de travailler sa pensée comme on travaille son corps." },
+  { id: "kaizen", nom: "Kaizen", origine: "Japonais", porteMin: 6, fichier: "kaizen", texte: "Après la défaite de 1945, le Japon était en ruine. Ce qui allait suivre n'a pas été une révolution spectaculaire — ce fut des millions de petits gestes quotidiens d'amélioration. Kai : changer. Zen : pour le mieux. Chaque jour, un peu mieux qu'hier. Pas de grand soir, pas de transformation radicale. Juste la discipline douce de ne jamais s'arrêter de progresser. Le Kaizen enseigne que la constance est plus puissante que l'intensité. Que ce qu'on fait chaque jour est plus important que ce qu'on fait parfois." },
+  { id: "lagom", nom: "Lagom", origine: "Suédois", porteMin: 6, fichier: "lagom", texte: "La légende dit que le mot vient des Vikings qui passaient un bol de bière à la ronde : 'laget om', pour le groupe. Chacun buvait sa juste part, ni trop ni trop peu, pour que tous puissent partager. Aujourd'hui, Lagom désigne cet art suédois de l'équilibre juste — dans l'alimentation, le travail, la décoration, la vie sociale. Ni excès ni manque. Juste assez. Dans un monde qui valorise le toujours plus, le Lagom est presque une forme de rébellion douce." },
+  { id: "sisu", nom: "Sisu", origine: "Finnois", porteMin: 6, fichier: "sisu", texte: "Les Finlandais ont survécu à des hivers qui auraient tué d'autres peuples. Pas grâce à l'optimisme — grâce au Sisu. C'est une force qui ne se voit pas dans les moments faciles. Elle n'apparaît que quand tout est épuisé : l'énergie, l'espoir, les ressources. Et là, au fond, il reste quelque chose. Une résistance sans spectacle, sans discours. Juste la décision silencieuse de continuer. Le Sisu ne promet pas que ça va aller. Il dit seulement : je ne m'arrête pas là." },
+  { id: "sankofa", nom: "Sankofa", origine: "Akan", porteMin: 6, fichier: "sankofa", texte: "Dans la tradition Akan du Ghana, on représente le Sankofa par un oiseau qui vole vers l'avant en tournant la tête vers l'arrière, tenant dans son bec un œuf — l'avenir. Le message est simple et profond : il n'est jamais trop tard pour retourner chercher ce qu'on a oublié. Les erreurs du passé ne sont pas des fardeaux — elles sont des enseignements. Les racines ne retiennent pas — elles nourrissent. Pour avancer vraiment, il faut savoir d'où on vient." },
+  { id: "qalb", nom: "Qalb", origine: "Arabe", porteMin: 8, fichier: "qalb", texte: "En arabe, Qalb signifie cœur — mais aussi ce qui se retourne, ce qui oscille. Ce n'est pas l'image romantique du cœur occidental. C'est quelque chose de plus profond et plus instable : le centre de l'être humain, le siège de la conscience, le lieu où se jouent les transformations réelles. Dans la spiritualité soufie, le Qalb est un miroir. Quand il est poli par l'attention et la sincérité, il reflète la lumière divine. Quand il est encombré, il ne voit plus rien." },
+  { id: "eudaimonia", nom: "Eudaimonia", origine: "Grec", porteMin: 8, fichier: "eudaimonia", texte: "Aristote n'a jamais cru que le bonheur était une sensation. Pour lui, l'Eudaimonia — souvent traduit par 'bonheur' mais qui signifie littéralement 'bon démon, bon génie intérieur' — c'est une activité. C'est la vie qui se déploie selon ce qu'on est profondément. Non pas ce qui fait plaisir, mais ce qui permet à la nature la plus haute de l'être humain de s'exprimer. L'Eudaimonia n'est pas un état qu'on atteint. C'est une direction dans laquelle on marche, chaque jour, en faisant le choix d'être pleinement ce qu'on est." },
+  { id: "arete", nom: "Areté", origine: "Grec", porteMin: 8, fichier: "arete", texte: "Pour les Grecs anciens, l'Areté n'était pas réservée aux héros. Un cheval qui court vite a son Areté. Un couteau bien aiguisé a le sien. Chaque être a une excellence qui lui est propre — une manière d'être pleinement ce qu'il est censé être. L'Areté humaine, c'est donner le meilleur de soi non pour être admiré, mais parce que c'est la seule manière juste d'habiter sa vie. C'est l'artisan qui soigne le dos de la statue que personne ne verra jamais. Parce que lui, il sait." },
+  { id: "maktub", nom: "Maktub", origine: "Arabe", porteMin: 8, fichier: "maktub", texte: "Paulo Coelho l'a rendu célèbre. Mais avant le roman, le mot existait dans les souks, dans les mosquées, dans les lettres entre voyageurs. Maktub : c'est écrit. Pas au sens d'une fatalité qui écrase — au sens d'une trame plus grande que soi dans laquelle chaque événement a un sens qu'on ne voit pas toujours immédiatement. Ce qui devait arriver est arrivé. Ce qu'on a perdu avait peut-être à partir. Et ce qui vient — même si on ne peut pas encore le nommer — est déjà en chemin." },
+  { id: "meraki", nom: "Meraki", origine: "Grec", porteMin: 10, fichier: "meraki", texte: "Les Grecs modernes utilisent ce mot pour décrire ce qu'on met dans ce qu'on fait quand on le fait vraiment. La cuisinière qui prépare le repas en pensant à chaque convive. Le musicien qui joue pour une salle vide avec autant d'âme que pour mille personnes. L'artisan qui peaufine un détail que personne ne remarquera. Le Meraki, c'est quand l'acte et la personne ne font plus qu'un. Quand on n'est plus en train de faire quelque chose — on est ce qu'on fait." },
+  { id: "maat", nom: "Ma'at", origine: "Égyptien", porteMin: 10, fichier: "maat", texte: "Dans l'Égypte ancienne, Ma'at était à la fois une déesse et un principe cosmique. Elle représentait l'ordre, la vérité, la justice, l'harmonie — tout ce qui maintient le monde en équilibre. Après la mort, le cœur du défunt était pesé contre sa plume. Si le cœur était alourdi par le mensonge, l'injustice, les actes contraires à Ma'at, la balance penchait. Vivre selon Ma'at, c'était vivre de façon à ce que son cœur reste léger. Pas innocent — juste." },
+  { id: "satori", nom: "Satori", origine: "Japonais", porteMin: 10, fichier: "satori", texte: "On ne peut pas décider d'avoir un Satori. On ne peut pas le provoquer, le planifier, le mériter par accumulation d'efforts. C'est un éveil soudain — un instant où la réalité se voit telle qu'elle est, sans les filtres habituels de l'ego et du mental. Les maîtres Zen créaient des conditions pour que cela arrive : méditation, kōan, travail, silence. Mais le Satori lui-même arrive comme la lumière entre les nuages. Bref, total, transformateur. Et après, on ne voit plus les choses tout à fait pareil." },
 ];
 
-const BibliothequeSagesses = () => {
+const BibliothequeSagesses = ({ cleActive = 0 }) => {
   const [selected, setSelected] = useState(null);
+
+  const estDebloquee = (s) => cleActive >= s.porteMin;
 
   if (selected) {
     const s = selected;
@@ -8534,6 +8571,8 @@ const BibliothequeSagesses = () => {
     );
   }
 
+  const debloquees = SAGESSES.filter(s => estDebloquee(s)).length;
+
   return (
     <div style={{ padding: "0 0 4rem" }}>
       <div style={{ textAlign: "center", padding: "1.5rem 1rem 1rem" }}>
@@ -8544,34 +8583,60 @@ const BibliothequeSagesses = () => {
           Les Sagesses du monde
         </div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.4rem", lineHeight: 1.7 }}>
-          22 mots que toutes les langues n'ont pas.
+          {debloquees} / 22 débloquées · une sagesse s'ouvre à chaque Porte traversée.
         </p>
       </div>
 
       {/* Grille 2 colonnes */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", padding: "0 2px" }}>
-        {SAGESSES.map(s => (
-          <div key={s.id} onClick={() => setSelected(s)} style={{
-            position: "relative", aspectRatio: "1/1", overflow: "hidden", cursor: "pointer",
-          }}>
-            <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
-              style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s" }}/>
-            {/* Gradient */}
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(to top, rgba(10,8,6,0.75) 0%, transparent 50%)",
-            }}/>
-            {/* Nom */}
-            <div style={{
-              position: "absolute", bottom: "0.7rem", left: 0, right: 0,
-              textAlign: "center",
-              fontFamily: T.serif, fontStyle: "italic",
-              fontSize: "clamp(0.85rem, 2.8vw, 1rem)",
-              color: T.orPale, fontWeight: 300,
-              textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-            }}>{s.nom}</div>
-          </div>
-        ))}
+        {SAGESSES.map(s => {
+          const libre = estDebloquee(s);
+          return (
+            <div key={s.id} onClick={() => libre && setSelected(s)} style={{
+              position: "relative", aspectRatio: "1/1", overflow: "hidden",
+              cursor: libre ? "pointer" : "default",
+            }}>
+              <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
+                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s",
+                  filter: libre ? "none" : "blur(6px) brightness(0.35)",
+                }}/>
+              {/* Gradient */}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: libre
+                  ? "linear-gradient(to top, rgba(10,8,6,0.75) 0%, transparent 50%)"
+                  : "rgba(10,8,6,0.2)",
+              }}/>
+              {libre ? (
+                /* Nom */
+                <div style={{
+                  position: "absolute", bottom: "0.7rem", left: 0, right: 0,
+                  textAlign: "center",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "clamp(0.85rem, 2.8vw, 1rem)",
+                  color: T.orPale, fontWeight: 300,
+                  textShadow: "0 1px 8px rgba(0,0,0,0.8)",
+                }}>{s.nom}</div>
+              ) : (
+                /* Cadenas */
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={`${T.or}66`} strokeWidth="1.5">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  <div style={{
+                    fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em",
+                    textTransform: "uppercase", color: `${T.or}44`,
+                  }}>Porte {s.porteMin + 1}</div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -8749,7 +8814,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   );
 };
 
-const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey }) => {
+const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey, cleActive = 0 }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const { blessure, hasDual, hasCroissance } = getContextProfil(data);
@@ -8828,7 +8893,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           letterSpacing: "0.5em", textTransform: "uppercase",
           color: T.brume, marginBottom: "1rem",
         }}>Bibliothèque des Sagesses</div>
-        <BibliothequeSagesses />
+        <BibliothequeSagesses cleActive={cleActive} />
       </div>
 
       {/* ── Lettre mensuelle ── */}
@@ -10518,7 +10583,7 @@ function AlbaInner() {
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} />}
+              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} />}
             </motion.div>
           </AnimatePresence>
 
