@@ -6028,16 +6028,12 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
         </p>
       </div>
       <div style={{ position: "absolute", bottom: "0.8rem", left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 20 }}>
-        {dejaFaitAujd && etape !== 7 ? (
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}BB` }}>
-            Ton offrande brille là-haut ce soir.
-          </p>
-        ) : etape === 7 ? (
+        {etape === 7 ? (
           <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${nouvelleOffrande?.couleur || T.or}cc` }}>
             Ta lumière est là-haut. Quelqu'un la verra.
           </p>
         ) : (
-          <button onClick={() => setEtape(1)} style={{
+          <button onClick={() => dejaFaitAujd ? setEtape("deja") : setEtape(1)} style={{
             background: "transparent", border: `1px solid ${T.or}33`,
             borderRadius: "30px", padding: "0.9rem 2.2rem",
             fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
@@ -6074,6 +6070,22 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
   );
 
   if (etape === 0 || etape === 7) return <CielView showNouvelleEtoile={etape === 7} />;
+
+  // ── DÉJÀ FAIT AUJOURD'HUI ────────────────────────────────────────────────
+  if (etape === "deja") return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", textAlign: "center" }}>
+      <div style={{ fontSize: "1.4rem", color: T.or, marginBottom: "2rem", animation: "alba-breathe 4s ease-in-out infinite" }}>✦</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem,4vw,1.2rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "0.8rem" }}>
+        Ton offrande brille déjà là-haut.
+      </p>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}77`, lineHeight: 1.8, marginBottom: "2.5rem" }}>
+        Une lumière par jour suffit.<br/>Reviens demain pour en déposer une autre.
+      </p>
+      <button onClick={() => setEtape(0)} style={{ background: "transparent", border: `1px solid ${T.or}33`, borderRadius: "30px", padding: "0.8rem 2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.45em", textTransform: "uppercase", color: `${T.or}99`, cursor: "pointer" }}>
+        Contempler le ciel
+      </button>
+    </div>
+  );
 
   // ── ÉTAPE 1 : Catégorie ──────────────────────────────────────────────────
   if (etape === 1) return (
