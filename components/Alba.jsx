@@ -9123,33 +9123,138 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         )}
       </div>
 
-      {/* ── SAGESSES — compteur discret ── */}
-      <div style={{
-        margin: "1.5rem 1.5rem 0",
-        padding: "1.1rem 1.4rem",
-        background: `${T.or}06`,
-        border: `1px solid ${T.or}18`,
-        borderRadius: "8px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        animation: "fadeUp 0.7s ease forwards 0.28s", opacity: 0,
-      }}>
-        <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.4rem" }}>
-            Sagesses débloquées
-          </div>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem" }}>
-            <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.5rem", color: T.orPale }}>{SAGESSES.filter(s => cleActive >= s.porteMin).length}</span>
-            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", color: T.brume }}>/ {SAGESSES.length}</span>
-          </div>
-          {/* Barre */}
-          <div style={{ height: 2, width: 120, background: `${T.brume}25`, borderRadius: 1, marginTop: "0.6rem", overflow: "hidden" }}>
-            <div style={{ height: "100%", background: `linear-gradient(to right, ${T.brume}60, ${T.or})`, borderRadius: 1, width: `${(SAGESSES.filter(s => cleActive >= s.porteMin).length / SAGESSES.length) * 100}%`, transition: "width 1s ease" }}/>
-          </div>
+      {/* ── TABLEAU DE BORD ── */}
+      <div style={{ margin: "2rem 0 0", padding: "0 1.5rem", animation: "fadeUp 0.7s ease forwards 0.28s", opacity: 0 }}>
+
+        {/* Titre section */}
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
+          Tableau de bord
         </div>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.25em", color: `${T.or}66`, cursor: "pointer" }}
-          onClick={() => document.querySelector("[data-tab='compagnon']")?.click?.()}>
-          Découvrir →
+
+        {/* ── Portes & Clés ── */}
+        <div style={{
+          background: `${T.nuit2}CC`,
+          border: `1px solid ${T.brume}15`,
+          borderRadius: "10px",
+          padding: "1.3rem 1.4rem",
+          marginBottom: "1rem",
+        }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}88`, marginBottom: "1rem" }}>
+            Les 6 Clés · Chemin parcouru
+          </div>
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            {CLES.map((cle, i) => {
+              const franchie = i <= cleActive;
+              const active = i === cleActive;
+              return (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+                  <div style={{
+                    width: "100%", aspectRatio: "1",
+                    borderRadius: "50%",
+                    background: franchie ? `${cle.couleur}22` : `${T.brume}08`,
+                    border: `1px solid ${franchie ? cle.couleur + "55" : T.brume + "18"}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: active ? `0 0 10px ${cle.couleur}40` : "none",
+                    transition: "all 0.4s",
+                  }}>
+                    <span style={{
+                      fontFamily: T.serif, fontStyle: "italic",
+                      fontSize: "clamp(0.55rem, 2.2vw, 0.75rem)",
+                      color: franchie ? cle.couleur : `${T.brume}30`,
+                      fontWeight: 300,
+                    }}>{cle.num}</span>
+                  </div>
+                  <div style={{
+                    fontFamily: T.sans, fontWeight: 300,
+                    fontSize: "clamp(0.35rem, 1.2vw, 0.44rem)",
+                    letterSpacing: "0.05em", textTransform: "uppercase",
+                    color: franchie ? `${cle.couleur}CC` : `${T.brume}28`,
+                    textAlign: "center", lineHeight: 1.2,
+                  }}>{cle.nom}</div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Barre de progression éclats vers prochaine porte */}
+          {cleActive < CLES.length - 1 && (() => {
+            const prochainSeuil = SEUILS_PORTES[cleActive + 1];
+            const seuilActuel  = SEUILS_PORTES[cleActive];
+            const pct = Math.min(100, Math.round(((eclats - seuilActuel) / (prochainSeuil - seuilActuel)) * 100));
+            return (
+              <div style={{ marginTop: "1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.4rem" }}>
+                  <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.3em", color: `${T.brume}66` }}>
+                    {eclats} éclats
+                  </span>
+                  <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.3em", color: `${T.brume}44` }}>
+                    Porte {cleActive + 1} → {prochainSeuil - eclats} restants
+                  </span>
+                </div>
+                <div style={{ height: 2, background: `${T.brume}18`, borderRadius: 1, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${pct}%`, background: `linear-gradient(to right, ${CLES[cleActive].couleur}88, ${CLES[cleActive].couleur})`, borderRadius: 1, transition: "width 1.2s ease" }}/>
+                </div>
+              </div>
+            );
+          })()}
         </div>
+
+        {/* ── Sagesses acquises ── */}
+        <div style={{
+          background: `${T.nuit2}CC`,
+          border: `1px solid ${T.brume}15`,
+          borderRadius: "10px",
+          padding: "1.3rem 1.4rem",
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}88` }}>
+              Sagesses acquises
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "0.25rem" }}>
+              <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale }}>{SAGESSES.filter(s => cleActive >= s.porteMin).length}</span>
+              <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", color: `${T.brume}55` }}>/ {SAGESSES.length}</span>
+            </div>
+          </div>
+
+          {/* Grille pastilles — débloquées en couleur, verrouillées en fantôme */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem" }}>
+            {SAGESSES.map(s => {
+              const libre = cleActive >= s.porteMin;
+              return (
+                <div key={s.id} title={libre ? s.nom : `Porte ${s.porteMin}`} style={{
+                  width: 42, height: 42, borderRadius: "50%",
+                  overflow: "hidden",
+                  border: `1px solid ${libre ? T.or + "44" : T.brume + "12"}`,
+                  background: T.nuit,
+                  opacity: libre ? 1 : 0.22,
+                  flexShrink: 0,
+                  position: "relative",
+                }}>
+                  <img
+                    src={`/sagesses/${s.fichier}.jpg`}
+                    alt={s.nom}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                  {!libre && (
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "0.55rem", color: `${T.brume}55`,
+                    }}>✦</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Ce qui manque */}
+          {SAGESSES.filter(s => cleActive < s.porteMin).length > 0 && (
+            <div style={{ marginTop: "1rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55`, lineHeight: 1.7 }}>
+              {SAGESSES.filter(s => cleActive < s.porteMin).length} sagesse{SAGESSES.filter(s => cleActive < s.porteMin).length > 1 ? "s" : ""} encore à découvrir — continue d'écrire, de souffler, de traverser.
+            </div>
+          )}
+        </div>
+
       </div>
 
       {/* ── LETTRE MENSUELLE ── */}
