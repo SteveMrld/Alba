@@ -12580,9 +12580,207 @@ const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
   );
 };
 
+// ─── PAGE B2B ENTREPRISES ─────────────────────────────────────────────────────
+
+const PricingB2B = ({ onRetour }) => {
+  const [quantite, setQuantite] = useState(50);
+  const [contact, setContact] = useState({ nom: "", entreprise: "", email: "", message: "" });
+  const [envoye, setEnvoye] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const prixUnitaire = quantite >= 200 ? 5.5 : quantite >= 100 ? 6.5 : quantite >= 50 ? 7.5 : 9;
+  const total = (quantite * prixUnitaire).toFixed(0);
+
+  const PALIERS = [
+    { min: 10,  max: 49,  prix: "9€",   label: "Découverte" },
+    { min: 50,  max: 99,  prix: "7,50€", label: "Équipe" },
+    { min: 100, max: 199, prix: "6,50€", label: "Structure" },
+    { min: 200, max: null, prix: "5,50€", label: "Entreprise" },
+  ];
+
+  const envoyer = async () => {
+    if (!contact.email || !contact.entreprise) return;
+    setLoading(true);
+    try {
+      await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          max_tokens: 10,
+          system: "Réponds juste: ok",
+          messages: [{ role: "user", content: `Contact B2B: ${JSON.stringify({ ...contact, quantite, total })}` }],
+        }),
+      });
+    } catch {}
+    setEnvoye(true);
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: T.nuit, overflowY: "auto", zIndex: 100 }}>
+      <style>{`
+        @keyframes b2bFade { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .b2b-1 { animation: b2bFade 0.6s ease forwards; }
+        .b2b-2 { animation: b2bFade 0.6s ease 0.15s forwards; opacity:0; }
+        .b2b-3 { animation: b2bFade 0.6s ease 0.3s forwards; opacity:0; }
+        .b2b-4 { animation: b2bFade 0.6s ease 0.45s forwards; opacity:0; }
+      `}</style>
+
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 1.5rem 6rem" }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.2rem 0", borderBottom: `1px solid ${T.brume}15` }}>
+          <button onClick={onRetour} style={{ background: "none", border: "none", color: `${T.brume}66`, fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", cursor: "pointer", textTransform: "uppercase" }}>← Retour</button>
+          <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.2rem", letterSpacing: "0.25em", color: T.or }}>ALBA</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}44`, textTransform: "uppercase" }}>Entreprises</div>
+        </div>
+
+        {/* Accroche */}
+        <div className="b2b-1" style={{ textAlign: "center", padding: "3rem 0 2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}66`, marginBottom: "1.2rem" }}>Pour les équipes</div>
+          <h1 style={{ fontFamily: T.serif, fontWeight: 300, fontStyle: "italic", fontSize: "clamp(1.5rem, 6vw, 2rem)", color: T.orPale, lineHeight: 1.6, margin: "0 0 1.2rem" }}>
+            Offrir un espace intérieur<br/>à vos collaborateurs.
+          </h1>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}99`, lineHeight: 1.9, margin: 0 }}>
+            Prévention burn-out, qualité de vie au travail, présence. ALBA accompagne chaque personne dans sa propre durée — sans collecte de données, sans algorithme.
+          </p>
+        </div>
+
+        {/* Pourquoi ALBA en entreprise */}
+        <div className="b2b-2" style={{ display: "flex", flexDirection: "column", gap: "1px", marginBottom: "3rem" }}>
+          {[
+            { titre: "Anonyme et confidentiel", desc: "Aucune donnée transmise à l'employeur. Chaque collaborateur a son espace privé.", sym: "○" },
+            { titre: "Sans obligation, sans suivi", desc: "Un outil qu'on utilise parce qu'on en a besoin, pas parce qu'on nous l'impose.", sym: "◇" },
+            { titre: "Un investissement durable", desc: "Pas une formation one-shot. Un espace auquel on revient dans les moments difficiles.", sym: "✦" },
+          ].map((p, i) => (
+            <div key={i} style={{ background: `${T.nuit2}88`, border: `1px solid ${T.brume}12`, borderRadius: i === 0 ? "8px 8px 0 0" : i === 2 ? "0 0 8px 8px" : 0, padding: "1.2rem 1.4rem", display: "flex", gap: "1rem", alignItems: "flex-start" }}>
+              <div style={{ color: `${T.or}66`, fontSize: "0.9rem", flexShrink: 0, width: 20, textAlign: "center", marginTop: "0.1rem" }}>{p.sym}</div>
+              <div>
+                <div style={{ fontFamily: T.serif, fontSize: "0.95rem", color: T.orPale, marginBottom: "0.3rem" }}>{p.titre}</div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}88`, lineHeight: 1.7 }}>{p.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Tarifs par palier */}
+        <div className="b2b-3">
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "1.2rem", textAlign: "center" }}>Tarifs dégressifs — par an par personne</div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", marginBottom: "2.5rem" }}>
+            {PALIERS.map((p, i) => (
+              <div key={i} style={{
+                background: quantite >= p.min && (p.max === null || quantite <= p.max) ? `${T.or}18` : `${T.nuit2}88`,
+                border: `1px solid ${quantite >= p.min && (p.max === null || quantite <= p.max) ? T.or + "44" : T.brume + "12"}`,
+                borderRadius: i === 0 ? "8px 0 0 0" : i === 1 ? "0 8px 0 0" : i === 2 ? "0 0 0 8px" : "0 0 8px 0",
+                padding: "1rem", textAlign: "center",
+              }}>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "0.4rem" }}>{p.label}</div>
+                <div style={{ fontFamily: T.serif, fontSize: "1.3rem", color: quantite >= p.min && (p.max === null || quantite <= p.max) ? T.or : `${T.brume}66`, marginBottom: "0.3rem" }}>{p.prix}</div>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.2em", color: `${T.brume}44` }}>
+                  {p.max ? `${p.min}–${p.max} accès` : `${p.min}+ accès`}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Simulateur */}
+          <div style={{ background: `linear-gradient(135deg, ${T.or}0D, ${T.nuit2}AA)`, border: `1px solid ${T.or}22`, borderRadius: "10px", padding: "1.6rem", marginBottom: "3rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}77`, marginBottom: "1.2rem", textAlign: "center" }}>Simulateur</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1rem" }}>
+              <label style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}99`, flexShrink: 0 }}>Nombre d'accès</label>
+              <input
+                type="number" min={10} max={500} value={quantite}
+                onChange={e => setQuantite(Math.max(10, parseInt(e.target.value) || 10))}
+                style={{ flex: 1, background: `${T.nuit}`, border: `1px solid ${T.brume}22`, borderRadius: "4px", padding: "0.5rem 0.8rem", color: T.orPale, fontFamily: T.serif, fontSize: "1rem", textAlign: "center", outline: "none" }}
+              />
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: T.serif, fontSize: "2rem", color: T.orPale, marginBottom: "0.2rem" }}>{total}€</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.2em", color: `${T.brume}55` }}>
+                {prixUnitaire}€ / personne / an · {quantite} accès
+              </div>
+            </div>
+          </div>
+
+          {/* Cartes ALBA */}
+          <div style={{ marginBottom: "3rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}44`, marginBottom: "1.2rem", textAlign: "center" }}>Les Cartes ALBA</div>
+            <div style={{ background: `${T.nuit2}88`, border: `1px solid ${T.brume}15`, borderRadius: "10px", padding: "1.4rem", display: "flex", gap: "1.2rem", alignItems: "center" }}>
+              {/* Aperçu carte */}
+              <div style={{
+                width: 80, height: 50, flexShrink: 0, borderRadius: "6px",
+                background: `linear-gradient(135deg, #1A1510, #2A2018)`,
+                border: `1px solid ${T.or}33`,
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                gap: "2px",
+              }}>
+                <div style={{ fontFamily: T.serif, fontSize: "0.55rem", letterSpacing: "0.2em", color: T.or }}>ALBA</div>
+                <div style={{ fontFamily: T.sans, fontSize: "0.25rem", letterSpacing: "0.15em", color: `${T.brume}55` }}>✦ ✦ ✦ ✦</div>
+                <div style={{ fontFamily: "monospace", fontSize: "0.3rem", color: `${T.brume}44`, letterSpacing: "0.1em" }}>ALBA-XXXX-XXXX</div>
+              </div>
+              <div>
+                <div style={{ fontFamily: T.serif, fontSize: "0.9rem", color: T.orPale, marginBottom: "0.4rem" }}>Code d'accès physique</div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}77`, lineHeight: 1.7 }}>
+                  Chaque accès peut être livré sous forme de carte imprimable — à glisser dans une enveloppe, un kit d'accueil, ou un cadeau d'équipe.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Formulaire contact */}
+          <div style={{ border: `1px solid ${T.or}22`, borderRadius: "10px", padding: "1.6rem", marginBottom: "2rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}66`, marginBottom: "1.4rem", textAlign: "center" }}>
+              Demander un devis
+            </div>
+
+            {envoye ? (
+              <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
+                <div style={{ fontSize: "1.2rem", color: T.or, marginBottom: "1rem" }}>✦</div>
+                <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.orPale, lineHeight: 1.8 }}>
+                  Votre demande a été reçue.<br/>Nous vous répondons sous 24h.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+                {[
+                  { key: "nom",        placeholder: "Votre nom",          type: "text" },
+                  { key: "entreprise", placeholder: "Entreprise / organisation", type: "text" },
+                  { key: "email",      placeholder: "Email professionnel", type: "email" },
+                ].map(f => (
+                  <input key={f.key} type={f.type} placeholder={f.placeholder}
+                    value={contact[f.key]}
+                    onChange={e => setContact(c => ({ ...c, [f.key]: e.target.value }))}
+                    style={{ background: `${T.nuit}`, border: `1px solid ${T.brume}18`, borderRadius: "4px", padding: "0.75rem 1rem", color: T.aube, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", outline: "none", width: "100%", boxSizing: "border-box" }}
+                  />
+                ))}
+                <textarea placeholder="Votre besoin — nombre de collaborateurs, contexte…"
+                  value={contact.message}
+                  onChange={e => setContact(c => ({ ...c, message: e.target.value }))}
+                  rows={3}
+                  style={{ background: `${T.nuit}`, border: `1px solid ${T.brume}18`, borderRadius: "4px", padding: "0.75rem 1rem", color: T.aube, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", outline: "none", resize: "none", width: "100%", boxSizing: "border-box" }}
+                />
+                <button onClick={envoyer} disabled={loading || !contact.email || !contact.entreprise}
+                  style={{ padding: "0.9rem", background: contact.email && contact.entreprise ? `${T.or}22` : "transparent", border: `1px solid ${contact.email && contact.entreprise ? T.or + "55" : T.brume + "18"}`, borderRadius: "6px", color: contact.email && contact.entreprise ? T.or : `${T.brume}44`, fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", cursor: contact.email && contact.entreprise ? "pointer" : "default", transition: "all 0.3s" }}>
+                  {loading ? "Envoi…" : "Envoyer la demande"}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div style={{ textAlign: "center", fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.15em", color: `${T.brume}33`, lineHeight: 1.8 }}>
+            Sans publicité · Sans données transmises à l'employeur · Résiliable
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // ─── PAGE PRICING ────────────────────────────────────────────────────────────
 
-const PricingPage = ({ onCommencer, onRetour, onConnexion }) => {
+const PricingPage = ({ onCommencer, onRetour, onConnexion, onB2B }) => {
   const [plan, setPlan] = useState("annual");
   const [section, setSection] = useState(0); // pour scroll reveal
 
@@ -12767,6 +12965,13 @@ const PricingPage = ({ onCommencer, onRetour, onConnexion }) => {
             <button onClick={onConnexion} style={{ background: "none", border: "none", fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}44`, cursor: "pointer", marginBottom: "1rem", display: "block", width: "100%", textAlign: "center" }}>
               J'ai déjà un compte
             </button>
+            {/* Lien B2B */}
+            <button onClick={onB2B} style={{ background: "none", border: `1px solid ${T.brume}15`, borderRadius: "6px", padding: "0.9rem", width: "100%", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}66`, cursor: "pointer", marginBottom: "1.2rem", textAlign: "center", transition: "all 0.3s" }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = `${T.or}33`; e.currentTarget.style.color = `${T.brume}BB`; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = `${T.brume}15`; e.currentTarget.style.color = `${T.brume}66`; }}
+            >
+              Vous êtes une entreprise ? <span style={{ color: `${T.or}88` }}>Voir les offres équipe →</span>
+            </button>
             <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.15em", color: `${T.brume}33`, lineHeight: 1.8 }}>
               Sans publicité · Sans données vendues · Sans algorithme
             </div>
@@ -12783,6 +12988,7 @@ const PricingPage = ({ onCommencer, onRetour, onConnexion }) => {
 function AlbaInner() {
   const [view, setView] = useState("splash");
   const [showPricing, setShowPricing] = useState(false);
+  const [showB2B, setShowB2B] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -13182,11 +13388,17 @@ function AlbaInner() {
           onConnexion={() => setView("auth")}
         />
       )}
-      {view === "welcome" && showPricing && (
+      {view === "welcome" && showPricing && !showB2B && (
         <PricingPage
           onCommencer={() => setView("auth")}
           onRetour={() => setShowPricing(false)}
           onConnexion={() => setView("auth")}
+          onB2B={() => setShowB2B(true)}
+        />
+      )}
+      {view === "welcome" && showB2B && (
+        <PricingB2B
+          onRetour={() => setShowB2B(false)}
         />
       )}
       {view === "splash" && <Splash onEnd={() => {
