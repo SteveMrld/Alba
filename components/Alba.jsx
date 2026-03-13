@@ -7966,13 +7966,6 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {}, isP
   const [flashEclat, setFlashEclat] = useState(false); // micro-animation éclat
 
   const [showThemesCle, setShowThemesCle] = useState(false);
-
-  // ── THEMES SCREEN ──
-  if (showThemesCle) return (
-    <div style={{ minHeight: "calc(100vh - 120px)", padding: "1.5rem 1.5rem 6rem" }}>
-      <ThemesScreen onBack={() => setShowThemesCle(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />
-    </div>
-  );
   const DESCRIPTIONS_PORTES = {
     1:  { demande: "Mettre des mots sur ce qui fait mal.", ouvre: "La capacité de voir sans se perdre dans ce qu'on voit." },
     2:  { demande: "Comprendre d'où viennent tes schémas.", ouvre: "La liberté de ne plus répéter ce qu'on n'a pas choisi." },
@@ -8770,15 +8763,13 @@ const LataifScreen = ({ onBack }) => {
 
 const Evasion = ({ data, isPremium = false, onShowPaywall }) => {
   const [showLataif, setShowLataif] = useState(false);
-
   const [showThemes, setShowThemes] = useState(false);
-
-  if (showLataif) return <LataifScreen onBack={() => setShowLataif(false)} />;
-  if (showThemes) return <ThemesScreen onBack={() => setShowThemes(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />;
-
   const [actif, setActif] = useState(0);
   const touchStart = useRef(null);
   const videoRef = useRef(null);
+
+  if (showLataif) return <LataifScreen onBack={() => setShowLataif(false)} />;
+  if (showThemes) return <ThemesScreen onBack={() => setShowThemes(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />;
   const item = VIDEOS[actif] || VIDEOS[0];
 
   // Passe automatiquement à la suivante quand la vidéo se termine
@@ -9259,6 +9250,9 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange
   const [bilan, setBilan] = useState(null);
   const [showBilan, setShowBilan] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [synthesePoetique, setSynthesePoetique] = useState(null);
+  const [syntheseLoading, setSyntheseLoading]   = useState(false);
+  const [syntheseGeneree, setSyntheseGeneree]   = useState(false);
   const typeActif = POSTIT_TYPES.find(t => t.id === type) || POSTIT_TYPES[0];
   const pressing = useRef(null);
   const pressTimer = useRef(null);
@@ -9412,10 +9406,7 @@ ${resume}
     setLoading(false);
   };
 
-  // ── Synthèse poétique — apparaît automatiquement après 3 fragments dans la semaine ──
-  const [synthesePoetique, setSynthesePoetique]     = useState(null);
-  const [syntheseLoading, setSyntheseLoading]       = useState(false);
-  const [syntheseGeneree, setSyntheseGeneree]       = useState(false);
+  // ── Synthèse poétique ──
 
   useEffect(() => {
     // Ne générer qu'une fois par semaine
@@ -9466,6 +9457,13 @@ Une seule phrase. Pas analytique, pas thérapeutique, pas poétique pour faire b
 
 
   const stats = POSTIT_TYPES.map(t => ({ ...t, count: postits.filter(p => p.type === t.id).length })).filter(t => t.count > 0);
+
+  // ── THEMES SCREEN ──
+  if (showThemesCle) return (
+    <div style={{ minHeight: "calc(100vh - 120px)", padding: "1.5rem 1.5rem 6rem" }}>
+      <ThemesScreen onBack={() => setShowThemesCle(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />
+    </div>
+  );
 
   return (
     <div style={{ padding: "0 0 6rem" }}>
