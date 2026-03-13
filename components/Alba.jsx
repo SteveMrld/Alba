@@ -2409,7 +2409,7 @@ const CarteAme = ({ data, small }) => {
         }}/>
         {/* Texte bas */}
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: small ? "0.8rem" : "1.2rem", textAlign: "center" }}>
-          <div style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: small ? 14 : 18, color: c3, opacity: 0.95, marginBottom: 4 }}>
+          <div style={{ fontFamily: "Georgia,serif", fontStyle: "italic", fontSize: small ? 14 : 18, color: "#F0E2BC", opacity: 0.95, marginBottom: 4 }}>
             {data.prenom}
           </div>
           <div style={{ fontFamily: "Arial Narrow,sans-serif", fontSize: small ? 6 : 8, color: c1, opacity: 0.7, letterSpacing: "0.5em", textTransform: "uppercase" }}>
@@ -5400,14 +5400,13 @@ const getPhotos = (cdv, blessure) => {
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
 const VIDEOS = [
-  { src: "/videos/miroir-passage.mp4", legende: "La savane sait attendre. Toi aussi.",                     label: "Savane" },
-  { src: "/videos/miroir-gel.mp4",     legende: "L'eau qui tombe ne demande pas la permission.",            label: "Chute d'eau" },
-  { src: "/videos/miroir-fond.mp4",    legende: "Tout passe. C'est la seule promesse que la vie tient.",    label: "Nuages" },
+  { src: "/videos/miroir-passage.mp4", legende: "La savane sait attendre. Toi aussi.",                      label: "Savane" },
+  { src: "/videos/miroir-gel.mp4",     legende: "L'eau qui tombe ne demande pas la permission.",             label: "Chute d'eau" },
+  { src: "/videos/miroir-fond.mp4",    legende: "Tout passe. C'est la seule promesse que la vie tient.",     label: "Nuages" },
   { src: "/videos/miroir-surchauffe.mp4", legende: "Laisse venir ce qui vient. Laisse partir ce qui part.", label: "Océan" },
-  { src: "/videos/etoiles.mp4",        legende: "Certaines nuits, le monde entier se tait pour toi.",       label: "Étoiles" },
-  { src: "/videos/nuages.mp4",         legende: "Il existe en toi quelque chose que rien n'a pu abîmer.",   label: "Ciel" },
-  { src: "/videos/foret.mp4",          legende: "La forêt n'explique pas sa lumière.",                      label: "Forêt" },
-  { src: "/videos/vagues.mp4",         legende: "L'océan reçoit tout, retient rien.",                       label: "Vagues" },
+  { src: "/videos/etoiles.mp4",        legende: "Certaines nuits, le monde entier se tait pour toi.",        label: "Étoiles" },
+  { src: "/videos/foret.mp4",          legende: "La forêt n'explique pas sa lumière.",                       label: "Forêt" },
+  { src: "/videos/vagues.mp4",         legende: "L'océan reçoit tout, retient rien.",                        label: "Vagues" },
 ];
 
 // ─── TERRITOIRES DES CLÉS ─────────────────────────────────────────────────────
@@ -8945,6 +8944,8 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const { blessure, hasDual, hasCroissance } = getContextProfil(data);
   const isRationnel = data.sensibilite === "rationnel";
+  const carte = CARTE_DATA[cdv] || CARTE_DATA[9];
+  const [c1] = carte.palette;
 
   const [tempetes, setTempetes] = useState([]);
   const [editIntention, setEditIntention] = useState(false);
@@ -8973,132 +8974,103 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
   };
   const sensInfo = SENS_LABELS[data.sensibilite] || SENS_LABELS.intuitif;
 
+  const eclats = calcEclats(progressStats);
+
   return (
-    <div style={{ padding: "0 1.5rem 6rem" }}>
+    <div style={{ paddingBottom: "6rem" }}>
 
-      {/* ── Portrait ── */}
-      <div style={{ textAlign: "center", padding: "2rem 0 1.5rem", animation: "fadeUp 0.7s ease forwards" }}>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "1rem" }}>
-          <CarteAme data={data} small />
-        </div>
-        <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.8rem", color: T.orPale, marginBottom: "0.3rem" }}>
-          {data.prenom}
-        </h2>
-        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
-          {isRationnel ? "Profil" : `Chemin ${cdv}`} · {chemin.titre}
-        </p>
-      </div>
-
-      {/* ── Stats ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem", marginBottom: "1.2rem" }}>
-        {[
-          { label: "Jours avec ALBA", val: nbJours, icon: "◌" },
-          { label: "Sensibilité",     val: `${sensInfo.emoji} ${sensInfo.label}`, icon: "" },
-          { label: "Tempêtes fermées",val: tempetes.length, icon: "⛈" },
-          { label: "Traversées",      val: tempetes.filter(t => t.vue).length, icon: "✦" },
-        ].map((item, i) => (
-          <div key={i} style={{
-            padding: "1rem", background: T.nuit2,
-            border: `1px solid ${T.brume}18`, borderRadius: "6px",
-            animation: `fadeUp 0.6s ease forwards ${i * 0.08}s`, opacity: 0,
-          }}>
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
-              {item.label}
-            </div>
-            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale }}>
-              {item.val}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Bibliothèque des Sagesses ── */}
-      <div style={{ marginBottom: "2rem" }}>
-        <div style={{
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
-          letterSpacing: "0.5em", textTransform: "uppercase",
-          color: T.brume, marginBottom: "1rem",
-        }}>Bibliothèque des Sagesses</div>
-        <BibliothequeSagesses cleActive={cleActive} />
-      </div>
-
-      {/* ── Lettre mensuelle ── */}
-      <div style={{ marginBottom: "2rem" }}>
-        <div style={{
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
-          letterSpacing: "0.5em", textTransform: "uppercase",
-          color: T.brume, marginBottom: "1rem",
-        }}>La lettre du mois</div>
-
-        <LettreMensuelle userKey={authUserKey} isPremium={isPremium} onShowPaywall={onShowPaywall} />
-      </div>
-
-      {/* ── Mot Secret ── généré par Claude API chaque lundi ── */}
-      <MotSecret data={data} progressStats={progressStats} />
-
-      {/* ── Éclats d'aube ── discret, poétique, pas un score ── */}
-      {(() => {
-        const eclats = calcEclats(progressStats);
-        const cleIdx = progressStats ? (Array.isArray(progressStats.cleActive) ? 0 : (progressStats._cleActive || 0)) : 0;
-        const prochainSeuil = SEUILS_PORTES[Math.min(cleIdx + 1, SEUILS_PORTES.length - 1)];
-        const pct = prochainSeuil > 0 ? Math.min((eclats / prochainSeuil) * 100, 100) : 100;
-        const phrase = eclats < 5
-          ? "Le chemin commence."
-          : eclats < 20
-          ? "Quelque chose se met en mouvement."
-          : eclats < 50
-          ? "Le chemin continue."
-          : "Tu avances.";
-        return (
-          <div style={{
-            padding: "1.2rem 1.4rem", marginBottom: "0.8rem",
-            background: `${T.or}06`,
-            border: `1px solid ${T.or}18`,
-            borderRadius: "6px",
-            animation: "fadeUp 0.7s ease forwards 0.25s", opacity: 0,
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.9rem" }}>
-              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.or }}>
-                Éclats d'aube
-              </div>
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.or}88` }}>
-                ✦
-              </div>
-            </div>
-            {/* Barre de progression — sans chiffre */}
-            <div style={{ height: 2, background: `${T.brume}35`, borderRadius: 1, overflow: "hidden", marginBottom: "0.9rem" }}>
-              <div style={{
-                height: "100%",
-                width: `${pct}%`,
-                background: `linear-gradient(to right, ${T.brume}60, ${T.or})`,
-                borderRadius: 1,
-                transition: "width 1.2s ease",
-              }}/>
-            </div>
-            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.orPale}88` }}>
-              {phrase}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ── Intention / Blessure ── */}
+      {/* ── HERO — carte d'âme pleine largeur ── */}
       <div style={{
-        padding: "1.2rem 1.4rem", marginBottom: "0.8rem",
+        position: "relative", width: "100%",
+        minHeight: "65vh", overflow: "hidden",
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "flex-end",
+        paddingBottom: "2.5rem",
+      }}>
+        {/* Carte en fond pleine hauteur */}
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {CARTE_IMAGES[cdv] ? (
+            <img src={CARTE_IMAGES[cdv]} alt="" style={{
+              width: "100%", height: "100%", objectFit: "cover",
+              objectPosition: "center top",
+            }}/>
+          ) : (
+            <CarteAme data={data} />
+          )}
+        </div>
+        {/* Overlay gradient bas — pour le texte */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to top, rgba(10,8,6,1) 0%, rgba(10,8,6,0.6) 40%, rgba(10,8,6,0.1) 80%, transparent 100%)",
+        }}/>
+        {/* Texte hero */}
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 1.5rem" }}>
+          <h1 style={{
+            fontFamily: T.serif, fontWeight: 300,
+            fontSize: "clamp(2.2rem, 8vw, 3rem)",
+            color: T.orPale, letterSpacing: "0.05em",
+            marginBottom: "0.4rem",
+          }}>{data.prenom}</h1>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem",
+            letterSpacing: "0.6em", textTransform: "uppercase",
+            color: `${c1}CC`,
+          }}>Chemin {cdv} · {chemin.titre}</div>
+        </div>
+      </div>
+
+      {/* ── ESSENCE DU CHEMIN ── */}
+      {!isRationnel && chemin.essence && (
+        <div style={{
+          padding: "1.8rem 1.8rem 0",
+          animation: "fadeUp 0.7s ease forwards 0.1s", opacity: 0,
+        }}>
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(1rem, 3vw, 1.1rem)",
+            color: `${T.brume}CC`, lineHeight: 2,
+            textAlign: "center",
+          }}>« {chemin.essence} »</p>
+        </div>
+      )}
+
+      {/* ── PRÉSENCE ── stats fondues, pas de grille ── */}
+      <div style={{ padding: "2rem 1.8rem 0", animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center", borderTop: `1px solid ${T.brume}15`, borderBottom: `1px solid ${T.brume}15`, padding: "1.5rem 0" }}>
+          {[
+            { val: nbJours, label: "jours" },
+            { val: tempetes.length, label: "tempêtes" },
+            { val: eclats, label: "éclats" },
+          ].map((s, i) => (
+            <div key={i}>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.8rem", color: T.orPale, fontWeight: 300 }}>{s.val}</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginTop: "0.3rem" }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── INTENTION ── */}
+      <div style={{
+        margin: "1.5rem 1.5rem 0",
+        padding: "1.3rem 1.5rem",
         background: `${blessure.couleur}08`,
-        border: `1px solid ${blessure.couleur}25`,
-        borderRadius: "6px",
+        border: `1px solid ${blessure.couleur}20`,
+        borderLeft: `3px solid ${blessure.couleur}60`,
+        borderRadius: "0 8px 8px 0",
         animation: "fadeUp 0.7s ease forwards 0.3s", opacity: 0,
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem" }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.45em", textTransform: "uppercase", color: blessure.couleur }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: blessure.couleur }}>
             Ce que tu traverses
           </div>
           <button onClick={() => setEditIntention(true)} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem",
-            letterSpacing: "0.3em", textTransform: "uppercase",
-            color: T.brume,
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
+            letterSpacing: "0.3em", textTransform: "uppercase", color: T.brume,
           }}>Changer →</button>
         </div>
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale }}>
@@ -9111,10 +9083,31 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         )}
       </div>
 
-      {/* ── Tempêtes archivées ── */}
+      {/* ── BIBLIOTHÈQUE DES SAGESSES ── */}
+      <div style={{ margin: "2rem 0 0", padding: "0 1.5rem", animation: "fadeUp 0.7s ease forwards 0.35s", opacity: 0 }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
+          Bibliothèque des Sagesses
+        </div>
+        <BibliothequeSagesses cleActive={cleActive} />
+      </div>
+
+      {/* ── LETTRE MENSUELLE ── */}
+      <div style={{ margin: "2rem 0 0", padding: "0 1.5rem", animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0 }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
+          La lettre du mois
+        </div>
+        <LettreMensuelle userKey={authUserKey} isPremium={isPremium} onShowPaywall={onShowPaywall} />
+      </div>
+
+      {/* ── MOT SECRET ── */}
+      <div style={{ padding: "0 1.5rem" }}>
+        <MotSecret data={data} progressStats={progressStats} />
+      </div>
+
+      {/* ── TEMPÊTES ARCHIVÉES ── */}
       {tempetes.length > 0 && (
-        <div style={{ marginBottom: "0.8rem", animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0 }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem", paddingTop: "0.4rem" }}>
+        <div style={{ margin: "2rem 0 0", padding: "0 1.5rem", animation: "fadeUp 0.7s ease forwards 0.45s", opacity: 0 }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
             Boîte des Tempêtes
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -9142,47 +9135,30 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         </div>
       )}
 
-      {/* ── Essence du chemin ── */}
-      {!isRationnel && (
-        <div style={{
-          padding: "1.3rem 1.5rem", marginBottom: "1rem",
-          borderLeft: `2px solid ${T.or}44`,
-          animation: "fadeUp 0.7s ease forwards 0.5s", opacity: 0,
-        }}>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.orPale, lineHeight: 1.9 }}>
-            {chemin.essence}
-          </p>
-        </div>
-      )}
-
-      {/* ── Accès Souffle ── */}
-      <div style={{ marginTop: "1.5rem", marginBottom: "0.5rem", animation: "fadeUp 0.7s ease forwards 0.6s", opacity: 0 }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.47rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.8rem" }}>
+      {/* ── SOUFFLE ── */}
+      <div style={{ margin: "2rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.5s", opacity: 0 }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
           Prendre un moment
         </div>
         <SouffleInline />
       </div>
 
-      {/* ── Déconnexion ── */}
-      {onSignOut && (
-        <div style={{ marginTop: "0.5rem", textAlign: "center" }}>
+      {/* ── DÉCONNEXION / RESET ── */}
+      <div style={{ marginTop: "3rem", textAlign: "center", padding: "0 1.5rem" }}>
+        {onSignOut && (
           <button onClick={onSignOut} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
-            color: `${T.brume}33`,
+            color: `${T.brume}44`, display: "block", margin: "0 auto 1rem",
           }}>Se déconnecter</button>
-        </div>
-      )}
-
-      {/* ── Réinitialiser ── */}
-      <div style={{ marginTop: "1rem", textAlign: "center" }}>
+        )}
         {!resetConfirm ? (
           <button onClick={() => setResetConfirm(true)} style={{
             background: "none", border: "none", cursor: "pointer",
-            fontFamily: T.sans, fontWeight: 300, fontSize: "0.62rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
-            color: `${T.brume}44`,
+            color: `${T.brume}28`,
           }}>Recommencer depuis le début</button>
         ) : (
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
@@ -9192,10 +9168,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
               fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
               letterSpacing: "0.3em", color: T.brume, cursor: "pointer",
             }}>Annuler</button>
-            <button onClick={() => {
-              localStorage.clear();
-              window.location.reload();
-            }} style={{
+            <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{
               background: "none", border: `1px solid #A87B7B44`,
               borderRadius: "20px", padding: "0.5rem 1rem",
               fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
@@ -9205,7 +9178,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         )}
       </div>
 
-      {/* ── Panneau changement d'intention ── */}
+      {/* ── PANNEAU CHANGEMENT D'INTENTION ── */}
       {editIntention && (
         <div style={{
           position: "fixed", inset: 0, zIndex: 200,
@@ -9224,19 +9197,12 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
               Qu'est-ce qui t'amène en ce moment ?
             </div>
-
-            {/* Groupe tempête */}
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
-              Je traverse quelque chose
-            </div>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Je traverse quelque chose</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem", marginBottom: "1rem" }}>
               {INTENTIONS_TEMPETE.map(intent => {
                 const sel = data.intention === intent;
                 return (
-                  <button key={intent} onClick={() => {
-                    const newIntention = sel ? "" : intent;
-                    if (onUpdateData) onUpdateData({ ...data, intention: newIntention });
-                  }} style={{
+                  <button key={intent} onClick={() => { if (onUpdateData) onUpdateData({ ...data, intention: sel ? "" : intent }); }} style={{
                     background: sel ? `${T.aurore}15` : "transparent",
                     border: `1px solid ${sel ? T.aurore + "55" : T.brume + "18"}`,
                     borderRadius: "6px", padding: "0.75rem 1rem",
@@ -9247,30 +9213,19 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
                 );
               })}
             </div>
-
-            {/* Séparateur */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "0.5rem 0 1rem" }}>
               <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
               <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.7rem", color: T.brume }}>et / ou</span>
               <div style={{ flex: 1, height: "1px", background: `${T.brume}22` }} />
             </div>
-
-            {/* Groupe soleil */}
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>
-              Je cherche un espace pour grandir
-            </div>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.brume, marginBottom: "0.6rem" }}>Je cherche un espace pour grandir</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
               {INTENTIONS_LUMIERE.map(intent => {
                 const sel = data.intentionSecondaire === intent || (!data.intentionSecondaire && data.intention === intent);
                 return (
                   <button key={intent} onClick={() => {
-                    // Si pas de tempête sélectionnée, soleil va dans intention principale
-                    if (!data.intention) {
-                      if (onUpdateData) onUpdateData({ ...data, intention: sel ? "" : intent, intentionSecondaire: "" });
-                    } else {
-                      const newSec = sel ? "" : intent;
-                      if (onUpdateData) onUpdateData({ ...data, intentionSecondaire: newSec });
-                    }
+                    if (!data.intention) { if (onUpdateData) onUpdateData({ ...data, intention: sel ? "" : intent, intentionSecondaire: "" }); }
+                    else { if (onUpdateData) onUpdateData({ ...data, intentionSecondaire: sel ? "" : intent }); }
                   }} style={{
                     background: sel ? `${T.or}12` : "transparent",
                     border: `1px solid ${sel ? T.or + "55" : T.brume + "18"}`,
@@ -9282,7 +9237,6 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
                 );
               })}
             </div>
-
             <button onClick={() => setEditIntention(false)} style={{
               marginTop: "1.5rem", width: "100%", padding: "0.8rem",
               background: "transparent", border: `1px solid ${T.or}33`,
@@ -9296,6 +9250,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
     </div>
   );
 };
+
 
 // ─── FIL DE VIE ───────────────────────────────────────────────────────────────
 const FilDeVie = ({ data, db }) => {
