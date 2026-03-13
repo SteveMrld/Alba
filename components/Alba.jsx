@@ -6022,12 +6022,12 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
       )}
 
       {/* Compteur + bouton */}
-      <div style={{ position: "absolute", bottom: "8.5rem", left: 0, right: 0, textAlign: "center" }}>
+      <div style={{ position: "fixed", bottom: "calc(5.5rem + env(safe-area-inset-bottom))", left: 0, right: 0, textAlign: "center", zIndex: 20, pointerEvents: "none" }}>
         <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}44` }}>
           {offrandes.length + 200} lumières dans ce ciel ce soir
         </p>
       </div>
-      <div style={{ position: "absolute", bottom: "5rem", left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+      <div style={{ position: "fixed", bottom: "calc(3.2rem + env(safe-area-inset-bottom))", left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 20 }}>
         {dejaFaitAujd && etape !== 7 ? (
           <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}BB` }}>
             Ton offrande brille là-haut ce soir.
