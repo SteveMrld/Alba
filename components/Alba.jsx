@@ -10286,127 +10286,75 @@ const FilDeVie = ({ data, db }) => {
 // Pas un chat. Un reflet. L'utilisateur pose une phrase — ALBA renvoie une seule
 // phrase. Un seul appel API. Pas de suite. Pas de conversation.
 const Presence = ({ data, onStart, onSessionComplete, onSaveToArdoise, isPremium, onShowPaywall }) => {
-  const [texte, setTexte]       = useState("");
-  const [reflet, setReflet]     = useState(null);
-  const [loading, setLoading]   = useState(false);
-  const [phase, setPhase]       = useState("idle");
-  const [zone, setZone]         = useState(null);
-  const [conversation, setConversation] = useState([]); // [{qui:"moi"|"alba", texte}]
+  const [phase, setPhase]               = useState("entree");   // entree | ecriture | latence | revealed | dialogue
+  const [flamme, setFlamme]             = useState(null);        // "vive" | "stable" | "vacille"
+  const [flammeExit, setFlammeExit]     = useState(false);
+  const [texte, setTexte]               = useState("");
+  const [conversation, setConversation] = useState([]);
   const [suiteTexte, setSuiteTexte]     = useState("");
   const [suiteLoading, setSuiteLoading] = useState(false);
   const [questionSuite, setQuestionSuite] = useState(null);
-  const threadRef   = useRef(null);
-  const textareaRef = useRef(null);
-  const suiteRef    = useRef(null);
-  const bgVideoRef  = useRef(null);
+  const [profondeur, setProfondeur]     = useState(0); // nb échanges — ALBA gagne en présence
+  const threadRef      = useRef(null);
+  const textareaRef    = useRef(null);
+  const suiteRef       = useRef(null);
   const sessionSauvegardee = useRef(false);
 
-  // Force rechargement vidéo à chaque changement de zone
-  useEffect(() => {
-    if (bgVideoRef.current && zone) {
-      bgVideoRef.current.load();
-      bgVideoRef.current.play().catch(() => {});
-    }
-  }, [zone]);
-
-  const ZONES = [
-    {
-      id: "surchauffe",
-      nom: "La Surchauffe",
-      sous: "Agité · Débordé · Trop plein",
-      img: "/v2/surchauffe.jpg",
-      couleur: "#C87048",
-      system_extra: "L'utilisateur est en état d'hyperactivation — agité, débordé, trop de pensées. ALBA ralentit. Peu de mots. Espace. Pas de questions. Une seule chose à la fois.",
-    },
-    {
-      id: "passage",
-      nom: "Le Passage",
-      sous: "Présent · En contact · Disponible",
-      img: "/v2/passage.jpg",
-      couleur: "#7BA87B",
-      system_extra: "L'utilisateur est dans sa fenêtre de tolérance — présent, disponible. ALBA peut aller un peu plus loin, proposer une nuance, ouvrir doucement.",
-    },
-    {
-      id: "gel",
-      nom: "Le Gel",
-      sous: "Vide · Distant · Figé",
-      img: "/v2/gel.jpg",
-      couleur: "#7898C8",
-      system_extra: "L'utilisateur est en état d'hypoactivation — figé, vide, absent à lui-même. ALBA réchauffe doucement. Présence avant tout. Aucune demande. Juste être là.",
-    },
-  ];
-
-  // Premium gate — afficher paywall si non abonné et tentative d'utiliser le Miroir
-  const handleEcouterGated = () => {
-    if (!isPremium) { if (onShowPaywall) onShowPaywall(); return; }
-    ecouter();
-  };
-
-  const cdv     = cheminDeVie(data.naissance);
-  const chemin  = CHEMINS[cdv] || CHEMINS[9];
-  const { blessure, hasDual, hasTempete, hasCroissance, texteContexte } = getContextProfil(data);
-  const sens      = data.sensibilite || "intuitif";
-
-  // Quelques mots d'attente — variés, jamais les mêmes
-  const ATTENTES = [
-    "Je garde tes mots.",
-    "Je t'écoute.",
-    "Je réfléchis à ce que tu viens de dire…",
-    "Un instant.",
-    "…",
-  ];
+  // ── Profil ──────────────────────────────────────────────────────────────────
+  const cdv    = cheminDeVie(data.naissance);
+  const chemin = CHEMINS[cdv] || CHEMINS[9];
+  const { blessure, hasDual, hasCroissance, texteContexte } = getContextProfil(data);
+  const sens   = data.sensibilite || "intuitif";
 
   const SYSTEM_MIROIR = `Tu es ALBA. Tu es un miroir intérieur — pas un coach, pas un assistant, pas un thérapeute.
 Tu lis ce que ${data.prenom} vient de poser.
 Profil : ${chemin.titre}. Contexte : ${texteContexte}
-${hasDual ? `Note importante : ${data.prenom} traverse quelque chose de difficile ET cherche à grandir en même temps. Ce n'est pas une contradiction — c'est une complexité humaine. Ton reflet peut tenir les deux.` : hasCroissance ? "Elle cherche à grandir, à se construire." : `Blessure traversée : ${blessure.nom}.`}
+${hasDual ? `Note : ${data.prenom} traverse quelque chose de difficile ET cherche à grandir. Ton reflet peut tenir les deux.` : hasCroissance ? "Elle cherche à grandir, à se construire." : `Blessure traversée : ${blessure.nom}.`}
 Sensibilité : ${sens}.
 ${sens === "spirituel" ? "Tu peux utiliser un langage symbolique, archétypal, mais sobrement." : ""}
 ${sens === "rationnel" ? "Zéro ésotérisme. Ancré, sobre, psychologique." : ""}
+État intérieur déclaré : ${flamme === "vive" ? "agité, débordé, trop de pensées" : flamme === "stable" ? "présent, disponible, en contact" : "figé, vide, absent à lui-même"}.
 
-Ta fonction : refléter. Pas expliquer. Pas conseiller. Pas questionner.
+Ta fonction : refléter. Pas expliquer. Pas conseiller. Pas questionner dans le reflet principal.
+Tu nommes ce que la personne a dit, avec un léger décalage qui permet de voir plus clair.
+Tu utilises ses propres mots. Tu ne dis jamais "je pense que", "tu devrais".
+UNE à DEUX phrases maximum. Courtes. Justes. Mémorables.
+Tu n'es pas Claude. Tu es ALBA.`;
 
-Comment réfléchir :
-- Tu nommes ce que la personne a dit, avec un léger décalage qui permet de voir plus clair.
-- Tu utilises ses propres mots, pas les tiens.
-- Tu peux dire "le mot qui revient", "tu dis que", "il apparaît", "quelque chose en toi nomme…"
-- Tu ne dis JAMAIS "je pense que", "tu devrais", "peut-être que tu devrais".
-- Tu n'expliques pas. Tu révèles doucement.
-
-Exemples du ton juste :
-- "Tu dis que tu te sens perdu. Le mot perdu mérite d'être regardé."
-- "Aujourd'hui le mot qui revient : fatigue."
-- "Quelque chose en toi nomme ça : solitude."
-- "Tu parles de force. Et peut-être que la force, parfois, fatigue."
-- "Rien ne presse."
-- "Ce que tu ressens mérite d'exister."
-
-Ta réponse : UNE à DEUX phrases maximum. Courtes. Justes. Mémorables.
-Tu n'es pas Claude. Tu es ALBA.
-${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.system_extra || ""}` : ""}`;
-
-  const recommencer = () => {
-    setTexte("");
-    setReflet(null);
-    setPhase("idle");
-    setZone(null);
-    setConversation([]);
-    setSuiteTexte("");
-    setQuestionSuite(null);
-    sessionSauvegardee.current = false;
-    setTimeout(() => textareaRef.current?.focus(), 100);
+  // ── Sauvegarder session ──────────────────────────────────────────────────────
+  const sauvegarderSession = (conv) => {
+    try {
+      const todayKey = new Date().toISOString().split("T")[0];
+      const sessions = JSON.parse(localStorage.getItem("alba_miroir_sessions") || "{}");
+      if (!sessions[todayKey]) sessions[todayKey] = [];
+      const premierMot    = conv.find(m => m.qui === "moi")?.texte || "";
+      const premierReflet = conv.find(m => m.qui === "alba")?.texte || "";
+      sessions[todayKey].push({
+        id: Date.now(),
+        heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+        extrait: premierMot.slice(0, 80),
+        reflet:  premierReflet.slice(0, 120),
+        echanges: Math.floor(conv.length / 2),
+      });
+      localStorage.setItem("alba_miroir_sessions", JSON.stringify(sessions));
+    } catch {}
   };
 
+  // ── Choisir la flamme ───────────────────────────────────────────────────────
+  const choisirFlamme = (f) => {
+    if (!isPremium) { onShowPaywall?.(); return; }
+    setFlamme(f);
+    setFlammeExit(true);
+    setTimeout(() => setPhase("ecriture"), 900);
+  };
+
+  // ── Premier reflet ──────────────────────────────────────────────────────────
   const ecouter = async () => {
-    if (!texte.trim() || loading) return;
-    setLoading(true);
-    setPhase("listening");
+    if (!texte.trim()) return;
+    setPhase("latence");
     if (onStart) onStart();
-
-    await new Promise(r => setTimeout(r, 1800 + Math.random() * 1200));
-
+    await new Promise(r => setTimeout(r, 2200 + Math.random() * 1000));
     try {
-      // Reflet principal — 1-2 phrases
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -10418,19 +10366,18 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       });
       const d = await res.json();
       const phrase = d.content?.[0]?.text?.trim() || "Je garde tes mots.";
-      setReflet(phrase);
 
-      // Question de suite — séparée, douce, ouverte
+      // Question de suite
       const res2 = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           max_tokens: 60,
-          system: SYSTEM_MIROIR + "\n\nCette fois, pose UNE seule question courte et ouverte — douce, qui invite à aller un peu plus loin sans pression. Pas de conseil. Juste une porte entrouverte. Maximum une phrase.",
+          system: SYSTEM_MIROIR + "\n\nPose UNE seule question ouverte, douce, courte. Une porte entrouverte. Maximum une phrase.",
           messages: [
-            { role: "user", content: texte.trim() },
+            { role: "user",      content: texte.trim() },
             { role: "assistant", content: phrase },
-            { role: "user", content: "[Pose maintenant une question pour continuer le dialogue.]" },
+            { role: "user",      content: "[Question de suite]" },
           ],
         }),
       });
@@ -10441,59 +10388,29 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       setConversation([{ qui: "moi", texte: texte.trim() }, { qui: "alba", texte: phrase }]);
       setPhase("revealed");
     } catch {
-      setReflet("Je suis là, même dans le silence.");
       setConversation([{ qui: "moi", texte: texte.trim() }, { qui: "alba", texte: "Je suis là, même dans le silence." }]);
       setPhase("revealed");
     }
-    setLoading(false);
   };
 
-  // Sauvegarder la session Miroir dans localStorage
-  const sauvegarderSession = (conv) => {
-    try {
-      const todayKey = new Date().toISOString().split("T")[0];
-      const sessions = JSON.parse(localStorage.getItem("alba_miroir_sessions") || "{}");
-      if (!sessions[todayKey]) sessions[todayKey] = [];
-      // Garde le premier mot posé + la première réponse ALBA
-      const premierMot = conv.find(m => m.qui === "moi")?.texte || "";
-      const premierReflet = conv.find(m => m.qui === "alba")?.texte || "";
-      sessions[todayKey].push({
-        id: Date.now(),
-        heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
-        extrait: premierMot.slice(0, 80),
-        reflet: premierReflet.slice(0, 120),
-        echanges: Math.floor(conv.length / 2),
-      });
-      localStorage.setItem("alba_miroir_sessions", JSON.stringify(sessions));
-    } catch {}
-  };
-
-  // Continuer le dialogue
+  // ── Continuer le dialogue ───────────────────────────────────────────────────
   const continuerDialogue = async () => {
     if (!suiteTexte.trim() || suiteLoading) return;
     setSuiteLoading(true);
     const msgUser = suiteTexte.trim();
     setSuiteTexte("");
     setQuestionSuite(null);
-
     const newConv = [...conversation, { qui: "moi", texte: msgUser }];
     setConversation(newConv);
-
-    setTimeout(() => {
-      threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
-    }, 100);
-
+    setTimeout(() => threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" }), 100);
     try {
-      const messages = newConv.map(m => ({
-        role: m.qui === "moi" ? "user" : "assistant",
-        content: m.texte,
-      }));
+      const messages = newConv.map(m => ({ role: m.qui === "moi" ? "user" : "assistant", content: m.texte }));
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           max_tokens: 150,
-          system: SYSTEM_MIROIR + "\n\nTu continues le dialogue. Reste dans le reflet — courte réponse, puis une question douce si le fil le demande. Maximum 2-3 phrases.",
+          system: SYSTEM_MIROIR + "\n\nTu continues le dialogue. Reste dans le reflet. Courte réponse, question douce si nécessaire. 2-3 phrases max.",
           messages,
         }),
       });
@@ -10501,8 +10418,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       const reponse = d.content?.[0]?.text?.trim() || "…";
       const finalConv = [...newConv, { qui: "alba", texte: reponse }];
       setConversation(finalConv);
-
-      // À partir de 3 échanges : sauvegarder + générer éclats
+      setProfondeur(p => p + 1);
       if (finalConv.length >= 6 && !sessionSauvegardee.current) {
         sessionSauvegardee.current = true;
         sauvegarderSession(finalConv);
@@ -10511,7 +10427,6 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
     } catch {
       setConversation(c => [...c, { qui: "alba", texte: "Je t'entends." }]);
     }
-
     setSuiteLoading(false);
     setTimeout(() => {
       threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
@@ -10519,428 +10434,498 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
     }, 300);
   };
 
-  const motAttente = ATTENTES[Math.floor(Math.random() * ATTENTES.length)];
+  const recommencer = () => {
+    setPhase("entree");
+    setFlamme(null);
+    setFlammeExit(false);
+    setTexte("");
+    setConversation([]);
+    setSuiteTexte("");
+    setQuestionSuite(null);
+    setProfondeur(0);
+    sessionSauvegardee.current = false;
+  };
 
-  // ── Fenêtre de tolérance — sélection de zone ──────────────────────────────
-  if (!zone) return (
-    <div style={{
-      minHeight: "calc(100vh - 120px)",
-      display: "flex", flexDirection: "column",
-      padding: "2rem 1.5rem 6rem",
-      position: "relative",
-    }}>
-      {/* Vidéo fond nuages */}
-      <video autoPlay loop muted playsInline style={{
-        position: "fixed", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", zIndex: 0, opacity: 0.08, pointerEvents: "none",
+  // ── STYLES communs ──────────────────────────────────────────────────────────
+  const fullScreen = {
+    position: "fixed", inset: 0,
+    background: "#050403",
+    display: "flex", flexDirection: "column",
+    alignItems: "center", justifyContent: "center",
+    zIndex: 10,
+  };
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE 1 — ENTRÉE
+  // ══════════════════════════════════════════════════════════════════════════
+  if (phase === "entree") return (
+    <div style={fullScreen}>
+      <style>{`
+        @keyframes questionMonte {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes flammeVacille {
+          0%,100% { transform: scaleY(1) scaleX(1); }
+          25%     { transform: scaleY(1.08) scaleX(0.95); }
+          75%     { transform: scaleY(0.94) scaleX(1.04); }
+        }
+        @keyframes flammeSort {
+          0%   { opacity: 1; transform: scaleY(1); filter: blur(0); }
+          60%  { opacity: 0.4; transform: scaleY(1.3) scaleX(0.7); filter: blur(1px); }
+          100% { opacity: 0; transform: scaleY(0.2) scaleX(1.5); filter: blur(4px); }
+        }
+        @keyframes lueurPulse {
+          0%,100% { opacity: 0.15; }
+          50%     { opacity: 0.35; }
+        }
+        .flamme-card { cursor: pointer; transition: transform 0.3s; }
+        .flamme-card:hover { transform: translateY(-4px); }
+      `}</style>
+
+      {/* Question centrale */}
+      <div style={{
+        fontFamily: T.serif, fontStyle: "italic",
+        fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
+        color: `${T.brume}CC`, lineHeight: 1.8,
+        textAlign: "center",
+        animation: "questionMonte 1.4s ease forwards",
+        marginBottom: "4rem",
+        padding: "0 2rem",
       }}>
-        <source src="/videos/miroir-fond.mp4" type="video/mp4" />
-      </video>
-      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
-      <div style={{ textAlign: "center", marginBottom: "2.5rem", animation: "fadeUp 0.7s ease forwards" }}>
-        <div style={{
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
-          letterSpacing: "0.55em", textTransform: "uppercase",
-          color: T.brume, marginBottom: "1rem",
-        }}>Le Miroir</div>
-        <div style={{
-          fontFamily: T.serif, fontStyle: "italic",
-          fontSize: "clamp(1rem, 3vw, 1.15rem)",
-          color: `${T.brume}cc`, lineHeight: 1.9,
-        }}>Où es-tu en ce moment ?</div>
+        Où es-tu<br/>en ce moment ?
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        {ZONES.map((z, i) => (
-          <div key={z.id} onClick={() => { if (!isPremium) { onShowPaywall?.(); return; } setZone(z.id); }} style={{
-            position: "relative", borderRadius: "12px", overflow: "hidden",
-            height: 110, cursor: "pointer",
-            border: `1px solid ${z.couleur}33`,
-            animation: `fadeUp 0.6s ease forwards ${0.1 + i * 0.12}s`, opacity: 0,
-          }}>
-            <img src={z.img} alt={z.nom} style={{
-              position: "absolute", inset: 0, width: "100%", height: "100%",
-              objectFit: "cover", objectPosition: "center",
-            }}/>
+      {/* 3 flammes */}
+      <div style={{
+        display: "flex", gap: "2.5rem", justifyContent: "center",
+        animation: "questionMonte 1.4s ease forwards 0.5s", opacity: 0,
+      }}>
+        {[
+          { id: "vive",    label: "Trop plein",  hauteur: 52, couleur: "#C87048", vitesse: "1.4s" },
+          { id: "stable",  label: "Présent",     hauteur: 44, couleur: "#C8A96E", vitesse: "2.2s" },
+          { id: "vacille", label: "Vide",        hauteur: 36, couleur: "#7898C8", vitesse: "3s"   },
+        ].map(f => (
+          <div
+            key={f.id}
+            className="flamme-card"
+            onClick={() => choisirFlamme(f.id)}
+            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}
+          >
+            {/* Flamme SVG */}
             <div style={{
-              position: "absolute", inset: 0,
-              background: `linear-gradient(90deg, rgba(10,8,6,0.82) 40%, rgba(10,8,6,0.3) 100%)`,
-            }}/>
-            <div style={{
-              position: "absolute", left: 0, top: 0, bottom: 0, width: 4,
-              background: `linear-gradient(to bottom, ${z.couleur}, ${z.couleur}55)`,
-            }}/>
-            <div style={{
-              position: "absolute", left: "1.2rem", top: "50%", transform: "translateY(-50%)",
+              position: "relative", width: 44, height: f.hauteur + 20,
+              animation: flammeExit && flamme === f.id
+                ? "flammeSort 0.9s ease forwards"
+                : `flammeVacille ${f.vitesse} ease-in-out infinite`,
             }}>
+              {/* Lueur au sol */}
               <div style={{
-                fontFamily: T.serif, fontStyle: "italic",
-                fontSize: "clamp(1rem, 3.5vw, 1.15rem)",
-                color: T.orPale, fontWeight: 300, marginBottom: "0.3rem",
-              }}>{z.nom}</div>
-              <div style={{
-                fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem",
-                letterSpacing: "0.25em", color: `${z.couleur}CC`,
-                textTransform: "uppercase",
-              }}>{z.sous}</div>
+                position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)",
+                width: 28, height: 8,
+                background: `radial-gradient(ellipse, ${f.couleur}55, transparent 70%)`,
+                animation: `lueurPulse ${f.vitesse} ease-in-out infinite`,
+              }} />
+              <svg width="44" height={f.hauteur} viewBox={`0 0 44 ${f.hauteur}`} fill="none">
+                <defs>
+                  <radialGradient id={`g${f.id}`} cx="50%" cy="80%" r="60%">
+                    <stop offset="0%"   stopColor={f.couleur} stopOpacity="0.9" />
+                    <stop offset="60%"  stopColor={f.couleur} stopOpacity="0.5" />
+                    <stop offset="100%" stopColor={f.couleur} stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <path
+                  d={`M22 ${f.hauteur} C10 ${f.hauteur * 0.7} 6 ${f.hauteur * 0.45} 14 ${f.hauteur * 0.25} C16 ${f.hauteur * 0.15} 18 ${f.hauteur * 0.05} 22 0 C26 ${f.hauteur * 0.05} 28 ${f.hauteur * 0.15} 30 ${f.hauteur * 0.25} C38 ${f.hauteur * 0.45} 34 ${f.hauteur * 0.7} 22 ${f.hauteur}Z`}
+                  fill={`url(#g${f.id})`}
+                />
+                {/* Cœur intérieur */}
+                <path
+                  d={`M22 ${f.hauteur * 0.85} C16 ${f.hauteur * 0.65} 15 ${f.hauteur * 0.5} 20 ${f.hauteur * 0.35} C21 ${f.hauteur * 0.28} 22 ${f.hauteur * 0.22} 22 ${f.hauteur * 0.15} C22 ${f.hauteur * 0.22} 23 ${f.hauteur * 0.28} 24 ${f.hauteur * 0.35} C29 ${f.hauteur * 0.5} 28 ${f.hauteur * 0.65} 22 ${f.hauteur * 0.85}Z`}
+                  fill={f.couleur} opacity="0.6"
+                />
+              </svg>
             </div>
+            <div style={{
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem",
+              letterSpacing: "0.4em", textTransform: "uppercase",
+              color: flammeExit && flamme === f.id ? "transparent" : `${f.couleur}99`,
+              transition: "color 0.4s",
+            }}>{f.label}</div>
           </div>
         ))}
       </div>
+
+      {/* Mention premium */}
+      {!isPremium && (
+        <div style={{
+          marginTop: "3rem",
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.8rem", color: `${T.brume}55`,
+          animation: "questionMonte 1.4s ease forwards 1s", opacity: 0,
+        }}>
+          Fonctionnalité réservée aux abonnés
+        </div>
+      )}
+    </div>
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE 2 — ÉCRITURE
+  // ══════════════════════════════════════════════════════════════════════════
+  if (phase === "ecriture") return (
+    <div style={fullScreen}>
+      <style>{`
+        @keyframes ligneApparait {
+          from { opacity: 0; width: 0; }
+          to   { opacity: 1; width: 72%; }
+        }
+        @keyframes invitationMonte {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 0.5; transform: translateY(0); }
+        }
+        @keyframes curseurCligne {
+          0%,100% { opacity: 1; }
+          50%     { opacity: 0; }
+        }
+      `}</style>
+
+      <div style={{ width: "100%", maxWidth: 480, padding: "0 2rem", textAlign: "center" }}>
+        {/* Invitation */}
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(0.9rem, 3vw, 1rem)",
+          color: `${T.brume}77`, lineHeight: 2,
+          marginBottom: "3rem",
+          animation: "invitationMonte 1.2s ease forwards 0.3s", opacity: 0,
+        }}>
+          Pose ici ce qui est là.
+        </p>
+
+        {/* Zone d'écriture — ligne d'eau */}
+        <div style={{
+          position: "relative",
+          animation: "invitationMonte 1s ease forwards 0.6s", opacity: 0,
+        }}>
+          <textarea
+            ref={textareaRef}
+            value={texte}
+            onChange={e => setTexte(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && texte.trim()) { e.preventDefault(); ecouter(); }}}
+            placeholder=""
+            rows={4}
+            autoFocus
+            style={{
+              width: "100%", background: "transparent",
+              border: "none",
+              borderBottom: `1px solid ${texte ? T.or + "55" : T.or + "22"}`,
+              color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(1.15rem, 4vw, 1.35rem)",
+              padding: "0.5rem 0", resize: "none",
+              lineHeight: 1.9, textAlign: "center", outline: "none",
+              transition: "border-color 0.6s",
+              letterSpacing: "0.01em",
+            }}
+          />
+          {/* Reflet sous la ligne — effet miroir d'eau */}
+          {texte && (
+            <div style={{
+              position: "absolute", top: "100%", left: 0, right: 0,
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "clamp(0.9rem, 3vw, 1.05rem)",
+              color: `${T.or}18`,
+              transform: "scaleY(-1)",
+              lineHeight: 1.9, textAlign: "center",
+              pointerEvents: "none", userSelect: "none",
+              whiteSpace: "pre-wrap", wordBreak: "break-word",
+              maskImage: "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 60%)",
+              WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,0.3), transparent 60%)",
+            }}>
+              {texte}
+            </div>
+          )}
+        </div>
+
+        {/* Bouton envoyer */}
+        {texte.trim().length > 2 && (
+          <div style={{ marginTop: "3.5rem", animation: "invitationMonte 0.6s ease forwards" }}>
+            <button onClick={ecouter} style={{
+              background: "transparent",
+              border: `1px solid ${T.or}44`,
+              borderRadius: "28px",
+              padding: "0.8rem 2.4rem",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", color: T.or,
+              cursor: "pointer", letterSpacing: "0.03em",
+              transition: "all 0.4s",
+            }}
+              onMouseEnter={e => { e.target.style.background = `${T.or}10`; e.target.style.borderColor = T.or; }}
+              onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.borderColor = `${T.or}44`; }}
+            >
+              Laisser venir
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 
-  // ── Mode Silence ──────────────────────────────────────────────────────────
-  if (phase === "silence") return (
-    <div style={{
-      position: "fixed", inset: 0, background: T.nuit, zIndex: 50,
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-    }}>
-      <video autoPlay loop muted playsInline style={{
-        position: "absolute", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", opacity: 0.2, pointerEvents: "none",
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE 3 — LATENCE (ondes)
+  // ══════════════════════════════════════════════════════════════════════════
+  if (phase === "latence") return (
+    <div style={fullScreen}>
+      <style>{`
+        @keyframes onde {
+          0%   { transform: translate(-50%,-50%) scale(0.1); opacity: 0.6; }
+          100% { transform: translate(-50%,-50%) scale(3.5); opacity: 0; }
+        }
+        @keyframes texteDisparait {
+          from { opacity: 0.5; transform: translateY(0); }
+          to   { opacity: 0; transform: translateY(-8px); }
+        }
+      `}</style>
+
+      {/* Phrase qui s'efface */}
+      <p style={{
+        fontFamily: T.serif, fontStyle: "italic",
+        fontSize: "clamp(1rem, 3.5vw, 1.2rem)",
+        color: `${T.brume}55`,
+        textAlign: "center", padding: "0 2rem",
+        marginBottom: "4rem",
+        animation: "texteDisparait 1.2s ease forwards 0.8s",
+        opacity: 0.5,
+        maxWidth: 400,
       }}>
-        <source src={HEURE < 6 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
-      </video>
-      <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "2rem" }}>
+        {texte.trim()}
+      </p>
+
+      {/* Ondes concentriques */}
+      <div style={{ position: "relative", width: 8, height: 8 }}>
+        {[0, 1, 2, 3, 4].map(i => (
+          <div key={i} style={{
+            position: "absolute",
+            top: "50%", left: "50%",
+            width: 80, height: 80,
+            borderRadius: "50%",
+            border: `1px solid ${T.or}`,
+            animation: `onde 3s ease-out infinite`,
+            animationDelay: `${i * 0.6}s`,
+          }} />
+        ))}
+        {/* Point central */}
         <div style={{
-          width: 72, height: 72, borderRadius: "50%",
-          border: `1px solid ${T.or}25`,
-          background: `radial-gradient(circle, ${T.or}08, transparent 70%)`,
-          margin: "0 auto 2.5rem",
-          animation: "pulse 6s ease-in-out infinite",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <span style={{ color: T.or, opacity: 0.4, fontSize: "1.1rem" }}>✦</span>
-        </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: `${T.brume}cc`, lineHeight: 2 }}>
-          Tu es ici.
-        </p>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, marginTop: "0.3rem" }}>
-          Reste aussi longtemps que tu veux.
-        </p>
-        <button onClick={() => setPhase("idle")} style={{
-          marginTop: "3rem", background: "none", border: `1px solid ${T.brume}25`,
-          borderRadius: "20px", padding: "0.5rem 1.4rem",
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
-          letterSpacing: "0.4em", textTransform: "uppercase",
-          color: T.brume, cursor: "pointer",
-        }}>Revenir</button>
+          position: "absolute", top: "50%", left: "50%",
+          transform: "translate(-50%,-50%)",
+          width: 4, height: 4, borderRadius: "50%",
+          background: T.or, opacity: 0.6,
+        }} />
       </div>
     </div>
   );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PHASE 4 & 5 — RÉVÉLATION + DIALOGUE
+  // ══════════════════════════════════════════════════════════════════════════
+  const premierReflet = conversation.find(m => m.qui === "alba")?.texte || "";
+  const echangesSuivants = conversation.slice(2); // tout après le premier échange
 
   return (
-    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+    <div style={{ ...fullScreen, justifyContent: "flex-start", overflowY: "auto", padding: "5rem 1.5rem 8rem" }}>
+      <style>{`
+        @keyframes developpement {
+          0%   { opacity: 0; filter: blur(12px) brightness(2); transform: translateY(6px); }
+          40%  { opacity: 0.7; filter: blur(3px) brightness(1.3); }
+          100% { opacity: 1; filter: blur(0) brightness(1); transform: translateY(0); }
+        }
+        @keyframes motApparait {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fondDialogue {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+      `}</style>
 
-      {/* Vidéo fond très discrète */}
-      <video ref={bgVideoRef} autoPlay loop muted playsInline style={{
-        position: "fixed", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", zIndex: 0, opacity: 0.08, pointerEvents: "none",
-      }}>
-        <source src={zone === "surchauffe" ? "/videos/miroir-surchauffe.mp4" : zone === "passage" ? "/videos/miroir-passage.mp4" : zone === "gel" ? "/videos/miroir-gel.mp4" : "/videos/miroir-fond.mp4"} type="video/mp4" />
-      </video>
+      <div style={{ width: "100%", maxWidth: 520, margin: "0 auto" }}>
 
-      <div style={{ position: "relative", zIndex: 1, width: "100%", textAlign: "center" }}>
-
-        {/* ── En-tête ── */}
-        <div style={{ marginBottom: "3rem", animation: "fadeUp 0.7s ease forwards" }}>
+        {/* ── Premier reflet — grand, développement photo ── */}
+        <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+          {/* Ligne dorée fine */}
           <div style={{
-            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
-            letterSpacing: "0.55em", textTransform: "uppercase",
-            color: T.brume, marginBottom: "1.2rem",
-          }}>Le Miroir</div>
+            width: 40, height: 1,
+            background: `linear-gradient(to right, transparent, ${T.or}66, transparent)`,
+            margin: "0 auto 2rem",
+            animation: "fondDialogue 1s ease forwards",
+          }} />
 
-          {/* Pattern nerveux si disponible */}
-          {(() => {
-            const pattern = analysePatternNerveux();
-            if (!pattern) return null;
-            const couleurPattern = pattern.type === "stable" ? "#7BA88A" : pattern.type === "alerte" ? "#A87878" : pattern.type === "cycle" ? "#C8A040" : "#8888AA";
-            return (
-              <div style={{ margin: "0 0 2rem", padding: "0.9rem 1rem", background: `${couleurPattern}0C`, border: `1px solid ${couleurPattern}33`, borderRadius: "6px", textAlign: "left", animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0 }}>
-                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: couleurPattern, marginBottom: "0.4rem" }}>Pattern nerveux · 14 jours</div>
-                <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.brume, lineHeight: 1.7, margin: 0 }}>{pattern.message}</p>
-              </div>
-            );
-          })()}
-
-          {/* Cercle pulsant */}
-          <div style={{
-            width: 60, height: 60, borderRadius: "50%",
-            border: `1px solid ${T.or}${phase === "listening" ? "66" : "30"}`,
-            background: `radial-gradient(circle, ${T.or}${phase === "listening" ? "18" : "08"}, transparent 70%)`,
+          <p style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: `clamp(1.3rem, 5vw, ${1.5 + profondeur * 0.04}rem)`,
+            color: T.orPale, lineHeight: 2,
+            letterSpacing: "0.01em",
+            animation: "developpement 2.2s ease forwards",
+            opacity: 0,
             margin: "0 auto",
-            animation: phase === "listening" ? "pulse 2s ease-in-out infinite" : "pulse 6s ease-in-out infinite",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transition: "all 0.8s ease",
+            maxWidth: 420,
           }}>
-            <span style={{ color: T.or, opacity: phase === "listening" ? 0.9 : 0.35, fontSize: "1rem", transition: "opacity 0.8s" }}>✦</span>
-          </div>
+            {premierReflet}
+          </p>
+
+          <p style={{
+            marginTop: "1rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
+            letterSpacing: "0.55em", textTransform: "uppercase",
+            color: `${T.brume}44`,
+            animation: "fondDialogue 1s ease forwards 2s", opacity: 0,
+          }}>ALBA</p>
         </div>
 
-        {/* ── Phase : écriture ── */}
-        {phase !== "revealed" && (
-          <div style={{ animation: "fadeUp 0.8s ease forwards 0.1s", opacity: 0 }}>
-            {/* Invitation */}
-            <p style={{
-              fontFamily: T.serif, fontStyle: "italic",
-              fontSize: "clamp(1rem, 3vw, 1.15rem)",
-              color: `${T.brume}cc`, lineHeight: 1.9, marginBottom: "0.8rem",
-            }}>
-              {phase === "listening"
-                ? motAttente
-                : "Pose ici ce qui est là.\nUne phrase, un mot, ce que tu portes."}
-            </p>
-
-            {phase !== "listening" && (
-              <p style={{
-                fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem",
-                letterSpacing: "0.05em", color: `${T.brume}55`,
-                lineHeight: 1.7, marginBottom: "1.8rem",
+        {/* ── Échanges suivants ── */}
+        {echangesSuivants.length > 0 && (
+          <div ref={threadRef} style={{
+            display: "flex", flexDirection: "column", gap: "1.8rem",
+            marginBottom: "2.5rem",
+            animation: "fondDialogue 0.8s ease forwards",
+          }}>
+            {echangesSuivants.map((msg, i) => (
+              <div key={i} style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: msg.qui === "moi" ? "flex-end" : "center",
+                animation: `motApparait 0.7s ease forwards ${i * 0.15}s`, opacity: 0,
               }}>
-                Le Miroir ne juge pas. Il écoute et te renvoie à toi-même.<br/>
-                ALBA te pose ensuite une question pour aller plus loin.
-              </p>
-            )}
-
-            {phase !== "listening" && (
-              <>
-                <textarea
-                  ref={textareaRef}
-                  value={texte}
-                  onChange={e => { setTexte(e.target.value); setPhase(e.target.value.length > 0 ? "writing" : "idle"); }}
-                  placeholder="…"
-                  rows={3}
-                  style={{
-                    width: "100%", background: "transparent",
-                    border: "none", borderBottom: `1px solid ${texte ? T.or + "44" : T.brume + "22"}`,
-                    color: T.aube, fontFamily: T.serif, fontStyle: "italic",
-                    fontSize: "clamp(1.05rem, 3vw, 1.2rem)",
-                    padding: "0.5rem 0", resize: "none", lineHeight: 1.8,
-                    textAlign: "center", outline: "none",
-                    transition: "border-color 0.4s",
-                  }}
-                  onFocus={e => e.target.style.borderColor = `${T.or}55`}
-                  onBlur={e => e.target.style.borderColor = texte ? `${T.or}44` : `${T.brume}22`}
-                  autoFocus
-                />
-
-                {/* Bouton Écouter — premium */}
-                {texte.trim().length > 0 && (
-                  <div style={{ marginTop: "2rem", animation: "fadeUp 0.5s ease forwards" }}>
-                    <button onClick={isPremium ? ecouter : onShowPaywall} style={{
-                      background: "transparent",
-                      border: `1px solid ${T.or}55`,
-                      borderRadius: "24px",
-                      padding: "0.7rem 2.2rem",
-                      fontFamily: T.serif, fontStyle: "italic",
-                      fontSize: "1rem", color: T.or,
-                      cursor: "pointer", letterSpacing: "0.04em",
-                      transition: "all 0.3s",
-                    }}
-                      onMouseEnter={e => { e.target.style.background = `${T.or}12`; e.target.style.borderColor = T.or; }}
-                      onMouseLeave={e => { e.target.style.background = "transparent"; e.target.style.borderColor = `${T.or}55`; }}
-                    >
-                      {isPremium ? "Laisser venir" : "✦ Débloquer le Miroir"}
-                    </button>
-                    {!isPremium && (
-                      <div style={{ marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: T.brume, textAlign: "center" }}>
-                        Accès complet — 9€ / mois
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Bouton silence */}
-                <div style={{ marginTop: texte ? "1.2rem" : "2.5rem" }}>
-                  <button onClick={() => setPhase("silence")} style={{
-                    background: "none", border: "none",
-                    fontFamily: T.serif, fontStyle: "italic",
-                    fontSize: "0.85rem", color: T.brume,
-                    cursor: "pointer", letterSpacing: "0.02em",
-                  }}>
-                    Je veux juste être là
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* ── Phase : dialogue ── */}
-        {phase === "revealed" && (
-          <div style={{ animation: "fadeUp 1s ease forwards", width: "100%" }}>
-
-            {/* Fil de conversation */}
-            <div ref={threadRef} style={{
-              display: "flex", flexDirection: "column", gap: "1.4rem",
-              marginBottom: "2rem", maxHeight: "55vh", overflowY: "auto",
-              paddingRight: "0.2rem",
-            }}>
-              {conversation.map((msg, i) => (
-                <div key={i} style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: msg.qui === "moi" ? "flex-end" : "flex-start",
-                  animation: `fadeUp 0.6s ease forwards ${i * 0.1}s`, opacity: 0,
-                }}>
-                  {msg.qui === "moi" ? (
-                    <div style={{
-                      maxWidth: "85%",
-                      padding: "0.75rem 1.1rem",
-                      background: `${T.brume}12`,
-                      border: `1px solid ${T.brume}22`,
-                      borderRadius: "12px 12px 2px 12px",
-                    }}>
-                      <p style={{
-                        fontFamily: T.serif, fontStyle: "italic",
-                        fontSize: "0.88rem", color: T.brume,
-                        lineHeight: 1.65, margin: 0,
-                      }}>« {msg.texte} »</p>
-                    </div>
-                  ) : (
-                    <div style={{ maxWidth: "90%", textAlign: "left" }}>
-                      {i === 1 ? (
-                        // Premier reflet ALBA — grand et lumineux
-                        <>
-                          <div style={{ width: 30, height: 1, background: `linear-gradient(to right, transparent, ${T.or}44, transparent)`, marginBottom: "1rem" }} />
-                          <TypedPhrase
-                            text={msg.texte}
-                            style={{
-                              fontFamily: T.serif, fontStyle: "italic",
-                              fontSize: "clamp(1.1rem, 3.5vw, 1.35rem)",
-                              color: T.orPale, lineHeight: 1.9,
-                              letterSpacing: "0.01em", display: "block",
-                            }}
-                            speed={28}
-                          />
-                          <p style={{
-                            marginTop: "0.6rem",
-                            fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem",
-                            letterSpacing: "0.5em", textTransform: "uppercase",
-                            color: `${T.brume}66`,
-                          }}>ALBA</p>
-                        </>
-                      ) : (
-                        // Réponses suivantes — plus petites
-                        <div style={{
-                          padding: "0.75rem 1.1rem",
-                          background: `${T.or}08`,
-                          border: `1px solid ${T.or}18`,
-                          borderRadius: "2px 12px 12px 12px",
-                        }}>
-                          <p style={{
-                            fontFamily: T.serif, fontStyle: "italic",
-                            fontSize: "0.9rem", color: T.aube,
-                            lineHeight: 1.75, margin: 0,
-                          }}>{msg.texte}</p>
-                          <p style={{
-                            marginTop: "0.4rem",
-                            fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem",
-                            letterSpacing: "0.45em", textTransform: "uppercase",
-                            color: `${T.brume}55`, margin: "0.4rem 0 0",
-                          }}>ALBA</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {/* Question de suite */}
-              {questionSuite && !suiteLoading && (
-                <div style={{
-                  alignSelf: "flex-start", maxWidth: "90%",
-                  animation: "fadeUp 0.8s ease forwards 0.6s", opacity: 0,
-                }}>
+                {msg.qui === "moi" ? (
                   <p style={{
                     fontFamily: T.serif, fontStyle: "italic",
-                    fontSize: "0.92rem", color: `${T.brume}CC`,
-                    lineHeight: 1.75, margin: 0,
-                  }}>{questionSuite}</p>
-                </div>
-              )}
-
-              {suiteLoading && (
-                <div style={{ alignSelf: "flex-start", animation: "pulse 1.5s ease-in-out infinite" }}>
-                  <span style={{ color: `${T.or}66`, fontSize: "0.9rem" }}>✦</span>
-                </div>
-              )}
-            </div>
-
-            {/* Zone de réponse */}
-            <div style={{
-              borderTop: `1px solid ${T.brume}15`,
-              paddingTop: "1.2rem",
-            }}>
-              <textarea
-                ref={suiteRef}
-                value={suiteTexte}
-                onChange={e => setSuiteTexte(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); continuerDialogue(); }}}
-                placeholder="Continue ici…"
-                rows={2}
-                style={{
-                  width: "100%", background: "transparent",
-                  border: "none", borderBottom: `1px solid ${suiteTexte ? T.or + "44" : T.brume + "22"}`,
-                  color: T.aube, fontFamily: T.serif, fontStyle: "italic",
-                  fontSize: "0.95rem", padding: "0.4rem 0",
-                  resize: "none", lineHeight: 1.7,
-                  textAlign: "left", outline: "none",
-                  transition: "border-color 0.3s",
-                }}
-                onFocus={e => e.target.style.borderColor = `${T.or}44`}
-                onBlur={e => e.target.style.borderColor = suiteTexte ? `${T.or}44` : `${T.brume}22`}
-              />
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "0.9rem" }}>
-                <button onClick={recommencer} style={{
-                  background: "none", border: "none",
-                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.52rem",
-                  letterSpacing: "0.3em", textTransform: "uppercase",
-                  color: `${T.brume}55`, cursor: "pointer",
-                }}>
-                  Nouvelle session
-                </button>
-                <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
-                  {/* Sauvegarder dans l'Ardoise */}
-                  {conversation.length >= 2 && onSaveToArdoise && (
-                    <button onClick={() => {
-                      const premierMot = conversation.find(m => m.qui === "moi")?.texte || "";
-                      const premierReflet = conversation.find(m => m.qui === "alba")?.texte || "";
-                      const texteArdoise = `Miroir — ${new Date().toLocaleDateString("fr-FR")}\n\n« ${premierMot} »\n\n${premierReflet}`;
-                      onSaveToArdoise(texteArdoise);
-                    }} style={{
-                      background: `${T.or}10`, border: `1px solid ${T.or}33`,
-                      borderRadius: "20px", padding: "0.4rem 0.9rem",
-                      fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
-                      letterSpacing: "0.25em", textTransform: "uppercase",
-                      color: `${T.or}CC`, cursor: "pointer", transition: "all 0.2s",
-                    }}>
-                      ✦ Garder dans l'Ardoise
-                    </button>
-                  )}
-                  {suiteTexte.trim().length > 0 && (
-                    <button onClick={continuerDialogue} style={{
-                      background: "transparent", border: `1px solid ${T.or}44`,
-                      borderRadius: "20px", padding: "0.45rem 1.2rem",
+                    fontSize: "0.82rem", color: `${T.brume}66`,
+                    lineHeight: 1.7, margin: 0, maxWidth: "75%", textAlign: "right",
+                  }}>
+                    {msg.texte}
+                  </p>
+                ) : (
+                  <div style={{ textAlign: "center", maxWidth: 400 }}>
+                    <p style={{
                       fontFamily: T.serif, fontStyle: "italic",
-                      fontSize: "0.85rem", color: T.or,
-                      cursor: "pointer", transition: "all 0.2s",
+                      fontSize: `clamp(1rem, 3.5vw, ${1.1 + profondeur * 0.04}rem)`,
+                      color: T.aube, lineHeight: 1.9, margin: "0 auto",
+                      animation: "developpement 1.8s ease forwards", opacity: 0,
                     }}>
-                      Envoyer →
-                    </button>
-                  )}
-                </div>
+                      {msg.texte}
+                    </p>
+                    <p style={{
+                      marginTop: "0.5rem",
+                      fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem",
+                      letterSpacing: "0.5em", textTransform: "uppercase",
+                      color: `${T.brume}33`,
+                    }}>ALBA</p>
+                  </div>
+                )}
               </div>
-            </div>
-
+            ))}
           </div>
         )}
+
+        {/* ── Question de suite ── */}
+        {questionSuite && !suiteLoading && (
+          <div style={{
+            textAlign: "center", marginBottom: "2rem",
+            animation: "motApparait 1s ease forwards 0.4s", opacity: 0,
+          }}>
+            <p style={{
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "0.95rem", color: `${T.brume}88`,
+              lineHeight: 1.8, margin: 0,
+            }}>
+              {questionSuite}
+            </p>
+          </div>
+        )}
+
+        {/* ── Indicateur chargement ── */}
+        {suiteLoading && (
+          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+            <div style={{ display: "inline-flex", gap: "0.4rem" }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{
+                  width: 4, height: 4, borderRadius: "50%",
+                  background: `${T.or}66`,
+                  animation: `onde 1.5s ease-in-out infinite`,
+                  animationDelay: `${i * 0.2}s`,
+                }} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Zone de réponse ── */}
+        <div style={{
+          borderTop: `1px solid ${T.brume}12`,
+          paddingTop: "1.5rem",
+          animation: "fondDialogue 1s ease forwards 1.5s", opacity: 0,
+        }}>
+          <textarea
+            ref={suiteRef}
+            value={suiteTexte}
+            onChange={e => setSuiteTexte(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); continuerDialogue(); }}}
+            placeholder="Continue ici…"
+            rows={2}
+            style={{
+              width: "100%", background: "transparent",
+              border: "none",
+              borderBottom: `1px solid ${suiteTexte ? T.or + "44" : T.brume + "18"}`,
+              color: T.aube, fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", padding: "0.4rem 0",
+              resize: "none", lineHeight: 1.7,
+              textAlign: "center", outline: "none",
+              transition: "border-color 0.4s",
+            }}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.2rem" }}>
+            <button onClick={recommencer} style={{
+              background: "none", border: "none",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
+              letterSpacing: "0.35em", textTransform: "uppercase",
+              color: `${T.brume}44`, cursor: "pointer",
+            }}>
+              Nouvelle session
+            </button>
+            <div style={{ display: "flex", gap: "0.7rem", alignItems: "center" }}>
+              {conversation.length >= 2 && onSaveToArdoise && (
+                <button onClick={() => {
+                  const premierMot    = conversation.find(m => m.qui === "moi")?.texte || "";
+                  const texteArdoise  = `Miroir — ${new Date().toLocaleDateString("fr-FR")}\n\n« ${premierMot} »\n\n${premierReflet}`;
+                  onSaveToArdoise(texteArdoise);
+                }} style={{
+                  background: `${T.or}08`, border: `1px solid ${T.or}25`,
+                  borderRadius: "20px", padding: "0.4rem 0.9rem",
+                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
+                  letterSpacing: "0.25em", textTransform: "uppercase",
+                  color: `${T.or}88`, cursor: "pointer",
+                }}>
+                  ✦ Garder dans l'Ardoise
+                </button>
+              )}
+              {suiteTexte.trim().length > 0 && (
+                <button onClick={continuerDialogue} style={{
+                  background: "transparent", border: `1px solid ${T.or}44`,
+                  borderRadius: "24px", padding: "0.5rem 1.3rem",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "0.9rem", color: T.or,
+                  cursor: "pointer",
+                }}>
+                  →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
+
 
 // ─── ERROR BOUNDARY ───────────────────────────────────────────────────────────
 class AlbaErrorBoundary extends React.Component {
