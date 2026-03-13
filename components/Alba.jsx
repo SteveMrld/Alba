@@ -3506,6 +3506,41 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const isMatin = heure >= 5 && heure < 12;
   const phraseDuJour = getPhraseduJour(cleActive);
 
+  // ── Rythme circadien ─────────────────────────────────────────────────────
+  const CIRCADIEN = heure >= 5 && heure < 11 ? {
+    id: "matin",
+    img: "/v2/matin.jpg",
+    energie: "haute",
+    accent: "#C8A048",
+    invite: "Le cortisol est à son pic. C'est le bon moment pour faire ce qui compte.",
+    action: "Qu'est-ce que tu veux accomplir ce matin ?",
+    suggestion: "ardoise",
+  } : heure >= 11 && heure < 16 ? {
+    id: "midi",
+    img: "/v2/midi.jpg",
+    energie: "moyenne",
+    accent: "#7BA88A",
+    invite: "La clarté du milieu de journée. Bon moment pour ancrer, pas pour forcer.",
+    action: "Prends un instant pour toi.",
+    suggestion: "evasion",
+  } : heure >= 16 && heure < 21 ? {
+    id: "soir",
+    img: "/v2/soir.jpg",
+    energie: "douce",
+    accent: "#C87048",
+    invite: "Le cortisol descend. Ton corps commence à déposer.",
+    action: "Qu'est-ce que tu gardes de cette journée ?",
+    suggestion: "ardoise",
+  } : {
+    id: "nuit",
+    img: "/v2/nuit.jpg",
+    energie: "basse",
+    accent: "#7898C8",
+    invite: "L'heure du silence. Rien ne presse. Tu peux laisser aller.",
+    action: "Repose-toi.",
+    suggestion: "presence",
+  };
+
   // ── Mémoire de présence ──────────────────────────────────────────────────
   const getPresenceAlba = () => {
     try {
@@ -3682,6 +3717,52 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           opacity: 0,
         }}>
           <CarteAme data={data} small />
+        </div>
+      </div>
+
+      {/* ── RYTHME CIRCADIEN ── */}
+      <div style={{
+        margin: "1.2rem 1.5rem 0",
+        borderRadius: "12px", overflow: "hidden",
+        position: "relative", minHeight: 130,
+        animation: "fadeUp 0.7s ease forwards 0.15s", opacity: 0,
+      }}>
+        {/* Photo de fond */}
+        <img src={CIRCADIEN.img} alt="" style={{
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center",
+        }}/>
+        {/* Overlay */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(90deg, rgba(10,8,6,0.88) 45%, rgba(10,8,6,0.35) 100%)",
+        }}/>
+        {/* Bande couleur gauche */}
+        <div style={{
+          position: "absolute", left: 0, top: 0, bottom: 0, width: 4,
+          background: `linear-gradient(to bottom, ${CIRCADIEN.accent}, ${CIRCADIEN.accent}44)`,
+        }}/>
+        {/* Contenu */}
+        <div style={{ position: "relative", zIndex: 1, padding: "1.3rem 1.5rem" }}>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem",
+            letterSpacing: "0.45em", textTransform: "uppercase",
+            color: CIRCADIEN.accent, marginBottom: "0.6rem",
+          }}>
+            {CIRCADIEN.id === "matin" ? "● Pic de cortisol" : CIRCADIEN.id === "midi" ? "● Milieu de journée" : CIRCADIEN.id === "soir" ? "● Descente du soir" : "● Heure du silence"}
+          </div>
+          <div style={{
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "clamp(0.88rem, 3vw, 0.98rem)",
+            color: T.orPale, lineHeight: 1.7, marginBottom: "0.5rem",
+          }}>{CIRCADIEN.invite}</div>
+          <div style={{
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
+            letterSpacing: "0.15em", color: `${T.brume}99`,
+            cursor: "pointer",
+          }} onClick={() => onNavigate?.(CIRCADIEN.suggestion)}>
+            {CIRCADIEN.action} →
+          </div>
         </div>
       </div>
 
