@@ -5719,14 +5719,24 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
 
 // ─── LE CIEL — Offrandes ──────────────────────────────────────────────────────
 
+const ICONES_CIEL = {
+  livre:        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg>,
+  conversation: <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  pratique:     <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>,
+  decouverte:   <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  phrase:       <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>,
+  moment:       <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  autre:        <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>,
+};
+
 const CATEGORIES_CIEL = [
-  { id: "livre",        label: "Un livre",          couleur: "#C8A96E", icon: "📖" },
-  { id: "conversation", label: "Une conversation",  couleur: "#7898C8", icon: "🗣" },
-  { id: "pratique",     label: "Une pratique",       couleur: "#78A878", icon: "🌿" },
-  { id: "decouverte",   label: "Une découverte",     couleur: "#9878C8", icon: "✦" },
-  { id: "phrase",       label: "Une phrase",         couleur: "#C8A040", icon: "✍" },
-  { id: "moment",       label: "Un moment",          couleur: "#C87878", icon: "○" },
-  { id: "autre",        label: "Autre chose",        couleur: "#A8A898", icon: "·" },
+  { id: "livre",        label: "Un livre",          couleur: "#C8A96E" },
+  { id: "conversation", label: "Une conversation",  couleur: "#7898C8" },
+  { id: "pratique",     label: "Une pratique",       couleur: "#78A878" },
+  { id: "decouverte",   label: "Une découverte",     couleur: "#9878C8" },
+  { id: "phrase",       label: "Une phrase",         couleur: "#C8A040" },
+  { id: "moment",       label: "Un moment",          couleur: "#C87878" },
+  { id: "autre",        label: "Autre chose",        couleur: "#A8A898" },
 ];
 
 const genererEtoilesCiel = (offrandes) => {
@@ -5942,33 +5952,41 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
         }} />
       )}
 
-      {/* Étoiles */}
+      {/* Étoiles ✦ */}
       {etoiles.map(e => (
         <div key={e.id}
           onClick={() => e.isReal && e.data && setEtoileSelectionnee(e.data)}
           style={{
-            position: "absolute", left: `${e.x}%`, top: `${e.y}%`,
-            width: e.taille, height: e.taille, borderRadius: "50%",
-            background: e.couleur, opacity: e.opacite,
-            boxShadow: e.isReal ? `0 0 ${e.taille * 4}px ${e.couleur}66` : "none",
+            position: "absolute",
+            left: `${e.x}%`, top: `${e.y}%`,
+            transform: "translate(-50%, -50%)",
+            fontSize: e.isReal ? `${e.taille * 3.5}px` : `${e.taille * 2.5}px`,
+            color: e.couleur,
+            opacity: e.opacite,
+            lineHeight: 1,
+            textShadow: e.isReal ? `0 0 ${e.taille * 4}px ${e.couleur}88, 0 0 ${e.taille * 8}px ${e.couleur}44` : "none",
             animation: e.twinkleAnim || "none",
             cursor: e.isReal && e.data ? "pointer" : "default",
-            transition: "transform 0.2s",
+            transition: "transform 0.2s, font-size 0.2s",
             zIndex: e.isReal ? 3 : 1,
+            userSelect: "none",
+            pointerEvents: e.isReal && e.data ? "auto" : "none",
           }}
-          onMouseEnter={ev => { if (e.isReal) ev.currentTarget.style.transform = "scale(2)"; }}
-          onMouseLeave={ev => { ev.currentTarget.style.transform = "scale(1)"; }}
-        />
+          onMouseEnter={ev => { if (e.isReal) ev.currentTarget.style.transform = "translate(-50%, -50%) scale(2)"; }}
+          onMouseLeave={ev => { ev.currentTarget.style.transform = "translate(-50%, -50%) scale(1)"; }}
+        >✦</div>
       ))}
 
-      {/* Nouvelle étoile */}
+      {/* Nouvelle étoile ✦ */}
       {showNouvelleEtoile && nouvelleOffrande && (
         <div style={{
           position: "absolute", left: `${nouvelleOffrande.x}%`, top: `${nouvelleOffrande.y}%`,
-          width: 7, height: 7, borderRadius: "50%", background: nouvelleOffrande.couleur,
-          boxShadow: `0 0 20px ${nouvelleOffrande.couleur}, 0 0 50px ${nouvelleOffrande.couleur}44`,
-          animation: "alba-breathe 3s ease-in-out infinite", zIndex: 10,
-        }} />
+          transform: "translate(-50%, -50%)",
+          fontSize: "18px", color: nouvelleOffrande.couleur,
+          textShadow: `0 0 12px ${nouvelleOffrande.couleur}, 0 0 30px ${nouvelleOffrande.couleur}88, 0 0 60px ${nouvelleOffrande.couleur}44`,
+          animation: "alba-breathe 2s ease-in-out infinite",
+          zIndex: 10, lineHeight: 1, userSelect: "none",
+        }}>✦</div>
       )}
 
       {/* Popup étoile sélectionnée */}
@@ -6002,12 +6020,12 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
       )}
 
       {/* Compteur + bouton */}
-      <div style={{ position: "absolute", bottom: "7rem", left: 0, right: 0, textAlign: "center" }}>
+      <div style={{ position: "absolute", bottom: "8.5rem", left: 0, right: 0, textAlign: "center" }}>
         <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}44` }}>
           {offrandes.length + 200} lumières dans ce ciel ce soir
         </p>
       </div>
-      <div style={{ position: "absolute", bottom: "3.5rem", left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+      <div style={{ position: "absolute", bottom: "5rem", left: 0, right: 0, display: "flex", justifyContent: "center" }}>
         {dejaFaitAujd && etape !== 7 ? (
           <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}BB` }}>
             Ton offrande brille là-haut ce soir.
@@ -6069,7 +6087,7 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
             style={{ background: "transparent", border: `1px solid ${c.couleur}25`, borderLeft: `3px solid ${c.couleur}66`, borderRadius: "8px", padding: "0.9rem 1.2rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.aube, cursor: "pointer", textAlign: "left", animation: `fadeUp 0.4s ease forwards ${i * 0.05}s`, opacity: 0, display: "flex", alignItems: "center", gap: "0.8rem" }}
             onMouseEnter={e => e.currentTarget.style.background = `${c.couleur}12`}
             onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-            <span style={{ color: c.couleur, fontSize: "0.9rem" }}>{c.icon}</span>
+            <span style={{ color: c.couleur, display: "flex", alignItems: "center" }}>{ICONES_CIEL[c.id]}</span>
             {c.label}
           </button>
         ))}
@@ -6187,8 +6205,19 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
   if (etape === 6) return (
     <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
       <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 70%, ${categorie.couleur}18 0%, transparent 60%)`, animation: "fadeIn 1s ease forwards", pointerEvents: "none" }} />
-      <div style={{ width: 8, height: 8, borderRadius: "50%", background: categorie.couleur, boxShadow: `0 0 20px ${categorie.couleur}, 0 0 40px ${categorie.couleur}55`, animation: "pierreEnvol 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards" }} />
-      <style>{`@keyframes pierreEnvol { 0% { transform: translateY(0) scale(1); opacity: 1; } 60% { transform: translateY(-40vh) scale(1.3); opacity: 0.9; } 100% { transform: translateY(-80vh) scale(0.4); opacity: 0; } }`}</style>
+      <div style={{
+        fontSize: "28px", color: categorie.couleur, lineHeight: 1, userSelect: "none",
+        textShadow: `0 0 15px ${categorie.couleur}, 0 0 35px ${categorie.couleur}88, 0 0 70px ${categorie.couleur}44`,
+        animation: "etoileEnvol 2.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
+      }}>✦</div>
+      <style>{`
+        @keyframes etoileEnvol {
+          0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+          30%  { transform: translateY(-20vh) scale(1.4) rotate(45deg); opacity: 1; }
+          60%  { transform: translateY(-50vh) scale(1.1) rotate(90deg); opacity: 0.8; }
+          100% { transform: translateY(-90vh) scale(0.3) rotate(180deg); opacity: 0; }
+        }
+      `}</style>
       <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}CC`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0, textAlign: "center", padding: "0 2rem" }}>
         Elle est partie.<br/>Quelqu'un en avait besoin.
       </p>
