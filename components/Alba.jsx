@@ -10384,7 +10384,7 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
   `;
 
   const fond = {
-    position: "fixed", inset: 0, zIndex: 300,
+    minHeight: "calc(100vh - 120px)",
     background: "#060504",
     display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "center",
