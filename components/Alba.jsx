@@ -10407,11 +10407,10 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
 
     try {
       // Reflet principal — 1-2 phrases
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
           max_tokens: 120,
           system: SYSTEM_MIROIR,
           messages: [{ role: "user", content: texte.trim() }],
@@ -10422,11 +10421,10 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       setReflet(phrase);
 
       // Question de suite — séparée, douce, ouverte
-      const res2 = await fetch("https://api.anthropic.com/v1/messages", {
+      const res2 = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
           max_tokens: 60,
           system: SYSTEM_MIROIR + "\n\nCette fois, pose UNE seule question courte et ouverte — douce, qui invite à aller un peu plus loin sans pression. Pas de conseil. Juste une porte entrouverte. Maximum une phrase.",
           messages: [
@@ -10490,11 +10488,10 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
         role: m.qui === "moi" ? "user" : "assistant",
         content: m.texte,
       }));
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
           max_tokens: 150,
           system: SYSTEM_MIROIR + "\n\nTu continues le dialogue. Reste dans le reflet — courte réponse, puis une question douce si le fil le demande. Maximum 2-3 phrases.",
           messages,
@@ -10535,7 +10532,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       {/* Vidéo fond nuages */}
       <video autoPlay loop muted playsInline style={{
         position: "fixed", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", zIndex: 0, opacity: 0.15, pointerEvents: "none",
+        objectFit: "cover", zIndex: 0, opacity: 0.08, pointerEvents: "none",
       }}>
         <source src="/videos/miroir-fond.mp4" type="video/mp4" />
       </video>
@@ -10640,7 +10637,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       {/* Vidéo fond très discrète */}
       <video ref={bgVideoRef} autoPlay loop muted playsInline style={{
         position: "fixed", inset: 0, width: "100%", height: "100%",
-        objectFit: "cover", zIndex: 0, opacity: 0.18, pointerEvents: "none",
+        objectFit: "cover", zIndex: 0, opacity: 0.08, pointerEvents: "none",
       }}>
         <source src={zone === "surchauffe" ? "/videos/miroir-surchauffe.mp4" : zone === "passage" ? "/videos/miroir-passage.mp4" : zone === "gel" ? "/videos/miroir-gel.mp4" : "/videos/miroir-fond.mp4"} type="video/mp4" />
       </video>
