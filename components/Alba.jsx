@@ -6894,8 +6894,117 @@ const ConstellationCles = ({ cleActive, porteIdx, porteDebloquee, onSelectPorte,
   );
 };
 
+// ─── CHEMIN DES 12 PORTES ─────────────────────────────────────────────────────
+const NOMS_PORTES = [
+  null,
+  "L'Entrée", "Le Premier Mot", "Le Retour", "Les Patterns",
+  "La Résistance", "Le Lâcher", "Le Miroir Profond", "L'Autre",
+  "La Blessure Nommée", "La Transmutation", "L'Horizon", "La Lumière Propre",
+];
+const DELAIS_PORTES = [0, 0, 5, 14, 21, 30, 45, 60, 75, 90, 120, 180, 365];
+
+const CheminDesPortes = ({ progressStats = {}, cleActive = 0, onSelectPorte }) => {
+  const eclats = calcEclats(progressStats);
+  const jours = progressStats.joursActifs || 0;
+  const porteActuelle = SEUILS_PORTES.reduce((acc, seuil, i) => eclats >= seuil ? i : acc, 0);
+  const cycle = Math.floor(porteActuelle / 12) + 1;
+
+  return (
+    <div style={{ padding: "1.5rem 1.5rem 0" }}>
+      {/* En-tête */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1.2rem" }}>
+        <div>
+          <div style={{ fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.3rem" }}>
+            TON CHEMIN
+          </div>
+          <div style={{ fontFamily: T.serif, fontSize: "1.1rem", color: T.orPale }}>
+            {cycle > 1 ? `Cycle ${cycle} · ` : ""}Porte {Math.min(porteActuelle + 1, 12)} sur 12
+          </div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}66`, marginBottom: "0.2rem" }}>ÉCLATS</div>
+          <div style={{ fontFamily: T.serif, fontSize: "1.2rem", color: T.or }}>✦ {eclats}</div>
+        </div>
+      </div>
+
+      {/* Barre de progression globale */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <div style={{ height: 3, background: `${T.brume}18`, borderRadius: 2, overflow: "hidden" }}>
+          <div style={{
+            height: "100%", borderRadius: 2,
+            background: `linear-gradient(to right, ${T.or}88, ${T.or})`,
+            width: `${Math.min(100, (porteActuelle / 12) * 100)}%`,
+            transition: "width 1s ease",
+          }} />
+        </div>
+      </div>
+
+      {/* Grille des 12 portes */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "0.6rem", marginBottom: "1rem" }}>
+        {TERRITOIRES_CLES.map((t, i) => {
+          const debloquee = eclats >= SEUILS_PORTES[i];
+          const active = i === Math.max(0, porteActuelle - 1) || (porteActuelle === 0 && i === 0);
+          const prochaine = i === porteActuelle;
+          const eclatsSuivant = SEUILS_PORTES[i] || 0;
+          const manque = Math.max(0, eclatsSuivant - eclats);
+          return (
+            <button key={t.index} onClick={() => debloquee && onSelectPorte && onSelectPorte(i)}
+              style={{
+                background: active ? `${t.couleur}22` : debloquee ? `${t.couleur}10` : `${T.brume}08`,
+                border: `1px solid ${active ? t.couleur + "88" : debloquee ? t.couleur + "33" : T.brume + "18"}`,
+                borderRadius: 8, padding: "0.7rem 0.4rem",
+                cursor: debloquee ? "pointer" : "default",
+                transition: "all 0.3s",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem",
+              }}>
+              {/* Numéro */}
+              <div style={{
+                fontFamily: T.sans, fontSize: "0.38rem", letterSpacing: "0.3em",
+                color: active ? t.couleur : debloquee ? `${t.couleur}99` : `${T.brume}44`,
+              }}>
+                {debloquee ? (active ? "●" : "✓") : (prochaine ? "○" : "·")}
+              </div>
+              {/* Nom */}
+              <div style={{
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "0.58rem",
+                color: active ? t.couleur : debloquee ? `${T.aube}99` : `${T.brume}44`,
+                lineHeight: 1.3, textAlign: "center",
+              }}>
+                {NOMS_PORTES[t.index] || t.nom}
+              </div>
+              {/* Éclats manquants si verrouillée */}
+              {!debloquee && prochaine && (
+                <div style={{ fontFamily: T.sans, fontSize: "0.38rem", color: `${T.or}55`, letterSpacing: "0.1em" }}>
+                  ✦ {manque} restants
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Phrase sur la porte actuelle */}
+      {TERRITOIRES_CLES[Math.max(0, porteActuelle - 1)] && (
+        <div style={{
+          padding: "1rem 1.2rem", marginBottom: "0.5rem",
+          background: `${T.or}06`, border: `1px solid ${T.or}15`, borderRadius: 8,
+        }}>
+          <div style={{ fontFamily: T.sans, fontSize: "0.4rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}77`, marginBottom: "0.4rem" }}>
+            TU ES ICI — PORTE {Math.max(1, porteActuelle)}
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}CC`, lineHeight: 1.7, margin: 0 }}>
+            {TERRITOIRES_CLES[Math.max(0, porteActuelle - 1)].ambiance.texte}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
   const [section, setSection] = useState("pratique");
+  const [vue, setVue] = useState("chemin"); // "chemin" | "porte"
   const [niveauPratique, setNiveauPratique] = useState(0);
   const [exerciceFait, setExerciceFait] = useState({});
   const [signal, setSignal] = useState(null);
@@ -6995,10 +7104,36 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         <source src={territoire.video} type="video/mp4" />
       </video>
 
-    <div style={{ position: "relative", zIndex: 1, padding: "1.5rem 1.5rem 8rem", maxWidth: 540, margin: "0 auto" }}>
+    <div style={{ position: "relative", zIndex: 1, padding: "0 0 8rem", maxWidth: 540, margin: "0 auto" }}>
       <style>{`@keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }`}</style>
 
-      {/* Navigation entre Portes — avec verrouillage */}
+      {/* ── Toggle vue d'ensemble / porte ── */}
+      <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", padding: "1.2rem 1.5rem 0" }}>
+        {[{ id: "chemin", label: "Vue d'ensemble" }, { id: "porte", label: "Porte active" }].map(v => (
+          <button key={v.id} onClick={() => setVue(v.id)} style={{
+            background: vue === v.id ? `${T.or}18` : "transparent",
+            border: `1px solid ${vue === v.id ? T.or + "66" : T.brume + "22"}`,
+            borderRadius: 20, padding: "0.35rem 1rem",
+            fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "0.82rem", color: vue === v.id ? T.or : `${T.brume}88`,
+            cursor: "pointer", transition: "all 0.2s",
+          }}>{v.label}</button>
+        ))}
+      </div>
+
+      {/* ── VUE D'ENSEMBLE ── */}
+      {vue === "chemin" && (
+        <CheminDesPortes
+          progressStats={progressStats}
+          cleActive={cleActive}
+          onSelectPorte={(i) => { setPorteIdx(i); setVue("porte"); setSection("pratique"); }}
+        />
+      )}
+
+      {/* ── VUE PORTE ACTIVE ── */}
+      {vue === "porte" && (
+      <div style={{ padding: "1.5rem 1.5rem 0" }}>
+
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         marginBottom: "1.5rem",
@@ -7442,6 +7577,8 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
           </div>
         </div>
       )}
+    </div>
+      )} {/* fin vue porte */}
     </div>
     </div>
   );
