@@ -4071,6 +4071,521 @@ const AnneauxJour = ({ compact = false }) => {
 // ─── ACCUEIL ─────────────────────────────────────────────────────────────────
 // ─── INVITATIONS DU JOUR ─────────────────────────────────────────────────────
 // ── PARCOURS THÉMATIQUES ──────────────────────────────────────────────────────
+// ── FICHES THÈMES ─────────────────────────────────────────────────────────────
+const FICHES_THEMES = [
+  {
+    id: "pardon",
+    theme: "Pardon",
+    couleur: "#C89878",
+    intro: "Le pardon est l'une des expériences les plus mal comprises. On le confond souvent avec l'oubli, avec l'absolution, avec la réconciliation. Mais pardonner, ce n'est pas dire que ce qui s'est passé était acceptable. Ce n'est pas reprendre contact. Ce n'est pas effacer. Le pardon est un acte intérieur — il se fait pour soi, pas pour l'autre. C'est choisir de ne plus laisser une douleur ancienne occuper le centre de sa vie. C'est reprendre la place que la rancœur avait prise. Certains pardons prennent des années. D'autres se font en une fraction de seconde. Il n'y a pas de bonne durée.",
+    dansLeFlux: "Quand le pardon est présent en toi, tu penses à certaines personnes ou à certaines situations sans que ça te consume. Il peut rester une trace — une cicatrice — mais elle ne dicte plus tes décisions. Tu n'as plus besoin que l'autre reconnaisse ce qu'il a fait pour aller de l'avant. Tu peux parler de ce qui s'est passé sans que la colère reprenne tout l'espace.",
+    quandCaResiste: "Quand le pardon est bloqué, la rancœur agit comme un fond sonore permanent. Tu repenses à des situations passées avec la même intensité qu'au premier jour. Tu construis des arguments, tu imagines des confrontations, tu attends une reconnaissance qui ne vient pas. La personne a peut-être disparu de ta vie — mais elle occupe encore beaucoup de place dans ta tête.",
+    pratiques: [
+      { titre: "Distinguer pardon et réconciliation", texte: "Pardonner ne signifie pas reprendre contact, redonner confiance, ou agir comme si rien ne s'était passé. Ces deux choses sont séparables. Tu peux pardonner intérieurement à quelqu'un avec qui tu n'auras plus jamais de lien. Écris une phrase qui distingue ce que tu pardones de ce que tu ne réinstaureras pas." },
+      { titre: "La lettre non envoyée", texte: "Écris une lettre à la personne qui t'a blessé — en disant tout ce que tu n'as jamais pu dire. Sans filtre, sans politesse. Laisse sortir la colère, la tristesse, le regret. Puis, à la fin, écris une seule phrase : ce que tu décides de ne plus porter. Tu ne l'enverras pas. L'acte d'écrire suffit." },
+      { titre: "Se pardonner soi-même", texte: "Le pardon le plus difficile est souvent celui qu'on s'accorde à soi-même. Pour des décisions passées, des erreurs commises, des choses qu'on n'a pas faites. Écris quelque chose pour lequel tu te juges encore. Puis demande-toi : est-ce que j'aurais accepté que quelqu'un d'autre se condamne autant pour la même chose ?" },
+    ],
+  },
+  {
+    id: "relations",
+    theme: "Relations",
+    couleur: "#C87898",
+    intro: "Les relations sont le miroir le plus précis de qui nous sommes. Ce n'est pas dans la solitude qu'on se découvre le mieux — c'est dans le contact avec l'autre. Les relations révèlent nos peurs, nos besoins, nos limites, notre capacité à aimer et à recevoir. Elles peuvent être source de joie intense ou de douleur profonde — souvent les deux, parfois en même temps. Ce qu'on cherche dans les relations dit beaucoup sur ce qu'on n'a pas encore trouvé en soi. Ce qu'on ne supporte pas chez l'autre dit souvent quelque chose sur ce qu'on refuse de voir en soi.",
+    dansLeFlux: "Quand tes relations sont saines, tu te sens nourri(e) par les gens que tu fréquentes — pas épuisé(e). Tu peux être toi-même sans te censurer entièrement. Tu poses des limites sans culpabilité excessive. Tu accueilles les différences sans te sentir menacé(e). Il y a un équilibre entre ce que tu donnes et ce que tu reçois.",
+    quandCaResiste: "Quand les relations dysfonctionnent, tu peux te retrouver à te perdre dans les autres — à t'oublier pour maintenir la paix. Ou au contraire, à rester à distance pour ne pas être blessé(e). Tu peux chercher dans les relations quelque chose qu'elles ne peuvent pas donner — une validation, une sécurité, une complétude. Les mêmes dynamiques se répètent avec des visages différents.",
+    pratiques: [
+      { titre: "Identifier ses patterns relationnels", texte: "Pense aux relations qui t'ont le plus marqué(e) — amoureuses, amicales, familiales. Y a-t-il des points communs ? Des dynamiques qui se répètent ? Le même type de personne, le même type de conflit, le même dénouement ? Écrire ces patterns sans se juger est un premier pas pour ne plus les répéter inconsciemment." },
+      { titre: "La relation à soi d'abord", texte: "La relation que tu as avec toi-même se reproduit dans tes relations aux autres. Comment tu te parles à toi-même en privé ? Avec bienveillance ou dureté ? Est-ce que tu t'accordes le même soin que tu accordes aux gens que tu aimes ? Écris une façon dont tu pourrais être plus doux/douce avec toi-même aujourd'hui." },
+      { titre: "Dire une vérité douce", texte: "Y a-t-il quelque chose que tu n'as jamais dit à quelqu'un de proche — une gratitude, une limite, un besoin — parce que tu ne savais pas comment le formuler ? Aujourd'hui, trouve une façon de le dire. Pas pour provoquer. Pour que la relation puisse exister dans plus de vérité." },
+    ],
+  },
+  {
+    id: "deuil",
+    theme: "Deuil & Perte",
+    couleur: "#9898C8",
+    intro: "Le deuil ne concerne pas seulement la mort. On fait le deuil d'une relation, d'une version de soi, d'un rêve non réalisé, d'une vie qu'on aurait pu avoir. Le deuil est le processus par lequel on apprend à continuer de vivre avec une absence. Il ne suit pas de calendrier. Il ne se fait pas dans l'ordre. Il arrive souvent en vagues — on croit être sorti(e) de quelque chose et ça revient, différemment. La société nous demande souvent de faire le deuil vite, de rebondir, d'aller de l'avant. Mais le deuil a besoin de temps et d'espace.",
+    dansLeFlux: "Quand le deuil est traversé — jamais complètement, mais suffisamment — on peut penser à ce qu'on a perdu avec une forme de paix mêlée de tristesse. La douleur est là mais elle ne paralyse plus. On arrive à tenir les deux — la perte et la vie qui continue. On intègre l'absence dans sa vie plutôt que de lutter contre elle.",
+    quandCaResiste: "Quand le deuil est bloqué, la perte reste un trou béant. On peut l'éviter — ne jamais en parler, ne pas regarder certaines photos, changer de sujet. Ou on peut s'y perdre — rester dans la douleur comme si en sortir signifiait trahir. Il peut y avoir de la culpabilité d'aller mieux, ou au contraire une anesthésie émotionnelle.",
+    pratiques: [
+      { titre: "Nommer ce qui a été perdu", texte: "Parfois on porte un deuil sans l'avoir nommé. Pas juste une personne ou une relation — mais ce qu'elle représentait. La sécurité. L'avenir imaginé. La version de soi qu'on était avec elle. Écris précisément ce que tu as perdu — au-delà de la surface." },
+      { titre: "Laisser de la place à la tristesse", texte: "On essaie souvent de remplacer la tristesse par quelque chose — l'activité, la distraction, la colère. Aujourd'hui, permets-toi d'être triste, sans rien faire de cette tristesse. Dix minutes. Juste la laisser exister sans la combattre ni la nourrir." },
+      { titre: "Ce que tu gardes", texte: "Faire le deuil ne signifie pas effacer. Certaines choses de ce qu'on a perdu peuvent rester — un enseignement, une façon d'aimer, une valeur transmise. Qu'est-ce que tu gardes de ce que tu as perdu ? Pas pour minimiser la perte — pour honorer ce qui a existé." },
+    ],
+  },
+  {
+    id: "identite",
+    theme: "Identité & Soi",
+    couleur: "#98C898",
+    intro: "L'identité est moins fixe qu'on ne le croit. On se construit en permanence — à travers les expériences, les rencontres, les crises, les transformations. Ce qu'on appelle 'soi' est un ensemble de récits qu'on se raconte et qu'on raconte aux autres. Certains de ces récits sont vrais. D'autres sont hérités — de la famille, de la culture, de blessures anciennes. La question 'qui suis-je vraiment ?' n'a pas de réponse définitive. Mais se la poser honnêtement est l'un des actes les plus courageux qu'on puisse faire.",
+    dansLeFlux: "Quand tu es en accord avec toi-même, tu n'as pas besoin de beaucoup d'approbation extérieure pour te sentir réel(le). Tu peux changer d'avis sans te sentir incohérent(e). Tu peux admettre tes contradictions sans en faire une crise. Tu sais ce qui compte pour toi — même si tu ne sais pas toujours comment le vivre.",
+    quandCaResiste: "Quand l'identité est fragile, le regard des autres prend trop de place. Tu changes de version de toi-même selon les contextes et tu t'y perds. Tu peux te sentir étranger(e) à toi-même — comme si ta vie était jouée par quelqu'un d'autre. Il y a souvent un décalage entre qui tu prétends être et ce que tu ressens vraiment.",
+    pratiques: [
+      { titre: "Les identités que je joue", texte: "Liste les rôles que tu joues dans ta vie — professionnel(le), parent, conjoint(e), enfant, ami(e). Pour chacun, demande-toi : est-ce que ce rôle me ressemble ? Ou est-ce que je le joue pour correspondre à ce qu'on attend de moi ?" },
+      { titre: "Ce qui reste quand on enlève tout", texte: "Si tu n'avais plus ton titre, ton travail, tes relations, tes possessions — qui serais-tu ? Pas pour créer une peur — pour toucher ce qui est toi indépendamment des circonstances. Écris trois choses qui te définissent sans aucun contexte extérieur." },
+      { titre: "Une croyance sur moi à revisiter", texte: "Quelle est une chose que tu crois fermement sur toi-même — une limite, un défaut, une incapacité — depuis très longtemps ? D'où vient cette croyance ? Est-ce que tu as des preuves récentes qu'elle est encore vraie ?" },
+    ],
+  },
+  {
+    id: "emotions",
+    theme: "Colère & Émotions",
+    couleur: "#C87848",
+    intro: "Les émotions ne sont pas des ennemies. Ce sont des informations. La colère dit qu'une limite a été franchie, ou qu'une injustice a eu lieu. La tristesse dit qu'une perte mérite d'être reconnue. La peur dit qu'un danger — réel ou perçu — est présent. Quand on apprend à écouter les émotions au lieu de les combattre ou de les subir, elles deviennent des guides. Le problème n'est pas d'avoir des émotions intenses — c'est de ne pas savoir quoi en faire. Ce qu'on n'exprime pas s'accumule. Ce qu'on n'exprime pas finit toujours par trouver une sortie — souvent au mauvais moment.",
+    dansLeFlux: "Quand tu es en bonne relation avec tes émotions, tu les ressens sans être submergé(e). Tu peux nommer ce que tu vis — 'je suis triste', 'je suis en colère' — sans t'y fondre entièrement. Tu laisses passer ce qui doit passer. Tu exprimes ce qui doit être dit, au bon moment et de façon adaptée.",
+    quandCaResiste: "Quand le rapport aux émotions est difficile, deux extrêmes sont possibles. Soit tout sort de façon incontrôlée — des réactions disproportionnées qui laissent des dégâts. Soit rien ne sort — une anesthésie, une façade de calme qui cache une tension permanente. Les deux sont épuisants.",
+    pratiques: [
+      { titre: "Nommer l'émotion précisément", texte: "Au lieu de 'je ne vais pas bien', essaie d'être plus précis(e). Est-ce de la tristesse, de la déception, de la honte, de l'anxiété, de la colère ? Plus on nomme avec précision, moins l'émotion est envahissante. Aujourd'hui, quand une émotion se présente, prends le temps de la nommer." },
+      { titre: "La colère comme information", texte: "La prochaine fois que tu ressens de la colère, avant d'agir, pose-toi cette question : qu'est-ce que cette colère protège ? Une valeur ? Une limite ? Un besoin non reconnu ? La colère pointe toujours vers quelque chose d'important. L'écouter avant de la décharger change tout." },
+      { titre: "Libérer par le corps", texte: "Certaines émotions ne se pensent pas — elles se bougent. Une marche rapide, un cri dans un endroit isolé, écrire vite sans réfléchir, pleurer sans retenue. Trouve une façon physique de laisser sortir ce qui est comprimé. Le corps est souvent plus efficace que la tête pour traiter les émotions." },
+    ],
+  },
+  {
+    id: "ambition",
+    theme: "Ambition & Chemin",
+    couleur: "#C8A840",
+    intro: "L'ambition a mauvaise réputation. On l'associe à l'orgueil, à l'arrivisme, à l'oubli des autres. Mais il y a une ambition saine — celle qui vient du désir de se dépasser, de contribuer, de construire quelque chose qui a du sens. Cette ambition-là n'écrase pas les autres. Elle pousse vers l'avant. La difficulté, c'est de distinguer l'ambition qui vient de soi — de ce qu'on veut vraiment — de celle qui vient du regard des autres, de la peur d'être insuffisant(e), de la compétition pour des standards qu'on n'a pas choisis.",
+    dansLeFlux: "Quand l'ambition est saine, tu travailles avec énergie sans te perdre dans le résultat. Tu prends des risques. Tu acceptes les échecs comme des informations. Tu n'as pas besoin que les autres valident ton chemin pour continuer à avancer. Il y a un alignement entre ce que tu construis et ce que tu es.",
+    quandCaResiste: "Quand l'ambition est mal orientée, elle épuise sans nourrir. Tu cours sans savoir vers quoi exactement. Tu atteins des objectifs et tu ne te sens pas mieux. Ou au contraire, tu as peur de vouloir trop — d'être jugé(e) arrogant(e), de décevoir si tu essaies. L'ambition se transforme en procrastination ou en perfectionnisme paralysant.",
+    pratiques: [
+      { titre: "Distinguer 'je veux' et 'je dois'", texte: "Liste trois choses que tu veux accomplir. Pour chacune, demande-toi honnêtement : est-ce que c'est ce que je veux, moi — ou ce que je crois devoir vouloir pour être reconnu(e), aimé(e), légitime ? La différence change tout à la qualité de l'effort." },
+      { titre: "L'ambition à petite échelle", texte: "L'ambition ne concerne pas que les grands projets. Elle s'applique aussi à devenir plus patient(e), plus présent(e), plus honnête. Quelle est une qualité que tu veux cultiver — pas pour les autres, pour toi ? Qu'est-ce que tu pourrais faire aujourd'hui pour avancer d'un centimètre dans cette direction ?" },
+      { titre: "Ce que tu construis vraiment", texte: "Dans dix ans, qu'est-ce que tu veux avoir construit — pas en termes de carrière ou de biens, mais en termes de personne ? Qui veux-tu être devenu(e) ? Écrire cette vision aide à recalibrer les choix quotidiens." },
+    ],
+  },
+  {
+    id: "corps",
+    theme: "Corps & Présence",
+    couleur: "#78A878",
+    intro: "On vit souvent dans sa tête en oubliant qu'on a un corps. Le corps n'est pas un véhicule pour transporter le cerveau — il est une intelligence en lui-même. Il stocke les émotions, garde la mémoire des expériences, envoie des signaux permanents qu'on ignore souvent. Revenir au corps, c'est revenir au présent. Les pensées nous projettent dans le passé ou dans le futur. Le corps, lui, est toujours ici, maintenant. La présence — ce mot qu'on utilise tellement — commence par habiter son corps.",
+    dansLeFlux: "Quand tu habites ton corps, tu remarques ses signaux — la fatigue avant l'épuisement, la tension avant la douleur, le malaise avant la rupture. Tu manges quand tu as faim et tu t'arrêtes quand tu es rassasié(e). Tu dors parce que tu ressens le besoin de dormir. Il y a une écoute naturelle qui s'est établie.",
+    quandCaResiste: "Quand le lien avec le corps est coupé, on peut se surprendre à ne pas avoir mangé depuis des heures sans s'en être rendu compte. À ne pas ressentir la fatigue jusqu'à l'effondrement. À ignorer des douleurs chroniques parce qu'on est 'trop occupé(e)'. Le corps finit toujours par se rappeler à notre bon souvenir — souvent avec fracas.",
+    pratiques: [
+      { titre: "Trois respirations conscientes maintenant", texte: "Pose ce que tu fais. Prends trois respirations longues et lentes. Sur chaque expiration, relâche un peu les épaules, la mâchoire, les mains. C'est tout. Ce simple geste, répété plusieurs fois par jour, recalibre le système nerveux." },
+      { titre: "Scanner son corps", texte: "Ferme les yeux. Parcours ton corps de la tête aux pieds, lentement. Où y a-t-il de la tension ? De la douleur ? De la légèreté ? Sans chercher à changer quoi que ce soit — juste observer. Le corps a souvent beaucoup à dire quand on lui prête enfin attention." },
+      { titre: "Un geste de soin pour son corps aujourd'hui", texte: "Fais quelque chose aujourd'hui uniquement pour ton corps — pas pour perdre du poids, pas pour performer, pas pour l'apparence. Un bain chaud, une marche lente, un repas préparé avec soin, une sieste. Quelque chose qui dit à ton corps : je t'entends et je prends soin de toi." },
+    ],
+  },
+  {
+    id: "gratitude",
+    theme: "Gratitude & Joie",
+    couleur: "#C8C840",
+    intro: "La gratitude n'est pas de l'optimisme forcé ou du déni de la difficulté. C'est une faculté d'attention — la capacité à remarquer ce qui est là, maintenant, qui a de la valeur. Notre cerveau est câblé pour le négatif — il enregistre les problèmes avec plus d'intensité que les bonnes choses. La gratitude est une pratique qui rééquilibre cette asymétrie. Ce n'est pas ignorer ce qui ne va pas — c'est refuser que ça soit la seule chose qu'on voit. La joie, elle, est différente du bonheur. Le bonheur dépend des circonstances. La joie est plus profonde — elle peut coexister avec la douleur.",
+    dansLeFlux: "Quand la gratitude est cultivée, les petites choses retrouvent leur poids. Un café le matin, une conversation qui fait du bien, la lumière à une heure particulière. Il y a une richesse ordinaire qu'on arrête de prendre pour acquise. La joie devient accessible — pas permanente, mais accessible.",
+    quandCaResiste: "Quand la gratitude est absente, tout semble insuffisant. On atteint quelque chose et on regarde déjà vers la prochaine étape. On compare — toujours avec ceux qui ont plus, jamais avec ceux qui ont moins. Il y a un fond d'insatisfaction chronique que rien ne comble vraiment.",
+    pratiques: [
+      { titre: "Trois choses précises aujourd'hui", texte: "Ce soir, note trois choses précises pour lesquelles tu es reconnaissant(e) aujourd'hui. Pas génériques — précises. Pas 'ma santé' mais 'ce moment ce matin où je me suis senti(e) bien dans mon corps'. La précision active vraiment la gratitude. La généralité l'endort." },
+      { titre: "Ce qu'on prendrait pour acquis", texte: "Pense à quelque chose dans ta vie que tu tiens pour acquis — une relation, une capacité, un confort. Imagine un moment que tu ne l'avais plus. Comment est-ce que ça change ta façon de le regarder maintenant ?" },
+      { titre: "Dire merci vraiment", texte: "Y a-t-il quelqu'un dans ta vie à qui tu n'as jamais dit — vraiment dit — à quel point sa présence ou ses actes ont compté pour toi ? Aujourd'hui, dis-le. Un message, un appel, une conversation. Pas pour que ce soit parfait — pour que ce soit dit." },
+    ],
+  },
+  {
+    id: "solitude",
+    theme: "Solitude & Intériorité",
+    couleur: "#7898B8",
+    intro: "La solitude a deux visages. Il y a la solitude subie — celle qui fait mal, celle de l'isolement, du sentiment de ne pas être vu. Et il y a la solitude choisie — celle du retrait volontaire, du silence habité, de la présence à soi. La deuxième est une ressource rare. Dans un monde qui valorise la connectivité permanente, savoir être seul(e) sans se fuir est presque un art. L'intériorité, c'est la capacité à avoir une vie intérieure riche — des pensées qui ne dépendent pas d'une stimulation externe, un espace en soi qu'on habite avec plaisir.",
+    dansLeFlux: "Quand tu es à l'aise avec la solitude, le silence ne t'angoisse pas. Tu peux passer une soirée seul(e) sans avoir besoin de te distraire en permanence. Tu trouves dans ce temps avec toi-même une ressource — des idées, du repos, une forme de clarté. Tu n'attends pas des autres qu'ils remplissent un vide que tu peux habiter toi-même.",
+    quandCaResiste: "Quand la solitude est difficile, le silence devient angoissant. On remplit compulsivement — les écrans, le bruit, les activités, les relations. On peut avoir peur de ce qu'on trouverait si on restait vraiment seul(e) avec soi-même. Ou au contraire, se replier dans une solitude défensive pour ne pas risquer d'être blessé(e).",
+    pratiques: [
+      { titre: "Vingt minutes sans écran", texte: "Aujourd'hui, passe vingt minutes seul(e) sans aucun écran et sans rien faire d'utile. Pas de méditation guidée — juste toi. Observe ce qui se passe — les pensées qui arrivent, l'inconfort éventuel, ce qui se détend petit à petit." },
+      { titre: "Cultiver une pratique solitaire", texte: "Quelle est une chose que tu pourrais faire régulièrement, seul(e), juste pour le plaisir ? Marcher, dessiner, lire, cuisiner sans but particulier. Quelque chose qui n'a pas besoin d'audience, pas besoin d'être partagé. Juste pour toi." },
+      { titre: "Ce que la solitude me dit", texte: "La prochaine fois que tu te retrouves seul(e) et que quelque chose d'inconfortable émerge — une pensée, une émotion, une inquiétude — plutôt que de la fuir, reste avec elle quelques minutes. Qu'est-ce qu'elle a à dire ?" },
+    ],
+  },
+  {
+    id: "liberte",
+    theme: "Liberté & Choix",
+    couleur: "#78B8C8",
+    intro: "La liberté est moins une question de circonstances que d'orientation intérieure. On peut être objectivement très libre et se sentir prisonnier de ses peurs, de ses habitudes, du regard des autres. Et on peut traverser des contraintes réelles tout en gardant une liberté intérieure profonde. Les choix qu'on fait — même les petits — construisent qui on est. Ce qu'on ne choisit pas finit souvent par nous choisir. La difficulté, c'est que la liberté fait peur. Choisir vraiment, c'est renoncer à d'autres possibles. C'est prendre la responsabilité de sa vie.",
+    dansLeFlux: "Quand tu vis librement, tu fais des choix qui correspondent à ce que tu es — même quand ils sont difficiles, même quand ils déçoivent certains. Tu assumes la responsabilité de tes décisions sans chercher à blâmer les circonstances. Tu peux changer de direction sans te justifier à l'infini.",
+    quandCaResiste: "Quand la liberté est bridée — souvent par soi-même — tu attends la permission des autres pour agir. Tu remets les décisions importantes à plus tard. Tu te retrouves à vivre une vie qui n'est pas tout à fait la tienne, construite par défaut plutôt que par choix. Il y a un sentiment diffus de passer à côté de quelque chose.",
+    pratiques: [
+      { titre: "Un choix que je remets", texte: "Y a-t-il une décision importante que tu reportes depuis trop longtemps ? Pas parce que tu n'as pas l'information — mais parce que choisir t'effraie. Nomme-la. Qu'est-ce que tu perdrais en choisissant chaque option ? Qu'est-ce que tu perds à ne pas choisir ?" },
+      { titre: "Ce que j'aurais fait si ce n'était pas pour les autres", texte: "Pense à une décision récente — professionnelle, personnelle, relationnelle. Est-ce que tu l'as prise pour toi, ou pour éviter la désapprobation de quelqu'un ? Il n'y a pas de bonne réponse. Juste voir honnêtement." },
+      { titre: "Un petit acte de liberté aujourd'hui", texte: "Fais aujourd'hui une chose petite que tu veux faire — pas que tu dois faire, pas pour être productif(ve) ou approuvé(e). Juste parce que tu en as envie. C'est ça, entraîner la liberté." },
+    ],
+  },
+  {
+    id: "transmission",
+    theme: "Transmission & Héritage",
+    couleur: "#A8C878",
+    intro: "Tout le monde transmet quelque chose — qu'on le veuille ou non. Des valeurs, des façons d'aimer, des peurs, des forces. La question n'est pas si on transmet, mais quoi. Ce qu'on a reçu de nos parents et grands-parents — leur sagesse, leurs blessures, leurs silences — vit en nous, souvent à notre insu. Prendre conscience de cet héritage permet de choisir ce qu'on garde et ce qu'on pose. La transmission consciente, c'est décider délibérément de ce qu'on veut laisser derrière soi — dans ses enfants, ses élèves, ses proches, son œuvre.",
+    dansLeFlux: "Quand tu vis en lien conscient avec la transmission, tu reconnais ce que tu as reçu — le bon et le moins bon — sans idéaliser ni condamner. Tu fais des choix dans tes relations qui correspondent à ce que tu veux transmettre. Il y a un sens de la continuité, d'appartenir à quelque chose qui te précède et te survivra.",
+    quandCaResiste: "Quand le rapport à la transmission est difficile, on peut répéter des patterns familiaux sans s'en rendre compte — la même distance émotionnelle, la même façon de gérer les conflits, les mêmes silences. Ou au contraire, on peut rejeter tout ce qui vient de sa famille — et se retrouver sans ancrage.",
+    pratiques: [
+      { titre: "Ce que j'ai reçu de ma famille", texte: "Fais deux colonnes. Dans la première, écris ce que tu as reçu de positif de ta famille — des valeurs, des façons d'être, des forces. Dans la deuxième, ce qui t'a été transmis et que tu veux transformer. Sans jugement — juste voir ce qui a été hérité et ce qui peut évoluer." },
+      { titre: "Ce que je veux transmettre", texte: "Si tu pouvais transmettre une seule chose à ceux qui viennent après toi — enfants, neveux, élèves, futurs lecteurs — qu'est-ce que ce serait ? Une valeur, une leçon, une façon d'être. Écris-la comme si tu l'adressais à quelqu'un de précis." },
+      { titre: "Briser un cycle", texte: "Y a-t-il quelque chose dans ta famille que tu as décidé de ne pas reproduire ? Une façon de communiquer, une relation à l'argent, une gestion de la colère ? Comment tu fais — concrètement — pour ne pas le répéter ?" },
+    ],
+  },
+  {
+    id: "argent",
+    theme: "Argent & Rapport au manque",
+    couleur: "#C8B040",
+    intro: "L'argent est rarement juste une question d'argent. Il est chargé de tout ce qu'on lui projette — la sécurité, la valeur personnelle, la liberté, le pouvoir, la honte. Ce qu'on pense de l'argent vient souvent de l'enfance — de ce qu'on a vu, entendu, vécu dans sa famille. Le manque réel ou le manque perçu, l'abondance culpabilisée ou l'aisance tenue pour acquise. Notre rapport à l'argent est un révélateur fidèle de nos croyances les plus profondes sur ce qu'on mérite, ce qu'on vaut, ce qui est possible pour nous.",
+    dansLeFlux: "Quand le rapport à l'argent est sain, il est un outil — ni une obsession ni une source de honte. Tu peux parler d'argent sans te sentir sale ou vulnérable. Tu fais des choix financiers alignés avec tes valeurs. Tu n'attends pas l'abondance pour commencer à vivre.",
+    quandCaResiste: "Quand le rapport à l'argent est difficile, il prend une place disproportionnée. Soit la peur du manque est permanente — même quand la situation objective ne le justifie pas. Soit il y a une relation conflictuelle à la richesse — une culpabilité d'avoir, ou une rage de ne pas avoir assez. Soit les décisions financières sont régies par l'impulsion ou l'évitement.",
+    pratiques: [
+      { titre: "Mes croyances héritées sur l'argent", texte: "Quelles phrases entendais-tu sur l'argent dans ta famille ? 'L'argent ne fait pas le bonheur', 'les riches sont malhonnêtes', 'on n'est pas fait pour ça', 'l'argent c'est sale'. Lesquelles guident encore tes décisions aujourd'hui, à ton insu ?" },
+      { titre: "Ce que l'argent représente pour moi", texte: "Complète cette phrase honnêtement : 'Pour moi, avoir de l'argent signifie...' Puis : 'Ne pas en avoir assez signifie...' Les réponses révèlent souvent ce que l'argent protège ou menace dans notre image de nous-même." },
+      { titre: "Un geste d'abondance", texte: "L'abondance n'est pas réservée aux riches. Elle est une posture. Fais aujourd'hui un geste généreux — avec ton temps, ton argent, ton attention. Sans attendre le bon moment, sans que ce soit parfait. Observer ce que ça fait en toi." },
+    ],
+  },
+  {
+    id: "spiritualite",
+    theme: "Spiritualité & Foi",
+    couleur: "#B8A8C8",
+    intro: "La spiritualité ne se réduit pas à la religion, même si elles se croisent souvent. C'est le rapport qu'on entretient avec ce qui dépasse soi — une force, un sens, une transcendance, peu importe le nom qu'on lui donne. Même les personnes qui se disent athées ont souvent une forme de spiritualité — dans leur rapport à la nature, à l'art, à l'amour, à ce qui les dépasse. La foi est différente de la certitude. On peut avoir une foi profonde et douter. Les deux coexistent souvent dans les gens les plus honnêtes.",
+    dansLeFlux: "Quand la vie spirituelle est nourrie, il y a une paix qui ne dépend pas des circonstances. Une capacité à tenir l'incertitude sans s'effondrer. Un sens qui traverse les épreuves. Pas une explication à tout — mais une confiance dans quelque chose de plus grand.",
+    quandCaResiste: "Quand la dimension spirituelle est négligée ou blessée — par une religion vécue comme traumatisme, par une perte de foi, par un deuil qui a tout remis en question — il peut y avoir un vide difficile à nommer. Un manque de sens, une sécheresse intérieure, un sentiment de marcher sans direction.",
+    pratiques: [
+      { titre: "Ce en quoi je crois vraiment", texte: "Au-delà des étiquettes, qu'est-ce que tu crois vraiment sur la vie, sur ce qui existe au-delà de ce qu'on voit, sur ce qui compte ? Écris-le sans te censurer, sans chercher à être cohérent(e) avec quoi que ce soit. Juste ta vérité du moment." },
+      { titre: "Un acte de transcendance ordinaire", texte: "La spiritualité vit dans les petits gestes autant que dans les grands. Aujourd'hui, fais quelque chose avec une qualité d'attention totale — marcher, préparer un repas, écouter quelqu'un. Laisse ce moment avoir une qualité sacrée, même ordinaire." },
+      { titre: "Ce qui a mis ma foi à l'épreuve", texte: "Y a-t-il eu un moment dans ta vie qui a profondément ébranlé ta façon de voir le monde — une perte, une injustice, une désilllusion ? Qu'est-ce que tu as reconstruit à partir de là ? Qu'est-ce que cette épreuve t'a appris sur ce qui tient vraiment ?" },
+    ],
+  },
+  {
+    id: "confiance",
+    theme: "Confiance & Trahison",
+    couleur: "#C8A098",
+    intro: "La confiance est fragile et précieuse. Elle se construit lentement, se brise vite. Et une fois brisée, elle laisse des traces qui vont bien au-delà de la relation concernée — elle peut contaminer la façon dont on regarde toutes les relations qui suivent. La trahison fait mal parce qu'elle touche à quelque chose de fondamental : le sentiment qu'on peut compter sur les autres, que le monde est globalement sûr. Reconstruire la confiance — en l'autre, en soi, dans la vie — est un travail long et délicat.",
+    dansLeFlux: "Quand la confiance est présente, tu peux être vulnérable sans te sentir en danger. Tu donnes ta confiance progressivement, en observant les actes plutôt qu'en espérant. Tu peux faire confiance à ta propre perception — tu sais quand quelqu'un est digne de confiance et quand il ne l'est pas.",
+    quandCaResiste: "Quand la confiance est blessée, deux postures sont possibles. Soit on devient hyper-vigilant(e) — on cherche les signes de trahison partout, on se protège avant même que la menace existe. Soit on continue à faire confiance aveuglément, en niant les signaux d'alarme parce que la désillusion fait trop mal.",
+    pratiques: [
+      { titre: "Ce que la trahison a changé", texte: "Pense à une trahison importante dans ta vie. Qu'est-ce qu'elle a changé dans ta façon de te rapporter aux autres ? Est-ce que cette protection que tu as construite est encore adaptée aujourd'hui, ou est-ce qu'elle t'empêche de quelque chose ?" },
+      { titre: "Faire confiance à sa propre perception", texte: "Il y a des gens qui ont perdu confiance en leur propre jugement après une trahison. Ils se demandent : comment j'ai pu ne pas voir ? Mais la perception n'est pas un échec — c'est l'autre qui a trahi. Écris trois fois où ton instinct avait raison sur quelqu'un ou quelque chose." },
+      { titre: "Un pas vers la confiance", texte: "Y a-t-il quelqu'un dans ta vie qui mérite plus de confiance que tu ne lui en accordes — à cause d'une blessure passée qui ne lui appartient pas ? Quel serait un petit geste pour lui ouvrir un peu plus de place ?" },
+    ],
+  },
+  {
+    id: "desir",
+    theme: "Désir & Vitalité",
+    couleur: "#C87860",
+    intro: "Le désir est le signal de la vie. Quand on ne désire plus rien, c'est souvent le signe qu'on s'est éteint quelque part. Les désirs ont mauvaise réputation — on les associe à l'excès, à l'insatisfaction, à la faiblesse. Mais le désir n'est pas seulement une pulsion à satisfaire. C'est aussi une direction — il dit quelque chose sur ce qu'on est, sur ce qui compte, sur ce qui nous fait nous sentir vivant(e). La vitalité, elle, c'est cette énergie de fond qui permet d'être pleinement là — dans le corps, dans les relations, dans ce qu'on crée.",
+    dansLeFlux: "Quand le désir et la vitalité sont présents, tu te lèves avec quelque chose qui t'attend. Pas nécessairement de l'excitation — parfois juste un mouvement vers. Tu ressens du plaisir dans ce que tu fais. Tu as de l'énergie pour les choses qui comptent. Il y a une appétence pour la vie.",
+    quandCaResiste: "Quand le désir s'éteint, tout devient effort. Rien ne semble valoir vraiment la peine. La fatigue est profonde — pas physique mais existentielle. Il peut y avoir un sentiment de vide, d'ennui chronique, d'une vie qui se passe sans vraiment y participer.",
+    pratiques: [
+      { titre: "Ce qui me fait me sentir vivant(e)", texte: "Fais la liste de cinq choses — activités, moments, personnes, lieux — qui te font te sentir vraiment vivant(e). Pas ce qui est sage ou raisonnable. Ce qui allume quelque chose. Observe si ces choses sont présentes dans ta vie en ce moment." },
+      { titre: "Un désir que j'ai mis de côté", texte: "Y a-t-il quelque chose que tu désirais — faire, être, vivre — et que tu as mis de côté il y a longtemps, pour des raisons qui semblaient valables ? Est-ce qu'il en reste quelque chose ? Est-ce qu'il y a une façon de le nourrir différemment aujourd'hui ?" },
+      { titre: "Nourrir la vitalité concrètement", texte: "La vitalité ne tombe pas du ciel. Elle se nourrit — par le sommeil, par le mouvement, par ce qu'on mange, par ce qu'on regarde et lit, par les gens qu'on fréquente. Identifie une chose qui te vide systématiquement et une chose qui te recharge. Qu'est-ce que tu pourrais ajuster ?" },
+    ],
+  },
+  {
+    id: "racines",
+    theme: "Racines & Origines",
+    couleur: "#A89878",
+    intro: "Les racines ne sont pas un destin — elles sont un point de départ. Ce qu'on a reçu de sa culture, de sa terre, de sa famille, de son histoire collective forge une partie de qui on est, même quand on cherche à s'en éloigner. Comprendre ses origines — sans les idéaliser ni les renier — permet de se situer. De savoir d'où on vient pour mieux choisir où on va. Parfois les racines sont une source de fierté et de force. Parfois elles sont une blessure à traverser. Souvent les deux.",
+    dansLeFlux: "Quand tu es en paix avec tes origines, tu peux en parler sans te justifier ni te défendre. Tu reconnais ce qu'elles t'ont donné sans en être prisonnier(e). Il y a une forme d'ancrage — tu sais d'où tu viens, ce qui te fonde, même si tu as beaucoup évolué.",
+    quandCaResiste: "Quand les origines sont difficiles, il peut y avoir de la honte — sociale, culturelle, familiale. Ou une rupture totale, un rejet de tout ce qui vient 'd'avant'. Ou au contraire une identité trop rigide, figée dans ses origines, qui empêche d'évoluer.",
+    pratiques: [
+      { titre: "Ce que mes origines m'ont donné", texte: "Écris trois choses que ta culture, ta famille, ta terre d'origine t'ont données — une valeur, une façon d'être, une force. Pas ce qu'on t'a dit devoir valoriser. Ce que tu reconnais vraiment comme une richesse." },
+      { titre: "Ce que j'ai choisi de garder", texte: "Parmi tout ce que tu as reçu de tes origines, qu'est-ce que tu as consciemment choisi de garder dans ta façon de vivre ? Et qu'est-ce que tu as choisi de transformer ou de laisser ?" },
+      { titre: "Une histoire que tu portes", texte: "Y a-t-il une histoire dans ta famille ou dans ton histoire collective — une migration, une perte, un silence — qui t'a marqué(e) même si tu n'en as pas été directement témoin ? Comment cette histoire vit-elle en toi ?" },
+    ],
+  },
+  {
+    id: "vocation",
+    theme: "Travail & Vocation",
+    couleur: "#98B8C8",
+    intro: "On confond souvent travail et vocation. Le travail est ce qu'on fait pour vivre. La vocation est ce pour quoi on semble fait(e) — une façon d'être dans le monde qui correspond profondément à ce qu'on est. On peut avoir un travail qui n'est pas une vocation et trouver sa vocation ailleurs. On peut avoir la chance que les deux se rejoignent. Le problème, c'est qu'on confond souvent 'ce pour quoi je suis bon(ne)' avec 'ce qui me nourrit vraiment'. Les deux ne sont pas toujours identiques.",
+    dansLeFlux: "Quand tu es en lien avec ta vocation, le travail ne semble pas toujours un travail. Il y a une énergie différente — pas l'absence d'effort, mais une qualité de présence. Tu te retrouves dans un état de flux où le temps passe autrement. Ce que tu fais a du sens — pas seulement de l'utilité.",
+    quandCaResiste: "Quand le travail est déconnecté de la vocation, il y a une fatigue particulière — pas physique mais existentielle. On peut être performant(e) et vide. On peut réussir et se demander 'pour quoi'. Ou on peut avoir une intuition forte sur sa vocation mais ne pas savoir comment y accéder.",
+    pratiques: [
+      { titre: "Ce que je ferais gratuitement", texte: "Qu'est-ce que tu ferais si tu n'avais pas besoin d'argent — pas des vacances, mais une activité qui a du sens pour toi ? La réponse n'est pas toujours évidente, mais elle pointe souvent vers quelque chose d'important." },
+      { titre: "La différence entre compétence et vocation", texte: "Être bon(ne) à quelque chose ne signifie pas que c'est ce pour quoi on est fait(e). Est-ce qu'il y a des compétences que tu as développées mais qui ne te nourrissent pas vraiment ? Et des choses pour lesquelles tu n'es pas encore expert(e) mais qui t'allument profondément ?" },
+      { titre: "Un pas vers l'alignement", texte: "Tu n'as peut-être pas le luxe de tout changer maintenant. Mais y a-t-il un geste — même petit — pour que ta vie professionnelle soit un peu plus en accord avec ce qui compte pour toi ? Une conversation, un projet annexe, une formation, un changement de rôle." },
+    ],
+  },
+  {
+    id: "temps",
+    theme: "Temps & Vieillissement",
+    couleur: "#A8A898",
+    intro: "Le temps est la seule ressource qu'on ne peut pas regagner. On le sait — mais rarement on le vit vraiment. On agit comme si on avait tout le temps, jusqu'au moment où on réalise qu'on n'en a pas autant qu'on pensait. Le vieillissement — qu'on commence à percevoir dès la trentaine — est souvent vécu comme une perte. Mais il peut aussi être un gain : de clarté, de discernement, de capacité à choisir ce qui compte vraiment. Ce qu'on appelle la sagesse n'est souvent que ça — savoir utiliser le temps qu'il reste.",
+    dansLeFlux: "Quand tu vis bien ton rapport au temps, tu fais des choix qui correspondent à ce qui compte vraiment — pas à ce qui est urgent, pas à ce qui est demandé. Tu peux être présent(e) dans le moment sans constamment te projeter. Tu n'attends pas que 'les conditions soient parfaites' pour commencer à vivre.",
+    quandCaResiste: "Quand le rapport au temps est difficile, il y a souvent de la procrastination sur les choses importantes, et de l'agitation sur les choses superficielles. Ou une nostalgie paralysante — toujours regarder en arrière. Ou une anxiété face au futur — une peur de ce qui vient qui empêche d'être là maintenant.",
+    pratiques: [
+      { titre: "Ce que je mettrais en premier si j'avais moins de temps", texte: "Si tu apprenais que tu avais beaucoup moins de temps devant toi, qu'est-ce que tu mettrais en priorité ? Pas dans ta vie entière — juste cette semaine. Qu'est-ce que ça dit sur ce qui compte vraiment, et sur la façon dont tu organises ton temps en ce moment ?" },
+      { titre: "Une lettre à soi dans dix ans", texte: "Écris une lettre à la version de toi dans dix ans. Qu'est-ce que tu voudrais lui dire ? Quelles décisions aimerais-tu avoir prises ? Quelle personne aimerais-tu être devenu(e) ? Cette lettre peut servir de boussole." },
+      { titre: "Ce qui durera", texte: "Parmi ce que tu fais en ce moment — travail, relations, projets, habitudes — qu'est-ce qui aura encore du sens dans vingt ans ? Qu'est-ce qui sera oublié ? Cette perspective aide à distinguer ce qui est urgent de ce qui est important." },
+    ],
+  },
+  {
+    id: "parentalite",
+    theme: "Parentalité",
+    couleur: "#A8C8A8",
+    intro: "La parentalité est l'une des expériences les plus transformatrices qu'on puisse vivre — qu'on soit parent biologique, beau-parent, ou dans toute forme d'accompagnement d'un enfant. Elle confronte à ses propres blessures d'enfance avec une brutalité parfois inattendue. Elle révèle des ressources insoupçonnées et des limites qu'on n'avait jamais touchées. Être parent, c'est souvent apprendre à donner ce qu'on n'a pas reçu — et parfois, apprendre à recevoir ce qu'on n'a jamais su demander.",
+    dansLeFlux: "Quand la parentalité est bien vécue, tu peux être présent(e) pour tes enfants sans te perdre complètement. Tu fais des erreurs sans t'effondrer. Tu poses des limites avec fermeté et bienveillance. Tu vois tes enfants comme ils sont — pas comme des extensions de toi ou des projets à accomplir.",
+    quandCaResiste: "Quand la parentalité est difficile, la culpabilité prend souvent toute la place. On se demande si on fait bien, si on fait assez, si on ne fait pas trop. On peut reproduire des schémas de sa propre enfance sans s'en rendre compte. Ou au contraire, réagir si fort contre ces schémas qu'on perd l'équilibre dans l'autre sens.",
+    pratiques: [
+      { titre: "Ce que je transmets sans le vouloir", texte: "Observe pendant une journée comment tu réagis face à tes enfants ou aux enfants proches de toi. Quelles émotions tu exprimes facilement ? Lesquelles tu caches ? Qu'est-ce que ton comportement leur enseigne — au-delà de ce que tu leur dis ?" },
+      { titre: "L'enfant que j'étais", texte: "Qu'est-ce que l'enfant que tu étais aurait eu besoin d'entendre — et qu'on ne lui a pas dit ? Est-ce que tu peux le dire aujourd'hui à un enfant dans ta vie ? Et peut-être aussi te le dire à toi-même ?" },
+      { titre: "Prendre soin de soi pour prendre soin des autres", texte: "On ne peut pas donner ce qu'on n'a pas. Qu'est-ce que tu négligences en toi en ce moment — du repos, de la joie, de la présence à toi-même — qui finit par appauvrir ta présence aux autres ? Un geste aujourd'hui pour te nourrir toi." },
+    ],
+  },
+  {
+    id: "couple",
+    theme: "Couple & Intimité",
+    couleur: "#C88898",
+    intro: "L'intimité est l'un des territoires les plus exigeants de l'existence humaine. Être vraiment vu(e) par quelqu'un — et choisir de le voir vraiment — demande un courage particulier. Le couple révèle tout : les blessures d'attachement, les peurs de l'abandon ou de l'engloutissement, les besoins qu'on n'a pas appris à formuler. L'amour romantique commence souvent comme une projection — on tombe amoureux d'une image. La vraie intimité commence quand les images s'effacent et qu'on reste quand même.",
+    dansLeFlux: "Quand l'intimité est saine, tu peux être vulnérable sans te sentir en danger. Tu exprimes tes besoins sans peur de l'abandon. Tu laisses de la place à l'autre sans te perdre. Les conflits existent mais ils ne menacent pas le lien. Il y a une sécurité qui permet à chacun de grandir.",
+    quandCaResiste: "Quand l'intimité est difficile, la distance s'installe — soit physique, soit émotionnelle. On peut être dans la même pièce et complètement séparé(e). Les non-dits s'accumulent. Les ressentiments aussi. Ou au contraire, la fusion est trop grande — on perd ses contours dans la relation.",
+    pratiques: [
+      { titre: "Ce que je n'ai jamais dit", texte: "Y a-t-il quelque chose que tu n'as jamais dit à ton partenaire — un besoin, une peur, une gratitude profonde, une limite — parce que tu ne savais pas comment le formuler ou parce que tu avais peur de la réaction ? Aujourd'hui, trouve une façon de le dire." },
+      { titre: "Mon style d'attachement", texte: "Observe ta façon de réagir quand tu te sens proche de quelqu'un. As-tu tendance à t'approcher ou à fuir quand l'intimité grandit ? À chercher plus de proximité ou à t'étouffer dans la relation ? Ces réflexes viennent de loin. Les reconnaître permet de les choisir plutôt que de les subir." },
+      { titre: "Un acte d'intimité aujourd'hui", texte: "L'intimité ne se résume pas à la sexualité. Elle se construit dans les petits gestes — une conversation sans téléphone, une question sincère sur comment l'autre va vraiment, un moment partagé en silence. Fais un geste d'intimité aujourd'hui." },
+    ],
+  },
+  {
+    id: "intention",
+    theme: "Intention",
+    couleur: "#C8A870",
+    intro: "L'intention précède l'acte. Pas toujours consciemment — mais toujours. Ce qui motive ce qu'on fait — la peur, l'amour, le besoin de reconnaissance, la conviction — détermine la qualité de l'acte bien plus que l'acte lui-même. Dans la tradition islamique, la niyyah — l'intention — est au cœur de toute action. Un geste identique peut valoir beaucoup ou rien selon l'intention qui le porte. Développer le rapport à l'intention, c'est apprendre à agir depuis un endroit plus authentique — moins réactif, plus choisi.",
+    dansLeFlux: "Quand tu vis intentionnellement, tes actes sont cohérents avec ce que tu es. Tu sais pourquoi tu fais ce que tu fais. Tu n'attends pas les circonstances parfaites — tu poses une direction et tu avances. Il y a une qualité de présence dans ce que tu fais, même les choses ordinaires.",
+    quandCaResiste: "Quand l'intention est absente ou confuse, on agit par habitude, par peur, pour plaire. On fait des choses et on se retrouve à se demander pourquoi on les a faites. Il peut y avoir un décalage chronique entre ce qu'on dit vouloir et ce qu'on fait réellement.",
+    pratiques: [
+      { titre: "L'intention derrière un acte répété", texte: "Choisis quelque chose que tu fais régulièrement — travailler dur, être serviable, éviter les conflits. Demande-toi honnêtement : quelle est l'intention derrière cet acte ? Est-ce que cette intention est encore vraie pour toi ?" },
+      { titre: "Poser une intention pour la journée", texte: "Avant de commencer ta journée, pose une intention — pas une liste de tâches. Une façon d'être. 'Aujourd'hui je veux être pleinement présent(e).' 'Aujourd'hui je veux agir depuis la générosité plutôt que depuis la peur.' Observe comment ça change l'expérience de la journée." },
+      { titre: "Aligner intention et action", texte: "Y a-t-il un domaine de ta vie où tes intentions déclarées et tes actions réelles divergent fortement ? Qu'est-ce qui cause cet écart ? Pas pour te juger — pour voir." },
+    ],
+  },
+  {
+    id: "intuition",
+    theme: "Intuition",
+    couleur: "#9888C8",
+    intro: "L'intuition est souvent incomprise. On la confond avec l'irrationnel, avec la superstition, avec l'impulsion. Mais l'intuition est une forme de traitement de l'information — rapide, non consciente, fondée sur l'expérience accumulée. Elle perçoit des patterns que l'analyse consciente n'a pas encore traités. Elle n'est pas infaillible. Mais elle mérite d'être écoutée — surtout quand elle est régulièrement ignorée. La difficulté, c'est qu'on vit dans une culture qui valorise le rationnel et qui traite l'intuition avec méfiance.",
+    dansLeFlux: "Quand tu écoutes ton intuition, tu remarques les signaux faibles — un malaise avant que le problème soit visible, un élan vers quelque chose sans savoir pourquoi. Tu fais confiance à ce que tu perçois sans avoir besoin de tout justifier. Tu prends de meilleures décisions — pas toujours, mais souvent.",
+    quandCaResiste: "Quand l'intuition est ignorée, tu te retrouves souvent dans des situations où tu te dis 'je savais bien'. Tu te laisses convaincre par des arguments logiques qui vont à l'encontre de ce que tu ressentais. La tête l'emporte toujours sur les autres formes de connaissance.",
+    pratiques: [
+      { titre: "Le journal de l'intuition", texte: "Pendant une semaine, note chaque fois que tu ressens quelque chose avant de pouvoir l'expliquer — une résistance, un élan, un malaise. Note aussi ce qui se passe ensuite. L'intuition se renforce quand on lui prête attention." },
+      { titre: "La décision au premier souffle", texte: "Pour une décision peu importante, décide en dix secondes — avec ton premier ressenti, sans délibérer. Observe comment tu te sens après. Était-ce juste ? L'intuition s'entraîne comme un muscle." },
+      { titre: "Distinguer intuition et peur", texte: "L'intuition et la peur peuvent se ressembler — toutes deux créent un signal d'alarme. La différence : la peur parle en termes de 'et si ça se passe mal', l'intuition pointe vers quelque chose de précis sans catastrophisme. La prochaine fois que tu ressens un signal fort, demande-toi : est-ce une information ou une anxiété ?" },
+    ],
+  },
+  {
+    id: "instinct",
+    theme: "Instinct",
+    couleur: "#C89068",
+    intro: "L'instinct est encore plus fondamental que l'intuition. C'est la réponse du corps — immédiate, pré-consciente, ancrée dans la survie. Il se manifeste dans la tension musculaire avant le danger, dans l'élan vers quelqu'un dès la première rencontre, dans le recul viscéral face à une situation. Les sociétés modernes ont appris à ignorer l'instinct — à le domestiquer, à lui préférer le calcul. Mais le corps garde une sagesse que l'esprit ne possède pas.",
+    dansLeFlux: "Quand tu es en lien avec tes instincts, ton corps est un allié — il t'informe, te protège, te guide. Tu remarques quand une situation crée de la tension avant même de comprendre pourquoi. Tu fais confiance aux réactions premières sans les systématiquement analyser.",
+    quandCaResiste: "Quand l'instinct est coupé, on se retrouve dans des situations dangereuses ou inconfortables qu'on aurait pu éviter — le corps avait signalé, mais on n'écoutait pas. Il peut y avoir une dissociation — ne pas ressentir les signaux d'alarme physiques, agir contre son propre bien-être sans le réaliser.",
+    pratiques: [
+      { titre: "Ce que mon corps a su avant moi", texte: "Rappelle-toi une situation où ton corps a réagi — tension, malaise, élan, recul — avant que ta tête comprenne quoi que ce soit. Qu'est-ce qu'il signalait ? Est-ce qu'il avait raison ?" },
+      { titre: "Scanner les tensions avant une décision", texte: "Avant une décision importante, ferme les yeux et imagine chaque option. Observe ce que ton corps fait — où apparaît la tension, où vient la légèreté. Ce n'est pas la seule information à prendre en compte, mais c'en est une précieuse." },
+      { titre: "Respecter un non corporel", texte: "Y a-t-il quelque chose dans ta vie que ton corps rejette — une situation, une relation, une habitude — et que tu continues malgré tout parce que ta tête trouve de bonnes raisons ? Qu'est-ce que ça coûte d'ignorer ce signal ?" },
+    ],
+  },
+  {
+    id: "courage",
+    theme: "Courage",
+    couleur: "#C87850",
+    intro: "Le courage n'est pas l'absence de peur. C'est ce qu'on fait en présence de la peur. Les personnes courageuses ont peur — elles agissent quand même. Le courage ordinaire est souvent invisibilisé : dire la vérité dans une conversation difficile, poser une limite, commencer quelque chose sans garantie de succès, demander de l'aide. Ces actes ne font pas les premières pages. Mais ils construisent une vie. La peur n'est pas un obstacle à contourner — c'est un signal à interroger.",
+    dansLeFlux: "Quand le courage est présent, tu agis malgré l'incertitude. Tu dis ce que tu penses sans avoir besoin que tout le monde soit d'accord. Tu commences des choses sans attendre d'être prêt(e). Tu assumes les conséquences de tes choix. Il y a une dignité dans la façon dont tu te tiens.",
+    quandCaResiste: "Quand le courage manque, la procrastination s'installe sur les choses importantes. On attend le bon moment qui ne vient jamais. On reporte les conversations difficiles jusqu'à ce qu'elles deviennent des crises. On s'adapte aux attentes des autres pour éviter le conflit — et on perd peu à peu sa propre direction.",
+    pratiques: [
+      { titre: "La chose que je reporte par peur", texte: "Nomme une chose que tu sais que tu dois faire ou dire — et que tu reportes. Pas parce que tu ne sais pas comment. Parce que ça fait peur. Qu'est-ce qui se passerait vraiment si tu le faisais ? Et qu'est-ce qui se passe si tu continues à ne pas le faire ?" },
+      { titre: "Un courage ordinaire non reconnu", texte: "Pense à un moment récent où tu as fait quelque chose de difficile — tenu une promesse difficile, dit non, demandé pardon, continué malgré la fatigue. Reconnaît ce moment. Le courage ordinaire mérite d'être vu." },
+      { titre: "La peur comme information", texte: "La prochaine fois que tu ressens de la peur face à quelque chose d'important, demande-toi : est-ce une peur qui protège quelque chose de précieux, ou une peur qui empêche de vivre ? Les deux existent. La distinguer change l'action qui suit." },
+    ],
+  },
+  {
+    id: "feminite",
+    theme: "Féminité",
+    couleur: "#C878A8",
+    intro: "La féminité — et son pendant, la masculinité — ne sont pas des essences figées. Ce sont des constructions culturelles qui varient selon les époques et les sociétés, et des dimensions intérieures que chacun porte en soi à des degrés divers. Le rapport qu'on entretient avec sa féminité ou sa masculinité est souvent traversé par des injonctions reçues dès l'enfance — ce qu'un homme doit être, ce qu'une femme ne doit pas faire. Revisiter ces injonctions ne signifie pas les rejeter toutes — mais choisir consciemment ce qui est vraiment soi.",
+    dansLeFlux: "Quand on est en paix avec sa féminité ou sa masculinité, on ne dépense pas d'énergie à prouver quelque chose. On peut être doux(ce) et fort(e), vulnérable et solide, ambitieux(se) et tendre — sans contradiction. Il y a une intégration qui permet d'être pleinement soi.",
+    quandCaResiste: "Quand ce rapport est difficile, il peut y avoir de la honte autour de certaines façons d'être — trop sensible pour un homme, trop ambitieuse pour une femme, trop différent(e) de ce qu'on attendait. Ou une rigidité — jouer le rôle attendu au point de ne plus savoir ce qui est authentique.",
+    pratiques: [
+      { titre: "Les injonctions reçues", texte: "Qu'est-ce qu'on t'a dit — directement ou non — que tu devais être en tant que garçon ou fille, homme ou femme ? Quelles de ces injonctions portes-tu encore ? Lesquelles as-tu questionnées ? Lesquelles correspondent à qui tu es vraiment ?" },
+      { titre: "Ce que je trouve beau en moi sans condition", texte: "Nomme quelque chose en toi — une qualité, une façon d'être, une dimension de ton identité — que tu trouves beau(belle) indépendamment de ce que les autres en pensent. Pas une performance. Quelque chose qui existe simplement." },
+      { titre: "Intégrer les contraires", texte: "Y a-t-il en toi des dimensions que tu as du mal à tenir ensemble — la douceur et la fermeté, la vulnérabilité et la force, l'ambition et la présence ? Qu'est-ce qui te fait croire qu'elles sont incompatibles ?" },
+    ],
+  },
+  {
+    id: "protection",
+    theme: "Protection",
+    couleur: "#78A8C8",
+    intro: "La protection intérieure est une compétence, pas une forteresse. Elle consiste à savoir ce qui te nourrit et ce qui te vide, à poser des limites claires sans se couper du monde, à choisir ce qu'on laisse entrer dans son espace intérieur. Une bonne protection n'isole pas — elle sélectionne. Elle permet d'être pleinement présent(e) dans les relations tout en gardant son centre. Les protections rigides, construites dans la peur, coûtent souvent plus qu'elles ne protègent.",
+    dansLeFlux: "Quand ta protection est saine, tu peux te sentir vulnérable sans être submergé(e). Tu sais dire non sans culpabilité excessive. Tu remarques quand une situation ou une personne te prend de l'énergie et tu peux agir en conséquence. Il y a une paix intérieure qui ne dépend pas de l'approbation des autres.",
+    quandCaResiste: "Quand la protection fait défaut, on se retrouve épuisé(e) par les autres — à tout absorber, à ne pas savoir dire non, à se sentir envahi(e) sans pouvoir nommer pourquoi. Ou au contraire, les murs sont si épais qu'aucune vraie connexion n'est possible.",
+    pratiques: [
+      { titre: "Ce qui me vide systématiquement", texte: "Identifie deux ou trois situations, personnes ou habitudes qui te laissent systématiquement plus vide qu'avant. Pas pour les fuir toutes — mais pour en être conscient(e) et décider de comment tu veux t'y engager." },
+      { titre: "Poser une limite claire aujourd'hui", texte: "Y a-t-il quelque chose à quoi tu dis oui par défaut et que tu voudrais pouvoir refuser ? Aujourd'hui, dis non à une chose — même petite. Observe ce qui se passe en toi et autour de toi." },
+      { titre: "Nettoyer son espace intérieur", texte: "Qu'est-ce que tu consommes mentalement — informations, réseaux, conversations — qui te pèse ? Cette semaine, retire une source d'inputs négatifs. Observe la différence sur ton niveau d'énergie." },
+    ],
+  },
+  {
+    id: "meditation",
+    theme: "Méditation",
+    couleur: "#88A8B8",
+    intro: "La méditation n'est pas vider son esprit. C'est apprendre à observer ses pensées sans les suivre, à ne pas être emporté(e) par chaque vague mentale. C'est une pratique d'entraînement de l'attention — l'une des facultés les plus précieuses et les plus négligées. Elle ne demande pas de croire à quoi que ce soit. Elle ne réclame pas de silence parfait ni de posture particulière. Elle demande de la régularité et une forme de courage : rester avec soi-même quelques minutes sans fuir.",
+    dansLeFlux: "Quand la méditation est présente dans ta vie, tu remarques tes pensées avant d'y réagir. Tu as un peu plus d'espace entre le stimulus et la réponse. Tu peux être dans une situation stressante sans être complètement submergé(e). La présence devient plus naturelle.",
+    quandCaResiste: "Quand on ne médite pas ou qu'on n'a pas d'espace intérieur, le mental tourne souvent en boucle. Les pensées commencent les unes les autres sans fin. Le stress s'accumule sans qu'on puisse y accéder vraiment. Il peut y avoir un sentiment d'être constamment 'sous eau'.",
+    pratiques: [
+      { titre: "Cinq minutes, rien de plus", texte: "Pas besoin de quarante minutes. Commence par cinq. Assieds-toi confortablement, ferme les yeux. Compte tes respirations de un à dix, puis recommence. Quand une pensée arrive, remarque-la et reviens au comptage. C'est tout. Cinq minutes." },
+      { titre: "La méditation dans l'action", texte: "La méditation n'est pas réservée au coussin. Elle peut se pratiquer en marchant, en mangeant, en écoutant. Choisis une activité quotidienne ordinaire et fais-la avec une attention totale — sans penser à autre chose, sans téléphone. Juste être là." },
+      { titre: "Observer sans juger une pensée difficile", texte: "La prochaine fois qu'une pensée difficile arrive — une inquiétude, un regret, une critique de soi — essaie de ne pas la combattre ni de la suivre. Juste l'observer, comme un nuage qui passe. Nomme-la : 'voilà de l'inquiétude'. Observe ce qui se passe ensuite." },
+    ],
+  },
+  {
+    id: "memoire-transgen",
+    theme: "Mémoire transgénérationnelle",
+    couleur: "#A898B8",
+    intro: "On hérite de bien plus que des gènes. Les recherches en épigénétique et en psychologie familiale montrent que les traumatismes non résolus se transmettent — dans les comportements, dans les peurs, dans les silences. Nos parents, grands-parents, arrière-grands-parents ont traversé des guerres, des migrations, des deuils, des injustices. Ce qu'ils n'ont pas pu digérer se retrouve souvent dans nos propres réactions — des peurs qui semblent disproportionnées, des attachements inexpliqués, des schémas qui se répètent sans raison apparente.",
+    dansLeFlux: "Quand on est conscient de sa mémoire transgénérationnelle, on peut distinguer ce qui est 'soi' de ce qui a été hérité. On peut rendre à l'histoire familiale ce qui lui appartient. Il y a une clarté nouvelle sur certains patterns — et avec elle, la possibilité de choisir autrement.",
+    quandCaResiste: "Quand la mémoire transgénérationnelle est ignorée, on répète des patterns sans comprendre pourquoi. On peut ressentir des peurs, des douleurs, des limitations qui semblent venir de nulle part — parce qu'elles viennent d'avant. Les silences familiaux ont souvent un poids disproportionné.",
+    pratiques: [
+      { titre: "L'arbre des blessures", texte: "Pense à tes parents et à leurs parents. Y a-t-il des événements difficiles dans ton histoire familiale — migrations, guerres, deuils, trahisons, silences ? Comment ces événements ont-ils pu façonner les personnes qu'ils étaient ? Et comment ces personnes t'ont-elles façonné(e) ?" },
+      { titre: "Ce qui vient d'avant", texte: "Y a-t-il en toi une peur ou un pattern dont tu ne comprends pas vraiment l'origine ? Quelque chose qui semble disproportionné par rapport à ta propre expérience ? C'est peut-être hérité. Le reconnaître ne le supprime pas — mais ça permet de le tenir autrement." },
+      { titre: "Briser le silence", texte: "Y a-t-il une histoire dans ta famille dont on ne parle jamais ? Un deuil non fait, une injustice non reconnue, un secret gardé ? Parfois, juste reconnaître l'existence de ce silence est un acte libérateur." },
+    ],
+  },
+  {
+    id: "corps-emotionnel",
+    theme: "Corps émotionnel",
+    couleur: "#C89878",
+    intro: "Le corps émotionnel est le corps ressenti — celui des sensations intérieures, des tensions qui portent des histoires, des douleurs qui disent des vérités que la tête préfère ignorer. La somatothérapie — thérapie par le corps — part du principe que les traumatismes et les émotions non traitées s'inscrivent dans le corps sous forme de tensions, de douleurs chroniques, de postures figées. Accéder au corps émotionnel, c'est accéder à une mémoire plus profonde que celle de la tête.",
+    dansLeFlux: "Quand le corps émotionnel est écouté, il y a une fluidité dans l'expérience des émotions. Elles traversent sans s'installer. Le corps est souple — pas seulement physiquement. Tu remarques tes réactions corporelles et tu les comprends comme des messages.",
+    quandCaResiste: "Quand le corps émotionnel est ignoré, les émotions s'accumulent sous forme de tensions physiques — nuque raide, dos douloureux, ventre noué, poitrine comprimée. Ces tensions peuvent devenir chroniques et sembler 'sans raison médicale'. Le corps dit ce que les mots ne disent pas.",
+    pratiques: [
+      { titre: "Localiser l'émotion dans le corps", texte: "Quand une émotion forte se présente, ferme les yeux et demande-toi : où est-ce que je la sens dans mon corps ? Gorge, poitrine, ventre, nuque ? Quel est le poids, la texture, la température de cette sensation ? Rester avec la sensation — pas avec l'histoire — quelques minutes." },
+      { titre: "Libérer par le mouvement", texte: "Certaines émotions ne se pensent pas — elles se bougent. Marche rapide, danse seul(e), secouer les bras et les jambes vigoureusement. Le but n'est pas d'expliquer l'émotion mais de lui donner un mouvement physique. Observer ce qui se transforme." },
+      { titre: "Le dialogue avec la douleur", texte: "Si tu as une douleur physique récurrente — dos, tête, ventre, gorge — demande-lui : si tu pouvais parler, qu'est-ce que tu dirais ? Écris la réponse sans censure. Ce n'est pas de la magie — c'est de la psychosomatique. Le corps et le psyché sont un." },
+    ],
+  },
+  {
+    id: "noeud-interieur",
+    theme: "Nœud intérieur",
+    couleur: "#B898A8",
+    intro: "Un nœud intérieur est quelque chose qui reste bloqué — une décision non prise depuis trop longtemps, une relation non réglée, une vérité non dite, un deuil non fait. Il ne se résout pas par la volonté seule. Il demande d'être regardé — ce qui est souvent ce qu'on évite le plus. Les nœuds intérieurs consomment de l'énergie en silence. Ils ne font pas de bruit — mais ils occupent une place. Souvent, se donner la permission de les regarder suffit à les desserrer partiellement.",
+    dansLeFlux: "Quand les nœuds se dénouent, il y a une légèreté qu'on n'avait pas remarqué avoir perdue. L'énergie qui allait à maintenir le blocage devient disponible pour autre chose. Des décisions qui semblaient impossibles se clarifient. Des relations se transforment.",
+    quandCaResiste: "Quand les nœuds restent serrés, on tourne autour d'eux sans les voir vraiment. Il peut y avoir une fatigue inexplicable — le coût de maintenir quelque chose en place qu'on refuse de regarder. Ou des symptômes détournés — de la procrastination, de l'irritabilité, une tristesse sans objet.",
+    pratiques: [
+      { titre: "Nommer le nœud", texte: "Qu'est-ce qui est bloqué en toi en ce moment ? Pas besoin de savoir comment le résoudre — juste le nommer. Une décision, une relation, une vérité, un sentiment. L'écrire le rend réel. Et ce qui est réel peut être travaillé." },
+      { titre: "Ce qui retient le nœud", texte: "Qu'est-ce qui t'empêche de défaire ce nœud ? La peur de quoi exactement ? La peur de la réaction des autres, de la perte, de l'inconnu, de ta propre puissance ? Nommer la peur derrière le blocage change souvent sa nature." },
+      { titre: "Un millimètre de mouvement", texte: "On n'a pas besoin de tout résoudre en une fois. Quel serait un tout petit geste — une conversation, une décision mineure, une heure dédiée à regarder ce qui est là — qui ferait bouger le nœud d'un millimètre ? Un millimètre suffit pour aujourd'hui." },
+    ],
+  },
+  {
+    id: "espace-de-vie",
+    theme: "Espace de vie",
+    couleur: "#98B8A8",
+    intro: "L'espace qu'on habite nous habite en retour. Ce n'est pas superficiel — c'est profond. Notre environnement immédiat reflète et renforce notre état intérieur. Un espace encombré peut perpétuer un esprit encombré. Un espace soigné peut soutenir une vie soignée. Prendre soin de son espace de vie, c'est une forme de soin de soi souvent négligée. Et au-delà du physique, l'espace de vie inclut aussi l'espace mental — ce qu'on laisse entrer dans sa tête, ce qu'on choisit de ne plus y laisser.",
+    dansLeFlux: "Quand l'espace de vie est sain, tu te sens bien dans l'endroit où tu vis et travailles. Il y a une cohérence entre l'espace et qui tu es. Tu peux te ressourcer chez toi. Il y a de l'ordre sans rigidité — une organisation qui sert ta vie plutôt que de la contraindre.",
+    quandCaResiste: "Quand l'espace de vie est difficile, rentrer chez soi peut être pesant plutôt que ressourçant. Il peut y avoir du chaos accumulé qui reflète un chaos intérieur. Ou un espace stérile qui dit une forme d'abandon de soi. L'espace qu'on habite dit beaucoup sur la relation qu'on entretient avec soi-même.",
+    pratiques: [
+      { titre: "Un espace, un geste", texte: "Choisis un endroit dans ton espace de vie qui te pèse — une pièce, un coin, une pile de choses. Fais un seul geste pour l'améliorer aujourd'hui. Pas tout ranger — juste un geste. Observer comment ça se répercute sur ton état intérieur." },
+      { titre: "Ce que mon espace dit de moi", texte: "Si un inconnu visitait ton espace de vie, qu'est-ce qu'il en déduirait sur toi ? Est-ce que cette image te ressemble ? Est-ce qu'il y a un écart entre qui tu veux être et l'espace qui t'entoure ?" },
+      { titre: "Nettoyer son espace mental", texte: "L'espace mental — ce qu'on consomme, ce à quoi on pense, ce dont on se souvient — est aussi un espace à entretenir. Qu'est-ce que tu laisses entrer dans ton esprit qui l'encombre ? Nouvelles, réseaux, conversations toxiques. Un seul changement cette semaine." },
+    ],
+  },
+  {
+    id: "vitalite",
+    theme: "Vitalité",
+    couleur: "#A8C870",
+    intro: "La vitalité est plus que l'énergie physique — c'est l'élan de vie. Ce sentiment d'être pleinement là, d'avoir envie de quelque chose, de ressentir du plaisir dans ce qu'on fait. Elle se nourrit — par le corps, par le sens, par les relations, par ce qu'on crée. Et elle s'épuise — par l'accumulation du stress, par les compromis sur ce qui compte, par les relations qui prennent sans donner. Connaître ses sources de vitalité et les protéger est l'une des formes les plus concrètes du soin de soi.",
+    dansLeFlux: "Quand la vitalité est présente, il y a une appétence pour la vie — une envie de faire, de créer, d'être avec les autres. Le corps est énergique sans être agité. Tu te lèves avec quelque chose qui t'attend. Il y a une joie de fond, pas toujours de l'excitation — mais une énergie de base qui soutient.",
+    quandCaResiste: "Quand la vitalité s'épuise, tout devient effort. Le matin est lourd. Rien ne semble valoir vraiment la peine. Il peut y avoir une fatigue chronique qui ne part pas avec le repos — parce qu'elle n'est pas seulement physique. Elle est le signe que quelque chose de plus profond est à rééquilibrer.",
+    pratiques: [
+      { titre: "Cartographier ses sources d'énergie", texte: "Fais deux listes. La première : ce qui te donne de l'énergie — activités, personnes, états, moments. La deuxième : ce qui t'en prend. Ce n'est pas pour supprimer tout ce qui fatigue — certaines choses difficiles nourrissent quand même. C'est pour voir clairement l'équilibre." },
+      { titre: "Un acte de soin pour la vitalité", texte: "Choisis une chose concrète — dormir une heure de plus, bouger ton corps, manger quelque chose qui te fait du bien, voir quelqu'un qui te ressource. Un seul geste aujourd'hui. La vitalité se reconstruit geste par geste." },
+      { titre: "Ce qui allume quelque chose", texte: "Pense à la dernière fois où tu t'es senti(e) vraiment vivant(e) — pas euphorique, juste vraiment là et présent(e). Qu'est-ce qui se passait ? Comment reproduire ce contexte, même partiellement, dans ta vie ordinaire ?" },
+    ],
+  },
+];
+
+const ThemesScreen = ({ onBack }) => {
+  const [vue, setVue] = useState("liste");
+  const [themeChoisi, setThemeChoisi] = useState(null);
+  const [recherche, setRecherche] = useState("");
+
+  const themesFiltres = FICHES_THEMES.filter(t =>
+    t.theme.toLowerCase().includes(recherche.toLowerCase())
+  );
+
+  if (vue === "fiche" && themeChoisi) {
+    const t = themeChoisi;
+    const idx = FICHES_THEMES.findIndex(x => x.id === t.id);
+    return (
+      <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+        <button onClick={() => setVue("liste")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Retour</button>
+
+        {/* En-tête */}
+        <div style={{ borderLeft: `3px solid ${t.couleur}88`, paddingLeft: "1.2rem", marginBottom: "2rem" }}>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.2rem,4vw,1.4rem)", color: T.orPale }}>{t.theme}</div>
+        </div>
+
+        {/* Ce que c'est */}
+        <div style={{ marginBottom: "2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${t.couleur}99`, marginBottom: "0.8rem" }}>Ce thème</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}cc`, lineHeight: 2, margin: 0 }}>{t.intro}</p>
+        </div>
+
+        <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${t.couleur}33, transparent)`, margin: "1.5rem 0" }} />
+
+        {/* Dans le flux */}
+        <div style={{ marginBottom: "1.5rem", background: `${t.couleur}08`, border: `1px solid ${t.couleur}22`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: t.couleur, marginBottom: "0.7rem" }}>Dans le flux</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>{t.dansLeFlux}</p>
+        </div>
+
+        {/* Quand ça résiste */}
+        <div style={{ marginBottom: "2rem", background: `${T.brume}08`, border: `1px solid ${T.brume}18`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}77`, marginBottom: "0.7rem" }}>Quand ça résiste</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}99`, lineHeight: 1.9, margin: 0 }}>{t.quandCaResiste}</p>
+        </div>
+
+        <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${t.couleur}33, transparent)`, margin: "0 0 2rem" }} />
+
+        {/* Pratiques */}
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${t.couleur}99`, marginBottom: "1.2rem" }}>Ce que tu peux faire</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {t.pratiques.map((p, i) => (
+            <div key={i} style={{ background: `${T.nuit2}cc`, border: `1px solid ${t.couleur}22`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.couleur, marginBottom: "0.6rem" }}>{p.titre}</div>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>{p.texte}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "3rem" }}>
+          <button onClick={() => idx > 0 && setThemeChoisi(FICHES_THEMES[idx - 1])} disabled={idx === 0}
+            style={{ background: "none", border: `1px solid ${idx === 0 ? T.brume + "22" : t.couleur + "44"}`, borderRadius: "6px", padding: "0.6rem 1.2rem", cursor: idx === 0 ? "default" : "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: idx === 0 ? `${T.brume}33` : t.couleur }}>← Précédent</button>
+          <button onClick={() => idx < FICHES_THEMES.length - 1 && setThemeChoisi(FICHES_THEMES[idx + 1])} disabled={idx === FICHES_THEMES.length - 1}
+            style={{ background: "none", border: `1px solid ${idx === FICHES_THEMES.length - 1 ? T.brume + "22" : t.couleur + "44"}`, borderRadius: "6px", padding: "0.6rem 1.2rem", cursor: idx === FICHES_THEMES.length - 1 ? "default" : "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: idx === FICHES_THEMES.length - 1 ? `${T.brume}33` : t.couleur }}>Suivant →</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Retour</button>
+      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.55em", textTransform: "uppercase", color: `${T.or}66`, marginBottom: "0.5rem" }}>Thèmes intérieurs</div>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}88`, marginBottom: "1.5rem", lineHeight: 1.7 }}>
+        {FICHES_THEMES.length} thèmes — chacun avec une description, deux états, et des pratiques concrètes.
+      </p>
+
+      {/* Recherche */}
+      <input
+        type="text"
+        value={recherche}
+        onChange={e => setRecherche(e.target.value)}
+        placeholder="Rechercher un thème…"
+        style={{ width: "100%", background: `${T.nuit2}cc`, border: `1px solid ${T.brume}22`, borderRadius: "6px", padding: "0.7rem 1rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.aube, outline: "none", marginBottom: "1.5rem", boxSizing: "border-box" }}
+      />
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+        {themesFiltres.map((t, i) => (
+          <div key={t.id} onClick={() => { setThemeChoisi(t); setVue("fiche"); }}
+            style={{ background: `${T.nuit2}cc`, border: `1px solid ${t.couleur}33`, borderLeft: `3px solid ${t.couleur}66`, borderRadius: "6px", padding: "0.9rem 1.1rem", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", animation: `fadeUp 0.4s ease forwards ${0.03 + i * 0.03}s`, opacity: 0 }}>
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.orPale }}>{t.theme}</div>
+            <div style={{ fontFamily: T.sans, fontSize: "0.7rem", color: `${T.brume}44` }}>→</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const PARCOURS = [
   {
     id: "silence-apres",
@@ -7324,7 +7839,14 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   const [porteIdx, setPorteIdx] = useState(Math.max(0, cleActive - 1));
   const [flashEclat, setFlashEclat] = useState(false); // micro-animation éclat
 
-  // Descriptions courtes par Porte — ce qu'elle demande + ce qu'elle ouvre
+  const [showThemesCle, setShowThemesCle] = useState(false);
+
+  // ── THEMES SCREEN ──
+  if (showThemesCle) return (
+    <div style={{ minHeight: "calc(100vh - 120px)", padding: "1.5rem 1.5rem 6rem" }}>
+      <ThemesScreen onBack={() => setShowThemesCle(false)} />
+    </div>
+  );
   const DESCRIPTIONS_PORTES = {
     1:  { demande: "Mettre des mots sur ce qui fait mal.", ouvre: "La capacité de voir sans se perdre dans ce qu'on voit." },
     2:  { demande: "Comprendre d'où viennent tes schémas.", ouvre: "La liberté de ne plus répéter ce qu'on n'a pas choisi." },
@@ -7757,15 +8279,15 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         border: `1px solid ${territoire.couleur}33`, borderRadius: "4px",
         overflow: "hidden",
       }}>
-        {[["pratique", "Pratiques"], ["questions", "Questions"]].map(([id, label]) => (
-          <button key={id} onClick={() => setSection(id)} style={{
+        {[["pratique", "Pratiques"], ["questions", "Questions"], ["themes", "Thèmes"]].map(([id, label]) => (
+          <button key={id} onClick={() => { if (id === "themes") { setShowThemesCle(true); } else setSection(id); }} style={{
             flex: 1, padding: "0.7rem",
             background: section === id ? `${territoire.couleur}22` : "transparent",
             border: "none", cursor: "pointer",
             fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
             letterSpacing: "0.3em", textTransform: "uppercase",
             color: section === id ? territoire.couleur : T.brume,
-            borderRight: id === "pratique" ? `1px solid ${territoire.couleur}33` : "none",
+            borderRight: id !== "themes" ? `1px solid ${territoire.couleur}33` : "none",
             transition: "all 0.2s",
           }}>{label}</button>
         ))}
@@ -8123,7 +8645,10 @@ const LataifScreen = ({ onBack }) => {
 const Evasion = ({ data }) => {
   const [showLataif, setShowLataif] = useState(false);
 
+  const [showThemes, setShowThemes] = useState(false);
+
   if (showLataif) return <LataifScreen onBack={() => setShowLataif(false)} />;
+  if (showThemes) return <ThemesScreen onBack={() => setShowThemes(false)} />;
 
   const [actif, setActif] = useState(0);
   const touchStart = useRef(null);
@@ -8162,16 +8687,11 @@ const Evasion = ({ data }) => {
         overflow: "hidden",
       }}
     >
-      {/* Bouton accès Latâ'if */}
-      <button onClick={() => setShowLataif(true)} style={{
-        position: "absolute", bottom: 100, left: "50%", transform: "translateX(-50%)",
-        zIndex: 20, background: `${T.nuit}cc`, border: `1px solid ${T.or}44`,
-        borderRadius: "20px", padding: "0.5rem 1.4rem",
-        fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
-        letterSpacing: "0.4em", textTransform: "uppercase", color: T.or,
-        cursor: "pointer", backdropFilter: "blur(8px)",
-        WebkitTapHighlightColor: "transparent",
-      }}>✦ Les Latâ'if</button>
+      {/* Boutons accès Latâ'if et Thèmes */}
+      <div style={{ position: "absolute", bottom: 100, left: "50%", transform: "translateX(-50%)", zIndex: 20, display: "flex", gap: "0.75rem" }}>
+        <button onClick={() => setShowLataif(true)} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}44`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.or, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Latâ'if</button>
+        <button onClick={() => setShowThemes(true)} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}33`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.or}cc`, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Thèmes</button>
+      </div>
 
       {/* Vidéo plein écran — pas de loop, enchaînement automatique */}
       <video
