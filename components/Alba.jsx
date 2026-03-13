@@ -5400,14 +5400,14 @@ const getPhotos = (cdv, blessure) => {
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
 const VIDEOS = [
-  { src: "/videos/etoiles.mp4",  legende: "Certaines nuits, le monde entier se tait pour toi.",          label: "Étoiles" },
-  { src: "/videos/caraibe.mp4",  legende: "Il y a des endroits qui te rappellent qui tu es vraiment.",   label: "Caraïbes" },
-  { src: "/videos/vagues.mp4",   legende: "Laisse venir ce qui vient. Laisse partir ce qui part.",        label: "Vagues" },
-  { src: "/videos/desert.mp4",   legende: "Le vide n'est pas un manque. C'est de l'espace.",             label: "Désert" },
-  { src: "/videos/nuages.mp4",   legende: "Tout passe. C'est la seule promesse que la vie tient.",        label: "Nuages" },
-  { src: "/videos/savane2.mp4",  legende: "Tu n'as pas à tout comprendre pour continuer d'avancer.",     label: "Savane" },
-  { src: "/videos/foret.mp4",    legende: "Il existe en toi quelque chose que rien n'a pu abîmer.",       label: "Forêt" },
-  { src: "/videos/savane.mp4",   legende: "Chaque coucher de soleil est une permission de lâcher.",       label: "Crépuscule" },
+  { src: "/videos/miroir-passage.mp4", legende: "La savane sait attendre. Toi aussi.",                     label: "Savane" },
+  { src: "/videos/miroir-gel.mp4",     legende: "L'eau qui tombe ne demande pas la permission.",            label: "Chute d'eau" },
+  { src: "/videos/miroir-fond.mp4",    legende: "Tout passe. C'est la seule promesse que la vie tient.",    label: "Nuages" },
+  { src: "/videos/miroir-surchauffe.mp4", legende: "Laisse venir ce qui vient. Laisse partir ce qui part.", label: "Océan" },
+  { src: "/videos/etoiles.mp4",        legende: "Certaines nuits, le monde entier se tait pour toi.",       label: "Étoiles" },
+  { src: "/videos/nuages.mp4",         legende: "Il existe en toi quelque chose que rien n'a pu abîmer.",   label: "Ciel" },
+  { src: "/videos/foret.mp4",          legende: "La forêt n'explique pas sa lumière.",                      label: "Forêt" },
+  { src: "/videos/vagues.mp4",         legende: "L'océan reçoit tout, retient rien.",                       label: "Vagues" },
 ];
 
 // ─── TERRITOIRES DES CLÉS ─────────────────────────────────────────────────────
@@ -6682,178 +6682,137 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
 };
 
 const Evasion = ({ data }) => {
-  const cdv = cheminDeVie(data.naissance);
-  const { blessure } = getContextProfil(data);
-  const { all, categorie } = getPhotos(cdv, blessure.nom);
-  const [mode, setMode] = useState("video"); // "photo" | "video"
   const [actif, setActif] = useState(0);
-  const [loaded, setLoaded] = useState({});
   const touchStart = useRef(null);
-  const videoRef = useRef(null);
-
-  const items = mode === "video" ? VIDEOS : all;
-  const item = items[actif] || items[0];
+  const item = VIDEOS[actif] || VIDEOS[0];
 
   const navigate = (dir) => {
-    setActif(a => (a + dir + items.length) % items.length);
+    setActif(a => (a + dir + VIDEOS.length) % VIDEOS.length);
   };
 
   const handleTouchStart = (e) => { touchStart.current = e.touches[0].clientX; };
   const handleTouchEnd = (e) => {
     if (!touchStart.current) return;
     const diff = touchStart.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+    if (Math.abs(diff) > 40) navigate(diff > 0 ? 1 : -1);
     touchStart.current = null;
   };
 
-  const catLabel = {
-    puissance: "Puissance", douceur: "Douceur", liberte: "Liberté",
-    ancrage: "Ancrage", mystere: "Mystère", savane: "Savane",
-    mer: "Mer & Caraïbes", aube: "Aube", resilience: "Résilience",
-  };
-
   return (
-    <div style={{ padding: "0 0 6rem" }}>
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        position: "fixed", inset: 0,
+        background: T.nuit,
+        zIndex: 10,
+        overflow: "hidden",
+      }}
+    >
+      {/* Vidéo plein écran */}
+      <video
+        key={item.src}
+        autoPlay loop muted playsInline
+        style={{
+          position: "absolute", inset: 0,
+          width: "100%", height: "100%",
+          objectFit: "cover",
+        }}
+      >
+        <source src={item.src} type="video/mp4"/>
+      </video>
 
-      {/* ── HEADER ── */}
-      <div style={{ padding: "1.5rem 1.5rem 1rem", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-        <div>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.55em", textTransform: "uppercase", color: T.brume, marginBottom: "0.3rem" }}>
-            Évasion · {mode === "video" ? "Ambiances" : catLabel[categorie] || ""}
-          </div>
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.3rem", color: T.orPale }}>
-            Laisse-les simplement être là.
-          </div>
-        </div>
-        {/* Toggle Photo / Vidéo */}
-        <div style={{ display: "flex", gap: "4px", background: T.nuit2, borderRadius: "20px", padding: "3px" }}>
-          {["video","photo"].map(m => (
-            <button key={m} onClick={() => { setMode(m); setActif(0); }} style={{
-              background: mode === m ? T.or : "transparent",
-              color: mode === m ? "#000" : T.brume,
-              border: "none", borderRadius: "16px",
-              padding: "4px 10px", cursor: "pointer",
-              fontFamily: T.sans, fontWeight: 300,
-              fontSize: "0.6rem", letterSpacing: "0.15em",
-              textTransform: "uppercase", transition: "all 0.25s",
-            }}>{m === "video" ? "Vidéo" : "Photo"}</button>
+      {/* Overlay dégradé bas */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(to top, rgba(8,6,5,0.92) 0%, rgba(8,6,5,0.3) 40%, transparent 70%)",
+        pointerEvents: "none",
+      }}/>
+
+      {/* Overlay haut léger */}
+      <div style={{
+        position: "absolute", top: 0, left: 0, right: 0, height: 120,
+        background: "linear-gradient(to bottom, rgba(8,6,5,0.5) 0%, transparent 100%)",
+        pointerEvents: "none",
+      }}/>
+
+      {/* Label haut */}
+      <div style={{
+        position: "absolute", top: "env(safe-area-inset-top, 20px)",
+        left: 0, right: 0,
+        padding: "1.2rem 1.5rem",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+      }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.5)",
+        }}>Évasion</div>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem",
+          letterSpacing: "0.3em", color: "rgba(255,255,255,0.4)",
+        }}>{actif + 1} / {VIDEOS.length}</div>
+      </div>
+
+      {/* Légende bas */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        padding: "0 1.8rem calc(env(safe-area-inset-bottom, 0px) + 100px)",
+      }}>
+        {/* Nom de l'ambiance */}
+        <div style={{
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem",
+          letterSpacing: "0.5em", textTransform: "uppercase",
+          color: `${T.or}99`, marginBottom: "0.8rem",
+        }}>{item.label}</div>
+
+        {/* Légende poétique */}
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(1.1rem, 4vw, 1.35rem)",
+          color: T.orPale, lineHeight: 1.6,
+          fontWeight: 300,
+          textShadow: "0 2px 12px rgba(0,0,0,0.8)",
+          marginBottom: "2rem",
+        }}>« {item.legende} »</p>
+
+        {/* Points de navigation */}
+        <div style={{ display: "flex", gap: "6px", justifyContent: "center", marginBottom: "0.5rem" }}>
+          {VIDEOS.map((_, i) => (
+            <div key={i} onClick={() => setActif(i)} style={{
+              width: i === actif ? 20 : 6,
+              height: 6, borderRadius: 3,
+              background: i === actif ? T.or : "rgba(255,255,255,0.3)",
+              transition: "all 0.3s ease",
+              cursor: "pointer",
+            }}/>
           ))}
         </div>
       </div>
 
-      {/* ── VIEWER PRINCIPAL ── */}
-      <div
-        style={{
-          position: "relative", overflow: "hidden",
-          margin: "0 1.5rem", borderRadius: "10px",
-          aspectRatio: "9/16", maxHeight: "70vh",
-          background: T.nuit2,
-          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-        }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* VIDEO */}
-        {mode === "video" && item.src && (
-          <video
-            key={item.src}
-            ref={videoRef}
-            autoPlay loop muted playsInline
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-          >
-            <source src={item.src} type="video/mp4"/>
-          </video>
-        )}
-
-        {/* PHOTO */}
-        {mode === "photo" && item.url && (
-          <img
-            key={actif}
-            src={item.url} alt=""
-            onLoad={() => setLoaded(l => ({...l, [actif]: true}))}
-            style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%", objectFit: "cover",
-              opacity: loaded[actif] ? 1 : 0,
-              transition: "opacity 0.6s ease",
-            }}
-          />
-        )}
-
-        {/* Gradient bas */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: "55%",
-          background: "linear-gradient(to top, rgba(8,6,5,0.96) 0%, rgba(8,6,5,0.4) 55%, transparent 100%)",
-          pointerEvents: "none",
-        }}/>
-
-        {/* Légende */}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "2rem 1.5rem 1.5rem" }}>
-          <p style={{
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "clamp(1rem, 3vw, 1.1rem)",
-            color: T.orPale, lineHeight: 1.7,
-            textShadow: "0 1px 6px rgba(0,0,0,0.7)",
-          }}>« {item.legende} »</p>
-        </div>
-
-        {/* Compteur */}
-        <div style={{ position: "absolute", top: 12, right: 14, fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.3em", color: "rgba(255,255,255,0.5)" }}>
-          {actif + 1} / {items.length}
-        </div>
-
-        {/* Flèches */}
-        <button onClick={() => navigate(-1)} style={{
-          position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-          background: "rgba(0,0,0,0.4)", border: "none", borderRadius: "50%",
-          width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-          backdropFilter: "blur(8px)",
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.aube} strokeWidth="1.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button onClick={() => navigate(1)} style={{
-          position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
-          background: "rgba(0,0,0,0.4)", border: "none", borderRadius: "50%",
-          width: 36, height: 36, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-          backdropFilter: "blur(8px)",
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.aube} strokeWidth="1.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-      </div>
-
-      {/* ── MINIATURES ── */}
-      <div style={{ display: "flex", gap: "0.5rem", margin: "1rem 1.5rem 0", overflowX: "auto", paddingBottom: "0.2rem" }}>
-        {items.map((p, i) => (
-          <button key={i} onClick={() => setActif(i)} style={{
-            flexShrink: 0, width: 56, height: 56, borderRadius: "6px",
-            border: `2px solid ${actif === i ? T.or : "transparent"}`,
-            background: T.nuit2, cursor: "pointer", padding: 0, overflow: "hidden",
-            opacity: actif === i ? 1 : 0.4, transition: "all 0.2s",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            {mode === "photo" && p.url && <img src={p.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }}/>}
-            {mode === "video" && (
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "1.2rem" }}>▶</div>
-                <div style={{ fontFamily: T.sans, fontSize: "0.58rem", color: T.brume, letterSpacing: "0.1em" }}>{p.label}</div>
-              </div>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* ── NOTE PROFIL ── */}
-      <div style={{ margin: "1rem 1.5rem 0", padding: "0.9rem 1.2rem", borderLeft: `2px solid ${T.or}25`, background: T.nuit2, borderRadius: "0 4px 4px 0" }}>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.7 }}>
-          {mode === "photo"
-            ? <>Sélection pour chemin <span style={{ color: T.orPale }}>{cdv}</span> — en traversée de <span style={{ color: T.orPale }}>{blessure.nom.toLowerCase()}</span>.</>
-            : <>Ambiances sonores et visuelles. Laisse le mouvement faire son travail.</>
-          }
-        </p>
-      </div>
+      {/* Flèches latérales discrètes */}
+      <button onClick={() => navigate(-1)} style={{
+        position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)",
+        background: "transparent", border: "none",
+        padding: "1.5rem 1rem", cursor: "pointer",
+      }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <button onClick={() => navigate(1)} style={{
+        position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)",
+        background: "transparent", border: "none",
+        padding: "1.5rem 1rem", cursor: "pointer",
+      }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
     </div>
   );
 };
+
 
 // ─── SOUFFLE ──────────────────────────────────────────────────────────────────
 // ─── SOUFFLE INLINE (pour Profil) ────────────────────────────────────────────
@@ -9942,7 +9901,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
     <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
 
       {/* Vidéo fond très discrète */}
-      <video autoPlay loop muted playsInline style={{
+      <video key={zone} autoPlay loop muted playsInline style={{
         position: "fixed", inset: 0, width: "100%", height: "100%",
         objectFit: "cover", zIndex: 0, opacity: 0.18, pointerEvents: "none",
       }}>
@@ -10845,6 +10804,7 @@ function AlbaInner() {
               {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
               {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
               {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+              {tab === "evasion"   && <Evasion data={userData} />}
               {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
               {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
