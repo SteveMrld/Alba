@@ -5870,6 +5870,14 @@ const CielCairn = ({ userId, db }) => {
   useEffect(() => () => { clearInterval(holdIntervalRef.current); clearTimeout(holdTimerRef.current); }, []);
 
   // ── CIEL (étape 0 et 5) ────────────────────────────────────────────────────
+  // Envol étape 4 — sauvegarde + transition (hook dans le corps, pas dans un if)
+  useEffect(() => {
+    if (etape !== 4) return;
+    sauvegarderPierre();
+    const t = setTimeout(() => setEtape(5), 3000);
+    return () => clearTimeout(t);
+  }, [etape]);
+
   // Étoile filante — apparaît toutes les 12-22s, direction variée
   const [shootingStarActive, setShootingStarActive] = useState(null);
   useEffect(() => {
@@ -6189,12 +6197,6 @@ const CielCairn = ({ userId, db }) => {
 
   // ── ÉTAPE 4 : Envol ────────────────────────────────────────────────────────
   if (etape === 4) {
-    useEffect(() => {
-      sauvegarderPierre();
-      const t = setTimeout(() => setEtape(5), 3000);
-      return () => clearTimeout(t);
-    }, []);
-
     return (
       <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
         {/* Fond wash */}
