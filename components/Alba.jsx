@@ -8619,11 +8619,19 @@ const TROUVAILLES_ALBA = [
   { id:"a17", source:"ALBA", categorie:"musique", titre:"Nuvole Bianche", auteur:"Ludovico Einaudi", pourquoi:"Quand les mots ne viennent plus, cette musique parle à leur place. Un piano, une fenêtre, du temps qui ralentit." },
   { id:"a18", source:"ALBA", categorie:"musique", titre:"Comptine d'un autre été", auteur:"Yann Tiersen", pourquoi:"La mélodie d'Amélie Poulain. Elle contient quelque chose de la mélancolie joyeuse qu'on ressent parfois en regardant par une fenêtre." },
 
+  // Séries
+  { id:"a21", source:"ALBA", categorie:"serie", titre:"The OA", auteur:"Brit Marling & Zal Batmanglij", pourquoi:"Une des séries les plus mystérieuses et spirituellement intenses jamais faites. Des expériences de mort imminente, des dimensions parallèles, la foi comme force physique. Culte, émouvante, inclassable." },
+  { id:"a22", source:"ALBA", categorie:"serie", titre:"Si je ne t'avais pas rencontré", auteur:"Pau Freixas", pourquoi:"Un homme perd sa famille et découvre des univers parallèles où leurs vies ont pris d'autres chemins. Le deuil, l'amour impossible, les réalités alternatives. Très touchant émotionnellement." },
+  { id:"a23", source:"ALBA", categorie:"serie", titre:"Dark", auteur:"Baran bo Odar & Jantje Friese", pourquoi:"Une série allemande d'une densité rare sur le temps, les cycles du destin et les liens familiaux. Brillante, exigeante, qui demande qu'on lui fasse confiance jusqu'au bout." },
+  { id:"a24", source:"ALBA", categorie:"serie", titre:"Tales from the Loop", auteur:"Nathaniel Halpern", pourquoi:"Une série contemplative et poétique, presque méditante. Elle parle de mémoire, de temps, d'amour et de perte dans un monde où la physique quantique fait partie du quotidien. Une ambiance rare." },
+  { id:"a25", source:"ALBA", categorie:"serie", titre:"Devs", auteur:"Alex Garland", pourquoi:"Une mini-série hypnotique sur le déterminisme, le libre arbitre et la perte. Est-ce qu'on choisit vraiment, ou tout est-il déjà écrit ? Philosophique et visuellement envoûtante." },
+  { id:"a26", source:"ALBA", categorie:"serie", titre:"Undone", auteur:"Raphael Bob-Waksberg", pourquoi:"Après un accident, une femme découvre qu'elle peut traverser le temps. Animation artistique unique, introspection profonde, exploration du trauma et de la mémoire. Une série qui ne ressemble à rien." },
+  { id:"a27", source:"ALBA", categorie:"serie", titre:"Station Eleven", auteur:"Patrick Somerville", pourquoi:"Après une pandémie, des humains reconstituent ce qui valait la peine d'être sauvé. Une série sensible sur les liens, la mémoire, la beauté qui survit. Certains épisodes sont bouleversants." },
+
   // Pratiques
   { id:"a19", source:"ALBA", categorie:"pratique", titre:"La cohérence cardiaque", auteur:"David O'Hare", pourquoi:"5 minutes. Trois fois par jour. 5 secondes d'inspiration, 5 secondes d'expiration. Le système nerveux se régule. Ça marche." },
   { id:"a20", source:"ALBA", categorie:"pratique", titre:"Pages du matin", auteur:"Julia Cameron", pourquoi:"Trois pages manuscrites, chaque matin, avant de penser. Pas un journal — un déversoir. La pratique qui libère tout le reste." },
 ];
-
 
 const VISUELS_TROUVAILLES = {
   livre: { bg: ["#1A1208","#2D1F0A"], accent: "#C8A96E",
@@ -9523,6 +9531,54 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
       {/* ── ANNEAUX DU JOUR ── */}
       <AnneauxJour compact={false} />
 
+      {/* ── SESSIONS MIROIR ── trace des conversations récentes ── */}
+      {(() => {
+        try {
+          const sessions = JSON.parse(localStorage.getItem("alba_miroir_sessions") || "{}");
+          const toutes = Object.entries(sessions)
+            .sort(([a], [b]) => b.localeCompare(a))
+            .flatMap(([date, sess]) => sess.map(s => ({ ...s, date })))
+            .slice(0, 5);
+          if (!toutes.length) return null;
+          const total = Object.values(sessions).reduce((n, arr) => n + arr.length, 0);
+          return (
+            <div style={{ margin: "1.5rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.25s", opacity: 0 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.9rem" }}>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume }}>
+                  Sessions Miroir
+                </div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.or}99` }}>
+                  {total} au total
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+                {toutes.map((s, i) => (
+                  <div key={s.id || i} style={{
+                    padding: "0.85rem 1.1rem",
+                    background: `${T.nuit2}CC`,
+                    border: `1px solid ${T.brume}12`,
+                    borderLeft: `2px solid ${T.or}33`,
+                    borderRadius: "4px",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.35rem" }}>
+                      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66` }}>
+                        {new Date(s.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })} · {s.heure}
+                      </div>
+                      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.or}66` }}>
+                        {s.echanges} échange{s.echanges > 1 ? "s" : ""}
+                      </div>
+                    </div>
+                    <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}BB`, lineHeight: 1.6, margin: 0 }}>
+                      « {s.extrait}{s.extrait?.length >= 80 ? "…" : ""} »
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        } catch { return null; }
+      })()}
+
       {/* ── PRÉSENCE ── stats fondues, pas de grille ── */}
       <div style={{ padding: "2rem 1.8rem 0", animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center", borderTop: `1px solid ${T.brume}15`, borderBottom: `1px solid ${T.brume}15`, padding: "1.5rem 0" }}>
@@ -10229,7 +10285,7 @@ const FilDeVie = ({ data, db }) => {
 // ─── LE MIROIR ───────────────────────────────────────────────────────────────
 // Pas un chat. Un reflet. L'utilisateur pose une phrase — ALBA renvoie une seule
 // phrase. Un seul appel API. Pas de suite. Pas de conversation.
-const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
+const Presence = ({ data, onStart, onSessionComplete, onSaveToArdoise, isPremium, onShowPaywall }) => {
   const [texte, setTexte]       = useState("");
   const [reflet, setReflet]     = useState(null);
   const [loading, setLoading]   = useState(false);
@@ -10243,6 +10299,7 @@ const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
   const textareaRef = useRef(null);
   const suiteRef    = useRef(null);
   const bgVideoRef  = useRef(null);
+  const sessionSauvegardee = useRef(false);
 
   // Force rechargement vidéo à chaque changement de zone
   useEffect(() => {
@@ -10336,6 +10393,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
     setConversation([]);
     setSuiteTexte("");
     setQuestionSuite(null);
+    sessionSauvegardee.current = false;
     setTimeout(() => textareaRef.current?.focus(), 100);
   };
 
@@ -10392,6 +10450,26 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
     setLoading(false);
   };
 
+  // Sauvegarder la session Miroir dans localStorage
+  const sauvegarderSession = (conv) => {
+    try {
+      const todayKey = new Date().toISOString().split("T")[0];
+      const sessions = JSON.parse(localStorage.getItem("alba_miroir_sessions") || "{}");
+      if (!sessions[todayKey]) sessions[todayKey] = [];
+      // Garde le premier mot posé + la première réponse ALBA
+      const premierMot = conv.find(m => m.qui === "moi")?.texte || "";
+      const premierReflet = conv.find(m => m.qui === "alba")?.texte || "";
+      sessions[todayKey].push({
+        id: Date.now(),
+        heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+        extrait: premierMot.slice(0, 80),
+        reflet: premierReflet.slice(0, 120),
+        echanges: Math.floor(conv.length / 2),
+      });
+      localStorage.setItem("alba_miroir_sessions", JSON.stringify(sessions));
+    } catch {}
+  };
+
   // Continuer le dialogue
   const continuerDialogue = async () => {
     if (!suiteTexte.trim() || suiteLoading) return;
@@ -10424,7 +10502,15 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       });
       const d = await res.json();
       const reponse = d.content?.[0]?.text?.trim() || "…";
-      setConversation(c => [...c, { qui: "alba", texte: reponse }]);
+      const finalConv = [...newConv, { qui: "alba", texte: reponse }];
+      setConversation(finalConv);
+
+      // À partir de 3 échanges : sauvegarder + générer éclats
+      if (finalConv.length >= 6 && !sessionSauvegardee.current) {
+        sessionSauvegardee.current = true;
+        sauvegarderSession(finalConv);
+        if (onSessionComplete) onSessionComplete();
+      }
     } catch {
       setConversation(c => [...c, { qui: "alba", texte: "Je t'entends." }]);
     }
@@ -10819,17 +10905,36 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
                 }}>
                   Nouvelle session
                 </button>
-                {suiteTexte.trim().length > 0 && (
-                  <button onClick={continuerDialogue} style={{
-                    background: "transparent", border: `1px solid ${T.or}44`,
-                    borderRadius: "20px", padding: "0.45rem 1.2rem",
-                    fontFamily: T.serif, fontStyle: "italic",
-                    fontSize: "0.85rem", color: T.or,
-                    cursor: "pointer", transition: "all 0.2s",
-                  }}>
-                    Envoyer →
-                  </button>
-                )}
+                <div style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
+                  {/* Sauvegarder dans l'Ardoise */}
+                  {conversation.length >= 2 && onSaveToArdoise && (
+                    <button onClick={() => {
+                      const premierMot = conversation.find(m => m.qui === "moi")?.texte || "";
+                      const premierReflet = conversation.find(m => m.qui === "alba")?.texte || "";
+                      const texteArdoise = `Miroir — ${new Date().toLocaleDateString("fr-FR")}\n\n« ${premierMot} »\n\n${premierReflet}`;
+                      onSaveToArdoise(texteArdoise);
+                    }} style={{
+                      background: `${T.or}10`, border: `1px solid ${T.or}33`,
+                      borderRadius: "20px", padding: "0.4rem 0.9rem",
+                      fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
+                      letterSpacing: "0.25em", textTransform: "uppercase",
+                      color: `${T.or}CC`, cursor: "pointer", transition: "all 0.2s",
+                    }}>
+                      ✦ Garder dans l'Ardoise
+                    </button>
+                  )}
+                  {suiteTexte.trim().length > 0 && (
+                    <button onClick={continuerDialogue} style={{
+                      background: "transparent", border: `1px solid ${T.or}44`,
+                      borderRadius: "20px", padding: "0.45rem 1.2rem",
+                      fontFamily: T.serif, fontStyle: "italic",
+                      fontSize: "0.85rem", color: T.or,
+                      cursor: "pointer", transition: "all 0.2s",
+                    }}>
+                      Envoyer →
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -11560,7 +11665,17 @@ function AlbaInner() {
               style={{ padding: "0 0" }}
             >
               {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
-              {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
+              {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} onSessionComplete={() => incrementStat("conversationsTotal")} onSaveToArdoise={(txt) => {
+                  try {
+                    const todayKey = new Date().toISOString().split("T")[0];
+                    const saved = JSON.parse(localStorage.getItem("alba_postits") || "{}");
+                    const nouveau = { id: Date.now(), texte: txt, type: "miroir", heure: new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }) };
+                    saved[todayKey] = [nouveau, ...(saved[todayKey] || [])];
+                    localStorage.setItem("alba_postits", JSON.stringify(saved));
+                    incrementStat("postitsTotal");
+                    goTab("ardoise");
+                  } catch {}
+                }} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
               {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "evasion"   && <Evasion data={userData} />}
               {tab === "sagesses"  && <BibliothequeSagesses cleActive={cleActive} />}
