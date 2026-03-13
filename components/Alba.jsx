@@ -5391,13 +5391,16 @@ const getPhotos = (cdv, blessure) => {
 
 // ─── ÉVASION ──────────────────────────────────────────────────────────────────
 const VIDEOS = [
-  { src: "/videos/miroir-passage.mp4", legende: "La savane sait attendre. Toi aussi.",                      label: "Savane" },
-  { src: "/videos/miroir-gel.mp4",     legende: "L'eau qui tombe ne demande pas la permission.",             label: "Chute d'eau" },
-  { src: "/videos/miroir-fond.mp4",    legende: "Tout passe. C'est la seule promesse que la vie tient.",     label: "Nuages" },
-  { src: "/videos/miroir-surchauffe.mp4", legende: "Laisse venir ce qui vient. Laisse partir ce qui part.", label: "Océan" },
-  { src: "/videos/etoiles.mp4",        legende: "Certaines nuits, le monde entier se tait pour toi.",        label: "Étoiles" },
-  { src: "/videos/foret.mp4",          legende: "La forêt n'explique pas sa lumière.",                       label: "Forêt" },
-  { src: "/videos/vagues.mp4",         legende: "L'océan reçoit tout, retient rien.",                        label: "Vagues" },
+  { src: "/videos/miroir-passage.mp4",  legende: "La savane sait attendre. Toi aussi.",                         label: "Savane" },
+  { src: "/videos/miroir-gel.mp4",      legende: "L'eau qui tombe ne demande pas la permission.",               label: "Chute d'eau" },
+  { src: "/videos/miroir-fond.mp4",     legende: "Tout passe. C'est la seule promesse que la vie tient.",       label: "Nuages" },
+  { src: "/videos/miroir-surchauffe.mp4", legende: "Laisse venir ce qui vient. Laisse partir ce qui part.",    label: "Océan" },
+  { src: "/videos/etoiles.mp4",         legende: "Certaines nuits, le monde entier se tait pour toi.",          label: "Étoiles" },
+  { src: "/videos/foret.mp4",           legende: "La forêt n'explique pas sa lumière.",                         label: "Forêt" },
+  { src: "/videos/vagues.mp4",          legende: "L'océan reçoit tout, retient rien.",                          label: "Vagues" },
+  { src: "/videos/montagne-neige.mp4",  legende: "Le silence des cimes dit ce que les mots n'atteignent pas.",  label: "Montagne" },
+  { src: "/videos/aurore-boreale.mp4",  legende: "Certaines beautés n'existent que pour être contemplées.",     label: "Aurore boréale" },
+  { src: "/videos/lac-montagne.mp4",    legende: "L'eau calme reflète tout. Le mental agité ne voit rien.",     label: "Lac de montagne" },
 ];
 
 // ─── TERRITOIRES DES CLÉS ─────────────────────────────────────────────────────
@@ -5575,7 +5578,7 @@ const TERRITOIRES_CLES = [
   {
     index: 6, nom: "Devenir", symbole: "/pictos/porte-06-devenir.svg", couleur: "#E8D5B0",
     video: "/videos/caraibe.mp4",
-    ambiance: { bg: "#0A1018", accent: "#E8D5B0", texte: "Tu n'arrives pas quelque part. Tu te révèles à toi-même." },
+    ambiance: { bg: "#0A1018", accent: "#E8D5B0", texte: "Il y a un enfant en toi qui n'a jamais eu besoin de devenir quelqu'un. Il était déjà là." },
     souffle: "Tu n'es pas en train de te réparer. Tu es en train de te révéler.",
     questions: [
       "Qui es-tu quand tu n'as plus rien à prouver ?",
