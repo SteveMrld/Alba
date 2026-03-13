@@ -6683,7 +6683,17 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
 const Evasion = ({ data }) => {
   const [actif, setActif] = useState(0);
   const touchStart = useRef(null);
+  const videoRef = useRef(null);
   const item = VIDEOS[actif] || VIDEOS[0];
+
+  // Passe automatiquement à la suivante quand la vidéo se termine
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const onEnded = () => setActif(a => (a + 1) % VIDEOS.length);
+    v.addEventListener("ended", onEnded);
+    return () => v.removeEventListener("ended", onEnded);
+  }, [actif]);
 
   const navigate = (dir) => {
     setActif(a => (a + dir + VIDEOS.length) % VIDEOS.length);
@@ -6708,10 +6718,11 @@ const Evasion = ({ data }) => {
         overflow: "hidden",
       }}
     >
-      {/* Vidéo plein écran */}
+      {/* Vidéo plein écran — pas de loop, enchaînement automatique */}
       <video
         key={item.src}
-        autoPlay loop muted playsInline
+        ref={videoRef}
+        autoPlay muted playsInline
         style={{
           position: "absolute", inset: 0,
           width: "100%", height: "100%",
