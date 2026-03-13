@@ -5934,7 +5934,7 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
 
   // ── CIEL ─────────────────────────────────────────────────────────────────
   const CielView = ({ showNouvelleEtoile }) => (
-    <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden", zIndex: 1 }}>
+    <div style={{ position: "relative", width: "100%", height: "calc(100vh - 3.2rem - 4.8rem)", background: "#030205", overflow: "hidden", zIndex: 1 }}>
       {/* Nébuleuses animées */}
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A55 0%, transparent 70%)", animation: "nebula-drift 20s ease-in-out infinite", pointerEvents: "none" }} />
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 50% 40% at 30% 60%, #0F1A2A33 0%, transparent 60%)", animation: "nebula-drift 28s ease-in-out infinite reverse", pointerEvents: "none" }} />
@@ -6022,12 +6022,12 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
       )}
 
       {/* Compteur + bouton */}
-      <div style={{ position: "fixed", bottom: "calc(5.5rem + env(safe-area-inset-bottom))", left: 0, right: 0, textAlign: "center", zIndex: 20, pointerEvents: "none" }}>
+      <div style={{ position: "absolute", bottom: "3.8rem", left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
         <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}44` }}>
           {offrandes.length + 200} lumières dans ce ciel ce soir
         </p>
       </div>
-      <div style={{ position: "fixed", bottom: "calc(3.2rem + env(safe-area-inset-bottom))", left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 20 }}>
+      <div style={{ position: "absolute", bottom: "0.8rem", left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 20 }}>
         {dejaFaitAujd && etape !== 7 ? (
           <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}BB` }}>
             Ton offrande brille là-haut ce soir.
