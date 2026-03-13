@@ -8706,15 +8706,31 @@ const BibliothequeSagesses = ({ cleActive = 0 }) => {
                     : `${T.nuit}88`,
                   border: `1px solid ${libre ? (isSelected ? T.or + "60" : T.or + "22") : T.brume + "18"}`,
                   borderRadius: "8px",
-                  padding: "1rem 1.2rem",
+                  padding: "0.85rem 1.2rem",
                   cursor: "pointer",
                   transition: "all 0.25s",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  gap: "0.9rem",
                 }}
               >
-                <div>
+                {/* Pastille image */}
+                <div style={{
+                  width: 44, height: 44, borderRadius: "50%",
+                  flexShrink: 0, overflow: "hidden",
+                  border: `1px solid ${libre ? T.or + "33" : T.brume + "18"}`,
+                  background: `${T.nuit}`,
+                  opacity: libre ? 1 : 0.35,
+                }}>
+                  <img
+                    src={`/sagesses/${s.fichier}.jpg`}
+                    alt={s.nom}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    onError={e => { e.target.style.display = "none"; }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
                   <div style={{
                     fontFamily: T.serif,
                     fontSize: "1rem",
