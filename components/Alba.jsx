@@ -3635,10 +3635,11 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const fragmentMémoire = getFragmentMémoire();
 
   const ENTREES = [
-    { id: "presence", label: "Présence",  desc: "Un reflet intérieur",         couleur: "#7B9EA8" },
-    { id: "ardoise",  label: "Ardoise",   desc: "Poser ce qui traverse", couleur: "#C8A96E" },
-    { id: "evasion",  label: "Évasion",   desc: "Un espace de beauté",   couleur: "#9EC8B4" },
-    { id: "souffle",  label: "Souffle",   desc: "Respirer",              couleur: "#D4856A" },
+    { id: "presence",     label: "Miroir",       desc: "Un reflet intérieur",       couleur: "#7B9EA8" },
+    { id: "ardoise",      label: "Ardoise",       desc: "Poser ce qui traverse",     couleur: "#C8A96E" },
+    { id: "evasion",      label: "Évasion",       desc: "Un espace de beauté",       couleur: "#9EC8B4" },
+    { id: "sagesses",     label: "Sagesses",      desc: "Les sagesses du monde",     couleur: "#A89060" },
+    { id: "souffle",      label: "Souffle",       desc: "Respirer",                  couleur: "#D4856A" },
   ];
 
   // Vidéo selon l'heure
@@ -8637,8 +8638,8 @@ const SalleDesTrouvailles = ({ data }) => {
 const SAGESSES = [
   { id: "ikigai", nom: "Ikigai", origine: "Japonais", porteMin: 0, fichier: "ikigai", texte: "Quelqu'un t'a demandé un jour ce que tu voulais faire de ta vie. Tu as peut-être répondu quelque chose de raisonnable. Mais l'Ikigai pose une autre question — quatre en réalité, simultanément : qu'est-ce qui me passionne ? Qu'est-ce que je sais faire vraiment ? Ce que je fais est-il utile au monde ? Puis-je en vivre ? L'Ikigai, c'est le point où ces quatre cercles se rejoignent. Pour certains, il est évident depuis l'enfance. Pour d'autres, il se révèle à cinquante ans, après une crise, après un deuil. Mais il est là. Il a toujours été là." },
   { id: "kintsugi", nom: "Kintsugi", origine: "Japonais", porteMin: 0, fichier: "kintsugi", texte: "Un bol tombe. Se brise en sept morceaux. Dans la plupart des maisons du monde, on jette ou on cache. Au Japon, on prend de la laque mêlée d'or et on réassemble — lentement, soigneusement. Les fractures deviennent les parties les plus visibles. Les plus lumineuses. Il n'y a pas de honte dans ce qui a été brisé. Il y a une histoire. Et cette histoire mérite d'être portée en or. Tu n'as pas à effacer ce qui t'a cassé. Tu peux choisir de le réparer à la vue de tous." },
-  { id: "hygge", nom: "Hygge", origine: "Danois", porteMin: 0, fichier: "hygge", texte: "Ce n'est pas un objet qu'on achète ni un endroit où l'on va. C'est une qualité de présence. Une bougie allumée un soir de novembre. Une conversation qui dure trop longtemps autour d'une table. Un plaid, un livre, la pluie dehors. Les Danois ont un mot pour ce que beaucoup cherchent sans savoir le nommer : cet état où l'on n'a nulle part à être sinon là, avec les gens qu'on aime, dans la lumière douce de l'instant qui suffit." },
-  { id: "sabr", nom: "Sabr", origine: "Arabe", porteMin: 0, fichier: "sabr", texte: "On traduit souvent Sabr par patience. Mais c'est insuffisant. La patience peut être passive, résignée, épuisée. Le Sabr est autre chose — une endurance active, lucide, presque guerrière. C'est tenir debout dans l'épreuve sans perdre la foi dans le mouvement. C'est savoir que la tempête a une durée, même quand on ne voit pas la rive. Dans la tradition soufie, le Sabr n'est pas la soumission à la douleur — c'est la dignité qu'on garde au milieu d'elle." },
+  { id: "hygge", nom: "Hygge", origine: "Danois", porteMin: 1, fichier: "hygge", texte: "Ce n'est pas un objet qu'on achète ni un endroit où l'on va. C'est une qualité de présence. Une bougie allumée un soir de novembre. Une conversation qui dure trop longtemps autour d'une table. Un plaid, un livre, la pluie dehors. Les Danois ont un mot pour ce que beaucoup cherchent sans savoir le nommer : cet état où l'on n'a nulle part à être sinon là, avec les gens qu'on aime, dans la lumière douce de l'instant qui suffit." },
+  { id: "sabr", nom: "Sabr", origine: "Arabe", porteMin: 1, fichier: "sabr", texte: "On traduit souvent Sabr par patience. Mais c'est insuffisant. La patience peut être passive, résignée, épuisée. Le Sabr est autre chose — une endurance active, lucide, presque guerrière. C'est tenir debout dans l'épreuve sans perdre la foi dans le mouvement. C'est savoir que la tempête a une durée, même quand on ne voit pas la rive. Dans la tradition soufie, le Sabr n'est pas la soumission à la douleur — c'est la dignité qu'on garde au milieu d'elle." },
   { id: "wabi-sabi", nom: "Wabi-Sabi", origine: "Japonais", porteMin: 2, fichier: "wabi-sabi", texte: "Une tasse ébréchée. Un visage qui a vieilli. Un jardin que l'automne a défait. L'esthétique japonaise du Wabi-Sabi enseigne que la beauté n'est pas dans la perfection — elle est dans l'impermanence, dans le passage du temps laissé visible, dans ce qui est incomplet parce que la vie l'est aussi. Rien n'est permanent. Rien n'est achevé. Rien n'est parfait. Et c'est exactement pour cette raison que tout peut être beau." },
   { id: "tawakkul", nom: "Tawakkul", origine: "Arabe", porteMin: 2, fichier: "tawakkul", texte: "Il y a un récit qu'on aime dans la tradition islamique : un homme attache son chameau avant de dormir, puis dit 'je fais confiance à Dieu'. Un sage lui répond : 'Attache ton chameau, puis fais confiance à Dieu.' Le Tawakkul n'est pas l'abandon de l'effort — c'est la paix qui suit l'effort. Faire sa part, complètement, honnêtement. Puis lâcher ce qu'on ne peut pas contrôler. Cette frontière entre responsabilité et lâcher-prise est l'une des plus difficiles à trouver. Et l'une des plus libératrices." },
   { id: "ubuntu", nom: "Ubuntu", origine: "Bantou", porteMin: 2, fichier: "ubuntu", texte: "Un anthropologue proposa un jour un jeu à des enfants d'un village africain. Il posa un panier de friandises sous un arbre et dit : le premier arrivé gagne tout. Il s'attendait à voir les enfants courir séparément. Ils se prirent par la main et coururent ensemble. Ils partagèrent. Quand il leur demanda pourquoi, ils répondirent : Ubuntu. Comment l'un d'entre nous pourrait-il être heureux si les autres ne le sont pas ? Je suis parce que nous sommes." },
@@ -8661,8 +8662,161 @@ const SAGESSES = [
 
 const BibliothequeSagesses = ({ cleActive = 0 }) => {
   const [selected, setSelected] = useState(null);
+  const [lockedTap, setLockedTap] = useState(null);
 
   const estDebloquee = (s) => cleActive >= s.porteMin;
+  const debloquees = SAGESSES.filter(s => estDebloquee(s)).length;
+
+  const handleLocked = (s) => {
+    setLockedTap(s.id === lockedTap ? null : s.id);
+    setTimeout(() => setLockedTap(null), 3000);
+  };
+
+  if (selected) {
+    const s = selected;
+    return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 100,
+        background: "#0A0806",
+        display: "flex", flexDirection: "column",
+      }}>
+        <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+          <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
+            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}/>
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: "55%",
+            background: "linear-gradient(to top, #0A0806 0%, transparent 100%)",
+          }}/>
+          <button onClick={() => setSelected(null)} style={{
+            position: "absolute", top: "1.2rem", left: "1.2rem",
+            background: "rgba(10,8,6,0.6)", border: `1px solid ${T.brume}33`,
+            borderRadius: "6px", padding: "0.5rem 0.9rem",
+            color: T.brume, fontFamily: T.sans, fontSize: "0.5rem",
+            letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
+          }}>← Retour</button>
+        </div>
+        <div style={{ padding: "1.5rem 1.5rem 2.5rem", flexShrink: 0 }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
+            {s.origine}
+          </div>
+          <div style={{ fontFamily: T.serif, fontSize: "clamp(1.6rem, 5vw, 2rem)", color: T.orPale, fontStyle: "italic", marginBottom: "1rem", fontWeight: 300 }}>
+            {s.nom}
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.9rem, 3vw, 1rem)", color: T.aube, lineHeight: 1.85, fontWeight: 300 }}>
+            {s.texte}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ paddingBottom: "4rem" }}>
+
+      {/* En-tête */}
+      <div style={{ textAlign: "center", padding: "1.5rem 1.5rem 0.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
+          Bibliothèque
+        </div>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300 }}>
+          Les Sagesses du monde
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.4rem", lineHeight: 1.7 }}>
+          {debloquees} / {SAGESSES.length} débloquées
+        </p>
+      </div>
+
+      {/* Explication du mécanisme */}
+      <div style={{
+        margin: "1rem 1.5rem",
+        padding: "1rem 1.2rem",
+        background: `${T.or}06`,
+        border: `1px solid ${T.or}18`,
+        borderLeft: `3px solid ${T.or}44`,
+        borderRadius: "0 8px 8px 0",
+      }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
+          Comment débloquer
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.8, margin: 0 }}>
+          Chaque action dans ALBA génère des Éclats d'aube — écrire dans l'Ardoise, utiliser le Miroir, pratiquer le Souffle. Quand tu en accumules suffisamment, une nouvelle Porte s'ouvre. Et avec elle, une sagesse.
+        </p>
+      </div>
+
+      {/* Grille */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", padding: "0 2px" }}>
+        {SAGESSES.map(s => {
+          const libre = estDebloquee(s);
+          const showTip = lockedTap === s.id;
+          return (
+            <div key={s.id} onClick={() => libre ? setSelected(s) : handleLocked(s)} style={{
+              position: "relative", aspectRatio: "1/1", overflow: "hidden",
+              cursor: "pointer",
+            }}>
+              <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
+                style={{
+                  width: "100%", height: "100%", objectFit: "cover",
+                  filter: libre ? "none" : "blur(6px) brightness(0.3)",
+                  transition: "filter 0.3s",
+                }}/>
+              <div style={{
+                position: "absolute", inset: 0,
+                background: libre
+                  ? "linear-gradient(to top, rgba(10,8,6,0.75) 0%, transparent 50%)"
+                  : "rgba(10,8,6,0.15)",
+              }}/>
+              {libre ? (
+                <div style={{
+                  position: "absolute", bottom: "0.7rem", left: 0, right: 0,
+                  textAlign: "center",
+                  fontFamily: T.serif, fontStyle: "italic",
+                  fontSize: "clamp(0.85rem, 2.8vw, 1rem)",
+                  color: T.orPale, fontWeight: 300,
+                  textShadow: "0 1px 8px rgba(0,0,0,0.8)",
+                }}>{s.nom}</div>
+              ) : (
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                  padding: "0.8rem",
+                }}>
+                  {showTip ? (
+                    <div style={{
+                      textAlign: "center",
+                      animation: "fadeUp 0.3s ease forwards",
+                    }}>
+                      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: T.orPale, marginBottom: "0.4rem" }}>
+                        {s.nom}
+                      </div>
+                      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.or}88`, lineHeight: 1.7 }}>
+                        S'ouvre à la Porte {s.porteMin}
+                      </div>
+                      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.65rem", color: `${T.brume}99`, marginTop: "0.3rem", lineHeight: 1.6 }}>
+                        Continue d'écrire, de souffler,<br/>de traverser.
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={`${T.or}55`} strokeWidth="1.5">
+                        <rect x="3" y="11" width="18" height="11" rx="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                      <div style={{ fontFamily: T.sans, fontSize: "0.38rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.or}44` }}>
+                        Porte {s.porteMin}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 
   if (selected) {
     const s = selected;
@@ -9094,12 +9248,33 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
         )}
       </div>
 
-      {/* ── BIBLIOTHÈQUE DES SAGESSES ── */}
-      <div style={{ margin: "2rem 0 0", padding: "0 1.5rem", animation: "fadeUp 0.7s ease forwards 0.35s", opacity: 0 }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1rem" }}>
-          Bibliothèque des Sagesses
+      {/* ── SAGESSES — compteur discret ── */}
+      <div style={{
+        margin: "1.5rem 1.5rem 0",
+        padding: "1.1rem 1.4rem",
+        background: `${T.or}06`,
+        border: `1px solid ${T.or}18`,
+        borderRadius: "8px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        animation: "fadeUp 0.7s ease forwards 0.28s", opacity: 0,
+      }}>
+        <div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.4rem" }}>
+            Sagesses débloquées
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "0.3rem" }}>
+            <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.5rem", color: T.orPale }}>{SAGESSES.filter(s => cleActive >= s.porteMin).length}</span>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", color: T.brume }}>/ {SAGESSES.length}</span>
+          </div>
+          {/* Barre */}
+          <div style={{ height: 2, width: 120, background: `${T.brume}25`, borderRadius: 1, marginTop: "0.6rem", overflow: "hidden" }}>
+            <div style={{ height: "100%", background: `linear-gradient(to right, ${T.brume}60, ${T.or})`, borderRadius: 1, width: `${(SAGESSES.filter(s => cleActive >= s.porteMin).length / SAGESSES.length) * 100}%`, transition: "width 1s ease" }}/>
+          </div>
         </div>
-        <BibliothequeSagesses cleActive={cleActive} />
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.25em", color: `${T.or}66`, cursor: "pointer" }}
+          onClick={() => document.querySelector("[data-tab='compagnon']")?.click?.()}>
+          Découvrir →
+        </div>
       </div>
 
       {/* ── LETTRE MENSUELLE ── */}
@@ -10780,6 +10955,7 @@ function AlbaInner() {
               {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
               {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "evasion"   && <Evasion data={userData} />}
+              {tab === "sagesses"  && <BibliothequeSagesses cleActive={cleActive} />}
               {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
               {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
