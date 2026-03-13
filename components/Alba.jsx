@@ -9624,10 +9624,38 @@ const FilDeVie = ({ data, db }) => {
 // phrase. Un seul appel API. Pas de suite. Pas de conversation.
 const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
   const [texte, setTexte]       = useState("");
-  const [reflet, setReflet]     = useState(null);  // la phrase renvoyée
+  const [reflet, setReflet]     = useState(null);
   const [loading, setLoading]   = useState(false);
-  const [phase, setPhase]       = useState("idle"); // idle | writing | listening | revealed | silence
+  const [phase, setPhase]       = useState("idle");
+  const [zone, setZone]         = useState(null); // null | "surchauffe" | "passage" | "gel"
   const textareaRef             = useRef(null);
+
+  const ZONES = [
+    {
+      id: "surchauffe",
+      nom: "La Surchauffe",
+      sous: "Agité · Débordé · Trop plein",
+      img: "/v2/surchauffe.jpg",
+      couleur: "#C87048",
+      system_extra: "L'utilisateur est en état d'hyperactivation — agité, débordé, trop de pensées. ALBA ralentit. Peu de mots. Espace. Pas de questions. Une seule chose à la fois.",
+    },
+    {
+      id: "passage",
+      nom: "Le Passage",
+      sous: "Présent · En contact · Disponible",
+      img: "/v2/passage.jpg",
+      couleur: "#7BA87B",
+      system_extra: "L'utilisateur est dans sa fenêtre de tolérance — présent, disponible. ALBA peut aller un peu plus loin, proposer une nuance, ouvrir doucement.",
+    },
+    {
+      id: "gel",
+      nom: "Le Gel",
+      sous: "Vide · Distant · Figé",
+      img: "/v2/gel.jpg",
+      couleur: "#7898C8",
+      system_extra: "L'utilisateur est en état d'hypoactivation — figé, vide, absent à lui-même. ALBA réchauffe doucement. Présence avant tout. Aucune demande. Juste être là.",
+    },
+  ];
 
   // Premium gate — afficher paywall si non abonné et tentative d'utiliser le Miroir
   const handleEcouterGated = () => {
@@ -9675,7 +9703,16 @@ Exemples du ton juste :
 - "Ce que tu ressens mérite d'exister."
 
 Ta réponse : UNE à DEUX phrases maximum. Courtes. Justes. Mémorables.
-Tu n'es pas Claude. Tu es ALBA.`;
+Tu n'es pas Claude. Tu es ALBA.
+${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.system_extra || ""}` : ""}`;
+
+  const recommencer = () => {
+    setTexte("");
+    setReflet(null);
+    setPhase("idle");
+    setZone(null);
+    setTimeout(() => textareaRef.current?.focus(), 100);
+  };
 
   const ecouter = async () => {
     if (!texte.trim() || loading) return;
@@ -9708,14 +9745,67 @@ Tu n'es pas Claude. Tu es ALBA.`;
     setLoading(false);
   };
 
-  const recommencer = () => {
-    setTexte("");
-    setReflet(null);
-    setPhase("idle");
-    setTimeout(() => textareaRef.current?.focus(), 100);
-  };
-
   const motAttente = ATTENTES[Math.floor(Math.random() * ATTENTES.length)];
+
+  // ── Fenêtre de tolérance — sélection de zone ──────────────────────────────
+  if (!zone) return (
+    <div style={{
+      minHeight: "calc(100vh - 120px)",
+      display: "flex", flexDirection: "column",
+      padding: "2rem 1.5rem 6rem",
+    }}>
+      <div style={{ textAlign: "center", marginBottom: "2.5rem", animation: "fadeUp 0.7s ease forwards" }}>
+        <div style={{
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
+          letterSpacing: "0.55em", textTransform: "uppercase",
+          color: T.brume, marginBottom: "1rem",
+        }}>Le Miroir</div>
+        <div style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(1rem, 3vw, 1.15rem)",
+          color: `${T.brume}cc`, lineHeight: 1.9,
+        }}>Où es-tu en ce moment ?</div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        {ZONES.map((z, i) => (
+          <div key={z.id} onClick={() => { if (!isPremium) { onShowPaywall?.(); return; } setZone(z.id); }} style={{
+            position: "relative", borderRadius: "12px", overflow: "hidden",
+            height: 110, cursor: "pointer",
+            border: `1px solid ${z.couleur}33`,
+            animation: `fadeUp 0.6s ease forwards ${0.1 + i * 0.12}s`, opacity: 0,
+          }}>
+            <img src={z.img} alt={z.nom} style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center",
+            }}/>
+            <div style={{
+              position: "absolute", inset: 0,
+              background: `linear-gradient(90deg, rgba(10,8,6,0.82) 40%, rgba(10,8,6,0.3) 100%)`,
+            }}/>
+            <div style={{
+              position: "absolute", left: 0, top: 0, bottom: 0, width: 4,
+              background: `linear-gradient(to bottom, ${z.couleur}, ${z.couleur}55)`,
+            }}/>
+            <div style={{
+              position: "absolute", left: "1.2rem", top: "50%", transform: "translateY(-50%)",
+            }}>
+              <div style={{
+                fontFamily: T.serif, fontStyle: "italic",
+                fontSize: "clamp(1rem, 3.5vw, 1.15rem)",
+                color: T.orPale, fontWeight: 300, marginBottom: "0.3rem",
+              }}>{z.nom}</div>
+              <div style={{
+                fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem",
+                letterSpacing: "0.25em", color: `${z.couleur}CC`,
+                textTransform: "uppercase",
+              }}>{z.sous}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   // ── Mode Silence (bouton "être là") ──────────────────────────────────────
   if (phase === "silence") return (
