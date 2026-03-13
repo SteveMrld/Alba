@@ -12391,34 +12391,36 @@ TON : Sobre. Dense. Chaque mot pèse. Pas de chaleur artificielle. Une vraie att
 
 // ─── ERROR BOUNDARY ───────────────────────────────────────────────────────────
 class AlbaErrorBoundary extends React.Component {
-  constructor(props) { super(props); this.state = { error: null, stack: "" }; }
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
   static getDerivedStateFromError(err) { return { error: err }; }
   componentDidCatch(err, info) {
-    let profile = "";
-    try { profile = localStorage.getItem("alba_profile") || "null"; } catch {}
-    this.setState({ stack: info?.componentStack || "", profile });
-    console.error("ALBA crash:", err.message, info?.componentStack);
+    console.error("ALBA crash:", err.message);
   }
   render() {
     if (this.state.error) {
       return (
         <div style={{ background:"#1A1714", minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"2rem", fontFamily:"serif", color:"#C8A96E", textAlign:"center" }}>
-          <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>✦</div>
-          <div style={{ fontSize:"1.1rem", fontStyle:"italic", marginBottom:"0.5rem" }}>Alba a rencontré un problème.</div>
-          <div style={{ fontSize:"0.75rem", color:"#7A7060", marginBottom:"1rem", maxWidth:300, lineHeight:1.6 }}>
-            {this.state.error.message}
+          <div style={{ fontSize:"2rem", marginBottom:"1.5rem" }}>✦</div>
+          <div style={{ fontSize:"1.1rem", fontStyle:"italic", marginBottom:"0.8rem" }}>
+            Quelque chose s'est interrompu.
           </div>
-          <div style={{ fontSize:"0.68rem", color:"#5A5040", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
-            {this.state.stack?.split("\n").slice(0,6).join("\n")}
+          <div style={{ fontSize:"0.8rem", color:"#7A7060", marginBottom:"2.5rem", maxWidth:280, lineHeight:1.8, fontStyle:"italic" }}>
+            Ton profil et tes données sont intacts.
           </div>
-          <div style={{ fontSize:"0.68rem", color:"#4A8A5A", marginBottom:"2rem", maxWidth:340, lineHeight:1.5, fontFamily:"monospace", textAlign:"left", whiteSpace:"pre-wrap", wordBreak:"break-all" }}>
-            PROFILE: {this.state.profile}
-          </div>
-          <button onClick={() => {
-            try { localStorage.removeItem("alba_profile"); } catch {}
-            window.location.reload();
-          }} style={{ background:"transparent", border:"1px solid #C8A96E55", borderRadius:"6px", padding:"0.7rem 1.5rem", color:"#C8A96E", cursor:"pointer", fontFamily:"serif", fontStyle:"italic" }}>
-            Réinitialiser et relancer
+          <button
+            onClick={() => this.setState({ error: null })}
+            style={{ background:"#C8A96E22", border:"1px solid #C8A96E66", borderRadius:"6px", padding:"0.85rem 2rem", color:"#C8A96E", cursor:"pointer", fontFamily:"serif", fontStyle:"italic", fontSize:"1rem", marginBottom:"1rem" }}
+          >
+            Revenir à l'application
+          </button>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ background:"transparent", border:"none", color:"#7A706055", cursor:"pointer", fontFamily:"sans-serif", fontSize:"0.65rem", letterSpacing:"0.2em", textTransform:"uppercase", padding:"0.5rem" }}
+          >
+            Recharger la page
           </button>
         </div>
       );
