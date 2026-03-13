@@ -10801,6 +10801,7 @@ const Presence = ({ data, onStart, onSessionComplete, onSaveToArdoise, isPremium
   const [conv, setConv]       = useState([]);
   const [loading, setLoading] = useState(false);
   const [profondeur, setProfondeur] = useState(0);
+  const [invitationPost, setInvitationPost] = useState(null); // invitation contextuelle fin de session
 
   // ── Limite 2 sessions/jour ──
   const getSessionsAujourdHui = () => {
@@ -10894,6 +10895,19 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
         setQuestion(q);
       }
       if (onSessionComplete && finalConv.length >= 4) onSessionComplete();
+      // Générer invitation contextuelle si c'est la fin
+      if (estDernier) {
+        try {
+          const convResume = finalConv.map(m => `${m.qui === "moi" ? data.prenom || "Moi" : "ALBA"}: ${m.texte}`).join("\n");
+          const inv = await appeler(
+            [{ role: "user", content: convResume }],
+            80,
+            `\n\nTu es ALBA. À partir de ce qui vient d'être posé dans cette session, propose UNE invitation concrète pour les prochaines 24h. Format : une phrase d'action douce, ancrée dans ce qui a été dit. Commence directement par l'invitation, sans "Je te propose" ni préambule. Ex : "Écris une lettre que tu n'enverras jamais." ou "Aujourd'hui, laisse une chose inachevée."`
+          );
+          setInvitationPost(inv.trim());
+          setPhase("invitation");
+        } catch { setPhase("dialogue"); }
+      }
     } catch(e) {}
     setLoading(false);
   };
@@ -10901,6 +10915,7 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
   const recommencer = () => {
     setPhase("intro"); setTexte(""); setReflet(""); setQuestion("");
     setSuite(""); setConv([]); setLoading(false); setProfondeur(0);
+    setInvitationPost(null);
   };
 
   const css = `
@@ -11009,6 +11024,34 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
           <div key={i} style={{ position:"absolute", top:"50%", left:"50%", width:70, height:70, borderRadius:"50%", border:`1px solid ${T.or}88`, animation:`albaOnde 3s ease-out infinite`, animationDelay:`${i*0.6}s` }} />
         ))}
         <div style={{ position:"absolute", top:"50%", left:"50%", transform:"translate(-50%,-50%)", width:4, height:4, borderRadius:"50%", background:T.or, opacity:0.6 }} />
+      </div>
+    </div>
+  );
+
+  // ── INVITATION POST-SESSION ──
+  if (phase === "invitation") return (
+    <div style={{ ...fond }}>
+      <style>{css}</style>
+      <div style={{ width:"100%", maxWidth:400, textAlign:"center" }}>
+        <div style={{ width:1, height:40, background:`linear-gradient(to bottom, transparent, ${T.or}33, transparent)`, margin:"0 auto 2.5rem", animation:"albaMonte 1s ease forwards" }} />
+        <p style={{ fontFamily:T.sans, fontWeight:300, fontSize:"0.48rem", letterSpacing:"0.55em", textTransform:"uppercase", color:`${T.or}55`, marginBottom:"2rem", animation:"albaMonte 1s ease forwards 0.2s", opacity:0 }}>
+          Une invitation
+        </p>
+        <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"clamp(1.05rem,3.5vw,1.25rem)", color:T.orPale, lineHeight:2.1, marginBottom:"3rem", animation:"albaDev 1.5s ease forwards 0.4s", opacity:0 }}>
+          {invitationPost}
+        </p>
+        <div style={{ width:28, height:1, background:`linear-gradient(to right,transparent,${T.or}33,transparent)`, margin:"0 auto 2.5rem" }} />
+        <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.82rem", color:`${T.brume}88`, lineHeight:1.8, marginBottom:"2.5rem", animation:"albaMonte 1s ease forwards 0.8s", opacity:0 }}>
+          Pour les prochaines 24h, si tu le veux.
+        </p>
+        <div style={{ display:"flex", flexDirection:"column", gap:"0.75rem", alignItems:"center", animation:"albaMonte 1s ease forwards 1s", opacity:0 }}>
+          <button onClick={recommencer} style={{ background:"none", border:`1px solid ${T.or}44`, borderRadius:"20px", padding:"0.6rem 1.8rem", fontFamily:T.sans, fontWeight:300, fontSize:"0.55rem", letterSpacing:"0.4em", textTransform:"uppercase", color:T.or, cursor:"pointer" }}>
+            Une nouvelle session
+          </button>
+          <button onClick={() => setPhase("dialogue")} style={{ background:"none", border:"none", fontFamily:T.serif, fontStyle:"italic", fontSize:"0.82rem", color:`${T.brume}55`, cursor:"pointer", marginTop:"0.3rem" }}>
+            Revenir à l'échange
+          </button>
+        </div>
       </div>
     </div>
   );
