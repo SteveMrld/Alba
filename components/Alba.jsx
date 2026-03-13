@@ -10286,10 +10286,8 @@ const FilDeVie = ({ data, db }) => {
 
 
 // ─── LE MIROIR ───────────────────────────────────────────────────────────────
-// Pas un chat. Un reflet. L'utilisateur pose une phrase — ALBA renvoie une seule
-// phrase. Un seul appel API. Pas de suite. Pas de conversation.
 const Presence = ({ data, onStart, onSessionComplete, onSaveToArdoise, isPremium, onShowPaywall }) => {
-  const [phase, setPhase]     = useState("ecriture");
+  const [phase, setPhase]     = useState("intro");
   const [texte, setTexte]     = useState("");
   const [reflet, setReflet]   = useState("");
   const [question, setQuestion] = useState("");
@@ -10297,6 +10295,24 @@ const Presence = ({ data, onStart, onSessionComplete, onSaveToArdoise, isPremium
   const [conv, setConv]       = useState([]);
   const [loading, setLoading] = useState(false);
   const [profondeur, setProfondeur] = useState(0);
+
+  // ── Limite 2 sessions/jour ──
+  const getSessionsAujourdHui = () => {
+    try {
+      const data = JSON.parse(localStorage.getItem("alba_miroir_quota") || "{}");
+      const today = new Date().toDateString();
+      return data.date === today ? (data.count || 0) : 0;
+    } catch { return 0; }
+  };
+  const incrementerSession = () => {
+    try {
+      const today = new Date().toDateString();
+      const count = getSessionsAujourdHui() + 1;
+      localStorage.setItem("alba_miroir_quota", JSON.stringify({ date: today, count }));
+    } catch {}
+  };
+  const sessionsRestantes = 2 - getSessionsAujourdHui();
+  const quotaAtteint = sessionsRestantes <= 0;
 
   const prenom = (data && data.prenom) ? data.prenom : "toi";
 
@@ -10325,6 +10341,7 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
     setLoading(true);
     setPhase("latence");
     if (onStart) onStart();
+    incrementerSession();
     await new Promise(r => setTimeout(r, 2000));
     try {
       const phrase = await appeler([{ role: "user", content: texte.trim() }], 120);
@@ -10376,7 +10393,7 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
   };
 
   const recommencer = () => {
-    setPhase("ecriture"); setTexte(""); setReflet(""); setQuestion("");
+    setPhase("intro"); setTexte(""); setReflet(""); setQuestion("");
     setSuite(""); setConv([]); setLoading(false); setProfondeur(0);
   };
 
@@ -10393,6 +10410,54 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
     alignItems: "center", justifyContent: "center",
     padding: "2rem 1.5rem",
   };
+
+  // ── INTRO ──
+  if (phase === "intro") return (
+    <div style={fond}>
+      <style>{css}</style>
+      <div style={{ width:"100%", maxWidth:400, textAlign:"center" }}>
+        <div style={{ marginBottom:"2.5rem", animation:"albaMonte 1s ease forwards" }}>
+          <div style={{ width:1, height:48, background:`linear-gradient(to bottom, transparent, ${T.or}44, transparent)`, margin:"0 auto 2rem" }} />
+          <p style={{ fontFamily:T.sans, fontWeight:300, fontSize:"0.5rem", letterSpacing:"0.5em", textTransform:"uppercase", color:`${T.or}66`, marginBottom:"0.5rem" }}>LE MIROIR</p>
+        </div>
+        <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"clamp(1.05rem,3.5vw,1.2rem)", color:T.orPale, lineHeight:2.1, marginBottom:"1.5rem", animation:"albaMonte 1s ease forwards 0.3s", opacity:0 }}>
+          Pose ce que tu portes. Une phrase, un mot, ce qui est là maintenant.
+        </p>
+        <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"clamp(0.9rem,3vw,1rem)", color:`${T.brume}77`, lineHeight:2, marginBottom:"0.8rem", animation:"albaMonte 1s ease forwards 0.6s", opacity:0 }}>
+          ALBA ne répond pas. Elle reflète. Tu verras tes propres mots sous un autre angle — ce que tu n'arrivais pas à voir seul.
+        </p>
+        <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"clamp(0.9rem,3vw,1rem)", color:`${T.brume}77`, lineHeight:2, marginBottom:"2.5rem", animation:"albaMonte 1s ease forwards 0.8s", opacity:0 }}>
+          Ce que tu poses ici sera gardé dans ton Ardoise, pour y revenir.
+        </p>
+        {quotaAtteint ? (
+          <div style={{ animation:"albaMonte 1s ease forwards 1s", opacity:0 }}>
+            <div style={{ width:28, height:1, background:`linear-gradient(to right,transparent,${T.or}33,transparent)`, margin:"0 auto 1.5rem" }} />
+            <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.9rem", color:`${T.brume}55`, lineHeight:1.9 }}>
+              Tu as utilisé tes deux sessions d'aujourd'hui.
+            </p>
+            <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:`${T.brume}40`, marginTop:"0.5rem" }}>
+              Reviens ce soir — ou demain matin.
+            </p>
+          </div>
+        ) : (
+          <div style={{ animation:"albaMonte 1s ease forwards 1s", opacity:0 }}>
+            <p style={{ fontFamily:T.sans, fontWeight:300, fontSize:"0.45rem", letterSpacing:"0.35em", textTransform:"uppercase", color:`${T.brume}44`, marginBottom:"1.5rem" }}>
+              {sessionsRestantes === 2 ? "2 sessions disponibles aujourd'hui" : "1 session restante aujourd'hui"}
+            </p>
+            {!isPremium ? (
+              <button onClick={onShowPaywall} style={{ background:"transparent", border:`1px solid ${T.or}44`, borderRadius:"30px", padding:"0.85rem 2.6rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"1rem", color:T.or, cursor:"pointer" }}>
+                ✦ Débloquer le Miroir
+              </button>
+            ) : (
+              <button onClick={() => setPhase("ecriture")} style={{ background:"transparent", border:`1px solid ${T.or}44`, borderRadius:"30px", padding:"0.85rem 2.6rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"1rem", color:T.or, cursor:"pointer" }}>
+                Entrer dans le Miroir
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   // ── ÉCRITURE ──
   if (phase === "ecriture") return (
@@ -10505,17 +10570,25 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
             </div>
           </div>
         ) : (
-          <div style={{ textAlign:"center", marginTop:"2.5rem" }}>
-            <div style={{ width:28, height:1, background:`linear-gradient(to right,transparent,${T.or}33,transparent)`, margin:"0 auto 1.5rem" }} />
-            <button onClick={recommencer} style={{ background:"none", border:`1px solid ${T.brume}22`, borderRadius:"24px", padding:"0.6rem 1.6rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:`${T.brume}66`, cursor:"pointer" }}>
-              Nouvelle session
-            </button>
+          <div style={{ textAlign:"center", marginTop:"2.5rem", animation:"albaMonte 1.2s ease forwards", opacity:0 }}>
+            <div style={{ width:28, height:1, background:`linear-gradient(to right,transparent,${T.or}33,transparent)`, margin:"0 auto 2rem" }} />
+            <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"clamp(0.9rem,3vw,1rem)", color:`${T.brume}66`, lineHeight:2, maxWidth:360, margin:"0 auto 0.8rem" }}>
+              Ce que tu viens de poser est maintenant dans ton Ardoise. Tu peux y revenir à tout moment — c'est une trace, pas une conclusion.
+            </p>
+            <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:`${T.brume}44`, lineHeight:1.9, marginBottom:"2rem" }}>
+              {sessionsRestantes > 0
+                ? `Tu peux ouvrir une nouvelle session ${sessionsRestantes === 2 ? "ce matin ou ce soir" : "ce soir"}.`
+                : "Tu reviens demain. Le Miroir t'attend."}
+            </p>
             {onSaveToArdoise && (
-              <div style={{ marginTop:"0.8rem" }}>
-                <button onClick={() => onSaveToArdoise(`Miroir — ${new Date().toLocaleDateString("fr-FR")}\n\n« ${conv[0]?.texte || ""} »\n\n${reflet}`)} style={{ background:"none", border:"none", fontFamily:T.sans, fontWeight:300, fontSize:"0.44rem", letterSpacing:"0.3em", textTransform:"uppercase", color:`${T.or}55`, cursor:"pointer" }}>
-                  ✦ Garder dans l'Ardoise
-                </button>
-              </div>
+              <button onClick={() => onSaveToArdoise(`Miroir — ${new Date().toLocaleDateString("fr-FR")}\n\n« ${conv[0]?.texte || ""} »\n\n${reflet}`)} style={{ background:"none", border:"none", fontFamily:T.sans, fontWeight:300, fontSize:"0.44rem", letterSpacing:"0.3em", textTransform:"uppercase", color:`${T.or}55`, cursor:"pointer", marginBottom:"1.5rem", display:"block", margin:"0 auto 1.5rem" }}>
+                ✦ Garder dans l'Ardoise
+              </button>
+            )}
+            {sessionsRestantes > 0 && (
+              <button onClick={recommencer} style={{ background:"none", border:`1px solid ${T.brume}22`, borderRadius:"24px", padding:"0.6rem 1.6rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:`${T.brume}55`, cursor:"pointer" }}>
+                Nouvelle session
+              </button>
             )}
           </div>
         )}
