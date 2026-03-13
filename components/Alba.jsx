@@ -11116,7 +11116,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   );
 };
 
-const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey, cleActive = 0 }) => {
+const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey, cleActive = 0, onShowCGU }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const { blessure, hasDual, hasCroissance } = getContextProfil(data);
@@ -11542,6 +11542,19 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             }}>Oui, tout effacer</button>
           </div>
         )}
+      </div>
+
+      {/* ── LIENS LÉGAUX ── */}
+      <div style={{ textAlign: "center", padding: "1.5rem 1.5rem 0", display: "flex", gap: "1.5rem", justifyContent: "center" }}>
+        {[
+          { label: "CGU", action: () => onShowCGU?.() },
+          { label: "Données & vie privée", action: () => onShowCGU?.() },
+          { label: "Mentions légales", action: () => onShowCGU?.() },
+        ].map((l, i) => (
+          <button key={i} onClick={l.action} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}28`, textDecoration: "underline", textDecorationColor: `${T.brume}15` }}>
+            {l.label}
+          </button>
+        ))}
       </div>
 
       {/* ── PANNEAU CHANGEMENT D'INTENTION ── */}
@@ -12882,6 +12895,114 @@ const AideAlba = ({ onClose, onTuto, tab }) => {
 };
 
 
+// ─── CGU & MENTIONS LÉGALES ───────────────────────────────────────────────────
+
+const CGUScreen = ({ onRetour }) => {
+  const [section, setSection] = useState("cgu"); // cgu | mentions | confidentialite
+
+  const SECTIONS = [
+    { id: "cgu",              label: "CGU" },
+    { id: "confidentialite",  label: "Données" },
+    { id: "mentions",         label: "Mentions" },
+  ];
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: T.nuit, zIndex: 200, overflowY: "auto" }}>
+
+      {/* Header */}
+      <div style={{
+        position: "sticky", top: 0, background: `${T.nuit}ee`,
+        backdropFilter: "blur(12px)", borderBottom: `1px solid ${T.brume}15`,
+        padding: "0.9rem 1.2rem", display: "flex", alignItems: "center", gap: "1rem", zIndex: 10,
+      }}>
+        <button onClick={onRetour} style={{ background: "none", border: "none", color: `${T.brume}66`, cursor: "pointer", padding: 0 }}>
+          <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke={`${T.brume}88`} strokeWidth="1.3" strokeLinecap="round">
+            <path d="M19 12H5M10 6l-6 6 6 6"/>
+          </svg>
+        </button>
+        <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "0.95rem", letterSpacing: "0.1em", color: T.orPale }}>
+          Mentions & CGU
+        </div>
+      </div>
+
+      {/* Onglets */}
+      <div style={{ display: "flex", gap: "1px", padding: "1rem 1.2rem 0", borderBottom: `1px solid ${T.brume}10`, marginBottom: "0" }}>
+        {SECTIONS.map(s => (
+          <button key={s.id} onClick={() => setSection(s.id)} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem",
+            letterSpacing: "0.35em", textTransform: "uppercase",
+            color: section === s.id ? T.or : `${T.brume}55`,
+            padding: "0 1rem 0.8rem",
+            borderBottom: `2px solid ${section === s.id ? T.or : "transparent"}`,
+            transition: "all 0.2s",
+          }}>
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Contenu */}
+      <div style={{ padding: "2rem 1.5rem 6rem", maxWidth: 560, margin: "0 auto" }}>
+
+        {section === "cgu" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            <CGUBloc titre="Objet" texte={`ALBA est une application de bien-être intérieur proposée par Jabrilia Éditions. Elle offre un espace privé d'introspection, de présence quotidienne et d'accompagnement personnel.\n\nL'utilisation d'ALBA est soumise aux présentes Conditions Générales d'Utilisation. En accédant à l'application, l'utilisateur reconnaît les avoir lues et acceptées.`} />
+            <CGUBloc titre="Accès et compte" texte={`L'accès à ALBA nécessite la création d'un compte via une adresse email. L'utilisateur est responsable de la confidentialité de ses identifiants.\n\nUn accès gratuit est disponible avec des fonctionnalités limitées. L'accès complet est disponible via abonnement mensuel (9€/mois) ou annuel (79€/an), résiliable à tout moment.`} />
+            <CGUBloc titre="Utilisation" texte={`ALBA est un outil de bien-être personnel. Il ne constitue pas un dispositif médical, thérapeutique ou psychiatrique.\n\nL'utilisateur s'engage à utiliser l'application de manière personnelle et non commerciale. Toute tentative de copie, extraction ou détournement du contenu est interdite.`} />
+            <CGUBloc titre="Résiliation et remboursement" texte={`L'abonnement peut être résilié à tout moment depuis les paramètres de l'application ou en contactant l'équipe.\n\nConformément à la législation européenne, un droit de rétractation de 14 jours s'applique à compter de la souscription, sauf si l'accès aux contenus a déjà été utilisé. Aucun remboursement n'est accordé au-delà de ce délai.`} />
+            <CGUBloc titre="Responsabilité" texte={`Jabrilia Éditions s'efforce d'assurer la continuité du service mais ne peut garantir une disponibilité permanente. ALBA n'est pas responsable des décisions prises par l'utilisateur à la suite de l'utilisation de l'application.\n\nEn cas de détresse psychologique sévère, l'utilisateur est invité à consulter un professionnel de santé qualifié.`} />
+            <CGUBloc titre="Propriété intellectuelle" texte={`L'ensemble des contenus de l'application — textes, gravures, prompts, design, parcours — est la propriété exclusive de Jabrilia Éditions et protégé par le droit d'auteur.\n\nLes sagesses citées appartiennent au patrimoine culturel mondial et sont présentées à des fins éducatives et non commerciales.`} />
+            <CGUBloc titre="Droit applicable" texte={`Les présentes CGU sont soumises au droit français. Tout litige sera soumis aux tribunaux compétents de Paris.\n\nDernière mise à jour : mars 2026.`} />
+          </div>
+        )}
+
+        {section === "confidentialite" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            <CGUBloc titre="Données collectées" texte={`ALBA collecte uniquement les données nécessaires au fonctionnement de l'application :\n\n— Adresse email (authentification)\n— Données de profil renseignées lors de l'onboarding (prénom, date de naissance, intention)\n— Données d'usage anonymisées (progression, éclats, portes)\n\nLes notes de l'Ardoise sont stockées localement sur votre appareil et ne sont pas transmises à nos serveurs.`} />
+            <CGUBloc titre="Utilisation des données" texte={`Vos données sont utilisées exclusivement pour :\n\n— Personnaliser votre expérience dans l'application\n— Générer vos lettres hebdomadaires et votre portrait d'âme\n— Assurer la continuité de votre progression\n\nVos données ne sont jamais vendues, louées ou partagées avec des tiers à des fins publicitaires.`} />
+            <CGUBloc titre="Le Miroir et l'API Claude" texte={`Les sessions du Miroir sont traitées via l'API d'Anthropic (Claude). Les échanges sont transmis de façon sécurisée pour générer les réponses, puis ne sont pas conservés dans nos systèmes.\n\nAnthropic applique sa propre politique de confidentialité pour le traitement des données transitant par son API. Aucune session n'est stockée côté ALBA.`} />
+            <CGUBloc titre="Le Ciel partagé" texte={`Les offrandes déposées dans Le Ciel sont stockées dans notre base de données et visibles par tous les utilisateurs de l'application. Elles sont anonymes — aucun nom ou identifiant n'est associé.\n\nLa géolocalisation (ville uniquement) est optionnelle et ne peut être activée qu'avec votre accord explicite.`} />
+            <CGUBloc titre="Vos droits" texte={`Conformément au RGPD, vous disposez des droits suivants :\n\n— Droit d'accès à vos données\n— Droit de rectification\n— Droit à l'effacement (bouton "Recommencer depuis le début" dans le Profil)\n— Droit à la portabilité\n— Droit d'opposition\n\nPour exercer ces droits : contact@jabrilia.com`} />
+            <CGUBloc titre="Cookies" texte={`ALBA n'utilise pas de cookies publicitaires. Les données de session sont stockées localement via localStorage pour maintenir votre connexion et votre progression.\n\nAucun tracker tiers n'est présent dans l'application.`} />
+          </div>
+        )}
+
+        {section === "mentions" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+            <CGUBloc titre="Éditeur" texte={`Jabrilia Éditions\nMaison d'édition indépendante\n\nDirecteur de publication : Steve Moradel\nEmail : contact@jabrilia.com`} />
+            <CGUBloc titre="Hébergement" texte={`Application hébergée par :\nVercel Inc.\n440 N Barranca Ave #4133\nCovina, CA 91723, États-Unis\nhttps://vercel.com\n\nBase de données :\nSupabase Inc.\nhttps://supabase.com`} />
+            <CGUBloc titre="Intelligence artificielle" texte={`Les fonctionnalités d'ALBA utilisant l'intelligence artificielle (Miroir, Lettres, Transformations poétiques) sont alimentées par l'API Claude d'Anthropic.\n\nAnthropic, PBC\nSan Francisco, Californie, États-Unis\nhttps://anthropic.com`} />
+            <CGUBloc titre="Paiement" texte={`Les paiements sont traités par :\nStripe, Inc.\n354 Oyster Point Blvd\nSouth San Francisco, CA 94080, États-Unis\nhttps://stripe.com\n\nJabrilia Éditions ne stocke aucune donnée bancaire.`} />
+            <CGUBloc titre="Propriété intellectuelle" texte={`© 2025–2026 Jabrilia Éditions. Tous droits réservés.\n\nLe contenu éditorial, les gravures SVG, les textes des Sagesses, les Parcours thématiques et l'ensemble du design de l'application sont la propriété exclusive de Jabrilia Éditions.\n\nToute reproduction, même partielle, est interdite sans autorisation écrite.`} />
+            <CGUBloc titre="Contact" texte={`Pour toute question :\ncontact@jabrilia.com\n\nPour les offres entreprises :\nentreprises@jabrilia.com`} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const CGUBloc = ({ titre, texte }) => (
+  <div>
+    <div style={{
+      fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem",
+      letterSpacing: "0.4em", textTransform: "uppercase",
+      color: `${T.or}77`, marginBottom: "0.7rem",
+    }}>
+      {titre}
+    </div>
+    <p style={{
+      fontFamily: T.serif, fontStyle: "italic",
+      fontSize: "0.85rem", color: `${T.brume}AA`,
+      lineHeight: 1.9, margin: 0, whiteSpace: "pre-line",
+    }}>
+      {texte}
+    </p>
+  </div>
+);
+
+
 // ─── PAGE B2B ENTREPRISES ─────────────────────────────────────────────────────
 
 const PricingB2B = ({ onRetour }) => {
@@ -13291,6 +13412,7 @@ function AlbaInner() {
   const [view, setView] = useState("splash");
   const [showPricing, setShowPricing] = useState(false);
   const [showB2B, setShowB2B] = useState(false);
+  const [showCGU, setShowCGU] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -13669,6 +13791,9 @@ function AlbaInner() {
       <Grain />
       <Horizon />
 
+      {/* ── CGU ── */}
+      {showCGU && <CGUScreen onRetour={() => setShowCGU(false)} />}
+
       {/* ── TUTO ── */}
       {showTuto && <TutoStories onClose={() => setShowTuto(false)} />}
 
@@ -13832,7 +13957,7 @@ function AlbaInner() {
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} />}
+              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} />}
             </motion.div>
           </AnimatePresence>
 
