@@ -1317,7 +1317,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
               {[
                 { icon: "🌊", label: "Le Miroir", desc: "Un reflet renvoyé. Sans jugement. Illimité." },
                 { icon: "✦",  label: "Lettres des Portes", desc: "6 lettres uniques, une par Clé franchie." },
-                { icon: "🌿", label: "Lettre mensuelle", desc: "ALBA t'écrit une fois par mois. Longue. Intime." },
+                { icon: "🌿", label: "Lettre mensuelle", desc: "Une lettre par mois. Longue. Intime." },
               ].map((item, i) => (
                 <div key={i} style={{
                   display: "flex", gap: "0.9rem", alignItems: "flex-start",
@@ -1405,7 +1405,7 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
             {/* Phrase ALBA générée */}
             <div style={{ padding: "0.8rem 1rem", background: `${T.or}08`, border: `1px solid ${T.or}18`, borderRadius: "6px", marginBottom: "1.2rem" }}>
               <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.orPale}EE`, lineHeight: 1.7, margin: 0 }}>
-                "Quelqu'un pense à toi. ALBA t'attend."
+                "Quelqu'un pense à toi."
               </p>
             </div>
 
@@ -1905,7 +1905,7 @@ const TOUR_CARDS = [
       </svg>
     ),
     titre: "Un espace à toi, chaque jour",
-    texte: "ALBA n'est pas une application à consulter. C'est un espace dans lequel tu reviens — le matin, le soir, quand quelque chose traverse. Un endroit qui te connaît et qui s'adapte.",
+    texte: "Ce n'est pas une application à consulter. C'est un espace dans lequel tu reviens — le matin, le soir, quand quelque chose traverse. Un endroit qui te connaît et qui s'adapte.",
     accent: "#C8A96E",
   },
   {
@@ -1938,7 +1938,7 @@ const TOUR_CARDS = [
       </svg>
     ),
     titre: "Un chemin : les six Clés",
-    texte: "ALBA te guide à travers six étapes intérieures — Reconnaître, Comprendre, Ressentir, Lâcher, Recevoir, Devenir. Tu n'avances pas vite. Tu avances juste. Chaque Clé s'ouvre quand tu es prêt(e).",
+    texte: "Six étapes intérieures — Reconnaître, Comprendre, Ressentir, Lâcher, Recevoir, Devenir. Tu n'avances pas vite. Tu avances juste. Chaque Porte s'ouvre quand tu es prêt(e).",
     accent: "#A87BC8",
   },
   {
@@ -1954,7 +1954,7 @@ const TOUR_CARDS = [
       </svg>
     ),
     titre: "Reviens demain",
-    texte: "ALBA construit quelque chose avec toi dans la durée. Pas besoin de tout faire en une fois. Chaque retour laisse une trace. Chaque trace devient un chemin.",
+    texte: "Quelque chose se construit dans la durée. Pas besoin de tout faire en une fois. Chaque retour laisse une trace. Chaque trace devient un chemin.",
     accent: "#C8A96E",
   },
 ];
@@ -3067,7 +3067,7 @@ const Portrait = ({ data, onContinue }) => {
             fontSize: "clamp(1.1rem, 4vw, 1.4rem)",
             color: T.brume, letterSpacing: "0.03em", lineHeight: 1.9,
           }}>
-            Attends un instant.
+            Un instant.
           </p>
           <p style={{
             fontFamily: T.serif, fontStyle: "italic",
@@ -3075,7 +3075,7 @@ const Portrait = ({ data, onContinue }) => {
             color: T.brume, marginTop: "0.3rem",
             ...fade(phase >= 0, 0.6),
           }}>
-            ALBA t'écoute.
+            Quelque chose se tisse.
           </p>
         </div>
 
@@ -5094,7 +5094,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
       );
       const streakActuel = alreadyGreeted ? streak : parseInt(localStorage.getItem("alba_streak") || "1", 10);
 
-      if (joursAbsence >= 14) return "Tu reviens après un long moment. ALBA était là.";
+      if (joursAbsence >= 14) return "Tu reviens après un long moment. Quelque chose t'attendait.";
       if (joursAbsence >= 7)  return "Une semaine. Quelque chose t'a ramené ici.";
       if (joursAbsence >= 3)  return "Tu étais parti quelques jours. Bienvenue.";
       if (joursAbsence >= 2)  return "Tu reviens. Quelque chose t'a ramené ici.";
@@ -6785,7 +6785,7 @@ Pas de formule de clôture. Signe : ALBA`;
             fontSize: "1rem", color: generation ? T.brume : T.or,
             transition: "all 0.3s",
           }}>
-            {generation ? "ALBA écrit…" : isPremium ? "Recevoir la lettre de la semaine" : "✦ Débloquer les Lettres — 9€/mois"}
+            {generation ? "En train d'écrire…" : isPremium ? "Recevoir la lettre de la semaine" : "✦ Débloquer les Lettres — 9€/mois"}
           </button>
           {generation && (
             <p style={{ textAlign: "center", marginTop: "0.8rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume }}>
@@ -11024,7 +11024,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
 
   if (loading) return (
     <div style={{ textAlign: "center", padding: "2rem", color: T.brume, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem" }}>
-      ALBA écrit…
+      En train d'écrire…
     </div>
   );
 
