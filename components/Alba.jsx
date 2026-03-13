@@ -10387,22 +10387,42 @@ Tu n'es pas Claude. Tu es ALBA.`;
     const newConv = [...conversation, { qui: "moi", texte: msgUser }];
     setConversation(newConv);
     setTimeout(() => threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" }), 100);
+    const nouvelleProf = profondeur + 1;
+    const estDernier = nouvelleProf >= 3;
     try {
+      const systemSuite = SYSTEM_MIROIR
+        + "\n\nTu continues le dialogue. Reste dans le reflet. 1-2 phrases max."
+        + (estDernier ? "\n\nC'est le dernier échange de cette session. Conclus avec une phrase qui ferme doucement, sans question. Quelque chose qui peut rester." : "");
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          max_tokens: 150,
-          system: SYSTEM_MIROIR + "\n\nTu continues le dialogue. Reste dans le reflet. 2-3 phrases max.",
+          max_tokens: 120,
+          system: systemSuite,
           messages: newConv.map(m => ({ role: m.qui === "moi" ? "user" : "assistant", content: m.texte })),
         }),
       });
       const d = await res.json();
-      const reponse = d.content?.[0]?.text?.trim() || "…";
+      const reponse = d.content?.[0]?.text?.trim() || "Je t'entends.";
       const finalConv = [...newConv, { qui: "alba", texte: reponse }];
       setConversation(finalConv);
-      setProfondeur(p => p + 1);
-      if (finalConv.length >= 6 && !sessionSauvegardee.current) {
+      setProfondeur(nouvelleProf);
+      if (!estDernier) {
+        // Question de suite seulement sur les 2 premiers échanges
+        const res2 = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            max_tokens: 50,
+            system: SYSTEM_MIROIR + "\n\nPose UNE seule question courte et ouverte. Maximum une phrase.",
+            messages: [...finalConv.map(m => ({ role: m.qui === "moi" ? "user" : "assistant", content: m.texte })), { role: "user", content: "[Question]" }],
+          }),
+        });
+        const d2 = await res2.json();
+        const q = d2.content?.[0]?.text?.trim();
+        if (q) setQuestionSuite(q);
+      }
+      if (!sessionSauvegardee.current && finalConv.length >= 4) {
         sessionSauvegardee.current = true;
         sauvegarderSession(finalConv);
         if (onSessionComplete) onSessionComplete();
@@ -10413,7 +10433,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
     setSuiteLoading(false);
     setTimeout(() => {
       threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
-      suiteRef.current?.focus();
+      if (!estDernier) suiteRef.current?.focus();
     }, 300);
   };
 
@@ -10720,6 +10740,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
         )}
 
         {/* ── Zone de réponse */}
+        {profondeur < 3 && (
         <div style={{ borderTop: `1px solid ${T.brume}12`, paddingTop: "1.5rem" }}>
           <textarea
             ref={suiteRef}
@@ -10776,6 +10797,37 @@ Tu n'es pas Claude. Tu es ALBA.`;
             </div>
           </div>
         </div>
+        )}
+
+        {/* ── Fin de session — après 3 échanges */}
+        {profondeur >= 3 && (
+          <div style={{ textAlign: "center", marginTop: "2.5rem", animation: "refletApparait 1s ease forwards", opacity: 0 }}>
+            <div style={{ width: 30, height: 1, background: `linear-gradient(to right, transparent, ${T.or}33, transparent)`, margin: "0 auto 1.5rem" }} />
+            <button onClick={recommencer} style={{
+              background: "none", border: `1px solid ${T.brume}22`,
+              borderRadius: "24px", padding: "0.6rem 1.6rem",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "0.85rem", color: `${T.brume}66`, cursor: "pointer",
+            }}>
+              Nouvelle session
+            </button>
+            {onSaveToArdoise && conversation.length >= 2 && (
+              <div style={{ marginTop: "0.8rem" }}>
+                <button onClick={() => {
+                  const premierMot = conversation.find(m => m.qui === "moi")?.texte || "";
+                  onSaveToArdoise(`Miroir — ${new Date().toLocaleDateString("fr-FR")}\n\n« ${premierMot} »\n\n${premierReflet}`);
+                }} style={{
+                  background: "none", border: "none",
+                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem",
+                  letterSpacing: "0.3em", textTransform: "uppercase",
+                  color: `${T.or}55`, cursor: "pointer",
+                }}>
+                  ✦ Garder dans l'Ardoise
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
     </div>
