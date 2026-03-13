@@ -1704,6 +1704,205 @@ const AHA_PHRASES = [
   "Il n'y a pas d'erreur dans ce que tu ressens.",
 ];
 
+// ─── DISCOVERY TOUR ──────────────────────────────────────────────────────────
+const TOUR_CARDS = [
+  {
+    icon: (
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#C8A96E" strokeWidth="1.2" strokeLinecap="round">
+        <circle cx="24" cy="24" r="20" strokeOpacity="0.3"/>
+        <path d="M24 14 Q18 19 18 24 Q18 30 24 34 Q30 30 30 24 Q30 19 24 14Z" strokeOpacity="0.8" fill="#C8A96E" fillOpacity="0.08"/>
+        <line x1="24" y1="34" x2="24" y2="40" strokeOpacity="0.5"/>
+        <line x1="20" y1="40" x2="28" y2="40" strokeOpacity="0.3"/>
+      </svg>
+    ),
+    titre: "Un espace à toi, chaque jour",
+    texte: "ALBA n'est pas une application à consulter. C'est un espace dans lequel tu reviens — le matin, le soir, quand quelque chose traverse. Un endroit qui te connaît et qui s'adapte.",
+    accent: "#C8A96E",
+  },
+  {
+    icon: (
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#9EC8B4" strokeWidth="1.2" strokeLinecap="round">
+        <rect x="8" y="10" width="32" height="28" rx="3" strokeOpacity="0.4"/>
+        <line x1="8" y1="20" x2="40" y2="20" strokeOpacity="0.3"/>
+        <rect x="13" y="25" width="8" height="8" rx="1.5" strokeOpacity="0.7" fill="#9EC8B4" fillOpacity="0.1"/>
+        <rect x="27" y="25" width="8" height="8" rx="1.5" strokeOpacity="0.4"/>
+        <line x1="13" y1="14" x2="18" y2="14" strokeOpacity="0.5"/>
+        <line x1="30" y1="14" x2="35" y2="14" strokeOpacity="0.5"/>
+      </svg>
+    ),
+    titre: "Cinq espaces t'attendent",
+    texte: (
+      <span>
+        <span style={{ color: "#7B9EA8" }}>Miroir</span> pour te voir. <span style={{ color: "#C8A96E" }}>Ardoise</span> pour poser ce qui traverse. <span style={{ color: "#9EC8B4" }}>Évasion</span> pour souffler. <span style={{ color: "#A89060" }}>Sagesses</span> pour nourrir ta pensée. Et chaque matin, un <span style={{ color: "#D4856A" }}>Rituel</span> en trois minutes.
+      </span>
+    ),
+    accent: "#9EC8B4",
+  },
+  {
+    icon: (
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#A87BC8" strokeWidth="1.2" strokeLinecap="round">
+        <path d="M24 8 L24 40" strokeOpacity="0.2"/>
+        <circle cx="24" cy="14" r="4" strokeOpacity="0.9" fill="#A87BC8" fillOpacity="0.15"/>
+        <circle cx="24" cy="26" r="4" strokeOpacity="0.5"/>
+        <circle cx="24" cy="38" r="4" strokeOpacity="0.25"/>
+        <path d="M28 14 Q36 14 36 20 Q36 26 28 26" strokeOpacity="0.3"/>
+      </svg>
+    ),
+    titre: "Un chemin : les six Clés",
+    texte: "ALBA te guide à travers six étapes intérieures — Reconnaître, Comprendre, Ressentir, Lâcher, Recevoir, Devenir. Tu n'avances pas vite. Tu avances juste. Chaque Clé s'ouvre quand tu es prêt(e).",
+    accent: "#A87BC8",
+  },
+  {
+    icon: (
+      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#C8A96E" strokeWidth="1.2" strokeLinecap="round">
+        <circle cx="24" cy="24" r="18" strokeOpacity="0.25"/>
+        <path d="M24 10 A14 14 0 0 1 38 24" strokeOpacity="0.9"/>
+        <path d="M38 24 A14 14 0 0 1 24 38" strokeOpacity="0.5"/>
+        <path d="M24 38 A14 14 0 0 1 10 24" strokeOpacity="0.25"/>
+        <circle cx="24" cy="10" r="2.5" fill="#C8A96E" fillOpacity="0.7" stroke="none"/>
+        <line x1="24" y1="24" x2="33" y2="18" strokeOpacity="0.7"/>
+        <circle cx="24" cy="24" r="2" fill="#C8A96E" fillOpacity="0.5" stroke="none"/>
+      </svg>
+    ),
+    titre: "Reviens demain",
+    texte: "ALBA construit quelque chose avec toi dans la durée. Pas besoin de tout faire en une fois. Chaque retour laisse une trace. Chaque trace devient un chemin.",
+    accent: "#C8A96E",
+  },
+];
+
+const DiscoveryTour = ({ onContinue }) => {
+  const [idx, setIdx] = useState(0);
+  const [animDir, setAnimDir] = useState(1);
+  const [visible, setVisible] = useState(true);
+  const touchStart = useRef(null);
+
+  const goTo = (next, dir) => {
+    setVisible(false);
+    setAnimDir(dir);
+    setTimeout(() => { setIdx(next); setVisible(true); }, 220);
+  };
+
+  const handleTouchStart = (e) => { touchStart.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (!touchStart.current) return;
+    const diff = touchStart.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 45) {
+      if (diff > 0 && idx < TOUR_CARDS.length - 1) goTo(idx + 1, 1);
+      else if (diff < 0 && idx > 0) goTo(idx - 1, -1);
+    }
+    touchStart.current = null;
+  };
+
+  const card = TOUR_CARDS[idx];
+  const isLast = idx === TOUR_CARDS.length - 1;
+
+  return (
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      style={{
+        position: "fixed", inset: 0, background: T.nuit,
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        zIndex: 100, padding: "2rem",
+        overflow: "hidden",
+      }}
+    >
+      {/* Halo d'ambiance */}
+      <div style={{
+        position: "absolute", width: 280, height: 280, borderRadius: "50%",
+        background: `radial-gradient(circle, ${card.accent}0A 0%, transparent 70%)`,
+        transition: "background 0.8s ease",
+        pointerEvents: "none",
+      }}/>
+
+      <style>{`
+        @keyframes tourIn  { from { opacity:0; transform: translateX(${animDir > 0 ? "24px" : "-24px"}) } to { opacity:1; transform:translateX(0) } }
+        @keyframes tourOut { from { opacity:1 } to { opacity:0 } }
+      `}</style>
+
+      <div style={{
+        position: "relative", zIndex: 2,
+        width: "100%", maxWidth: 340,
+        animation: visible ? "tourIn 0.35s ease forwards" : "tourOut 0.2s ease forwards",
+        textAlign: "center",
+      }}>
+        {/* Icône */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+          {card.icon}
+        </div>
+
+        {/* Titre */}
+        <h2 style={{
+          fontFamily: T.serif, fontWeight: 300,
+          fontSize: "clamp(1.3rem, 5vw, 1.7rem)",
+          color: T.orPale, letterSpacing: "0.03em",
+          lineHeight: 1.3, margin: "0 0 1.2rem",
+        }}>
+          {card.titre}
+        </h2>
+
+        {/* Texte */}
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "clamp(0.9rem, 3vw, 1.05rem)",
+          color: T.brume, lineHeight: 1.85,
+          margin: "0 0 2.5rem",
+        }}>
+          {card.texte}
+        </p>
+
+        {/* Dots */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "6px", marginBottom: "2.5rem" }}>
+          {TOUR_CARDS.map((_, i) => (
+            <div key={i} onClick={() => goTo(i, i > idx ? 1 : -1)} style={{
+              width: i === idx ? 22 : 6, height: 6, borderRadius: 3,
+              background: i === idx ? card.accent : `${T.brume}33`,
+              transition: "all 0.35s ease", cursor: "pointer",
+            }}/>
+          ))}
+        </div>
+
+        {/* Bouton */}
+        {isLast ? (
+          <button onClick={onContinue} style={{
+            background: "transparent", border: `1px solid ${T.or}66`,
+            borderRadius: "3px", padding: "0.9rem 2.6rem",
+            color: T.orPale, fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1rem", letterSpacing: "0.05em", cursor: "pointer",
+            transition: "border-color 0.3s",
+            WebkitTapHighlightColor: "transparent",
+          }}>
+            Je commence
+          </button>
+        ) : (
+          <button onClick={() => goTo(idx + 1, 1)} style={{
+            background: "transparent", border: `1px solid ${T.brume}44`,
+            borderRadius: "3px", padding: "0.75rem 2rem",
+            color: T.brume, fontFamily: T.sans, fontWeight: 300,
+            fontSize: "0.75rem", letterSpacing: "0.3em", textTransform: "uppercase",
+            cursor: "pointer", transition: "border-color 0.3s",
+            WebkitTapHighlightColor: "transparent",
+          }}>
+            Suivant
+          </button>
+        )}
+
+        {/* Skip */}
+        {!isLast && (
+          <div onClick={onContinue} style={{
+            marginTop: "1.2rem", fontFamily: T.sans, fontWeight: 300,
+            fontSize: "0.55rem", letterSpacing: "0.35em", textTransform: "uppercase",
+            color: `${T.brume}44`, cursor: "pointer",
+          }}>
+            Passer
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AhaMoment = ({ prenom, onContinue }) => {
   const [phase, setPhase] = useState(0);
   const phrase = AHA_PHRASES[Math.floor((prenom.charCodeAt(0) || 0) % AHA_PHRASES.length)];
@@ -1844,6 +2043,7 @@ const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [stepDir, setStepDir] = useState(1);
   const [showAha, setShowAha] = useState(false);
+  const [showTour, setShowTour] = useState(false);
 
   const goNext = (s) => { setStepDir(1); setStep(s); };
   const goBack = (s) => { setStepDir(-1); setStep(s); };
@@ -1944,7 +2144,12 @@ const Onboarding = ({ onComplete }) => {
 
   // ── AHA MOMENT ──────────────────────────────────────────────────────────
   if (showAha) return (
-    <AhaMoment prenom={prenom} onContinue={() => { setShowAha(false); setStep(1); }} />
+    <AhaMoment prenom={prenom} onContinue={() => { setShowAha(false); setShowTour(true); }} />
+  );
+
+  // ── DISCOVERY TOUR ──────────────────────────────────────────────────────────
+  if (showTour) return (
+    <DiscoveryTour onContinue={() => { setShowTour(false); setStep(1); }} />
   );
 
   // ── ÉTAPE 1 — Sensibilité ─────────────────────────────────────────────────
