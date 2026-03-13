@@ -11120,7 +11120,7 @@ const LettreMensuelle = ({ userKey, isPremium, onShowPaywall }) => {
   );
 };
 
-const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey, cleActive = 0, onShowCGU }) => {
+const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onShowPaywall, authUserKey, cleActive = 0, onShowCGU, onShowPricing }) => {
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const { blessure, hasDual, hasCroissance } = getContextProfil(data);
@@ -11549,16 +11549,21 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
       </div>
 
       {/* ── LIENS LÉGAUX ── */}
-      <div style={{ textAlign: "center", padding: "1.5rem 1.5rem 0", display: "flex", gap: "1.5rem", justifyContent: "center" }}>
-        {[
-          { label: "CGU", action: () => onShowCGU?.() },
-          { label: "Données & vie privée", action: () => onShowCGU?.() },
-          { label: "Mentions légales", action: () => onShowCGU?.() },
-        ].map((l, i) => (
-          <button key={i} onClick={l.action} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}66`, textDecoration: "underline", textDecorationColor: `${T.brume}33` }}>
-            {l.label}
-          </button>
-        ))}
+      <div style={{ textAlign: "center", padding: "1.5rem 1.5rem 0" }}>
+        <button onClick={() => onShowPricing?.()} style={{ background: "none", border: `1px solid ${T.or}33`, borderRadius: "20px", padding: "0.6rem 1.5rem", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.or}99`, marginBottom: "1.2rem", display: "block", margin: "0 auto 1.2rem" }}>
+          Abonnement & tarifs
+        </button>
+        <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center" }}>
+          {[
+            { label: "CGU", action: () => onShowCGU?.() },
+            { label: "Données & vie privée", action: () => onShowCGU?.() },
+            { label: "Mentions légales", action: () => onShowCGU?.() },
+          ].map((l, i) => (
+            <button key={i} onClick={l.action} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}66`, textDecoration: "underline", textDecorationColor: `${T.brume}33` }}>
+              {l.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── PANNEAU CHANGEMENT D'INTENTION ── */}
@@ -13417,6 +13422,7 @@ const PricingPage = ({ onCommencer, onRetour, onConnexion, onB2B }) => {
 function AlbaInner() {
   const [view, setView] = useState("splash");
   const [showPricing, setShowPricing] = useState(false);
+  const [showPricingProfil, setShowPricingProfil] = useState(false);
   const [showB2B, setShowB2B] = useState(false);
   const [showCGU, setShowCGU] = useState(false);
   const [authUser, setAuthUser] = useState(null);
@@ -13806,6 +13812,8 @@ function AlbaInner() {
 
       {/* ── CGU ── */}
       {showCGU && <CGUScreen onRetour={() => setShowCGU(false)} />}
+      {/* ── PRICING DEPUIS PROFIL ── */}
+      {showPricingProfil && <PricingPage onCommencer={() => { setShowPricingProfil(false); setShowPaywall(true); }} onRetour={() => setShowPricingProfil(false)} onConnexion={() => setShowPricingProfil(false)} onB2B={() => { setShowPricingProfil(false); setShowB2B(true); }} />}
 
       {/* ── TUTO ── */}
       {showTuto && <TutoStories onClose={() => setShowTuto(false)} />}
@@ -13970,7 +13978,7 @@ function AlbaInner() {
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
-              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} />}
+              {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} onShowPricing={() => setShowPricingProfil(true)} />}
             </motion.div>
           </AnimatePresence>
 
