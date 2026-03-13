@@ -4491,7 +4491,7 @@ const FICHES_THEMES = [
   },
 ];
 
-const ThemesScreen = ({ onBack }) => {
+const ThemesScreen = ({ onBack, isPremium = false, onShowPaywall }) => {
   const [vue, setVue] = useState("liste");
   const [themeChoisi, setThemeChoisi] = useState(null);
   const [recherche, setRecherche] = useState("");
@@ -4534,16 +4534,35 @@ const ThemesScreen = ({ onBack }) => {
 
         <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${t.couleur}33, transparent)`, margin: "0 0 2rem" }} />
 
-        {/* Pratiques */}
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${t.couleur}99`, marginBottom: "1.2rem" }}>Ce que tu peux faire</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {t.pratiques.map((p, i) => (
-            <div key={i} style={{ background: `${T.nuit2}cc`, border: `1px solid ${t.couleur}22`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.couleur, marginBottom: "0.6rem" }}>{p.titre}</div>
-              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>{p.texte}</p>
+        {/* Pratiques — premium gate */}
+        {isPremium ? (
+          <>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${t.couleur}99`, marginBottom: "1.2rem" }}>Ce que tu peux faire</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {t.pratiques.map((p, i) => (
+                <div key={i} style={{ background: `${T.nuit2}cc`, border: `1px solid ${t.couleur}22`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.couleur, marginBottom: "0.6rem" }}>{p.titre}</div>
+                  <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>{p.texte}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        ) : (
+          <div style={{ background: `${T.nuit2}cc`, border: `1px solid ${T.or}33`, borderRadius: "8px", padding: "1.6rem 1.5rem", textAlign: "center" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "1rem" }}>Ce que tu peux faire</div>
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}88`, lineHeight: 1.9, marginBottom: "1.2rem" }}>
+              {t.pratiques.length} pratiques concrètes pour ce thème.<br />
+              <span style={{ fontSize: "0.75rem", color: `${T.brume}55` }}>Réservées aux abonnés ALBA.</span>
+            </div>
+            {/* Aperçu flou du titre de la première pratique */}
+            <div style={{ background: `${T.brume}08`, border: `1px solid ${T.brume}15`, borderRadius: "6px", padding: "0.9rem 1.1rem", marginBottom: "1.2rem", filter: "blur(3px)", userSelect: "none", pointerEvents: "none" }}>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: t.couleur }}>{t.pratiques[0].titre}</div>
+            </div>
+            <button onClick={onShowPaywall} style={{ background: `${T.or}22`, border: `1px solid ${T.or}55`, borderRadius: "6px", padding: "0.75rem 2rem", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.4em", textTransform: "uppercase", color: T.or }}>
+              Accéder aux pratiques
+            </button>
+          </div>
+        )}
 
         {/* Navigation */}
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "3rem" }}>
@@ -7829,7 +7848,7 @@ const CheminDesPortes = ({ progressStats = {}, cleActive = 0, onSelectPorte }) =
   );
 };
 
-const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) => {
+const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {}, isPremium = false, onShowPaywall }) => {
   const [section, setSection] = useState("pratique");
   const [vue, setVue] = useState("chemin"); // "chemin" | "porte"
   const [niveauPratique, setNiveauPratique] = useState(0);
@@ -7844,7 +7863,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   // ── THEMES SCREEN ──
   if (showThemesCle) return (
     <div style={{ minHeight: "calc(100vh - 120px)", padding: "1.5rem 1.5rem 6rem" }}>
-      <ThemesScreen onBack={() => setShowThemesCle(false)} />
+      <ThemesScreen onBack={() => setShowThemesCle(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />
     </div>
   );
   const DESCRIPTIONS_PORTES = {
@@ -8642,13 +8661,13 @@ const LataifScreen = ({ onBack }) => {
   return null;
 };
 
-const Evasion = ({ data }) => {
+const Evasion = ({ data, isPremium = false, onShowPaywall }) => {
   const [showLataif, setShowLataif] = useState(false);
 
   const [showThemes, setShowThemes] = useState(false);
 
   if (showLataif) return <LataifScreen onBack={() => setShowLataif(false)} />;
-  if (showThemes) return <ThemesScreen onBack={() => setShowThemes(false)} />;
+  if (showThemes) return <ThemesScreen onBack={() => setShowThemes(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />;
 
   const [actif, setActif] = useState(0);
   const touchStart = useRef(null);
@@ -12922,9 +12941,10 @@ function AlbaInner() {
                   } catch {}
                 }} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
               {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
-              {tab === "evasion"   && <Evasion data={userData} />}
+              {tab === "evasion"   && <Evasion data={userData} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+
               {tab === "sagesses"  && <BibliothequeSagesses cleActive={cleActive} />}
-              {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} />}
+              {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
               {tab === "lumiere"   && <LumiereDuJour />}
