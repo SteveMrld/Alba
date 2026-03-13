@@ -7583,6 +7583,7 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange
   const [bilan, setBilan] = useState(null);
   const [showBilan, setShowBilan] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const typeActif = POSTIT_TYPES.find(t => t.id === type) || POSTIT_TYPES[0];
   const pressing = useRef(null);
   const pressTimer = useRef(null);
   const [deletingId, setDeletingId] = useState(null);
