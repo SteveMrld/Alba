@@ -12580,9 +12580,209 @@ const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
   );
 };
 
+// ─── PAGE PRICING ────────────────────────────────────────────────────────────
+
+const PricingPage = ({ onCommencer, onRetour, onConnexion }) => {
+  const [plan, setPlan] = useState("annual");
+  const [section, setSection] = useState(0); // pour scroll reveal
+
+  const FONCTIONNALITES_FREE = [
+    "Le Miroir — conversations illimitées",
+    "L'Ardoise — notes quotidiennes",
+    "La Question du jour",
+    "Le Rituel du matin",
+    "Le Souffle guidé",
+    "2 sagesses du monde",
+    "Le Ciel — offrandes partagées",
+  ];
+
+  const FONCTIONNALITES_PREMIUM = [
+    "Tout ce qui est gratuit",
+    "Les 22 Sagesses du monde, progressives",
+    "La Lettre de la semaine — écrite pour toi",
+    "Les Parcours thématiques (7 à 10 jours)",
+    "Les Latâ'if soufis — centres subtils",
+    "Les 28 Thèmes intérieurs avec pratiques",
+    "Ma Clé — les 12 Portes intérieures",
+    "L'Évasion — cinéma contemplatif",
+    "Les Trouvailles — bibliothèque vivante",
+  ];
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, background: T.nuit,
+      overflowY: "auto", zIndex: 100,
+    }}>
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .pricing-appear { animation: fadeSlideUp 0.7s ease forwards; }
+        .pricing-appear-2 { animation: fadeSlideUp 0.7s ease 0.15s forwards; opacity: 0; }
+        .pricing-appear-3 { animation: fadeSlideUp 0.7s ease 0.3s forwards; opacity: 0; }
+        .pricing-appear-4 { animation: fadeSlideUp 0.7s ease 0.45s forwards; opacity: 0; }
+      `}</style>
+
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 1.5rem 6rem" }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.2rem 0", borderBottom: `1px solid ${T.brume}15` }}>
+          <button onClick={onRetour} style={{ background: "none", border: "none", color: `${T.brume}66`, fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", cursor: "pointer", textTransform: "uppercase" }}>
+            ← Retour
+          </button>
+          <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1.2rem", letterSpacing: "0.25em", color: T.or }}>ALBA</div>
+          <button onClick={onConnexion} style={{ background: "none", border: "none", color: `${T.brume}66`, fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", cursor: "pointer", textTransform: "uppercase" }}>
+            Connexion
+          </button>
+        </div>
+
+        {/* Accroche */}
+        <div className="pricing-appear" style={{ textAlign: "center", padding: "3rem 0 2rem" }}>
+          <div style={{ fontSize: "1.2rem", color: T.or, marginBottom: "1.5rem", display: "inline-block" }}>✦</div>
+          <h1 style={{ fontFamily: T.serif, fontWeight: 300, fontStyle: "italic", fontSize: "clamp(1.6rem, 6vw, 2.2rem)", color: T.orPale, lineHeight: 1.5, margin: "0 0 1rem" }}>
+            Un espace intérieur.<br/>Pas une application.
+          </h1>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${T.brume}BB`, lineHeight: 1.9, margin: 0 }}>
+            ALBA t'accompagne dans la durée — le matin, le soir, quand quelque chose traverse. Un miroir. Des mots calibrés. Un espace qui te connaît.
+          </p>
+        </div>
+
+        {/* Ce qu'est ALBA — 3 piliers */}
+        <div className="pricing-appear-2" style={{ display: "flex", flexDirection: "column", gap: "1px", marginBottom: "3rem" }}>
+          {[
+            { titre: "Un miroir", desc: "Pas un thérapeute. Pas un coach. Une présence qui réfléchit ce que tu ne vois pas seul.", symbol: "○" },
+            { titre: "Une pratique", desc: "Chaque jour, quelque chose à poser, à traverser, à respirer. Rien de spectaculaire. Juste du réel.", symbol: "◇" },
+            { titre: "Un ciel commun", desc: "Chaque offrande déposée devient une étoile. Le ciel appartient à tous ceux qui ont traversé.", symbol: "✦" },
+          ].map((p, i) => (
+            <div key={i} style={{ background: `${T.nuit2}88`, border: `1px solid ${T.brume}12`, borderRadius: i === 0 ? "8px 8px 0 0" : i === 2 ? "0 0 8px 8px" : 0, padding: "1.2rem 1.4rem", display: "flex", gap: "1rem", alignItems: "flex-start" }}>
+              <div style={{ color: `${T.or}77`, fontSize: "1rem", marginTop: "0.1rem", flexShrink: 0, width: 20, textAlign: "center" }}>{p.symbol}</div>
+              <div>
+                <div style={{ fontFamily: T.serif, fontSize: "0.95rem", color: T.orPale, marginBottom: "0.3rem" }}>{p.titre}</div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}99`, lineHeight: 1.7 }}>{p.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Séparateur */}
+        <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${T.or}33, transparent)`, marginBottom: "3rem" }} />
+
+        {/* Toggle plan */}
+        <div className="pricing-appear-3">
+          <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}66`, marginBottom: "1.2rem" }}>Choisir un accès</div>
+            <div style={{ display: "inline-flex", background: `${T.nuit2}`, border: `1px solid ${T.brume}20`, borderRadius: "30px", padding: "3px" }}>
+              {[
+                { id: "monthly", label: "Mensuel", price: "9€/mois" },
+                { id: "annual",  label: "Annuel",  price: "79€/an" },
+              ].map(p => (
+                <button key={p.id} onClick={() => setPlan(p.id)} style={{
+                  background: plan === p.id ? `${T.or}22` : "transparent",
+                  border: plan === p.id ? `1px solid ${T.or}44` : "1px solid transparent",
+                  borderRadius: "24px", padding: "0.5rem 1.4rem",
+                  fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
+                  letterSpacing: "0.2em", textTransform: "uppercase",
+                  color: plan === p.id ? T.or : `${T.brume}66`, cursor: "pointer",
+                  transition: "all 0.3s",
+                }}>
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Prix mis en avant */}
+          <div style={{ textAlign: "center", marginBottom: "0.5rem" }}>
+            <span style={{ fontFamily: T.serif, fontSize: "clamp(2.5rem, 10vw, 3.5rem)", color: T.orPale, fontWeight: 300 }}>
+              {plan === "annual" ? "79€" : "9€"}
+            </span>
+            <span style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem", letterSpacing: "0.2em", color: `${T.brume}77`, marginLeft: "0.5rem" }}>
+              {plan === "annual" ? "/ an" : "/ mois"}
+            </span>
+          </div>
+          {plan === "annual" && (
+            <div style={{ textAlign: "center", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.or}88`, marginBottom: "2rem" }}>
+              Soit 6,60€/mois · 2 mois offerts
+            </div>
+          )}
+
+          {/* CTA principal */}
+          <button onClick={onCommencer} style={{
+            width: "100%", padding: "1rem",
+            background: `linear-gradient(135deg, ${T.or}33, ${T.or}18)`,
+            border: `1px solid ${T.or}66`, borderRadius: "6px",
+            color: T.orPale, fontFamily: T.serif, fontStyle: "italic",
+            fontSize: "1.05rem", letterSpacing: "0.04em", cursor: "pointer",
+            transition: "all 0.3s", marginBottom: "0.8rem",
+          }}
+            onMouseOver={e => e.currentTarget.style.background = `linear-gradient(135deg, ${T.or}44, ${T.or}28)`}
+            onMouseOut={e => e.currentTarget.style.background = `linear-gradient(135deg, ${T.or}33, ${T.or}18)`}
+          >
+            Commencer — {plan === "annual" ? "79€ / an" : "9€ / mois"}
+          </button>
+          <p style={{ textAlign: "center", fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.2em", color: `${T.brume}44`, marginBottom: "2.5rem" }}>
+            Résiliable à tout moment · Paiement sécurisé
+          </p>
+
+          {/* Accès gratuit */}
+          <div style={{ background: `${T.nuit2}66`, border: `1px solid ${T.brume}15`, borderRadius: "6px", padding: "1.2rem 1.4rem", marginBottom: "3rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "0.8rem" }}>Accès gratuit inclus</div>
+            {FONCTIONNALITES_FREE.map((f, i) => (
+              <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                <span style={{ color: `${T.brume}55`, fontSize: "0.7rem", marginTop: "0.05rem", flexShrink: 0 }}>·</span>
+                <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}88`, lineHeight: 1.6 }}>{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Ce que débloque l'abonnement */}
+        <div className="pricing-appear-4">
+          <div style={{ background: `linear-gradient(135deg, ${T.or}0D, ${T.nuit2}AA)`, border: `1px solid ${T.or}25`, borderRadius: "8px", padding: "1.6rem 1.4rem", marginBottom: "3rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}77`, marginBottom: "1rem" }}>
+              ✦ Accès complet
+            </div>
+            {FONCTIONNALITES_PREMIUM.map((f, i) => (
+              <div key={i} style={{ display: "flex", gap: "0.7rem", alignItems: "flex-start", marginBottom: "0.6rem" }}>
+                <span style={{ color: `${T.or}88`, fontSize: "0.65rem", marginTop: "0.1rem", flexShrink: 0 }}>✓</span>
+                <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}CC`, lineHeight: 1.6 }}>{f}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Cadeau */}
+          <div style={{ textAlign: "center", padding: "1.5rem", background: `${T.nuit2}55`, border: `1px solid ${T.brume}10`, borderRadius: "8px", marginBottom: "3rem" }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}44`, marginBottom: "0.8rem" }}>Offrir ALBA</div>
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}77`, lineHeight: 1.8, marginBottom: "1rem" }}>
+              Un mois (9€) ou un an (79€).<br/>Pour quelqu'un qui traverse quelque chose.
+            </div>
+            <button onClick={onCommencer} style={{ background: "none", border: `1px solid ${T.brume}25`, borderRadius: "20px", padding: "0.6rem 1.5rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66`, cursor: "pointer" }}>
+              Offrir un accès
+            </button>
+          </div>
+
+          {/* Footer discret */}
+          <div style={{ textAlign: "center", borderTop: `1px solid ${T.brume}10`, paddingTop: "1.5rem" }}>
+            <button onClick={onConnexion} style={{ background: "none", border: "none", fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}44`, cursor: "pointer", marginBottom: "1rem", display: "block", width: "100%", textAlign: "center" }}>
+              J'ai déjà un compte
+            </button>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.15em", color: `${T.brume}33`, lineHeight: 1.8 }}>
+              Sans publicité · Sans données vendues · Sans algorithme
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
 function AlbaInner() {
   const [view, setView] = useState("splash");
+  const [showPricing, setShowPricing] = useState(false);
   const [authUser, setAuthUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -12976,9 +13176,16 @@ function AlbaInner() {
         />
       )}
 
-      {view === "welcome" && (
+      {view === "welcome" && !showPricing && (
         <WelcomeSilencieux
+          onCommencer={() => setShowPricing(true)}
+          onConnexion={() => setView("auth")}
+        />
+      )}
+      {view === "welcome" && showPricing && (
+        <PricingPage
           onCommencer={() => setView("auth")}
+          onRetour={() => setShowPricing(false)}
           onConnexion={() => setView("auth")}
         />
       )}
