@@ -5934,7 +5934,7 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
 
   // ── CIEL ─────────────────────────────────────────────────────────────────
   const CielView = ({ showNouvelleEtoile }) => (
-    <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden" }}>
+    <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden", zIndex: 1 }}>
       {/* Nébuleuses animées */}
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A55 0%, transparent 70%)", animation: "nebula-drift 20s ease-in-out infinite", pointerEvents: "none" }} />
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 50% 40% at 30% 60%, #0F1A2A33 0%, transparent 60%)", animation: "nebula-drift 28s ease-in-out infinite reverse", pointerEvents: "none" }} />
@@ -5968,9 +5968,11 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
             animation: e.twinkleAnim || "none",
             cursor: e.isReal && e.data ? "pointer" : "default",
             transition: "transform 0.2s, font-size 0.2s",
-            zIndex: e.isReal ? 3 : 1,
+            zIndex: e.isReal ? 10 : 1,
             userSelect: "none",
             pointerEvents: e.isReal && e.data ? "auto" : "none",
+            padding: e.isReal && e.data ? "8px" : "0",
+            margin: e.isReal && e.data ? "-8px" : "0",
           }}
           onMouseEnter={ev => { if (e.isReal) ev.currentTarget.style.transform = "translate(-50%, -50%) scale(2)"; }}
           onMouseLeave={ev => { ev.currentTarget.style.transform = "translate(-50%, -50%) scale(1)"; }}
@@ -5992,7 +5994,7 @@ Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait tou
       {/* Popup étoile sélectionnée */}
       {etoileSelectionnee && (
         <div onClick={() => setEtoileSelectionnee(null)} style={{
-          position: "absolute", inset: 0, background: "#030205cc", zIndex: 20,
+          position: "fixed", inset: 0, background: "#030205cc", zIndex: 200,
           display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem",
           backdropFilter: "blur(4px)",
         }}>
