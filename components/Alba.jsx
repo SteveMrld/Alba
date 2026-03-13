@@ -3709,7 +3709,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
             }}
           />
         )}
-
+      </div>
 
       {/* ── RYTHME CIRCADIEN ── */}
       <div style={{
@@ -8662,256 +8662,113 @@ const BibliothequeSagesses = ({ cleActive = 0 }) => {
     setTimeout(() => setLockedTap(null), 3000);
   };
 
-  if (selected) {
-    const s = selected;
-    return (
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 100,
-        background: "#0A0806",
-        display: "flex", flexDirection: "column",
-      }}>
-        <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-          <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
-            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}/>
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: "55%",
-            background: "linear-gradient(to top, #0A0806 0%, transparent 100%)",
-          }}/>
-          <button onClick={() => setSelected(null)} style={{
-            position: "absolute", top: "1.2rem", left: "1.2rem",
-            background: "rgba(10,8,6,0.6)", border: `1px solid ${T.brume}33`,
-            borderRadius: "6px", padding: "0.5rem 0.9rem",
-            color: T.brume, fontFamily: T.sans, fontSize: "0.5rem",
-            letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
-          }}>← Retour</button>
-        </div>
-        <div style={{ padding: "1.5rem 1.5rem 2.5rem", flexShrink: 0 }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
-            {s.origine}
-          </div>
-          <div style={{ fontFamily: T.serif, fontSize: "clamp(1.6rem, 5vw, 2rem)", color: T.orPale, fontStyle: "italic", marginBottom: "1rem", fontWeight: 300 }}>
-            {s.nom}
-          </div>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.9rem, 3vw, 1rem)", color: T.aube, lineHeight: 1.85, fontWeight: 300 }}>
-            {s.texte}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ paddingBottom: "4rem" }}>
+    <div style={{ padding: "0 1rem 4rem" }}>
 
-      {/* En-tête */}
-      <div style={{ textAlign: "center", padding: "1.5rem 1.5rem 0.5rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
-          Bibliothèque
-        </div>
-        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300 }}>
-          Les Sagesses du monde
-        </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.4rem", lineHeight: 1.7 }}>
-          {debloquees} / {SAGESSES.length} débloquées
-        </p>
-      </div>
-
-      {/* Explication du mécanisme */}
+      {/* ── Explication mécanisme ── */}
       <div style={{
-        margin: "1rem 1.5rem",
-        padding: "1rem 1.2rem",
-        background: `${T.or}06`,
-        border: `1px solid ${T.or}18`,
-        borderLeft: `3px solid ${T.or}44`,
-        borderRadius: "0 8px 8px 0",
+        background: `linear-gradient(135deg, ${T.or}12, ${T.or}06)`,
+        border: `1px solid ${T.or}30`,
+        borderRadius: "10px",
+        padding: "1.2rem 1.4rem",
+        marginBottom: "2rem",
       }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
-          Comment débloquer
-        </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.8, margin: 0 }}>
-          Chaque action dans ALBA génère des Éclats d'aube — écrire dans l'Ardoise, utiliser le Miroir, pratiquer le Souffle. Quand tu en accumules suffisamment, une nouvelle Porte s'ouvre. Et avec elle, une sagesse.
+        <p style={{
+          fontFamily: T.serif, fontStyle: "italic",
+          fontSize: "0.88rem", color: T.orPale,
+          lineHeight: 1.8, margin: 0,
+        }}>
+          Chaque action dans ALBA — écrire, souffler, traverser — génère des <strong style={{ fontStyle: "normal", color: T.or }}>Éclats d'aube</strong>. Ces éclats ouvrent les Portes. Chaque Porte déverrouille de nouvelles sagesses du monde.
+        </p>
+        <p style={{
+          fontFamily: T.sans, fontWeight: 300,
+          fontSize: "0.65rem", letterSpacing: "0.2em",
+          textTransform: "uppercase", color: `${T.or}70`,
+          margin: "0.8rem 0 0",
+        }}>
+          {debloquees} / {SAGESSES.length} sagesses déverrouillées
         </p>
       </div>
 
-      {/* Grille */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", padding: "0 2px" }}>
-        {SAGESSES.map(s => {
+      {/* ── Grille des sagesses ── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+        {SAGESSES.map((s) => {
           const libre = estDebloquee(s);
-          const showTip = lockedTap === s.id;
+          const isSelected = selected === s.id;
+          const isLocked = lockedTap === s.id;
           return (
-            <div key={s.id} onClick={() => libre ? setSelected(s) : handleLocked(s)} style={{
-              position: "relative", aspectRatio: "1/1", overflow: "hidden",
-              cursor: "pointer",
-            }}>
-              <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
+            <div key={s.id}>
+              <div
+                onClick={() => libre ? setSelected(isSelected ? null : s.id) : handleLocked(s)}
                 style={{
-                  width: "100%", height: "100%", objectFit: "cover",
-                  filter: libre ? "none" : "blur(6px) brightness(0.3)",
-                  transition: "filter 0.3s",
-                }}/>
-              <div style={{
-                position: "absolute", inset: 0,
-                background: libre
-                  ? "linear-gradient(to top, rgba(10,8,6,0.75) 0%, transparent 50%)"
-                  : "rgba(10,8,6,0.15)",
-              }}/>
-              {libre ? (
+                  background: libre
+                    ? (isSelected ? `${T.or}18` : `${T.nuit2}CC`)
+                    : `${T.nuit}88`,
+                  border: `1px solid ${libre ? (isSelected ? T.or + "60" : T.or + "22") : T.brume + "18"}`,
+                  borderRadius: "8px",
+                  padding: "1rem 1.2rem",
+                  cursor: "pointer",
+                  transition: "all 0.25s",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div style={{
+                    fontFamily: T.serif,
+                    fontSize: "1rem",
+                    color: libre ? T.orPale : `${T.brume}60`,
+                    fontWeight: 300,
+                  }}>{s.nom}</div>
+                  <div style={{
+                    fontFamily: T.sans, fontWeight: 300,
+                    fontSize: "0.6rem", letterSpacing: "0.25em",
+                    textTransform: "uppercase",
+                    color: libre ? `${T.brume}80` : `${T.brume}35`,
+                    marginTop: "0.2rem",
+                  }}>{s.origine}</div>
+                </div>
+                <div style={{ fontSize: "0.85rem", opacity: libre ? 0.7 : 0.3 }}>
+                  {libre ? (isSelected ? "▲" : "▼") : "✦"}
+                </div>
+              </div>
+
+              {/* Tooltip verrouillé */}
+              {isLocked && (
                 <div style={{
-                  position: "absolute", bottom: "0.7rem", left: 0, right: 0,
-                  textAlign: "center",
-                  fontFamily: T.serif, fontStyle: "italic",
-                  fontSize: "clamp(0.85rem, 2.8vw, 1rem)",
-                  color: T.orPale, fontWeight: 300,
-                  textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-                }}>{s.nom}</div>
-              ) : (
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                  padding: "0.8rem",
+                  background: `${T.nuit2}EE`,
+                  border: `1px solid ${T.brume}25`,
+                  borderRadius: "6px",
+                  padding: "0.7rem 1rem",
+                  marginTop: "0.3rem",
+                  fontFamily: T.serif,
+                  fontStyle: "italic",
+                  fontSize: "0.82rem",
+                  color: T.brume,
+                  lineHeight: 1.6,
                 }}>
-                  {showTip ? (
-                    <div style={{
-                      textAlign: "center",
-                      animation: "fadeUp 0.3s ease forwards",
-                    }}>
-                      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: T.orPale, marginBottom: "0.4rem" }}>
-                        {s.nom}
-                      </div>
-                      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.2em", color: `${T.or}88`, lineHeight: 1.7 }}>
-                        S'ouvre à la Porte {s.porteMin}
-                      </div>
-                      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.65rem", color: `${T.brume}99`, marginTop: "0.3rem", lineHeight: 1.6 }}>
-                        Continue d'écrire, de souffler,<br/>de traverser.
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={`${T.or}55`} strokeWidth="1.5">
-                        <rect x="3" y="11" width="18" height="11" rx="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                      </svg>
-                      <div style={{ fontFamily: T.sans, fontSize: "0.38rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.or}44` }}>
-                        Porte {s.porteMin}
-                      </div>
-                    </>
-                  )}
+                  S'ouvre à la Porte {s.porteMin} · Continue d'écrire, de souffler, de traverser.
                 </div>
               )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
 
-
-  if (selected) {
-    const s = selected;
-    return (
-      <div style={{
-        position: "fixed", inset: 0, zIndex: 100,
-        background: "#0A0806",
-        display: "flex", flexDirection: "column",
-      }}>
-        {/* Image plein écran */}
-        <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
-          <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
-            style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.85 }}/>
-          {/* Gradient bas */}
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: "55%",
-            background: "linear-gradient(to top, #0A0806 0%, transparent 100%)",
-          }}/>
-          {/* Bouton retour */}
-          <button onClick={() => setSelected(null)} style={{
-            position: "absolute", top: "1.2rem", left: "1.2rem",
-            background: "rgba(10,8,6,0.6)", border: `1px solid ${T.brume}33`,
-            borderRadius: "6px", padding: "0.5rem 0.9rem",
-            color: T.brume, fontFamily: T.sans, fontSize: "0.5rem",
-            letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer",
-          }}>← Retour</button>
-        </div>
-
-        {/* Texte */}
-        <div style={{ padding: "1.5rem 1.5rem 2.5rem", flexShrink: 0 }}>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}88`, marginBottom: "0.5rem" }}>
-            {s.origine}
-          </div>
-          <div style={{ fontFamily: T.serif, fontSize: "clamp(1.6rem, 5vw, 2rem)", color: T.orPale, fontStyle: "italic", marginBottom: "1rem", fontWeight: 300 }}>
-            {s.nom}
-          </div>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.9rem, 3vw, 1rem)", color: T.aube, lineHeight: 1.85, fontWeight: 300 }}>
-            {s.texte}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const debloquees = SAGESSES.filter(s => estDebloquee(s)).length;
-
-  return (
-    <div style={{ padding: "0 0 4rem" }}>
-      <div style={{ textAlign: "center", padding: "1.5rem 1rem 1rem" }}>
-        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "0.5rem" }}>
-          Bibliothèque
-        </div>
-        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 3.5vw, 1.3rem)", color: T.orPale, fontWeight: 300 }}>
-          Les Sagesses du monde
-        </div>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, marginTop: "0.4rem", lineHeight: 1.7 }}>
-          {debloquees} / 22 débloquées · une sagesse s'ouvre à chaque Porte traversée.
-        </p>
-      </div>
-
-      {/* Grille 2 colonnes */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2px", padding: "0 2px" }}>
-        {SAGESSES.map(s => {
-          const libre = estDebloquee(s);
-          return (
-            <div key={s.id} onClick={() => libre && setSelected(s)} style={{
-              position: "relative", aspectRatio: "1/1", overflow: "hidden",
-              cursor: libre ? "pointer" : "default",
-            }}>
-              <img src={`/sagesses/${s.fichier}.jpg`} alt={s.nom}
-                style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s",
-                  filter: libre ? "none" : "blur(6px) brightness(0.35)",
-                }}/>
-              {/* Gradient */}
-              <div style={{
-                position: "absolute", inset: 0,
-                background: libre
-                  ? "linear-gradient(to top, rgba(10,8,6,0.75) 0%, transparent 50%)"
-                  : "rgba(10,8,6,0.2)",
-              }}/>
-              {libre ? (
-                /* Nom */
+              {/* Texte déplié */}
+              {isSelected && libre && (
                 <div style={{
-                  position: "absolute", bottom: "0.7rem", left: 0, right: 0,
-                  textAlign: "center",
-                  fontFamily: T.serif, fontStyle: "italic",
-                  fontSize: "clamp(0.85rem, 2.8vw, 1rem)",
-                  color: T.orPale, fontWeight: 300,
-                  textShadow: "0 1px 8px rgba(0,0,0,0.8)",
-                }}>{s.nom}</div>
-              ) : (
-                /* Cadenas */
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                  background: `${T.nuit2}AA`,
+                  border: `1px solid ${T.or}18`,
+                  borderTop: "none",
+                  borderRadius: "0 0 8px 8px",
+                  padding: "1.2rem 1.4rem",
                 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={`${T.or}66`} strokeWidth="1.5">
-                    <rect x="3" y="11" width="18" height="11" rx="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                  </svg>
-                  <div style={{
-                    fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em",
-                    textTransform: "uppercase", color: `${T.or}44`,
-                  }}>Porte {s.porteMin + 1}</div>
+                  <p style={{
+                    fontFamily: T.serif,
+                    fontStyle: "italic",
+                    fontSize: "0.92rem",
+                    color: T.aube,
+                    lineHeight: 1.9,
+                    margin: 0,
+                  }}>{s.texte}</p>
                 </div>
               )}
             </div>
