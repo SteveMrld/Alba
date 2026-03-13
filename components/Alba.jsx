@@ -9753,7 +9753,16 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
       minHeight: "calc(100vh - 120px)",
       display: "flex", flexDirection: "column",
       padding: "2rem 1.5rem 6rem",
+      position: "relative",
     }}>
+      {/* Vidéo fond nuages */}
+      <video autoPlay loop muted playsInline style={{
+        position: "fixed", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", zIndex: 0, opacity: 0.15, pointerEvents: "none",
+      }}>
+        <source src="/videos/miroir-fond.mp4" type="video/mp4" />
+      </video>
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", flex: 1 }}>
       <div style={{ textAlign: "center", marginBottom: "2.5rem", animation: "fadeUp 0.7s ease forwards" }}>
         <div style={{
           fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
@@ -9804,10 +9813,11 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
           </div>
         ))}
       </div>
+      </div>
     </div>
   );
 
-  // ── Mode Silence (bouton "être là") ──────────────────────────────────────
+  // ── Mode Silence ──────────────────────────────────────────────────────────
   if (phase === "silence") return (
     <div style={{
       position: "fixed", inset: 0, background: T.nuit, zIndex: 50,
@@ -9855,7 +9865,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
         position: "fixed", inset: 0, width: "100%", height: "100%",
         objectFit: "cover", zIndex: 0, opacity: 0.18, pointerEvents: "none",
       }}>
-        <source src={HEURE < 6 || HEURE >= 21 ? "/videos/etoiles.mp4" : "/videos/nuages.mp4"} type="video/mp4" />
+        <source src={zone === "surchauffe" ? "/videos/miroir-surchauffe.mp4" : zone === "passage" ? "/videos/miroir-passage.mp4" : zone === "gel" ? "/videos/miroir-gel.mp4" : "/videos/miroir-fond.mp4"} type="video/mp4" />
       </video>
 
       <div style={{ position: "relative", zIndex: 1, width: "100%", textAlign: "center" }}>
