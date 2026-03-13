@@ -3470,7 +3470,9 @@ const BarometreNerveux = () => {
             <div style={{ fontSize: "1.1rem", color: etat.couleur }}>{etat.icone}</div>
             <div>
               <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube }}>{etat.label}</div>
-              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${etat.couleur}AA` }}>aujourd'hui</div>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${etat.couleur}AA` }}>
+                aujourd'hui · {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+              </div>
             </div>
             <button onClick={() => { setEtatChoisi(null); setShowDetail(false); try { localStorage.removeItem(storageKey); } catch {} }} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: `${T.brume}55`, fontSize: "0.7rem", fontFamily: T.sans }}>
               changer
@@ -3486,6 +3488,112 @@ const BarometreNerveux = () => {
           </div>
         </div>
       ) : null}
+    </div>
+  );
+};
+
+// ─── ANNEAUX DU JOUR ────────────────────────────────────────────────────────
+const AnneauxJour = ({ compact = false }) => {
+  const todayKey = new Date().toISOString().split("T")[0];
+
+  const actes = (() => {
+    try {
+      const rituel    = localStorage.getItem("alba_rituel_" + todayKey) === "1";
+      const postits   = JSON.parse(localStorage.getItem("alba_postits") || "{}");
+      const ardoise   = (postits[todayKey] || []).filter(p => p.type !== "bilan").length > 0;
+      const bilans    = (postits[todayKey] || []).filter(p => p.type === "bilan").length > 0;
+      const souffle   = parseInt(localStorage.getItem("alba_souffle_" + todayKey) || "0") > 0;
+      const barometre = !!localStorage.getItem("alba_barometre_" + todayKey);
+      return [
+        { label: "Rituel",    fait: rituel,    couleur: "#C8A96E" },
+        { label: "Ardoise",   fait: ardoise,   couleur: "#A89060" },
+        { label: "Baromètre", fait: barometre, couleur: "#7B9EA8" },
+        { label: "Souffle",   fait: souffle,   couleur: "#D4856A" },
+        { label: "Bilan",     fait: bilans,    couleur: "#8A7BA8" },
+      ];
+    } catch { return []; }
+  })();
+
+  const faits = actes.filter(a => a.fait).length;
+  const total = actes.length;
+  const size = compact ? 36 : 52;
+  const stroke = compact ? 3 : 4;
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 120); return () => clearTimeout(t); }, []);
+
+  if (compact) return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.7rem", padding: "0.85rem 1.5rem 0" }}>
+      <div style={{ display: "flex", gap: "0.35rem" }}>
+        {actes.map((a, i) => {
+          const r = (size / 2) - stroke;
+          const circ = 2 * Math.PI * r;
+          return (
+            <svg key={i} width={size} height={size} style={{ transform: "rotate(-90deg)", display: "block" }}>
+              <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`${a.couleur}18`} strokeWidth={stroke}/>
+              <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={a.fait ? a.couleur : `${a.couleur}00`}
+                strokeWidth={stroke} strokeLinecap="round"
+                strokeDasharray={circ}
+                strokeDashoffset={mounted && a.fait ? 0 : circ}
+                style={{ transition: `stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1) ${i * 0.13}s` }}
+              />
+            </svg>
+          );
+        })}
+      </div>
+      <div>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}88` }}>
+          Aujourd'hui
+        </div>
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.8rem", color: faits === total ? T.or : T.aube, marginTop: "0.15rem" }}>
+          {faits === 0 ? "La journée commence." :
+           faits === total ? "Journée complète ✦" :
+           `${faits} acte${faits > 1 ? "s" : ""} accompli${faits > 1 ? "s" : ""}`}
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ margin: "2rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.15s", opacity: 0 }}>
+      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: T.brume, marginBottom: "1.2rem" }}>
+        Aujourd'hui
+      </div>
+      <div style={{ background: `${T.nuit2}CC`, border: `1px solid ${T.brume}15`, borderRadius: "10px", padding: "1.4rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center", marginBottom: "1rem" }}>
+          {actes.map((a, i) => {
+            const r = (size / 2) - stroke;
+            const circ = 2 * Math.PI * r;
+            return (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.4rem" }}>
+                <svg width={size} height={size} style={{ transform: "rotate(-90deg)", display: "block" }}>
+                  <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`${a.couleur}15`} strokeWidth={stroke}/>
+                  <circle cx={size/2} cy={size/2} r={r} fill="none"
+                    stroke={a.fait ? a.couleur : `${a.couleur}00`}
+                    strokeWidth={stroke} strokeLinecap="round"
+                    strokeDasharray={circ}
+                    strokeDashoffset={mounted && a.fait ? 0 : circ}
+                    style={{ transition: `stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1) ${i * 0.18}s` }}
+                  />
+                </svg>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.37rem", letterSpacing: "0.15em", textTransform: "uppercase", color: a.fait ? `${a.couleur}CC` : `${T.brume}38` }}>
+                  {a.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ borderTop: `1px solid ${T.brume}12`, paddingTop: "0.9rem", textAlign: "center" }}>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: faits === total ? T.or : `${T.brume}BB`, margin: 0, lineHeight: 1.6 }}>
+            {faits === 0 && "La journée est devant toi."}
+            {faits === 1 && "Un premier pas. C'est déjà quelque chose."}
+            {faits === 2 && "Tu construis quelque chose, doucement."}
+            {faits === 3 && "La régularité est une forme de soin."}
+            {faits === 4 && "Presque là. Une chose encore."}
+            {faits === 5 && "Journée pleine. ✦"}
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
@@ -3987,6 +4095,9 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         </div>
       </div>
 
+      {/* ── ANNEAUX DU JOUR ── */}
+      <AnneauxJour compact={true} />
+
       {/* ── CITATION ── */}
       <div style={{
         margin: "1rem 1.5rem 0",
@@ -4017,6 +4128,11 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
               textAlign: "left", cursor: "pointer",
               animation: `fadeUp 0.6s ease forwards ${0.5 + i * 0.07}s`, opacity: 0,
               transition: "border-color 0.25s, transform 0.2s",
+              // Centre le 5e bouton (Souffle) s'il est seul sur sa ligne
+              gridColumn: i === ENTREES.length - 1 && ENTREES.length % 2 !== 0 ? "1 / -1" : undefined,
+              maxWidth: i === ENTREES.length - 1 && ENTREES.length % 2 !== 0 ? "50%" : undefined,
+              margin: i === ENTREES.length - 1 && ENTREES.length % 2 !== 0 ? "0 auto" : undefined,
+              width: i === ENTREES.length - 1 && ENTREES.length % 2 !== 0 ? "100%" : undefined,
             }}>
               <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, marginBottom: "0.25rem" }}>
                 {e.label}
@@ -4047,6 +4163,18 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
         };
         detecter(intentionBasse);
         if (intentionBasse2) detecter(intentionBasse2);
+
+        // Croise avec le baromètre nerveux du jour
+        const todayKey = new Date().toISOString().split("T")[0];
+        const etatNerveux = (() => { try { return localStorage.getItem("alba_barometre_" + todayKey); } catch { return null; } })();
+        if (etatNerveux === "effondre" || etatNerveux === "fige") {
+          etatsDetectes.unshift("burn-out"); // priorité aux ressources apaisantes
+        } else if (etatNerveux === "mobilise") {
+          etatsDetectes.unshift("anxiete");
+        } else if (etatNerveux === "securite") {
+          etatsDetectes.push("croissance"); // opportunité d'explorer
+        }
+
         if (etatsDetectes.length === 0) etatsDetectes.push("quete-de-sens");
 
         const recos = getRecommandationsPersonnalisees(etatsDetectes, cleActive + 1, 2);
@@ -6968,6 +7096,11 @@ const Souffle = ({ onComplete }) => {
               const newN = n + 1;
               if (newN === 1 && !completedRef.current) {
                 completedRef.current = true;
+                // Marquer souffle fait aujourd'hui
+                try {
+                  const dk = new Date().toISOString().split("T")[0];
+                  localStorage.setItem("alba_souffle_" + dk, "1");
+                } catch {}
                 if (onComplete) onComplete();
               }
               return newN;
@@ -9079,6 +9212,9 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           }}>« {chemin.essence} »</p>
         </div>
       )}
+
+      {/* ── ANNEAUX DU JOUR ── */}
+      <AnneauxJour compact={false} />
 
       {/* ── PRÉSENCE ── stats fondues, pas de grille ── */}
       <div style={{ padding: "2rem 1.8rem 0", animation: "fadeUp 0.7s ease forwards 0.2s", opacity: 0 }}>
