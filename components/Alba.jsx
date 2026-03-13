@@ -13101,11 +13101,16 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
 
   const chap = chapitreActuel();
   const pageActive = pageSelectionnee || pageJour;
-  const numeroPage = pageActive ? (() => {
-    const debut = new Date(pageActive.date + 'T00:00:00');
-    const debutAnnee = new Date(debut.getFullYear(), 0, 1);
-    return Math.ceil((debut - debutAnnee) / (1000 * 60 * 60 * 24)) + 1;
-  })() : 1;
+  // Page numéro = rang dans l'archive (1 = première page générée)
+  const numeroPage = (() => {
+    if (!pageActive || archive.length === 0) return 1;
+    // L'archive est triée du plus récent au plus ancien
+    // Le plus ancien = page 1
+    const totalPages = archive.length;
+    const positionDepuisFin = archive.findIndex(p => p.date === pageActive.date);
+    if (positionDepuisFin === -1) return 1;
+    return totalPages - positionDepuisFin;
+  })();
 
   const gravIdx = pageActive?.chapitre_num ? pageActive.chapitre_num - 1 : chap.num - 1;
   const gravKeys = ["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"];
@@ -13269,10 +13274,7 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
           {archive.map((p, i) => {
-            const num = (() => {
-              const d = new Date(p.date + 'T00:00:00');
-              return Math.ceil((d - new Date(d.getFullYear(), 0, 1)) / (1000*60*60*24)) + 1;
-            })();
+            const num = archive.length - i;
             return (
               <button key={i} onClick={() => { setArchive(archive); setPageIdx(i); setPageSelectionnee(p); setVue("page"); }} style={{
                 background: `${T.nuit2}88`, border: `1px solid ${T.brume}10`,
