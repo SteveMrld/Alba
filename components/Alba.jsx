@@ -13984,7 +13984,7 @@ function AlbaInner() {
     { id: "ardoise",      label: "Ardoise" },
     { id: "cle",          label: "Ma Clé" },
     { id: "ciel",         label: "Le Ciel" },
-    { id: "trouvailles",  label: "Trouvailles" },
+    { id: "trouvailles",  label: "Perles" },
     { id: "livre",        label: "Le Livre" },
     { id: "profil",       label: "Profil" },
   ];
