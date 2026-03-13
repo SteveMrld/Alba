@@ -10403,7 +10403,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
         }),
       });
       const d = await res.json();
-      const reponse = d.content?.[0]?.text?.trim() || "Je t'entends.";
+      const reponse = d.content?.[0]?.text?.trim() || d.error || "erreur API";
       const finalConv = [...newConv, { qui: "alba", texte: reponse }];
       setConversation(finalConv);
       setProfondeur(nouvelleProf);
