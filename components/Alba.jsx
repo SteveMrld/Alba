@@ -12580,6 +12580,308 @@ const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
   );
 };
 
+// ─── TUTO STORIES ────────────────────────────────────────────────────────────
+
+const TUTO_SLIDES = [
+  {
+    id: "miroir",
+    titre: "Le Miroir",
+    sousTitre: "Pas un assistant. Un reflet.",
+    texte: "Tu parles. ALBA écoute et te renvoie ce que tu ne vois pas seul. Une question, pas deux. Une phrase qui reste.",
+    symbol: "○",
+    couleur: "#7898C8",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #0F1A2A 0%, #0D0A12 100%)",
+  },
+  {
+    id: "ardoise",
+    titre: "L'Ardoise",
+    sousTitre: "Poser ce qui traverse.",
+    texte: "Des fragments quotidiens — une pensée, une émotion, une image. À la fin de la semaine, ALBA les tisse en une lettre qui te parle de toi.",
+    symbol: "□",
+    couleur: "#C8A96E",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #2A1F0F 0%, #0D0A12 100%)",
+  },
+  {
+    id: "portes",
+    titre: "Les 12 Portes",
+    sousTitre: "Un chemin intérieur.",
+    texte: "Chaque action génère des Éclats d'aube. Les Éclats ouvrent les Portes. Chaque Porte déverrouille une nouvelle dimension — des sagesses, des pratiques, une lettre unique.",
+    symbol: "✦",
+    couleur: "#C8A040",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #2A200A 0%, #0D0A12 100%)",
+  },
+  {
+    id: "sagesses",
+    titre: "Les Sagesses",
+    sousTitre: "22 traditions du monde.",
+    texte: "Ikigai, Kintsugi, Ubuntu, Satori… Chaque sagesse s'ouvre avec une nouvelle Porte. Une gravure. Un texte. Une question pour ce soir.",
+    symbol: "◇",
+    couleur: "#A89060",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #1A180A 0%, #0D0A12 100%)",
+  },
+  {
+    id: "ciel",
+    titre: "Le Ciel",
+    sousTitre: "Un espace partagé.",
+    texte: "Chaque offrande que tu déposes — une phrase, un livre, une pratique — est transformée et devient une étoile. D'autres la verront. Quelqu'un en avait besoin.",
+    symbol: "✦",
+    couleur: "#9878C8",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #150F2A 0%, #0D0A12 100%)",
+  },
+  {
+    id: "evasion",
+    titre: "L'Évasion & le Souffle",
+    sousTitre: "Deux pauses.",
+    texte: "L'Évasion : du cinéma contemplatif pour respirer autrement. Le Souffle : un exercice guidé de 3 minutes. Rien à faire sinon être là.",
+    symbol: "~",
+    couleur: "#78A878",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #0F1A0F 0%, #0D0A12 100%)",
+  },
+  {
+    id: "debut",
+    titre: "Par où commencer ?",
+    sousTitre: "Par ici.",
+    texte: "Le Miroir, chaque soir. L'Ardoise, quand quelque chose traverse. Le reste vient seul, à mesure que les Portes s'ouvrent.",
+    symbol: "→",
+    couleur: "#C8A96E",
+    bg: "radial-gradient(ellipse 70% 50% at 50% 40%, #1A1510 0%, #0D0A12 100%)",
+    isFinal: true,
+  },
+];
+
+const TutoStories = ({ onClose }) => {
+  const [idx, setIdx] = useState(0);
+  const [animDir, setAnimDir] = useState(1);
+  const [touchStart, setTouchStart] = useState(null);
+  const slide = TUTO_SLIDES[idx];
+  const isLast = idx === TUTO_SLIDES.length - 1;
+
+  const goTo = (newIdx, dir = 1) => {
+    if (newIdx < 0 || newIdx >= TUTO_SLIDES.length) return;
+    setAnimDir(dir);
+    setIdx(newIdx);
+  };
+
+  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  const handleTouchEnd = (e) => {
+    if (!touchStart) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) goTo(diff > 0 ? idx + 1 : idx - 1, diff > 0 ? 1 : -1);
+    setTouchStart(null);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0D0A12" }}
+      onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}
+    >
+      <style>{`
+        @keyframes tutoSlideIn { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+        @keyframes tutoSlideInLeft { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:translateX(0); } }
+        .tuto-slide { animation: tutoSlideIn 0.4s ease forwards; }
+      `}</style>
+
+      {/* Barre de progression */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, display: "flex", gap: 3, padding: "env(safe-area-inset-top, 1rem) 1rem 0", zIndex: 10 }}>
+        {TUTO_SLIDES.map((_, i) => (
+          <div key={i} style={{ flex: 1, height: 2, borderRadius: 2, background: i <= idx ? slide.couleur : `${T.brume}25`, transition: "background 0.3s" }} />
+        ))}
+      </div>
+
+      {/* Bouton fermer */}
+      <button onClick={onClose} style={{ position: "absolute", top: "calc(env(safe-area-inset-top, 1rem) + 1.2rem)", right: "1rem", background: "none", border: "none", color: `${T.brume}88`, fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", textTransform: "uppercase", cursor: "pointer", zIndex: 10 }}>
+        Passer
+      </button>
+
+      {/* Contenu slide */}
+      <div key={idx} className="tuto-slide" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "5rem 2.5rem 6rem", background: slide.bg }}>
+
+        {/* Symbole central animé */}
+        <div style={{
+          fontSize: slide.id === "debut" ? "2rem" : "3.5rem",
+          color: slide.couleur,
+          marginBottom: "2.5rem",
+          animation: "alba-breathe 4s ease-in-out infinite",
+          textShadow: `0 0 40px ${slide.couleur}44`,
+          lineHeight: 1,
+        }}>
+          {slide.symbol}
+        </div>
+
+        {/* Texte */}
+        <div style={{ textAlign: "center", maxWidth: 320 }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${slide.couleur}99`, marginBottom: "0.8rem" }}>
+            {slide.sousTitre}
+          </div>
+          <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.8rem, 7vw, 2.5rem)", color: T.orPale, letterSpacing: "0.05em", margin: "0 0 1.5rem" }}>
+            {slide.titre}
+          </h2>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.88rem, 3.5vw, 1rem)", color: `${T.brume}CC`, lineHeight: 1.9, margin: 0 }}>
+            {slide.texte}
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation bas */}
+      <div style={{ position: "absolute", bottom: "calc(env(safe-area-inset-bottom, 1rem) + 1.5rem)", left: 0, right: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: "1.5rem", zIndex: 10 }}>
+        {idx > 0 && (
+          <button onClick={() => goTo(idx - 1, -1)} style={{ background: "none", border: `1px solid ${T.brume}25`, borderRadius: "50%", width: 40, height: 40, cursor: "pointer", color: `${T.brume}66`, fontSize: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            ←
+          </button>
+        )}
+        {isLast ? (
+          <button onClick={onClose} style={{
+            background: `${slide.couleur}22`, border: `1px solid ${slide.couleur}55`,
+            borderRadius: "30px", padding: "0.85rem 2.5rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
+            letterSpacing: "0.45em", textTransform: "uppercase",
+            color: slide.couleur, cursor: "pointer", transition: "all 0.3s",
+          }}>
+            C'est parti
+          </button>
+        ) : (
+          <button onClick={() => goTo(idx + 1)} style={{
+            background: `${slide.couleur}22`, border: `1px solid ${slide.couleur}44`,
+            borderRadius: "30px", padding: "0.75rem 2rem",
+            fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
+            letterSpacing: "0.45em", textTransform: "uppercase",
+            color: slide.couleur, cursor: "pointer",
+          }}>
+            Suivant →
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── AIDE ALBA ────────────────────────────────────────────────────────────────
+
+const AIDE_FAQ = [
+  { q: "C'est quoi les Éclats d'aube ?", r: "Chaque action dans ALBA — écrire, souffler, traverser — génère des Éclats. Ils s'accumulent et ouvrent les Portes." },
+  { q: "Comment fonctionne le Miroir ?", r: "Tu parles. ALBA repère ce qui pèse le plus dans ce que tu dis — pas le plus dramatique, le plus vrai. Elle pose une question. Une seule." },
+  { q: "C'est quoi les 12 Portes ?", r: "Un chemin en 12 étapes intérieures. Chaque Porte déverrouille de nouvelles fonctionnalités, sagesses et pratiques. Tu les franchis naturellement en utilisant l'app." },
+  { q: "Mes données sont-elles privées ?", r: "Tout ce que tu écris sur l'Ardoise reste sur ton appareil. Les sessions du Miroir ne sont pas stockées. Aucune donnée n'est vendue." },
+  { q: "Comment marchent les Parcours ?", r: "Un parcours dure 5 à 10 jours. Chaque jour, une invitation concrète. Tu valides quand tu l'as faite. Un seul jour à la fois." },
+  { q: "C'est quoi le Ciel partagé ?", r: "Un espace où chaque utilisateur dépose quelque chose — une phrase, un livre, une pratique — qui a changé quelque chose pour lui. Ça devient une étoile pour quelqu'un d'autre." },
+  { q: "Comment relancer le tutoriel ?", r: null }, // Action spéciale
+];
+
+const AideAlba = ({ onClose, onTuto, tab }) => {
+  const [question, setQuestion] = useState("");
+  const [reponse, setReponse] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [faqOpen, setFaqOpen] = useState(null);
+
+  const poser = async () => {
+    if (!question.trim()) return;
+    setLoading(true);
+    setReponse(null);
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          max_tokens: 120,
+          system: `Tu es l'aide d'ALBA — une app de bien-être intérieur. Tu réponds aux questions sur l'application de façon sobre et directe, en 2-3 phrases maximum. Onglet actif: ${tab}. Fonctionnalités: Miroir (conversation intérieure), Ardoise (notes quotidiennes), Éclats d'aube (points qui ouvrent les Portes), 12 Portes (chemin intérieur), Sagesses (22 traditions mondiales), Le Ciel (offrandes partagées), Évasion (vidéos contemplatives), Souffle (respiration guidée), Trouvailles (bibliothèque), Parcours thématiques. Ne parle pas en dehors de l'application.`,
+          messages: [{ role: "user", content: question.trim() }],
+        }),
+      });
+      const d = await res.json();
+      setReponse(d.content?.[0]?.text?.trim() || "Je n'ai pas pu répondre à ça.");
+    } catch {
+      setReponse("Une erreur s'est produite. Réessaie.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end" }}
+      onClick={onClose}
+    >
+      {/* Fond sombre */}
+      <div style={{ position: "absolute", inset: 0, background: "#0D0A12cc", backdropFilter: "blur(4px)" }} />
+
+      {/* Panel */}
+      <div onClick={e => e.stopPropagation()} style={{
+        position: "relative", width: "100%", maxWidth: 560, margin: "0 auto",
+        background: T.nuit2, borderRadius: "16px 16px 0 0",
+        border: `1px solid ${T.brume}15`, borderBottom: "none",
+        padding: "1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom))",
+        maxHeight: "82vh", overflowY: "auto",
+        animation: "fadeUp 0.3s ease forwards",
+      }}>
+        {/* Handle */}
+        <div style={{ width: 36, height: 3, background: `${T.brume}33`, borderRadius: 2, margin: "0 auto 1.5rem" }} />
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+          <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "1rem", color: T.orPale }}>Aide</div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: `${T.brume}55`, cursor: "pointer", fontSize: "1.1rem" }}>×</button>
+        </div>
+
+        {/* Question libre */}
+        <div style={{ marginBottom: "1.8rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "0.8rem" }}>
+            Pose ta question
+          </div>
+          <div style={{ display: "flex", gap: "0.6rem" }}>
+            <input
+              value={question}
+              onChange={e => setQuestion(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && poser()}
+              placeholder="Comment fonctionne le Miroir ?"
+              style={{ flex: 1, background: `${T.nuit}`, border: `1px solid ${T.brume}18`, borderRadius: "6px", padding: "0.65rem 0.9rem", color: T.aube, fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", outline: "none" }}
+            />
+            <button onClick={poser} disabled={!question.trim() || loading} style={{ background: `${T.or}22`, border: `1px solid ${T.or}44`, borderRadius: "6px", padding: "0 0.9rem", color: T.or, cursor: "pointer", fontSize: "0.8rem", flexShrink: 0 }}>
+              {loading ? "…" : "→"}
+            </button>
+          </div>
+
+          {reponse && (
+            <div style={{ marginTop: "1rem", background: `${T.or}08`, border: `1px solid ${T.or}18`, borderRadius: "6px", padding: "1rem 1.1rem" }}>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.orPale, lineHeight: 1.8, margin: 0 }}>
+                {reponse}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* FAQ */}
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "0.8rem" }}>
+          Questions fréquentes
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+          {AIDE_FAQ.map((item, i) => (
+            <div key={i}>
+              <button onClick={() => {
+                if (item.r === null) { onTuto(); return; }
+                setFaqOpen(faqOpen === i ? null : i);
+              }} style={{
+                width: "100%", background: faqOpen === i ? `${T.or}0A` : "transparent",
+                border: `1px solid ${T.brume}12`,
+                borderRadius: faqOpen === i ? "6px 6px 0 0" : "6px",
+                padding: "0.8rem 1rem", cursor: "pointer",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                textAlign: "left",
+              }}>
+                <span style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}CC` }}>{item.q}</span>
+                <span style={{ color: `${T.or}66`, fontSize: "0.65rem", flexShrink: 0, marginLeft: "0.5rem" }}>
+                  {item.r === null ? "▶" : faqOpen === i ? "▲" : "▼"}
+                </span>
+              </button>
+              {faqOpen === i && item.r && (
+                <div style={{ background: `${T.or}06`, border: `1px solid ${T.brume}12`, borderTop: "none", borderRadius: "0 0 6px 6px", padding: "0.8rem 1rem" }}>
+                  <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}99`, lineHeight: 1.8, margin: 0 }}>{item.r}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // ─── PAGE B2B ENTREPRISES ─────────────────────────────────────────────────────
 
 const PricingB2B = ({ onRetour }) => {
@@ -12992,6 +13294,8 @@ function AlbaInner() {
   const [authUser, setAuthUser] = useState(null);
   const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [showTuto, setShowTuto] = useState(false);
+  const [showAide, setShowAide] = useState(false);
   const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState("compagnon");
   const [tabHistory, setTabHistory] = useState([]);
@@ -13365,6 +13669,12 @@ function AlbaInner() {
       <Grain />
       <Horizon />
 
+      {/* ── TUTO ── */}
+      {showTuto && <TutoStories onClose={() => setShowTuto(false)} />}
+
+      {/* ── AIDE ALBA ── */}
+      {showAide && <AideAlba onClose={() => setShowAide(false)} onTuto={() => { setShowAide(false); setShowTuto(true); }} tab={tab} />}
+
       {/* ── PAYWALL ── */}
       {showPaywall && (
         <PaywallScreen
@@ -13424,7 +13734,7 @@ function AlbaInner() {
           </motion.div>
         </AnimatePresence>
       )}
-      {view === "portrait" && <Portrait data={userData} onContinue={() => setView("app")} />}
+      {view === "portrait" && <Portrait data={userData} onContinue={() => { setView("app"); setTimeout(() => setShowTuto(true), 800); }} />}
 
       {view === "app" && (
         <motion.div
@@ -13470,14 +13780,24 @@ function AlbaInner() {
               letterSpacing: "0.28em", color: T.or, padding: 0,
             }}>ALBA</button>
 
-            {/* Droite : onglet courant */}
-            <div style={{ minWidth: 60, textAlign: "right" }}>
+            {/* Droite : onglet courant + aide */}
+            <div style={{ minWidth: 60, textAlign: "right", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.8rem" }}>
               <span style={{
                 fontFamily: T.sans, fontWeight: 300, fontSize: "0.65rem",
                 letterSpacing: "0.35em", textTransform: "uppercase", color: T.brume,
               }}>
                 {TABS.find(t => t.id === tab)?.label}
               </span>
+              <button onClick={() => setShowAide(true)} style={{
+                background: "none", border: `1px solid ${T.brume}25`, borderRadius: "50%",
+                width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", color: `${T.brume}77`, fontFamily: T.sans,
+                fontSize: "0.55rem", fontStyle: "italic", transition: "all 0.2s", padding: 0,
+                flexShrink: 0,
+              }}
+                onMouseOver={e => { e.currentTarget.style.borderColor = `${T.or}55`; e.currentTarget.style.color = T.or; }}
+                onMouseOut={e => { e.currentTarget.style.borderColor = `${T.brume}25`; e.currentTarget.style.color = `${T.brume}77`; }}
+              >?</button>
             </div>
           </div>
 
