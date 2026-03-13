@@ -4646,7 +4646,7 @@ const PARCOURS = [
     sousTitre: "Traverser une fin",
     duree: 7,
     couleur: "#8898C8",
-    description: "Pour quand quelque chose s'est terminé et que le silence est trop grand.",
+    description: "Quelque chose s'est arrêté. Le silence qui suit est immense. Ce parcours est pour traverser ça.",
     jours: [
       { jour: 1, invitation: "Aujourd'hui, ne cherche pas à comprendre. Assieds-toi avec ce qui est là, sans lui donner de nom.", note: "Le premier jour, la seule tâche c'est d'exister." },
       { jour: 2, invitation: "Écris trois choses que tu as perdues. Pas des personnes — des versions de toi-même.", note: "Ce qu'on perd, c'est souvent qui on était avec l'autre." },
@@ -4663,7 +4663,7 @@ const PARCOURS = [
     sousTitre: "Retrouver l'ancrage",
     duree: 5,
     couleur: "#7BA87B",
-    description: "Quand on s'est coupé de soi-même et qu'on ne sait plus ce qu'on ressent.",
+    description: "Tu ne sais plus ce que tu ressens. Ton corps est là mais tu n'y es plus vraiment. Ce parcours te ramène.",
     jours: [
       { jour: 1, invitation: "Pendant deux minutes, sens tes pieds sur le sol. C'est tout. Rien d'autre.", note: "Le sol est toujours là. Même quand tout le reste vacille." },
       { jour: 2, invitation: "Mange un repas sans écran, sans musique. Juste toi et ce que tu manges.", note: "La présence commence par les sens les plus simples." },
@@ -4678,7 +4678,7 @@ const PARCOURS = [
     sousTitre: "Nommer l'invisible",
     duree: 10,
     couleur: "#C8A040",
-    description: "Explorer ce qu'on traine sans pouvoir le nommer — les poids silencieux.",
+    description: "Il y a quelque chose que tu portes depuis longtemps. Tu ne sais pas toujours le nommer. Ce parcours aide à le regarder.",
     jours: [
       { jour: 1, invitation: "Qu'est-ce que tu portes en ce moment que personne ne voit ?", note: "Il n'est pas nécessaire de répondre complètement. Commencer suffit." },
       { jour: 2, invitation: "Pense à une chose que tu répètes dans ta vie — une situation, une dynamique. Écris-la sans te juger.", note: "Les patterns se répètent jusqu'à ce qu'on les regarde." },
@@ -4698,7 +4698,7 @@ const PARCOURS = [
     sousTitre: "Une nouvelle page",
     duree: 7,
     couleur: "#B87050",
-    description: "Quand une page se tourne et qu'on ne sait pas encore écrire la suivante.",
+    description: "Une page vient de se tourner. Tu ne sais pas encore quoi écrire sur la suivante. Ce parcours commence là.",
     jours: [
       { jour: 1, invitation: "Qu'est-ce qui se termine vraiment ? Nomme-le avec précision.", note: "Commencer demande d'abord de finir." },
       { jour: 2, invitation: "Qu'est-ce que tu ne veux plus emmener dans cette nouvelle étape ? Écris-le.", note: "Recommencer c'est choisir ce qu'on laisse derrière." },
