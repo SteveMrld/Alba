@@ -52,7 +52,7 @@ export async function GET() {
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
         max_tokens: 400,
-        system: "Tu écris pour un livre de bien-être intérieur. Style sobre, dense, jamais de tiret ni de liste. Prose uniquement. Voix directe, humaine, sans formule générique.",
+        system: "Tu écris pour un livre de bien-être intérieur. Style sobre, dense. Prose uniquement — jamais de tiret, de liste, de #, de ** ou de toute mise en forme markdown. Pas de sous-titres. Commence directement par le contenu. Voix directe, humaine, sans formule générique.",
         messages: [{ role: "user", content: prompt }]
       })
     });

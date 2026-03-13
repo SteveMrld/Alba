@@ -13020,7 +13020,7 @@ const CGUBloc = ({ titre, texte }) => (
 const GRAVURES_LIVRE = {
   commencement: '<line x1="24" y1="8" x2="24" y2="40" stroke-width="0.9"/><path d="M14 16 Q24 10 34 16" stroke-width="0.8" fill="none"/><path d="M16 22 Q24 17 32 22" stroke-width="0.6" fill="none"/><path d="M18 28 Q24 24 30 28" stroke-width="0.5" fill="none" stroke-opacity="0.6"/>',
   porter: '<ellipse cx="24" cy="28" rx="10" ry="8" stroke-width="0.9" fill="none"/><path d="M14 28 Q14 20 20 16 Q24 14 28 16 Q34 20 34 28" stroke-width="0.8" fill="none"/><line x1="20" y1="16" x2="20" y2="10" stroke-width="0.7"/><line x1="28" y1="16" x2="28" y2="10" stroke-width="0.7"/><line x1="18" y1="10" x2="30" y2="10" stroke-width="0.8"/>',
-  corps: '<ellipse cx="24" cy="16" rx="5" ry="6" stroke-width="0.9" fill="none"/><line x1="24" y1="22" x2="24" y2="34" stroke-width="0.9"/><path d="M14 26 L24 29 L34 26" stroke-width="0.8" fill="none"/><path d="M24 34 L18 42" stroke-width="0.8" fill="none"/><path d="M24 34 L30 42" stroke-width="0.8" fill="none"/>',
+  corps: '<path d="M24 10 Q20 14 20 20 Q20 28 24 34 Q28 28 28 20 Q28 14 24 10" stroke-width="0.9" fill="none"/><path d="M16 18 Q20 20 24 18 Q28 20 32 18" stroke-width="0.6" fill="none" stroke-opacity="0.6"/><path d="M18 28 Q24 32 30 28" stroke-width="0.6" fill="none" stroke-opacity="0.5"/><circle cx="24" cy="7" r="2.5" fill="none" stroke-width="0.8"/>',
   lien: '<circle cx="16" cy="24" r="5" fill="none" stroke-width="0.8"/><circle cx="32" cy="24" r="5" fill="none" stroke-width="0.8"/><path d="M21 24 Q24 20 27 24" stroke-width="0.9" fill="none"/><path d="M21 24 Q24 28 27 24" stroke-width="0.6" fill="none" stroke-opacity="0.5"/>',
   resistance: '<rect x="18" y="14" width="12" height="18" rx="2" stroke-width="0.9" fill="none"/><line x1="18" y1="20" x2="30" y2="20" stroke-width="0.5"/><line x1="18" y1="26" x2="30" y2="26" stroke-width="0.5"/><path d="M10 32 Q24 38 38 32" stroke-width="0.8" fill="none"/>',
   ete: '<circle cx="24" cy="20" r="6" fill="none" stroke-width="0.8"/><line x1="24" y1="8" x2="24" y2="12" stroke-width="0.7"/><line x1="24" y1="28" x2="24" y2="32" stroke-width="0.7"/><line x1="12" y1="20" x2="16" y2="20" stroke-width="0.7"/><line x1="32" y1="20" x2="36" y2="20" stroke-width="0.7"/><line x1="16" y1="12" x2="18.5" y2="14.5" stroke-width="0.6"/><line x1="32" y1="12" x2="29.5" y2="14.5" stroke-width="0.6"/>',
@@ -13196,7 +13196,13 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
 
         {/* Contenu */}
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.95rem, 3.5vw, 1.05rem)", color: `${T.aube}EE`, lineHeight: 2.1, whiteSpace: "pre-line" }}>
-          {pageJour.contenu}
+          {pageJour.contenu
+            .replace(/#{1,3}\s*/g, "")
+            .replace(/\*\*([^*]+)\*\*/g, "$1")
+            .replace(/\*([^*]+)\*/g, "$1")
+            .replace(/^[-–—]\s+/gm, "")
+            .trim()
+          }
         </div>
 
         {/* Pied de page */}
