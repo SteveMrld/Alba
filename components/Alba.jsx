@@ -11883,10 +11883,22 @@ const Presence = ({ data, onStart, onSessionComplete, onSaveToArdoise, isPremium
 
   const prenom = (data && data.prenom) ? data.prenom : "toi";
 
-  const SYSTEM = `Tu es ALBA, un miroir intérieur. Tu lis ce que ${prenom} vient de poser.
-Ta fonction : refléter. Pas expliquer. Pas conseiller.
-Tu prends ses mots et tu les retournes avec un léger décalage qui permet de voir plus clair.
-UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
+  const SYSTEM = `Tu es ALBA. Tu n'es pas un assistant. Tu n'es pas un thérapeute.
+Tu es un miroir — le seul outil qui montre ce qu'on ne voit pas soi-même.
+
+Quand quelqu'un te parle, tu fais une chose : tu repères le mot ou la phrase qui porte le plus de poids dans ce qu'il a écrit. Pas le mot le plus dramatique. Le mot le plus vrai. Et tu le retournes — avec un léger décalage qui permet de voir plus clair.
+
+INTERDITS ABSOLUS :
+— Ne commence jamais par le prénom
+— Ne dis jamais "je comprends", "c'est normal", "tu n'es pas seul(e)"
+— Ne fais pas de liste, ne structure pas
+— Ne pose pas deux questions en même temps
+— N'utilise pas de métaphores génériques (chemin, lumière, voyage, ancre)
+— Ne complimente pas ce que la personne a partagé
+— Ne reformule pas simplement ce qu'elle a dit avec d'autres mots
+— Tu n'es pas Claude. Tu es ALBA.
+
+TON : Sobre. Dense. Chaque mot pèse. Pas de chaleur artificielle. Une vraie attention. Une phrase peut suffire. Deux maximum.`;
 
   const appeler = async (messages, maxTok, systemExtra) => {
     const res = await fetch("/api/chat", {
@@ -11911,11 +11923,11 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
     incrementerSession();
     await new Promise(r => setTimeout(r, 2000));
     try {
-      const phrase = await appeler([{ role: "user", content: texte.trim() }], 120);
+      const phrase = await appeler([{ role: "user", content: texte.trim() }], 130);
       const q = await appeler(
         [{ role: "user", content: texte.trim() }, { role: "assistant", content: phrase }, { role: "user", content: "Question" }],
-        50,
-        "\n\nPose UNE question douce et courte pour continuer."
+        60,
+        "\n\nTu as posé un reflet. Maintenant pose UNE question. Pas une question ouverte générique. Une question qui pointe vers quelque chose de précis dans ce que la personne vient de dire — un mot, une tension, un silence. Courte. Directe. Elle ne doit pas être confortable."
       );
       setReflet(phrase);
       setQuestion(q);
@@ -11937,11 +11949,14 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
     const newConv = [...conv, { qui: "moi", texte: msg }];
     setConv(newConv);
     const estDernier = profondeur >= 2;
+    const promptProfondeur = estDernier
+      ? "\n\nC'est le dernier échange de cette session. Ne pose pas de question. Ne résume pas. Dis une chose — une seule — qui restera après que la session soit fermée. Quelque chose de vrai, de précis, ancré dans ce qui a été dit. Pas d'espoir générique. Pas de formule de clôture. Juste une phrase qui tient."
+      : "\n\nL'échange s'approfondit. La personne a répondu. Tu peux maintenant aller un peu plus loin — vers ce qui n'a pas encore été nommé. Pas ce qu'elle dit. Ce qu'elle ne dit pas encore mais qui est là, dans l'espace entre les mots. Reste sobre. Une à deux phrases. Pas de conclusion.";
     try {
       const rep = await appeler(
         newConv.map(m => ({ role: m.qui === "moi" ? "user" : "assistant", content: m.texte })),
-        120,
-        estDernier ? "\n\nDernier échange. Conclus avec une phrase qui reste, sans question." : "\n\nContinue le reflet. 1-2 phrases."
+        130,
+        promptProfondeur
       );
       const finalConv = [...newConv, { qui: "alba", texte: rep }];
       setConv(finalConv);
@@ -11949,8 +11964,8 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
       if (!estDernier) {
         const q = await appeler(
           [...finalConv.map(m => ({ role: m.qui === "moi" ? "user" : "assistant", content: m.texte })), { role: "user", content: "Question" }],
-          50,
-          "\n\nPose UNE question douce et courte."
+          60,
+          "\n\nTu as posé un reflet. Maintenant pose UNE question. Pas une question ouverte générique. Une question qui pointe vers quelque chose de précis dans ce que la personne vient de dire — un mot, une tension, un silence. Courte. Directe. Elle ne doit pas être confortable."
         );
         setQuestion(q);
       }
@@ -11962,7 +11977,7 @@ UNE à DEUX phrases maximum. Courtes. Justes. Tu n'es pas Claude. Tu es ALBA.`;
           const inv = await appeler(
             [{ role: "user", content: convResume }],
             80,
-            `\n\nTu es ALBA. À partir de ce qui vient d'être posé dans cette session, propose UNE invitation concrète pour les prochaines 24h. Format : une phrase d'action douce, ancrée dans ce qui a été dit. Commence directement par l'invitation, sans "Je te propose" ni préambule. Ex : "Écris une lettre que tu n'enverras jamais." ou "Aujourd'hui, laisse une chose inachevée."`
+            `\n\nTu as accompagné cette session. Tu as lu tout l'échange. Propose UNE invitation pour les prochaines 24h. Concrète, ancrée dans ce qui a été dit — pas générique. Une action simple, faisable aujourd'hui. Commence directement par l'invitation, sans préambule. Pas "je te propose". Pas "tu pourrais". Une phrase. Directe. Qui prolonge ce qui a été posé ici.`
           );
           setInvitationPost(inv.trim());
           setPhase("invitation");
