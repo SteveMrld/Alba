@@ -707,9 +707,20 @@ const FontLoader = () => (
       33%     { transform: scale(1.05) translateX(8px) translateY(-5px); opacity: 0.8; }
       66%     { transform: scale(0.97) translateX(-6px) translateY(8px); opacity: 0.5; }
     }
-    @keyframes shooting-star {
-      0%   { transform: translateX(0) translateY(0) scaleX(1); opacity: 1; }
-      100% { transform: translateX(180px) translateY(80px) scaleX(0); opacity: 0; }
+    @keyframes shooting-star-lr {
+      0%   { transform: translateX(0) translateY(0); opacity: 0.9; }
+      15%  { opacity: 1; }
+      100% { transform: translateX(160px) translateY(60px); opacity: 0; }
+    }
+    @keyframes shooting-star-rl {
+      0%   { transform: translateX(0) translateY(0); opacity: 0.9; }
+      15%  { opacity: 1; }
+      100% { transform: translateX(-160px) translateY(70px); opacity: 0; }
+    }
+    @keyframes shooting-star-diag {
+      0%   { transform: translateX(0) translateY(0); opacity: 0.9; }
+      15%  { opacity: 1; }
+      100% { transform: translateX(120px) translateY(-80px); opacity: 0; }
     }
   `}</style>
 );
@@ -5859,13 +5870,23 @@ const CielCairn = ({ userId, db }) => {
   useEffect(() => () => { clearInterval(holdIntervalRef.current); clearTimeout(holdTimerRef.current); }, []);
 
   // ── CIEL (étape 0 et 5) ────────────────────────────────────────────────────
-  const shootingStars = useMemo(() => [...Array(3)].map((_, i) => ({
-    id: i,
-    x: 10 + Math.sin(i * 2.7) * 30,
-    y: 5 + Math.cos(i * 1.9) * 20,
-    delay: 8 + i * 13,
-    dur: 1.2 + i * 0.3,
-  })), []);
+  // Étoile filante — apparaît toutes les 12-22s, direction variée
+  const [shootingStarActive, setShootingStarActive] = useState(null);
+  useEffect(() => {
+    const DIRECTIONS = ["lr", "rl", "diag"];
+    const lancer = () => {
+      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      const x = 10 + Math.random() * 70;
+      const y = 5 + Math.random() * 40;
+      setShootingStarActive({ id: Date.now(), x, y, dir });
+      setTimeout(() => setShootingStarActive(null), 1400);
+      // Prochain lancement dans 12 à 22 secondes
+      setTimeout(lancer, 12000 + Math.random() * 10000);
+    };
+    // Premier lancement après 5s
+    const t = setTimeout(lancer, 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   const CielView = ({ showNouvelleEtoile }) => (
     <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden" }}>
@@ -5879,17 +5900,23 @@ const CielCairn = ({ userId, db }) => {
         animation: "nebula-drift 28s ease-in-out infinite reverse",
         pointerEvents: "none" }} />
 
-      {/* Étoiles filantes */}
-      {shootingStars.map(s => (
-        <div key={s.id} style={{
-          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
-          width: 60, height: 1,
-          background: `linear-gradient(to right, transparent, ${T.orPale}cc, transparent)`,
-          borderRadius: 1,
-          animation: `shooting-star ${s.dur}s ${s.delay}s ease-out infinite`,
-          opacity: 0,
+      {/* Étoile filante */}
+      {shootingStarActive && (
+        <div key={shootingStarActive.id} style={{
+          position: "absolute",
+          left: `${shootingStarActive.x}%`,
+          top: `${shootingStarActive.y}%`,
+          width: shootingStarActive.dir === "rl" ? 55 : 65,
+          height: 1.5,
+          background: shootingStarActive.dir === "rl"
+            ? `linear-gradient(to left, transparent, ${T.orPale}dd, ${T.orPale}44)`
+            : `linear-gradient(to right, transparent, ${T.orPale}dd, ${T.orPale}44)`,
+          borderRadius: 2,
+          boxShadow: `0 0 4px ${T.orPale}88`,
+          animation: `shooting-star-${shootingStarActive.dir} 1.2s ease-out forwards`,
+          zIndex: 5,
         }} />
-      ))}
+      )}
 
       {/* Étoiles */}
       {etoiles.map(e => (
