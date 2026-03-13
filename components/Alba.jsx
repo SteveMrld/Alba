@@ -688,6 +688,29 @@ const FontLoader = () => (
       0%,100% { opacity: 0.055; transform: scale(1); }
       50%     { opacity: 0.09;  transform: scale(1.08); }
     }
+    @keyframes star-twinkle-1 {
+      0%,100% { opacity: 0.12; transform: scale(1); }
+      33%     { opacity: 0.55; transform: scale(1.4); }
+      66%     { opacity: 0.2;  transform: scale(0.9); }
+    }
+    @keyframes star-twinkle-2 {
+      0%,100% { opacity: 0.25; transform: scale(1); }
+      50%     { opacity: 0.08; transform: scale(0.7); }
+    }
+    @keyframes star-twinkle-3 {
+      0%,100% { opacity: 0.18; transform: scale(1); }
+      25%     { opacity: 0.6;  transform: scale(1.5); }
+      75%     { opacity: 0.1;  transform: scale(0.85); }
+    }
+    @keyframes nebula-drift {
+      0%,100% { transform: scale(1) translateX(0px) translateY(0px); opacity: 0.6; }
+      33%     { transform: scale(1.05) translateX(8px) translateY(-5px); opacity: 0.8; }
+      66%     { transform: scale(0.97) translateX(-6px) translateY(8px); opacity: 0.5; }
+    }
+    @keyframes shooting-star {
+      0%   { transform: translateX(0) translateY(0) scaleX(1); opacity: 1; }
+      100% { transform: translateX(180px) translateY(80px) scaleX(0); opacity: 0; }
+    }
   `}</style>
 );
 
@@ -5720,10 +5743,14 @@ const genererEtoilesCiel = (pierresReelles) => {
   // ~200 points de fond (histoire collective simulée)
   for (let i = 0; i < 200; i++) {
     const etat = ETATS_CAIRN[Math.floor(rng(i * 7.3) * ETATS_CAIRN.length)];
+    const twinkleIdx = Math.floor(rng(i * 8.3) * 3);
+    const twinkleDur = 4 + rng(i * 11.7) * 12;
+    const twinkleDelay = rng(i * 6.1) * 8;
     points.push({
       id: `bg_${i}`, x: rng(i * 3.7) * 100, y: rng(i * 5.1) * 100,
       couleur: etat.couleur, taille: 1 + rng(i * 2.3) * 2,
       opacite: 0.15 + rng(i * 4.1) * 0.35, isReal: false,
+      twinkleAnim: `star-twinkle-${twinkleIdx + 1} ${twinkleDur}s ${twinkleDelay}s ease-in-out infinite`,
     });
   }
   // Pierres réelles par-dessus
@@ -5832,12 +5859,37 @@ const CielCairn = ({ userId, db }) => {
   useEffect(() => () => { clearInterval(holdIntervalRef.current); clearTimeout(holdTimerRef.current); }, []);
 
   // ── CIEL (étape 0 et 5) ────────────────────────────────────────────────────
+  const shootingStars = useMemo(() => [...Array(3)].map((_, i) => ({
+    id: i,
+    x: 10 + Math.sin(i * 2.7) * 30,
+    y: 5 + Math.cos(i * 1.9) * 20,
+    delay: 8 + i * 13,
+    dur: 1.2 + i * 0.3,
+  })), []);
+
   const CielView = ({ showNouvelleEtoile }) => (
     <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden" }}>
-      {/* Nébuleuse de fond */}
+      {/* Nébuleuse animée */}
       <div style={{ position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A44 0%, transparent 70%)",
+        background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A55 0%, transparent 70%)",
+        animation: "nebula-drift 20s ease-in-out infinite",
         pointerEvents: "none" }} />
+      <div style={{ position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse 50% 40% at 30% 60%, #0F1A2A33 0%, transparent 60%)",
+        animation: "nebula-drift 28s ease-in-out infinite reverse",
+        pointerEvents: "none" }} />
+
+      {/* Étoiles filantes */}
+      {shootingStars.map(s => (
+        <div key={s.id} style={{
+          position: "absolute", left: `${s.x}%`, top: `${s.y}%`,
+          width: 60, height: 1,
+          background: `linear-gradient(to right, transparent, ${T.orPale}cc, transparent)`,
+          borderRadius: 1,
+          animation: `shooting-star ${s.dur}s ${s.delay}s ease-out infinite`,
+          opacity: 0,
+        }} />
+      ))}
 
       {/* Étoiles */}
       {etoiles.map(e => (
@@ -5847,7 +5899,9 @@ const CielCairn = ({ userId, db }) => {
           background: e.couleur, opacity: e.opacite,
           boxShadow: e.isReal ? `0 0 ${e.taille * 3}px ${e.couleur}55` : "none",
           transition: "opacity 2s ease",
-          animation: e.isReal ? `alba-breathe ${8 + Math.random() * 8}s ease-in-out infinite` : "none",
+          animation: e.isReal
+            ? `alba-breathe ${8 + Math.random() * 8}s ease-in-out infinite`
+            : (e.twinkleAnim || "none"),
         }} />
       ))}
 
@@ -5866,7 +5920,7 @@ const CielCairn = ({ userId, db }) => {
       {/* Compteur discret */}
       <div style={{ position: "absolute", bottom: "7rem", left: 0, right: 0, textAlign: "center" }}>
         <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55` }}>
-          {pierres.length + 200} présences dans ce ciel
+          {pierres.length + 200} lumières dans ce ciel ce soir
         </p>
       </div>
 
@@ -5878,7 +5932,7 @@ const CielCairn = ({ userId, db }) => {
           </p>
         ) : etape === 5 ? (
           <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${etatChoisi?.couleur}cc` }}>
-            Elle brille là-haut. Tu peux rester.
+            Ta lumière est là-haut. Quelqu'un la verra.
           </p>
         ) : (
           <button onClick={() => setEtape(1)} style={{
@@ -5973,12 +6027,18 @@ const CielCairn = ({ userId, db }) => {
       <div style={{ position: "absolute", top: "25%", left: "50%", transform: "translateX(-50%)", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}08 0%, transparent 70%)`, animation: "alba-breathe 8s ease-in-out infinite", pointerEvents: "none" }} />
 
       <div style={{ width: "100%", maxWidth: 340, position: "relative", zIndex: 1 }}>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.2rem, 4vw, 1.5rem)", color: T.orPale, lineHeight: 1.9, textAlign: "center", marginBottom: "2.5rem", animation: "fadeUp 1s ease forwards" }}>
-          Qu'est-ce que tu portes<br/>en ce moment ?
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.45em", textTransform: "uppercase", color: `${T.or}66`, textAlign: "center", marginBottom: "1.2rem", animation: "fadeUp 0.6s ease forwards" }}>
+          Une pierre pour le ciel
+        </p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 4vw, 1.35rem)", color: T.orPale, lineHeight: 1.9, textAlign: "center", marginBottom: "0.8rem", animation: "fadeUp 1s ease forwards 0.2s", opacity: 0 }}>
+          Qu'est-ce qui t'a aidé —<br/>une phrase, un geste, un mot —<br/>et que tu veux offrir à quelqu'un d'autre ?
+        </p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55`, textAlign: "center", marginBottom: "2rem", lineHeight: 1.7, animation: "fadeUp 1s ease forwards 0.5s", opacity: 0 }}>
+          Tu n'as pas à savoir à qui.<br/>Le ciel s'en charge.
         </p>
         <textarea
           value={texte} onChange={e => setTexte(e.target.value)}
-          placeholder="En un mot, une phrase…"
+          placeholder="Ce qui t'a traversé et qui pourrait traverser quelqu'un d'autre…"
           rows={3} autoFocus
           style={{
             width: "100%", background: "transparent", border: "none",
@@ -6007,7 +6067,7 @@ const CielCairn = ({ userId, db }) => {
   if (etape === 2) return (
     <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem", overflowY: "auto" }}>
       <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}bb`, textAlign: "center", marginBottom: "2rem", lineHeight: 1.8, animation: "fadeUp 0.6s ease forwards" }}>
-        Cette chose que tu portes,<br/>elle ressemble plutôt à…
+        Ce que tu vas offrir,<br/>il vient plutôt de…
       </p>
       <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
         {ETATS_CAIRN.map((e, i) => (
@@ -6130,7 +6190,7 @@ const CielCairn = ({ userId, db }) => {
         `}</style>
 
         <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}CC`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0 }}>
-          Ta lumière a rejoint le ciel.
+          Elle est partie. Quelqu'un en avait besoin.
         </p>
       </div>
     );
