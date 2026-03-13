@@ -3,6 +3,10 @@
     {
       "path": "/api/lettre-mensuelle",
       "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/livre-du-jour",
+      "schedule": "0 0 * * *"
     }
   ]
 }
