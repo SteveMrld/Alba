@@ -6561,7 +6561,24 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   const [exerciceFait, setExerciceFait] = useState({});
   const [signal, setSignal] = useState(null);
   const [exercicesMis, setExercicesMis] = useState([]);
-  const [porteIdx, setPorteIdx] = useState(Math.max(0, cleActive - 1)); // navigation locale
+  const [porteIdx, setPorteIdx] = useState(Math.max(0, cleActive - 1));
+  const [flashEclat, setFlashEclat] = useState(false); // micro-animation éclat
+
+  // Descriptions courtes par Porte — ce qu'elle demande + ce qu'elle ouvre
+  const DESCRIPTIONS_PORTES = {
+    1:  { demande: "Mettre des mots sur ce qui fait mal.", ouvre: "La capacité de voir sans se perdre dans ce qu'on voit." },
+    2:  { demande: "Comprendre d'où viennent tes schémas.", ouvre: "La liberté de ne plus répéter ce qu'on n'a pas choisi." },
+    3:  { demande: "Accepter ce que tu ressens sans le fuir.", ouvre: "Un rapport à toi-même sans jugement ni honte." },
+    4:  { demande: "Poser ce que tu portes pour les autres.", ouvre: "Une légèreté que tu n'avais pas remarqué avoir perdue." },
+    5:  { demande: "Apprendre à recevoir — amour, aide, présence.", ouvre: "Des liens plus vrais, moins épuisants." },
+    6:  { demande: "Habiter qui tu deviens, pas qui tu étais.", ouvre: "Une vie construite sur ce que tu es, pas sur ce qu'on attendait." },
+    7:  { demande: "Laisser naître ce qui cherche à exister en toi.", ouvre: "Une énergie créatrice que tu avais mise en veille." },
+    8:  { demande: "Ouvrir aux autres sans te perdre dans eux.", ouvre: "Des relations qui te nourrissent au lieu de t'épuiser." },
+    9:  { demande: "Protéger ce qui est sacré en toi.", ouvre: "Des limites posées avec clarté, sans culpabilité." },
+    10: { demande: "Donner sens à ce que tu as traversé.", ouvre: "La possibilité de transmettre ce que la douleur t'a appris." },
+    11: { demande: "Être pleinement là où tu es.", ouvre: "Une présence à toi-même qui ne cherche plus à fuir." },
+    12: { demande: "N'avoir plus rien à prouver, à soi ou aux autres.", ouvre: "Le commencement de toi-même — enfin." },
+  };
 
   const tousLesTerrItoires = TERRITOIRES_CLES; // 12 portes
   const territoire = tousLesTerrItoires[porteIdx] || tousLesTerrItoires[0];
@@ -6613,9 +6630,15 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   }, [porteIdx]);
 
   const toggleExercice = (idx) => {
+    const wasUnchecked = !exerciceFait[idx];
     const updated = { ...exerciceFait, [idx]: !exerciceFait[idx] };
     setExerciceFait(updated);
     try { localStorage.setItem(`alba_exercices_cle${porteIdx}`, JSON.stringify(updated)); } catch {}
+    // Micro-animation éclat quand on coche
+    if (wasUnchecked) {
+      setFlashEclat(true);
+      setTimeout(() => setFlashEclat(false), 1800);
+    }
   };
 
   return (
@@ -6716,6 +6739,91 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
         textAlign: "center", marginBottom: "1.8rem", lineHeight: 1.6,
         animation: "fadeUpCle 0.4s ease forwards",
       }}>{territoire.ambiance?.texte}</div>
+
+      {/* ── DESCRIPTION DE LA PORTE ── */}
+      {DESCRIPTIONS_PORTES[territoire.index] && (
+        <div style={{
+          margin: "0 0 1.8rem",
+          padding: "1.1rem 1.4rem",
+          background: `${territoire.couleur}08`,
+          border: `1px solid ${territoire.couleur}22`,
+          borderLeft: `3px solid ${territoire.couleur}66`,
+          borderRadius: "4px",
+          animation: "fadeUpCle 0.5s ease forwards 0.1s", opacity: 0,
+        }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${territoire.couleur}88`, marginBottom: "0.6rem" }}>
+            Cette Porte te demande
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: T.aube, lineHeight: 1.7, margin: "0 0 0.8rem" }}>
+            {DESCRIPTIONS_PORTES[territoire.index].demande}
+          </p>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${territoire.couleur}66`, marginBottom: "0.5rem" }}>
+            Ce qu'elle ouvre
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}CC`, lineHeight: 1.7, margin: 0 }}>
+            {DESCRIPTIONS_PORTES[territoire.index].ouvre}
+          </p>
+        </div>
+      )}
+
+      {/* ── BARRE DE PROGRESSION ÉCLATS ── */}
+      {(() => {
+        const seuils = [...SEUILS_PORTES, 999];
+        const seuilActuel = seuils[porteIdx] || 0;
+        const seuilSuivant = seuils[porteIdx + 1] || seuilActuel + 50;
+        const reste = Math.max(0, seuilSuivant - eclats);
+        const pct = Math.min(1, (eclats - seuilActuel) / (seuilSuivant - seuilActuel));
+        const porteOuverte = eclats >= seuilSuivant;
+        const estDernierePorte = porteIdx >= TERRITOIRES_CLES.length - 1;
+        if (estDernierePorte) return null;
+        return (
+          <div style={{
+            margin: "0 0 2rem",
+            padding: "1rem 1.2rem",
+            background: `${T.nuit2}`,
+            border: `1px solid ${territoire.couleur}22`,
+            borderRadius: "6px",
+            animation: "fadeUpCle 0.5s ease forwards 0.2s", opacity: 0,
+            position: "relative", overflow: "hidden",
+          }}>
+            {/* Flash éclat */}
+            <style>{`
+              @keyframes eclatMonte { 0%{opacity:0;transform:translateY(0) scale(0.8)} 30%{opacity:1;transform:translateY(-18px) scale(1.2)} 100%{opacity:0;transform:translateY(-40px) scale(0.9)} }
+              @keyframes fadeUpCle { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+            `}</style>
+            {flashEclat && (
+              <div style={{
+                position: "absolute", right: "1.2rem", top: "0.5rem",
+                fontFamily: T.serif, fontSize: "0.85rem", color: T.or,
+                pointerEvents: "none",
+                animation: "eclatMonte 1.6s ease forwards",
+              }}>✦ +1 éclat</div>
+            )}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.6rem" }}>
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${territoire.couleur}88` }}>
+                {porteOuverte ? "Prochaine porte débloquée ✦" : `Il te reste ${reste} éclat${reste > 1 ? "s" : ""} pour ouvrir la porte suivante`}
+              </div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.7rem", color: `${territoire.couleur}BB` }}>
+                {eclats} / {seuilSuivant}
+              </div>
+            </div>
+            {/* Jauge */}
+            <div style={{ height: 4, background: `${territoire.couleur}18`, borderRadius: 2, overflow: "hidden" }}>
+              <div style={{
+                height: "100%", borderRadius: 2,
+                background: `linear-gradient(90deg, ${territoire.couleur}88, ${territoire.couleur})`,
+                width: `${pct * 100}%`,
+                transition: "width 1s cubic-bezier(0.4,0,0.2,1)",
+                boxShadow: pct > 0 ? `0 0 8px ${territoire.couleur}66` : "none",
+              }}/>
+            </div>
+            {/* Explication mécanique — une fois, discrète */}
+            <div style={{ marginTop: "0.6rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.56rem", color: `${T.brume}55`, letterSpacing: "0.05em", lineHeight: 1.5 }}>
+              Chaque exercice accompli, chaque jour revenu, chaque souffle pris — tout génère des Éclats. Les Éclats ouvrent les Portes.
+            </div>
+          </div>
+        );
+      })()}
 
       {/* En-tête Clé — Porte architecturale */}
       <div style={{
@@ -6953,14 +7061,7 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
             ))}
           </div>
 
-          <div style={{
-            marginTop: "2rem", textAlign: "center",
-            fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "0.78rem", color: `${T.brume}CC`,
-          }}>
-            Appuie sur un exercice pour le marquer comme fait.<br/>
-            Chaque acte génère des Éclats d'aube.
-          </div>
+          <div style={{ height: "1.5rem" }} />
         </div>
       )}
 
