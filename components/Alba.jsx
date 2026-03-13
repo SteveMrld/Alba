@@ -9144,32 +9144,44 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
   return (
     <div style={{ paddingBottom: "6rem" }}>
 
-      {/* ── HERO — carte d'âme pleine largeur ── */}
+      {/* ── HERO — carte d'âme centrée, fondue ── */}
       <div style={{
         position: "relative", width: "100%",
-        minHeight: "65vh", overflow: "hidden",
+        minHeight: "70vh", overflow: "hidden",
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "flex-end",
         paddingBottom: "2.5rem",
+        background: T.nuit,
       }}>
-        {/* Carte en fond pleine hauteur */}
+        {/* Halo radial derrière la carte */}
         <div style={{
           position: "absolute", inset: 0,
-          display: "flex", alignItems: "center", justifyContent: "center",
+          background: `radial-gradient(ellipse 70% 60% at 50% 40%, ${c1}12 0%, transparent 70%)`,
+          pointerEvents: "none",
+        }}/>
+        {/* Carte — contenue, visible en entier */}
+        <div style={{
+          position: "absolute",
+          top: "3%", left: "50%",
+          transform: "translateX(-50%)",
+          width: "min(72vw, 300px)",
         }}>
           {CARTE_IMAGES[cdv] ? (
             <img src={CARTE_IMAGES[cdv]} alt="" style={{
-              width: "100%", height: "100%", objectFit: "cover",
-              objectPosition: "center top",
+              width: "100%", height: "auto",
+              display: "block",
+              borderRadius: "10px",
+              boxShadow: `0 24px 80px rgba(0,0,0,0.7), 0 0 40px ${c1}18`,
             }}/>
           ) : (
             <CarteAme data={data} />
           )}
         </div>
-        {/* Overlay gradient bas — pour le texte */}
+        {/* Gradient bas — fondu vers le fond */}
         <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to top, rgba(10,8,6,1) 0%, rgba(10,8,6,0.6) 40%, rgba(10,8,6,0.1) 80%, transparent 100%)",
+          position: "absolute", bottom: 0, left: 0, right: 0, height: "45%",
+          background: `linear-gradient(to top, ${T.nuit} 0%, ${T.nuit}CC 40%, transparent 100%)`,
+          pointerEvents: "none",
         }}/>
         {/* Texte hero */}
         <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 1.5rem" }}>
@@ -9182,7 +9194,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           <div style={{
             fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem",
             letterSpacing: "0.6em", textTransform: "uppercase",
-            color: `${c1}CC`,
+            color: `${T.brume}99`,
           }}>Chemin {cdv} · {chemin.titre}</div>
         </div>
       </div>
