@@ -9667,8 +9667,17 @@ const Presence = ({ data, onStart, isPremium, onShowPaywall }) => {
   const [reflet, setReflet]     = useState(null);
   const [loading, setLoading]   = useState(false);
   const [phase, setPhase]       = useState("idle");
-  const [zone, setZone]         = useState(null); // null | "surchauffe" | "passage" | "gel"
+  const [zone, setZone]         = useState(null);
   const textareaRef             = useRef(null);
+  const bgVideoRef              = useRef(null);
+
+  // Force rechargement vidéo à chaque changement de zone
+  useEffect(() => {
+    if (bgVideoRef.current && zone) {
+      bgVideoRef.current.load();
+      bgVideoRef.current.play().catch(() => {});
+    }
+  }, [zone]);
 
   const ZONES = [
     {
@@ -9901,7 +9910,7 @@ ${zone ? `\nÉtat nerveux de l'utilisateur : ${ZONES.find(z=>z.id===zone)?.syste
     <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
 
       {/* Vidéo fond très discrète */}
-      <video key={zone} autoPlay loop muted playsInline style={{
+      <video ref={bgVideoRef} autoPlay loop muted playsInline style={{
         position: "fixed", inset: 0, width: "100%", height: "100%",
         objectFit: "cover", zIndex: 0, opacity: 0.18, pointerEvents: "none",
       }}>
