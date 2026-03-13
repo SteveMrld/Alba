@@ -1447,14 +1447,26 @@ const PaywallScreen = ({ onClose, userKey, userEmail, onPremiumActivated }) => {
 const AuthScreen = ({ onAuth }) => {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode]         = useState("login"); // login | signup | reset
+  const [mode, setMode]         = useState("login"); // login | signup | reset | magic
   const [loading, setLoading]   = useState(false);
   const [errMsg, setErrMsg]     = useState("");
   const [resetSent, setResetSent] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
 
   const handleSubmit = async () => {
     setErrMsg("");
     if (!email.includes("@")) { setErrMsg("Adresse email invalide."); return; }
+
+    // Magic link
+    if (mode === "magic") {
+      setLoading(true);
+      const ok = await sbAuth.sendMagicLink(email.trim().toLowerCase());
+      setLoading(false);
+      if (ok) setMagicSent(true);
+      else setErrMsg("Une erreur est survenue. Réessaie.");
+      return;
+    }
+
     if (mode !== "reset" && password.length < 6) { setErrMsg("Mot de passe trop court (6 caractères min)."); return; }
     setLoading(true);
     if (mode === "login") {
@@ -1492,7 +1504,19 @@ const AuthScreen = ({ onAuth }) => {
       <div style={{ width: "100%", maxWidth: 320, display: "flex", flexDirection: "column", gap: "0.9rem" }}>
 
         {/* ── MOT DE PASSE OUBLIÉ ENVOYÉ ── */}
-        {mode === "reset" && resetSent ? (
+        {mode === "magic" && magicSent ? (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: "1.6rem", color: T.or, marginBottom: "1rem" }}>✦</div>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.orPale, lineHeight: 1.8 }}>
+              Un lien de connexion a été envoyé à<br/>
+              <span style={{ fontSize: "0.8rem", color: T.brume }}>{email}</span><br/><br/>
+              Clique sur le lien dans l'email pour entrer dans ALBA.
+            </p>
+            <button onClick={() => { setMode("login"); setMagicSent(false); }} style={{ marginTop: "1.5rem", background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.8rem", color: `${T.brume}88` }}>
+              Retour à la connexion
+            </button>
+          </div>
+        ) : mode === "reset" && resetSent ? (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "1.6rem", color: T.or, marginBottom: "1rem" }}>✦</div>
             <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.orPale, lineHeight: 1.8 }}>
@@ -1516,6 +1540,12 @@ const AuthScreen = ({ onAuth }) => {
               Continuer avec Google
             </button>
 
+            {/* Magic link */}
+            <button onClick={() => setMode(mode === "magic" ? "login" : "magic")} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", width: "100%", padding: "0.85rem 1rem", background: mode === "magic" ? `${T.or}12` : "#1E1A16", border: `1px solid ${mode === "magic" ? T.or + "55" : T.brume + "33"}`, borderRadius: "6px", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.75rem", letterSpacing: "0.08em", color: mode === "magic" ? T.or : T.aube, WebkitTapHighlightColor: "transparent", transition: "all 0.2s" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Connexion par email magique
+            </button>
+
             {/* Séparateur */}
             <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
               <div style={{ flex: 1, height: 1, background: `${T.brume}22` }} />
@@ -1525,7 +1555,7 @@ const AuthScreen = ({ onAuth }) => {
 
             {/* Titre mode */}
             <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: T.brume, textAlign: "center", margin: "0" }}>
-              {mode === "login" ? "Connexion" : mode === "signup" ? "Créer mon compte" : "Mot de passe oublié"}
+              {mode === "login" ? "Connexion" : mode === "signup" ? "Créer mon compte" : mode === "magic" ? "Connexion sans mot de passe" : "Mot de passe oublié"}
             </p>
 
             {/* Email */}
@@ -1533,7 +1563,7 @@ const AuthScreen = ({ onAuth }) => {
               onFocus={e => e.target.style.borderColor = `${T.or}55`} onBlur={e => e.target.style.borderColor = `${T.brume}33`} />
 
             {/* Mot de passe */}
-            {mode !== "reset" && (
+            {mode !== "reset" && mode !== "magic" && (
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleSubmit()} placeholder="Mot de passe" style={inputStyle}
                 onFocus={e => e.target.style.borderColor = `${T.or}55`} onBlur={e => e.target.style.borderColor = `${T.brume}33`} />
             )}
@@ -1542,7 +1572,7 @@ const AuthScreen = ({ onAuth }) => {
 
             {/* Bouton principal */}
             <button onClick={handleSubmit} disabled={loading} style={{ background: loading ? `${T.or}55` : T.or, border: "none", borderRadius: "4px", padding: "1rem", cursor: loading ? "default" : "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.nuit, WebkitTapHighlightColor: "transparent" }}>
-              {loading ? "…" : mode === "login" ? "Se connecter" : mode === "signup" ? "Créer mon compte" : "Envoyer le lien"}
+              {loading ? "…" : mode === "login" ? "Se connecter" : mode === "signup" ? "Créer mon compte" : mode === "magic" ? "Envoyer le lien magique" : "Envoyer le lien"}
             </button>
 
             {/* Liens secondaires */}
