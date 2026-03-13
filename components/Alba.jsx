@@ -5715,98 +5715,81 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
 };
 
 // ─── RITUEL DU CRÉPUSCULE ────────────────────────────────────────────────────
-// ─── LE CIEL — Rituel du Cairn ────────────────────────────────────────────────
+// ─── LE CIEL — Offrandes ────────────────────────────────────────────────────────
 
-const ETATS_CAIRN = [
-  { id: "chagrin",        label: "quelque chose que je perds",              couleur: "#4A6FA5", hex: "#4A6FA5" },
-  { id: "fatigue",        label: "je n'en peux plus",                       couleur: "#7A7A8A", hex: "#7A7A8A" },
-  { id: "colere",         label: "quelque chose en moi résiste",            couleur: "#C45C2A", hex: "#C45C2A" },
-  { id: "solitude",       label: "je suis seul avec ça",                    couleur: "#2A3A5C", hex: "#2A3A5C" },
-  { id: "questionnement", label: "je ne sais plus",                         couleur: "#8A6FA5", hex: "#8A6FA5" },
-  { id: "traversee",      label: "je suis en chemin malgré tout",           couleur: "#C8A96E", hex: "#C8A96E" },
-  { id: "espoir",         label: "quelque chose recommence",                couleur: "#6A9E8A", hex: "#6A9E8A" },
-  { id: "douceur",        label: "je me traite avec soin",                  couleur: "#C4857A", hex: "#C4857A" },
-  { id: "gratitude",      label: "j'ai reçu quelque chose",                 couleur: "#D4A84B", hex: "#D4A84B" },
-  { id: "paix",           label: "je suis posé",                            couleur: "#8AA88A", hex: "#8AA88A" },
-  { id: "joie",           label: "quelque chose de léger",                  couleur: "#E8B89A", hex: "#E8B89A" },
-  { id: "guerison",       label: "je sens que ça change en moi",            couleur: "#D4C8B8", hex: "#D4C8B8" },
+// ─── LE CIEL — Offrandes ──────────────────────────────────────────────────────
+
+const CATEGORIES_CIEL = [
+  { id: "livre",        label: "Un livre",          couleur: "#C8A96E", icon: "📖" },
+  { id: "conversation", label: "Une conversation",  couleur: "#7898C8", icon: "🗣" },
+  { id: "pratique",     label: "Une pratique",       couleur: "#78A878", icon: "🌿" },
+  { id: "decouverte",   label: "Une découverte",     couleur: "#9878C8", icon: "✦" },
+  { id: "phrase",       label: "Une phrase",         couleur: "#C8A040", icon: "✍" },
+  { id: "moment",       label: "Un moment",          couleur: "#C87878", icon: "○" },
+  { id: "autre",        label: "Autre chose",        couleur: "#A8A898", icon: "·" },
 ];
 
-const PHRASES_CAIRN = {
-  chagrin:        "Le chagrin est une forme d'amour qui cherche où aller.",
-  fatigue:        "Poser ce qu'on porte, c'est déjà un acte de courage.",
-  colere:         "La colère dit quelque chose de juste. Écoute-la.",
-  solitude:       "D'autres ont veillé dans le même silence ce soir.",
-  questionnement: "Ne pas savoir est parfois la réponse la plus honnête.",
-  traversee:      "Être en chemin, c'est déjà être arrivé quelque part.",
-  espoir:         "Quelque chose en toi sait que ça peut recommencer.",
-  douceur:        "Prendre soin de soi n'est pas un luxe. C'est un retour.",
-  gratitude:      "Ce que tu as reçu continue à travailler en toi.",
-  paix:           "La paix n'est pas l'absence. C'est une présence.",
-  joie:           "Laisse la légèreté prendre toute la place qu'elle mérite.",
-  guerison:       "La guérison ne prévient pas. Elle arrive doucement.",
-};
-
-// Génère des points de ciel simulés + les vrais depuis Supabase
-const genererEtoilesCiel = (pierresReelles) => {
+const genererEtoilesCiel = (offrandes) => {
   const rng = (seed) => { let x = Math.sin(seed) * 10000; return x - Math.floor(x); };
   const points = [];
-  // ~200 points de fond (histoire collective simulée)
-  for (let i = 0; i < 200; i++) {
-    const etat = ETATS_CAIRN[Math.floor(rng(i * 7.3) * ETATS_CAIRN.length)];
+  for (let i = 0; i < 180; i++) {
+    const cat = CATEGORIES_CIEL[Math.floor(rng(i * 7.3) * CATEGORIES_CIEL.length)];
     const twinkleIdx = Math.floor(rng(i * 8.3) * 3);
     const twinkleDur = 4 + rng(i * 11.7) * 12;
     const twinkleDelay = rng(i * 6.1) * 8;
     points.push({
       id: `bg_${i}`, x: rng(i * 3.7) * 100, y: rng(i * 5.1) * 100,
-      couleur: etat.couleur, taille: 1 + rng(i * 2.3) * 2,
-      opacite: 0.15 + rng(i * 4.1) * 0.35, isReal: false,
+      couleur: cat.couleur, taille: 1 + rng(i * 2.3) * 1.5,
+      opacite: 0.08 + rng(i * 4.1) * 0.22, isReal: false, data: null,
       twinkleAnim: `star-twinkle-${twinkleIdx + 1} ${twinkleDur}s ${twinkleDelay}s ease-in-out infinite`,
     });
   }
-  // Pierres réelles par-dessus
-  pierresReelles.forEach((p, i) => {
+  offrandes.forEach((o, i) => {
+    const cat = CATEGORIES_CIEL.find(c => c.id === o.categorie) || CATEGORIES_CIEL[6];
     points.push({
-      id: `real_${p.id || i}`,
-      x: 5 + rng((p.created_at || i) * 9.1 + 1) * 90,
-      y: 5 + rng((p.created_at || i) * 6.7 + 2) * 90,
-      couleur: (ETATS_CAIRN.find(e => e.id === p.etat) || ETATS_CAIRN[5]).couleur,
-      taille: 2 + rng(i * 1.7) * 2, opacite: 0.5 + rng(i * 3.3) * 0.4, isReal: true,
+      id: `real_${o.id || i}`,
+      x: 5 + rng((o.created_at || i) * 9.1 + 1) * 90,
+      y: 5 + rng((o.created_at || i) * 6.7 + 2) * 85,
+      couleur: cat.couleur, taille: 3 + rng(i * 1.7) * 2,
+      opacite: 0.6 + rng(i * 3.3) * 0.35, isReal: true,
+      data: o,
+      twinkleAnim: `alba-breathe ${6 + rng(i * 5.1) * 8}s ${rng(i * 2.3) * 4}s ease-in-out infinite`,
     });
   });
   return points;
 };
 
 const CielCairn = ({ userId, db }) => {
-  const [introVue, setIntroVue]     = useState(() => {
+  const [introVue, setIntroVue] = useState(() => {
     try { return localStorage.getItem("alba_ciel_intro_vue") === "1"; } catch { return false; }
   });
-  const [introPhase, setIntroPhase] = useState(0); // 0=texte 1=fondu
-  const [etape, setEtape]           = useState(0); // 0=ciel 1=question 2=etats 3=geste 4=envol 5=retour
-  const [texte, setTexte]           = useState("");
-  const [etatChoisi, setEtatChoisi] = useState(null);
-  const [pierres, setPierres]       = useState([]);
-  const [nouvellePierre, setNouvellePierre] = useState(null);
-  const [piedDePage, setPiedDePage] = useState(false);
+  const [etape, setEtape] = useState(0); // 0=ciel 1=categorie 2=texte 3=transformation 4=geo 5=geste 6=envol 7=retour
+  const [categorie, setCategorie] = useState(null);
+  const [texte, setTexte] = useState("");
+  const [textePoetique, setTextePoetique] = useState("");
+  const [ville, setVille] = useState("");
+  const [geoAccepted, setGeoAccepted] = useState(null);
+  const [offrandes, setOffrandes] = useState([]);
+  const [nouvelleOffrande, setNouvelleOffrande] = useState(null);
   const [dejaFaitAujd, setDejaFaitAujd] = useState(false);
-  const [isHolding, setIsHolding]   = useState(false);
+  const [isHolding, setIsHolding] = useState(false);
   const [holdProgress, setHoldProgress] = useState(0);
   const [particules, setParticules] = useState([]);
-  const holdTimerRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [etoileSelectionnee, setEtoileSelectionnee] = useState(null);
+  const [shootingStarActive, setShootingStarActive] = useState(null);
   const holdIntervalRef = useRef(null);
-
   const today = new Date().toISOString().split("T")[0];
 
-  // Charger les pierres depuis Supabase
+  // Charger les offrandes
   useEffect(() => {
     const charger = async () => {
       try {
-        const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_cairn?select=id,etat,created_at&order=created_at.desc&limit=300`, {
+        const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_ciel_offrandes?select=id,categorie,texte_poetique,couleur,ville,pays,created_at&order=created_at.desc&limit=400`, {
           headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
         });
-        if (r.ok) { const d = await r.json(); setPierres(d); }
+        if (r.ok) { const d = await r.json(); setOffrandes(d); }
       } catch {}
-      // Vérifier si déjà fait aujourd'hui
       try {
         const fait = localStorage.getItem(`alba_cairn_${today}`);
         if (fait) setDejaFaitAujd(true);
@@ -5815,22 +5798,96 @@ const CielCairn = ({ userId, db }) => {
     charger();
   }, []);
 
-  const etoiles = useMemo(() => genererEtoilesCiel(pierres), [pierres]);
+  // Étoile filante
+  useEffect(() => {
+    const DIRECTIONS = ["lr", "rl", "diag"];
+    const lancer = () => {
+      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      setShootingStarActive({ id: Date.now(), x: 10 + Math.random() * 70, y: 5 + Math.random() * 40, dir });
+      setTimeout(() => setShootingStarActive(null), 1400);
+      setTimeout(lancer, 12000 + Math.random() * 10000);
+    };
+    const t = setTimeout(lancer, 5000);
+    return () => clearTimeout(t);
+  }, []);
 
-  // Sauvegarder la pierre
-  const sauvegarderPierre = async () => {
-    const pierre = { etat: etatChoisi.id, user_token: userId || "anon", created_at: new Date().toISOString() };
+  // Envol étape 6
+  useEffect(() => {
+    if (etape !== 6) return;
+    sauvegarderOffrande();
+    const t = setTimeout(() => setEtape(7), 3000);
+    return () => clearTimeout(t);
+  }, [etape]);
+
+  const etoiles = useMemo(() => genererEtoilesCiel(offrandes), [offrandes]);
+
+  // Transformation poétique via ALBA
+  const transformer = async () => {
+    if (!texte.trim()) return;
+    setLoading(true);
+    setEtape(3);
     try {
-      await fetch(`${SUPABASE_URL}/rest/v1/alba_cairn`, {
+      const catLabel = categorie?.label || "quelque chose";
+      const prompt = `Quelqu'un dépose dans un ciel partagé : "${texte.trim()}" (catégorie : ${catLabel}).
+
+Transforme ceci en une phrase poétique, sobre, universelle — qui pourrait toucher quelqu'un qui n'a pas vécu exactement la même chose mais qui pourrait la reconnaître. Entre 10 et 22 mots. Pas de guillemets. Pas de signature. Juste la phrase.`;
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          max_tokens: 80,
+          system: "Tu es une présence poétique sobre. Tu distilles des expériences humaines en phrases universelles.",
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+      const d = await res.json();
+      const poetique = d.content?.[0]?.text?.trim() || texte.trim();
+      setTextePoetique(poetique);
+    } catch {
+      setTextePoetique(texte.trim());
+    }
+    setLoading(false);
+  };
+
+  // Géolocalisation
+  const demanderGeo = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
+            const d = await r.json();
+            setVille(d.address?.city || d.address?.town || d.address?.village || "");
+          } catch { setVille(""); }
+        },
+        () => setVille("")
+      );
+    }
+  };
+
+  // Sauvegarder
+  const sauvegarderOffrande = async () => {
+    const offrande = {
+      categorie: categorie?.id || "autre",
+      texte_brut: texte.trim(),
+      texte_poetique: textePoetique,
+      couleur: categorie?.couleur || "#C8A96E",
+      ville: ville || null,
+      pays: null,
+      user_token: userId || "anon",
+      created_at: new Date().toISOString(),
+    };
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/alba_ciel_offrandes`, {
         method: "POST",
         headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", Prefer: "return=minimal" },
-        body: JSON.stringify(pierre),
+        body: JSON.stringify(offrande),
       });
       localStorage.setItem(`alba_cairn_${today}`, "1");
       setDejaFaitAujd(true);
     } catch {}
-    setNouvellePierre({ x: 48 + Math.random() * 4, y: 20 + Math.random() * 10, couleur: etatChoisi.couleur, isNew: true });
-    setPierres(prev => [...prev, { ...pierre, id: Date.now() }]);
+    setNouvelleOffrande({ x: 10 + Math.random() * 80, y: 10 + Math.random() * 30, couleur: categorie?.couleur || "#C8A96E" });
+    setOffrandes(prev => [...prev, { ...offrande, id: Date.now() }]);
   };
 
   // Geste maintien
@@ -5840,393 +5897,307 @@ const CielCairn = ({ userId, db }) => {
     holdIntervalRef.current = setInterval(() => {
       progress += 2;
       setHoldProgress(progress);
-      // Générer particules
       if (progress % 10 === 0) {
         setParticules(prev => [...prev, {
           id: Date.now() + Math.random(),
           angle: Math.random() * 360,
           distance: 40 + Math.random() * 30,
           size: 2 + Math.random() * 3,
-          couleur: etatChoisi.couleur,
+          couleur: categorie?.couleur || "#C8A96E",
         }]);
       }
       if (progress >= 100) {
         clearInterval(holdIntervalRef.current);
         setIsHolding(false);
         setHoldProgress(100);
-        try { const a = new Audio("/sons/cairn.mp3"); a.volume = 0.2; a.play().catch(()=>{}); } catch(e) {}
-        setTimeout(() => setEtape(4), 300);
+        try { const a = new Audio("/sons/cairn.mp3"); a.volume = 0.2; a.play().catch(()=>{}); } catch {}
+        setTimeout(() => setEtape(6), 300);
       }
     }, 30);
   };
-
   const stopHold = () => {
     clearInterval(holdIntervalRef.current);
     setIsHolding(false);
     if (holdProgress < 100) setHoldProgress(0);
   };
+  useEffect(() => () => clearInterval(holdIntervalRef.current), []);
 
-  // Nettoyage
-  useEffect(() => () => { clearInterval(holdIntervalRef.current); clearTimeout(holdTimerRef.current); }, []);
-
-  // ── CIEL (étape 0 et 5) ────────────────────────────────────────────────────
-  // Envol étape 4 — sauvegarde + transition (hook dans le corps, pas dans un if)
-  useEffect(() => {
-    if (etape !== 4) return;
-    sauvegarderPierre();
-    const t = setTimeout(() => setEtape(5), 3000);
-    return () => clearTimeout(t);
-  }, [etape]);
-
-  // Étoile filante — apparaît toutes les 12-22s, direction variée
-  const [shootingStarActive, setShootingStarActive] = useState(null);
-  useEffect(() => {
-    const DIRECTIONS = ["lr", "rl", "diag"];
-    const lancer = () => {
-      const dir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
-      const x = 10 + Math.random() * 70;
-      const y = 5 + Math.random() * 40;
-      setShootingStarActive({ id: Date.now(), x, y, dir });
-      setTimeout(() => setShootingStarActive(null), 1400);
-      // Prochain lancement dans 12 à 22 secondes
-      setTimeout(lancer, 12000 + Math.random() * 10000);
-    };
-    // Premier lancement après 5s
-    const t = setTimeout(lancer, 5000);
-    return () => clearTimeout(t);
-  }, []);
-
+  // ── CIEL ─────────────────────────────────────────────────────────────────
   const CielView = ({ showNouvelleEtoile }) => (
     <div style={{ position: "relative", width: "100%", height: "100vh", background: "#030205", overflow: "hidden" }}>
-      {/* Nébuleuse animée */}
-      <div style={{ position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A55 0%, transparent 70%)",
-        animation: "nebula-drift 20s ease-in-out infinite",
-        pointerEvents: "none" }} />
-      <div style={{ position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 50% 40% at 30% 60%, #0F1A2A33 0%, transparent 60%)",
-        animation: "nebula-drift 28s ease-in-out infinite reverse",
-        pointerEvents: "none" }} />
+      {/* Nébuleuses animées */}
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, #1A0F2A55 0%, transparent 70%)", animation: "nebula-drift 20s ease-in-out infinite", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 50% 40% at 30% 60%, #0F1A2A33 0%, transparent 60%)", animation: "nebula-drift 28s ease-in-out infinite reverse", pointerEvents: "none" }} />
 
       {/* Étoile filante */}
       {shootingStarActive && (
         <div key={shootingStarActive.id} style={{
-          position: "absolute",
-          left: `${shootingStarActive.x}%`,
-          top: `${shootingStarActive.y}%`,
-          width: shootingStarActive.dir === "rl" ? 55 : 65,
-          height: 1.5,
+          position: "absolute", left: `${shootingStarActive.x}%`, top: `${shootingStarActive.y}%`,
+          width: 65, height: 1.5,
           background: shootingStarActive.dir === "rl"
             ? `linear-gradient(to left, transparent, ${T.orPale}dd, ${T.orPale}44)`
             : `linear-gradient(to right, transparent, ${T.orPale}dd, ${T.orPale}44)`,
-          borderRadius: 2,
-          boxShadow: `0 0 4px ${T.orPale}88`,
-          animation: `shooting-star-${shootingStarActive.dir} 1.2s ease-out forwards`,
-          zIndex: 5,
+          borderRadius: 2, boxShadow: `0 0 4px ${T.orPale}88`,
+          animation: `shooting-star-${shootingStarActive.dir} 1.2s ease-out forwards`, zIndex: 5,
         }} />
       )}
 
       {/* Étoiles */}
       {etoiles.map(e => (
-        <div key={e.id} style={{
-          position: "absolute", left: `${e.x}%`, top: `${e.y}%`,
-          width: e.taille, height: e.taille, borderRadius: "50%",
-          background: e.couleur, opacity: e.opacite,
-          boxShadow: e.isReal ? `0 0 ${e.taille * 3}px ${e.couleur}55` : "none",
-          transition: "opacity 2s ease",
-          animation: e.isReal
-            ? `alba-breathe ${8 + Math.random() * 8}s ease-in-out infinite`
-            : (e.twinkleAnim || "none"),
-        }} />
+        <div key={e.id}
+          onClick={() => e.isReal && e.data && setEtoileSelectionnee(e.data)}
+          style={{
+            position: "absolute", left: `${e.x}%`, top: `${e.y}%`,
+            width: e.taille, height: e.taille, borderRadius: "50%",
+            background: e.couleur, opacity: e.opacite,
+            boxShadow: e.isReal ? `0 0 ${e.taille * 4}px ${e.couleur}66` : "none",
+            animation: e.twinkleAnim || "none",
+            cursor: e.isReal && e.data ? "pointer" : "default",
+            transition: "transform 0.2s",
+            zIndex: e.isReal ? 3 : 1,
+          }}
+          onMouseEnter={ev => { if (e.isReal) ev.currentTarget.style.transform = "scale(2)"; }}
+          onMouseLeave={ev => { ev.currentTarget.style.transform = "scale(1)"; }}
+        />
       ))}
 
-      {/* Nouvelle étoile — brille plus fort */}
-      {showNouvelleEtoile && nouvellePierre && (
+      {/* Nouvelle étoile */}
+      {showNouvelleEtoile && nouvelleOffrande && (
         <div style={{
-          position: "absolute", left: `${nouvellePierre.x}%`, top: `${nouvellePierre.y}%`,
-          width: 6, height: 6, borderRadius: "50%",
-          background: nouvellePierre.couleur,
-          boxShadow: `0 0 20px ${nouvellePierre.couleur}, 0 0 40px ${nouvellePierre.couleur}55`,
-          animation: "alba-breathe 3s ease-in-out infinite",
-          zIndex: 10,
+          position: "absolute", left: `${nouvelleOffrande.x}%`, top: `${nouvelleOffrande.y}%`,
+          width: 7, height: 7, borderRadius: "50%", background: nouvelleOffrande.couleur,
+          boxShadow: `0 0 20px ${nouvelleOffrande.couleur}, 0 0 50px ${nouvelleOffrande.couleur}44`,
+          animation: "alba-breathe 3s ease-in-out infinite", zIndex: 10,
         }} />
       )}
 
-      {/* Compteur discret */}
+      {/* Popup étoile sélectionnée */}
+      {etoileSelectionnee && (
+        <div onClick={() => setEtoileSelectionnee(null)} style={{
+          position: "absolute", inset: 0, background: "#030205cc", zIndex: 20,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem",
+          backdropFilter: "blur(4px)",
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: "#0D0A12", border: `1px solid ${(CATEGORIES_CIEL.find(c => c.id === etoileSelectionnee.categorie) || CATEGORIES_CIEL[6]).couleur}44`,
+            borderRadius: "12px", padding: "2rem 1.8rem", maxWidth: 320, textAlign: "center",
+            animation: "fadeUp 0.4s ease forwards",
+          }}>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${(CATEGORIES_CIEL.find(c => c.id === etoileSelectionnee.categorie) || CATEGORIES_CIEL[6]).couleur}99`, marginBottom: "1.2rem" }}>
+              {(CATEGORIES_CIEL.find(c => c.id === etoileSelectionnee.categorie) || CATEGORIES_CIEL[6]).icon}&nbsp;
+              {(CATEGORIES_CIEL.find(c => c.id === etoileSelectionnee.categorie) || CATEGORIES_CIEL[6]).label}
+            </div>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.05rem", color: T.orPale, lineHeight: 1.9, margin: "0 0 1.4rem" }}>
+              "{etoileSelectionnee.texte_poetique}"
+            </p>
+            {(etoileSelectionnee.ville || etoileSelectionnee.pays) && (
+              <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}55` }}>
+                {etoileSelectionnee.ville}{etoileSelectionnee.ville && etoileSelectionnee.pays ? " · " : ""}{etoileSelectionnee.pays}
+                {etoileSelectionnee.created_at && ` · ${new Date(etoileSelectionnee.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}`}
+              </div>
+            )}
+            <button onClick={() => setEtoileSelectionnee(null)} style={{ marginTop: "1.5rem", background: "none", border: `1px solid ${T.brume}22`, borderRadius: "20px", padding: "0.5rem 1.5rem", color: `${T.brume}66`, fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", cursor: "pointer" }}>Fermer</button>
+          </div>
+        </div>
+      )}
+
+      {/* Compteur + bouton */}
       <div style={{ position: "absolute", bottom: "7rem", left: 0, right: 0, textAlign: "center" }}>
-        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55` }}>
-          {pierres.length + 200} lumières dans ce ciel ce soir
+        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}44` }}>
+          {offrandes.length + 200} lumières dans ce ciel ce soir
         </p>
       </div>
-
-      {/* Bouton déposer / déjà fait */}
       <div style={{ position: "absolute", bottom: "3.5rem", left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-        {dejaFaitAujd && etape !== 5 ? (
+        {dejaFaitAujd && etape !== 7 ? (
           <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}BB` }}>
-            Ta pierre est dans le ciel ce soir.
+            Ton offrande brille là-haut ce soir.
           </p>
-        ) : etape === 5 ? (
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${etatChoisi?.couleur}cc` }}>
+        ) : etape === 7 ? (
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${nouvelleOffrande?.couleur || T.or}cc` }}>
             Ta lumière est là-haut. Quelqu'un la verra.
           </p>
         ) : (
           <button onClick={() => setEtape(1)} style={{
             background: "transparent", border: `1px solid ${T.or}33`,
-            borderRadius: "30px", padding: "0.8rem 2rem",
+            borderRadius: "30px", padding: "0.9rem 2.2rem",
             fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
             letterSpacing: "0.5em", textTransform: "uppercase",
-            color: `${T.or}EE`, cursor: "pointer",
-            transition: "all 0.4s ease",
+            color: `${T.or}EE`, cursor: "pointer", transition: "all 0.4s ease",
           }}>
-            Déposer une pierre
+            Déposer une offrande
           </button>
         )}
       </div>
     </div>
   );
 
-  // ── INTRO — première visite seulement ────────────────────────────────────
+  // ── INTRO ────────────────────────────────────────────────────────────────
   if (!introVue) return (
-    <div style={{
-      minHeight: "100vh", background: "#060408",
-      display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      padding: "2.5rem",
-      animation: "fadeIn 1s ease forwards",
-    }}>
-      {/* Étoiles décoratives */}
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2.5rem", animation: "fadeIn 1s ease forwards" }}>
       {[...Array(40)].map((_, i) => (
-        <div key={i} style={{
-          position: "absolute",
-          left: `${Math.random()*100}%`, top: `${Math.random()*100}%`,
-          width: Math.random()*2+1, height: Math.random()*2+1,
-          borderRadius: "50%",
-          background: `rgba(${180+Math.floor(Math.random()*60)},${160+Math.floor(Math.random()*60)},${100+Math.floor(Math.random()*80)},${0.3+Math.random()*0.5})`,
-          pointerEvents: "none",
-        }}/>
+        <div key={i} style={{ position: "absolute", left: `${Math.random()*100}%`, top: `${Math.random()*100}%`, width: Math.random()*2+1, height: Math.random()*2+1, borderRadius: "50%", background: `rgba(${180+Math.floor(Math.random()*60)},${160+Math.floor(Math.random()*60)},${100+Math.floor(Math.random()*80)},${0.3+Math.random()*0.5})`, pointerEvents: "none" }}/>
       ))}
-
       <div style={{ textAlign: "center", maxWidth: 320, position: "relative", zIndex: 1 }}>
-        <div style={{ fontSize: "1.8rem", marginBottom: "2rem", filter: "drop-shadow(0 0 12px rgba(200,169,110,0.6))" }}>
-          ✦
-        </div>
-        <p style={{
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontStyle: "italic", fontWeight: 300,
-          fontSize: "clamp(1.1rem, 4vw, 1.3rem)",
-          color: "#E8D5B0", lineHeight: 1.9,
-          marginBottom: "1rem",
-          animation: "fadeUp 0.8s ease forwards 0.3s", opacity: 0,
-        }}>
-          Un espace partagé.
+        <div style={{ fontSize: "1.8rem", marginBottom: "2rem", filter: "drop-shadow(0 0 12px rgba(200,169,110,0.6))" }}>✦</div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontWeight: 300, fontSize: "clamp(1.1rem, 4vw, 1.3rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "1rem", animation: "fadeUp 0.8s ease forwards 0.3s", opacity: 0 }}>
+          Ce que tu as traversé<br/>peut éclairer quelqu'un d'autre.
         </p>
-        <p style={{
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-          fontStyle: "italic", fontWeight: 300,
-          fontSize: "clamp(1.1rem, 4vw, 1.3rem)",
-          color: "#D4CCC5", lineHeight: 1.9,
-          marginBottom: "2.5rem",
-          animation: "fadeUp 0.8s ease forwards 0.8s", opacity: 0,
-        }}>
-          Chaque pierre déposée ici<br/>devient une étoile.
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontWeight: 300, fontSize: "clamp(0.9rem, 3vw, 1rem)", color: `${T.brume}99`, lineHeight: 1.9, marginBottom: "2.5rem", animation: "fadeUp 0.8s ease forwards 0.8s", opacity: 0 }}>
+          Chaque offrande déposée ici<br/>devient une étoile dans le ciel partagé.
         </p>
-        <button
-          onClick={() => {
-            try { localStorage.setItem("alba_ciel_intro_vue", "1"); } catch {}
-            setIntroVue(true);
-          }}
-          style={{
-            background: "none",
-            border: "1px solid rgba(200,169,110,0.35)",
-            borderRadius: "6px",
-            padding: "0.85rem 2.5rem",
-            fontFamily: "'Jost', sans-serif",
-            fontWeight: 300, fontSize: "0.68rem",
-            letterSpacing: "0.5em", textTransform: "uppercase",
-            color: "#C8A96E", cursor: "pointer",
-            animation: "fadeUp 0.8s ease forwards 1.4s", opacity: 0,
-            transition: "all 0.2s",
-          }}
-        >
+        <button onClick={() => { try { localStorage.setItem("alba_ciel_intro_vue", "1"); } catch {} setIntroVue(true); }}
+          style={{ background: "none", border: "1px solid rgba(200,169,110,0.35)", borderRadius: "6px", padding: "0.85rem 2.5rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.68rem", letterSpacing: "0.5em", textTransform: "uppercase", color: "#C8A96E", cursor: "pointer", animation: "fadeUp 0.8s ease forwards 1.4s", opacity: 0, transition: "all 0.2s" }}>
           Entrer
         </button>
       </div>
     </div>
   );
 
-  if (etape === 0 || etape === 5) return <CielView showNouvelleEtoile={etape === 5} />;
+  if (etape === 0 || etape === 7) return <CielView showNouvelleEtoile={etape === 7} />;
 
-  // ── ÉTAPE 1 : Question ─────────────────────────────────────────────────────
+  // ── ÉTAPE 1 : Catégorie ──────────────────────────────────────────────────
   if (etape === 1) return (
-    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-      <div style={{ position: "absolute", top: "25%", left: "50%", transform: "translateX(-50%)", width: 300, height: 300, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}08 0%, transparent 70%)`, animation: "alba-breathe 8s ease-in-out infinite", pointerEvents: "none" }} />
-
-      <div style={{ width: "100%", maxWidth: 340, position: "relative", zIndex: 1 }}>
-        <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.45em", textTransform: "uppercase", color: `${T.or}66`, textAlign: "center", marginBottom: "1.2rem", animation: "fadeUp 0.6s ease forwards" }}>
-          Une pierre pour le ciel
-        </p>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.1rem, 4vw, 1.35rem)", color: T.orPale, lineHeight: 1.9, textAlign: "center", marginBottom: "0.8rem", animation: "fadeUp 1s ease forwards 0.2s", opacity: 0 }}>
-          Qu'est-ce qui t'a aidé —<br/>une phrase, un geste, un mot —<br/>et que tu veux offrir à quelqu'un d'autre ?
-        </p>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55`, textAlign: "center", marginBottom: "2rem", lineHeight: 1.7, animation: "fadeUp 1s ease forwards 0.5s", opacity: 0 }}>
-          Tu n'as pas à savoir à qui.<br/>Le ciel s'en charge.
-        </p>
-        <textarea
-          value={texte} onChange={e => setTexte(e.target.value)}
-          placeholder="Ce qui t'a traversé et qui pourrait traverser quelqu'un d'autre…"
-          rows={3} autoFocus
-          style={{
-            width: "100%", background: "transparent", border: "none",
-            borderBottom: `1px solid ${texte ? T.or + "44" : T.brume + "22"}`,
-            color: T.aube, fontFamily: T.serif, fontStyle: "italic",
-            fontSize: "1.05rem", padding: "0.5rem 0", outline: "none",
-            resize: "none", boxSizing: "border-box", lineHeight: 1.7,
-            textAlign: "center", transition: "border-color 0.3s",
-          }}
-        />
-        <button onClick={() => setEtape(2)} style={{
-          marginTop: "2rem", background: "transparent", border: `1px solid ${T.or}30`,
-          borderRadius: "30px", padding: "0.75rem 1.8rem",
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem",
-          letterSpacing: "0.45em", textTransform: "uppercase",
-          color: `${T.or}88`, cursor: "pointer", display: "block",
-          margin: "2rem auto 0", transition: "all 0.3s",
-        }}>
-          {texte.trim() ? "Continuer →" : "Passer →"}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ── ÉTAPE 2 : Choix état ───────────────────────────────────────────────────
-  if (etape === 2) return (
-    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem", overflowY: "auto" }}>
-      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}bb`, textAlign: "center", marginBottom: "2rem", lineHeight: 1.8, animation: "fadeUp 0.6s ease forwards" }}>
-        Ce que tu vas offrir,<br/>il vient plutôt de…
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 1.5rem", overflowY: "auto" }}>
+      <button onClick={() => setEtape(0)} style={{ position: "absolute", top: "1.5rem", left: "1.5rem", background: "none", border: "none", color: `${T.brume}55`, fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", cursor: "pointer" }}>← Retour</button>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem,4vw,1.25rem)", color: T.orPale, textAlign: "center", lineHeight: 1.9, marginBottom: "0.8rem", animation: "fadeUp 0.7s ease forwards" }}>
+        Qu'est-ce que tu veux offrir<br/>à ceux qui traversent la même chose ?
       </p>
-      <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-        {ETATS_CAIRN.map((e, i) => (
-          <button key={e.id} onClick={() => { setEtatChoisi(e); setEtape(3); }}
-            style={{
-              background: "transparent", border: `1px solid ${e.couleur}25`,
-              borderLeft: `3px solid ${e.couleur}55`,
-              borderRadius: "6px", padding: "0.85rem 1.2rem",
-              fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem",
-              color: `${T.aube}EE`, cursor: "pointer", textAlign: "left",
-              transition: "all 0.2s", animation: `fadeUp 0.4s ease forwards ${i * 0.04}s`,
-              opacity: 0,
-            }}
-            onMouseEnter={e2 => { e2.currentTarget.style.background = `${e.couleur}12`; e2.currentTarget.style.color = T.aube; }}
-            onMouseLeave={e2 => { e2.currentTarget.style.background = "transparent"; e2.currentTarget.style.color = `${T.aube}EE`; }}
-          >
-            {e.label}
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.8rem", color: `${T.brume}55`, textAlign: "center", marginBottom: "2rem", lineHeight: 1.7 }}>Un livre, une pratique, une phrase qui t'a aidé…</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", maxWidth: 360, width: "100%", margin: "0 auto" }}>
+        {CATEGORIES_CIEL.map((c, i) => (
+          <button key={c.id} onClick={() => { setCategorie(c); setEtape(2); }}
+            style={{ background: "transparent", border: `1px solid ${c.couleur}25`, borderLeft: `3px solid ${c.couleur}66`, borderRadius: "8px", padding: "0.9rem 1.2rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.aube, cursor: "pointer", textAlign: "left", animation: `fadeUp 0.4s ease forwards ${i * 0.05}s`, opacity: 0, display: "flex", alignItems: "center", gap: "0.8rem" }}
+            onMouseEnter={e => e.currentTarget.style.background = `${c.couleur}12`}
+            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+            <span style={{ color: c.couleur, fontSize: "0.9rem" }}>{c.icon}</span>
+            {c.label}
           </button>
         ))}
       </div>
     </div>
   );
 
-  // ── ÉTAPE 3 : Geste (maintenir) ────────────────────────────────────────────
-  if (etape === 3 && etatChoisi) return (
-    <div style={{
-      minHeight: "100vh", background: "#060408",
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      padding: "2rem", overflow: "hidden", position: "relative",
-    }}>
-      {/* Wash de couleur progressif */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: `radial-gradient(ellipse at center, ${etatChoisi.couleur}${Math.floor(holdProgress * 0.18).toString(16).padStart(2,"0")} 0%, transparent 70%)`,
-        transition: "background 0.3s ease",
-      }} />
-
-      {/* Phrase ALBA */}
-      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${etatChoisi.couleur}cc`, textAlign: "center", lineHeight: 1.85, maxWidth: 280, marginBottom: "3rem", animation: "fadeUp 0.8s ease forwards", position: "relative", zIndex: 1 }}>
-        {PHRASES_CAIRN[etatChoisi.id]}
-      </p>
-
-      {/* La pierre — cercle à maintenir */}
-      <div style={{ position: "relative", zIndex: 2 }}>
-        {/* Particules */}
-        {particules.map(p => (
-          <div key={p.id} style={{
-            position: "absolute",
-            left: `calc(50% + ${Math.cos(p.angle * Math.PI / 180) * p.distance}px)`,
-            top: `calc(50% + ${Math.sin(p.angle * Math.PI / 180) * p.distance}px)`,
-            width: p.size, height: p.size, borderRadius: "50%",
-            background: p.couleur, opacity: 0.6,
-            transform: "translate(-50%, -50%)",
-            transition: "opacity 1s ease",
-            animation: "fadeIn 0.3s ease forwards",
-          }} />
-        ))}
-
-        {/* Anneau de progression */}
-        <svg width={120} height={120} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) rotate(-90deg)" }}>
-          <circle cx={60} cy={60} r={54} fill="none" stroke={`${etatChoisi.couleur}22`} strokeWidth={2} />
-          <circle cx={60} cy={60} r={54} fill="none" stroke={etatChoisi.couleur} strokeWidth={2}
-            strokeDasharray={`${2 * Math.PI * 54}`}
-            strokeDashoffset={`${2 * Math.PI * 54 * (1 - holdProgress / 100)}`}
-            strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 0.1s linear" }}
-          />
-        </svg>
-
-        {/* Bouton pierre */}
-        <div
-          onMouseDown={startHold} onMouseUp={stopHold} onMouseLeave={stopHold}
-          onTouchStart={startHold} onTouchEnd={stopHold}
-          style={{
-            width: 80, height: 80, borderRadius: "50%",
-            background: `radial-gradient(circle, ${etatChoisi.couleur}55 0%, ${etatChoisi.couleur}22 60%, transparent 100%)`,
-            border: `1px solid ${etatChoisi.couleur}66`,
-            cursor: "pointer", userSelect: "none",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            transform: isHolding ? "scale(1.08)" : "scale(1)",
-            transition: "transform 0.2s ease",
-            boxShadow: isHolding ? `0 0 30px ${etatChoisi.couleur}44` : `0 0 15px ${etatChoisi.couleur}22`,
-          }}
-        />
+  // ── ÉTAPE 2 : Texte ──────────────────────────────────────────────────────
+  if (etape === 2) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+      <button onClick={() => setEtape(1)} style={{ position: "absolute", top: "1.5rem", left: "1.5rem", background: "none", border: "none", color: `${T.brume}55`, fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", cursor: "pointer" }}>← Retour</button>
+      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 40%, ${categorie.couleur}08 0%, transparent 70%)`, pointerEvents: "none" }} />
+      <div style={{ width: "100%", maxWidth: 360, position: "relative", zIndex: 1 }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${categorie.couleur}88`, marginBottom: "0.8rem", textAlign: "center" }}>
+          {categorie.icon} {categorie.label}
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem,4vw,1.2rem)", color: T.orPale, textAlign: "center", lineHeight: 1.9, marginBottom: "2rem", animation: "fadeUp 0.7s ease forwards" }}>
+          C'était quoi, exactement ?
+        </p>
+        <textarea value={texte} onChange={e => setTexte(e.target.value)}
+          placeholder="En une ou deux phrases — le titre d'un livre, le nom d'une pratique, une phrase qui t'a changé…"
+          rows={4} autoFocus
+          style={{ width: "100%", background: "transparent", border: "none", borderBottom: `1px solid ${texte ? categorie.couleur + "55" : T.brume + "22"}`, color: T.aube, fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", padding: "0.5rem 0", outline: "none", resize: "none", boxSizing: "border-box", lineHeight: 1.7, transition: "border-color 0.3s" }} />
+        <button onClick={transformer} disabled={!texte.trim() || loading}
+          style={{ marginTop: "2rem", background: texte.trim() ? `${categorie.couleur}22` : "transparent", border: `1px solid ${texte.trim() ? categorie.couleur + "55" : T.brume + "22"}`, borderRadius: "30px", padding: "0.8rem 2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.45em", textTransform: "uppercase", color: texte.trim() ? categorie.couleur : `${T.brume}44`, cursor: texte.trim() ? "pointer" : "default", display: "block", margin: "2rem auto 0", transition: "all 0.3s" }}>
+          {loading ? "Un instant…" : "Continuer →"}
+        </button>
       </div>
+    </div>
+  );
 
+  // ── ÉTAPE 3 : Transformation ─────────────────────────────────────────────
+  if (etape === 3) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+      {loading ? (
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "1.4rem", color: categorie.couleur, animation: "starSpin 3s linear infinite", display: "inline-block", marginBottom: "1.5rem" }}>✦</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}88` }}>Ce que tu offres prend forme…</p>
+        </div>
+      ) : (
+        <div style={{ width: "100%", maxWidth: 360, textAlign: "center", animation: "fadeUp 0.7s ease forwards" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${categorie.couleur}77`, marginBottom: "1.5rem" }}>Ton offrande</div>
+          <div style={{ background: `${T.nuit2}cc`, border: `1px solid ${categorie.couleur}33`, borderRadius: "10px", padding: "1.8rem 1.6rem", marginBottom: "2rem" }}>
+            <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.1rem", color: T.orPale, lineHeight: 1.9, margin: 0 }}>
+              "{textePoetique}"
+            </p>
+          </div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}55`, marginBottom: "2rem", lineHeight: 1.7 }}>
+            C'est ainsi qu'elle brillera pour les autres.
+          </p>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+            <button onClick={() => { setTextePoetique(""); transformer(); }}
+              style={{ background: "none", border: `1px solid ${T.brume}33`, borderRadius: "20px", padding: "0.6rem 1.2rem", fontFamily: T.sans, fontSize: "0.48rem", letterSpacing: "0.3em", color: `${T.brume}77`, cursor: "pointer" }}>
+              Reformuler
+            </button>
+            <button onClick={() => setEtape(4)}
+              style={{ background: `${categorie.couleur}22`, border: `1px solid ${categorie.couleur}55`, borderRadius: "20px", padding: "0.6rem 1.5rem", fontFamily: T.sans, fontSize: "0.48rem", letterSpacing: "0.3em", color: categorie.couleur, cursor: "pointer" }}>
+              C'est juste →
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // ── ÉTAPE 4 : Géolocalisation ────────────────────────────────────────────
+  if (etape === 4) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+      <div style={{ width: "100%", maxWidth: 340, textAlign: "center", animation: "fadeUp 0.7s ease forwards" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem,4vw,1.15rem)", color: T.orPale, lineHeight: 1.9, marginBottom: "0.8rem" }}>
+          Veux-tu qu'on sache<br/>d'où vient cette lumière ?
+        </p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}55`, marginBottom: "2.5rem", lineHeight: 1.7 }}>
+          Juste la ville — rien d'autre.<br/>Complètement facultatif.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+          <button onClick={() => { setGeoAccepted(true); demanderGeo(); setEtape(5); }}
+            style={{ background: `${categorie.couleur}18`, border: `1px solid ${categorie.couleur}44`, borderRadius: "8px", padding: "0.9rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: T.aube, cursor: "pointer" }}>
+            Oui, partager ma ville
+          </button>
+          <button onClick={() => { setGeoAccepted(false); setEtape(5); }}
+            style={{ background: "transparent", border: `1px solid ${T.brume}22`, borderRadius: "8px", padding: "0.9rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: `${T.brume}77`, cursor: "pointer" }}>
+            Non, rester anonyme
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── ÉTAPE 5 : Geste maintien ─────────────────────────────────────────────
+  if (etape === 5) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem", overflow: "hidden", position: "relative" }}>
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: `radial-gradient(ellipse at center, ${categorie.couleur}${Math.floor(holdProgress * 0.18).toString(16).padStart(2,"0")} 0%, transparent 70%)`, transition: "background 0.3s ease" }} />
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${categorie.couleur}cc`, textAlign: "center", lineHeight: 1.85, maxWidth: 280, marginBottom: "3rem", animation: "fadeUp 0.8s ease forwards", position: "relative", zIndex: 1 }}>
+        "{textePoetique}"
+      </p>
+      <div style={{ position: "relative", zIndex: 2 }}>
+        {particules.map(p => (
+          <div key={p.id} style={{ position: "absolute", left: `calc(50% + ${Math.cos(p.angle * Math.PI / 180) * p.distance}px)`, top: `calc(50% + ${Math.sin(p.angle * Math.PI / 180) * p.distance}px)`, width: p.size, height: p.size, borderRadius: "50%", background: p.couleur, opacity: 0.6, transform: "translate(-50%, -50%)", animation: "fadeIn 0.3s ease forwards" }} />
+        ))}
+        <svg width={120} height={120} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) rotate(-90deg)" }}>
+          <circle cx={60} cy={60} r={54} fill="none" stroke={`${categorie.couleur}22`} strokeWidth={2} />
+          <circle cx={60} cy={60} r={54} fill="none" stroke={categorie.couleur} strokeWidth={2} strokeDasharray={`${2 * Math.PI * 54}`} strokeDashoffset={`${2 * Math.PI * 54 * (1 - holdProgress / 100)}`} strokeLinecap="round" style={{ transition: "stroke-dashoffset 0.1s linear" }} />
+        </svg>
+        <div onMouseDown={startHold} onMouseUp={stopHold} onMouseLeave={stopHold} onTouchStart={startHold} onTouchEnd={stopHold}
+          style={{ width: 80, height: 80, borderRadius: "50%", background: `radial-gradient(circle, ${categorie.couleur}55 0%, ${categorie.couleur}22 60%, transparent 100%)`, border: `1px solid ${categorie.couleur}66`, cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", justifyContent: "center", transform: isHolding ? "scale(1.08)" : "scale(1)", transition: "transform 0.2s ease", boxShadow: isHolding ? `0 0 30px ${categorie.couleur}44` : `0 0 15px ${categorie.couleur}22` }} />
+      </div>
       <p style={{ marginTop: "2.5rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.44rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, animation: "fadeUp 1s ease forwards 0.5s", opacity: 0, position: "relative", zIndex: 1 }}>
-        {holdProgress < 100 ? "Maintiens pour déposer" : "…"}
+        {holdProgress < 100 ? "Maintiens pour envoyer" : "…"}
       </p>
     </div>
   );
 
-  // ── ÉTAPE 4 : Envol ────────────────────────────────────────────────────────
-  if (etape === 4) {
-    return (
-      <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
-        {/* Fond wash */}
-        <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 70%, ${etatChoisi.couleur}18 0%, transparent 60%)`, animation: "fadeIn 1s ease forwards", pointerEvents: "none" }} />
-
-        {/* Étoile qui monte */}
-        <div style={{
-          width: 8, height: 8, borderRadius: "50%",
-          background: etatChoisi.couleur,
-          boxShadow: `0 0 20px ${etatChoisi.couleur}, 0 0 40px ${etatChoisi.couleur}55`,
-          animation: "pierreEnvol 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards",
-        }} />
-
-        <style>{`
-          @keyframes pierreEnvol {
-            0%   { transform: translateY(0) scale(1); opacity: 1; }
-            60%  { transform: translateY(-40vh) scale(1.3); opacity: 0.9; }
-            100% { transform: translateY(-80vh) scale(0.4); opacity: 0; }
-          }
-        `}</style>
-
-        <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}CC`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0 }}>
-          Elle est partie. Quelqu'un en avait besoin.
-        </p>
-      </div>
-    );
-  }
+  // ── ÉTAPE 6 : Envol ──────────────────────────────────────────────────────
+  if (etape === 6) return (
+    <div style={{ minHeight: "100vh", background: "#060408", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
+      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse at 50% 70%, ${categorie.couleur}18 0%, transparent 60%)`, animation: "fadeIn 1s ease forwards", pointerEvents: "none" }} />
+      <div style={{ width: 8, height: 8, borderRadius: "50%", background: categorie.couleur, boxShadow: `0 0 20px ${categorie.couleur}, 0 0 40px ${categorie.couleur}55`, animation: "pierreEnvol 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards" }} />
+      <style>{`@keyframes pierreEnvol { 0% { transform: translateY(0) scale(1); opacity: 1; } 60% { transform: translateY(-40vh) scale(1.3); opacity: 0.9; } 100% { transform: translateY(-80vh) scale(0.4); opacity: 0; } }`}</style>
+      <p style={{ position: "absolute", bottom: "30%", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.brume}CC`, animation: "fadeIn 1s ease forwards 0.5s", opacity: 0, textAlign: "center", padding: "0 2rem" }}>
+        Elle est partie.<br/>Quelqu'un en avait besoin.
+      </p>
+    </div>
+  );
 
   return null;
 };
+
 
 // ─── RITUEL DU MATIN ──────────────────────────────────────────────────────────
 
