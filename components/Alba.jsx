@@ -5167,6 +5167,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
     { id: "evasion",      label: "Évasion",       desc: "Un espace de beauté",       couleur: "#9EC8B4" },
     { id: "souffle",      label: "Souffle",       desc: "Respirer",                  couleur: "#D4856A" },
     { id: "sagesses",     label: "Sagesses",      desc: "Les sagesses du monde",     couleur: "#A89060" },
+    { id: "livre",        label: "Le Livre",      desc: "Ce que l'aube sait",        couleur: "#C8A96E" },
   ];
 
   // Vidéo selon l'heure
@@ -13014,6 +13015,239 @@ const CGUBloc = ({ titre, texte }) => (
 );
 
 
+// ─── LE LIVRE D'ALBA ──────────────────────────────────────────────────────────
+
+const GRAVURES_LIVRE = {
+  commencement: '<line x1="24" y1="8" x2="24" y2="40" stroke-width="0.9"/><path d="M14 16 Q24 10 34 16" stroke-width="0.8" fill="none"/><path d="M16 22 Q24 17 32 22" stroke-width="0.6" fill="none"/><path d="M18 28 Q24 24 30 28" stroke-width="0.5" fill="none" stroke-opacity="0.6"/>',
+  porter: '<ellipse cx="24" cy="28" rx="10" ry="8" stroke-width="0.9" fill="none"/><path d="M14 28 Q14 20 20 16 Q24 14 28 16 Q34 20 34 28" stroke-width="0.8" fill="none"/><line x1="20" y1="16" x2="20" y2="10" stroke-width="0.7"/><line x1="28" y1="16" x2="28" y2="10" stroke-width="0.7"/><line x1="18" y1="10" x2="30" y2="10" stroke-width="0.8"/>',
+  corps: '<ellipse cx="24" cy="16" rx="5" ry="6" stroke-width="0.9" fill="none"/><line x1="24" y1="22" x2="24" y2="34" stroke-width="0.9"/><path d="M14 26 L24 29 L34 26" stroke-width="0.8" fill="none"/><path d="M24 34 L18 42" stroke-width="0.8" fill="none"/><path d="M24 34 L30 42" stroke-width="0.8" fill="none"/>',
+  lien: '<circle cx="16" cy="24" r="5" fill="none" stroke-width="0.8"/><circle cx="32" cy="24" r="5" fill="none" stroke-width="0.8"/><path d="M21 24 Q24 20 27 24" stroke-width="0.9" fill="none"/><path d="M21 24 Q24 28 27 24" stroke-width="0.6" fill="none" stroke-opacity="0.5"/>',
+  resistance: '<rect x="18" y="14" width="12" height="18" rx="2" stroke-width="0.9" fill="none"/><line x1="18" y1="20" x2="30" y2="20" stroke-width="0.5"/><line x1="18" y1="26" x2="30" y2="26" stroke-width="0.5"/><path d="M10 32 Q24 38 38 32" stroke-width="0.8" fill="none"/>',
+  ete: '<circle cx="24" cy="20" r="6" fill="none" stroke-width="0.8"/><line x1="24" y1="8" x2="24" y2="12" stroke-width="0.7"/><line x1="24" y1="28" x2="24" y2="32" stroke-width="0.7"/><line x1="12" y1="20" x2="16" y2="20" stroke-width="0.7"/><line x1="32" y1="20" x2="36" y2="20" stroke-width="0.7"/><line x1="16" y1="12" x2="18.5" y2="14.5" stroke-width="0.6"/><line x1="32" y1="12" x2="29.5" y2="14.5" stroke-width="0.6"/>',
+  silence: '<line x1="10" y1="20" x2="38" y2="20" stroke-width="0.7"/><line x1="14" y1="26" x2="34" y2="26" stroke-width="0.5" stroke-opacity="0.6"/><line x1="18" y1="32" x2="30" y2="32" stroke-width="0.4" stroke-opacity="0.4"/>',
+  traversee: '<path d="M8 36 Q16 30 24 32 Q32 34 40 28" stroke-width="0.9" fill="none"/><path d="M24 32 L24 14" stroke-width="0.7"/><path d="M20 18 L24 10 L28 18" stroke-width="0.7" fill="none"/>',
+  retour: '<circle cx="24" cy="24" r="12" fill="none" stroke-width="0.8"/><path d="M24 12 Q18 16 20 24 Q22 32 28 32" stroke-width="0.8" fill="none"/><path d="M22 28 L28 32 L24 36" stroke-width="0.7" fill="none"/>',
+  depart: '<path d="M8 32 L24 10 L40 32" stroke-width="0.9" fill="none"/><line x1="24" y1="10" x2="24" y2="40" stroke-width="0.7" stroke-opacity="0.4"/><path d="M16 38 Q24 42 32 38" stroke-width="0.6" fill="none" stroke-opacity="0.5"/>',
+  gratitude: '<path d="M24 36 Q10 26 10 18 Q10 10 17 10 Q21 10 24 15 Q27 10 31 10 Q38 10 38 18 Q38 26 24 36Z" stroke-width="0.9" fill="none"/><path d="M18 22 Q24 18 30 22" stroke-width="0.6" fill="none" stroke-opacity="0.5"/>',
+  reste: '<line x1="12" y1="24" x2="36" y2="24" stroke-width="0.9"/><circle cx="24" cy="24" r="4" fill="none" stroke-width="0.8"/><line x1="24" y1="8" x2="24" y2="20" stroke-width="0.6" stroke-opacity="0.6"/><line x1="24" y1="28" x2="24" y2="40" stroke-width="0.6" stroke-opacity="0.4"/>',
+};
+
+const TYPE_LABELS = {
+  "saviez-vous":   "Le saviez-vous",
+  "corps-cerveau": "Corps & cerveau",
+  "conte":         "Conte",
+  "pratique":      "Pratique oubliée",
+  "phrase":        "Une phrase",
+};
+
+const LivreAlba = ({ isPremium, onShowPaywall }) => {
+  const [vue, setVue] = useState("couverture"); // couverture | page | archive
+  const [pageJour, setPageJour] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [archive, setArchive] = useState([]);
+  const [archiveLoading, setArchiveLoading] = useState(false);
+
+  const chapitreActuel = () => {
+    const mois = new Date().getMonth() + 1;
+    return { num: mois, mois, titre: ["Ce qui commence","Ce qu'on porte","Le corps sait","Les liens","Ce qui résiste","L'été intérieur","Le silence","Ce qu'on traverse","Revenir à soi","Ce qui part","La gratitude sauvage","Ce qui reste"][mois-1], couleur: ["#C8A96E","#9898C8","#78A878","#C87878","#C8A040","#E8A870","#7898A8","#A87858","#88A888","#B89870","#C8B098","#A898C8"][mois-1] };
+  };
+
+  const chargerPage = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch("/api/livre-du-jour");
+      const d = await r.json();
+      setPageJour(d);
+      setVue("page");
+    } catch { }
+    setLoading(false);
+  };
+
+  const chargerArchive = async () => {
+    if (!isPremium) { onShowPaywall?.(); return; }
+    setArchiveLoading(true);
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=30`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (r.ok) { const d = await r.json(); setArchive(d); }
+    } catch {}
+    setArchiveLoading(false);
+    setVue("archive");
+  };
+
+  const chap = chapitreActuel();
+  const gravurePaths = GRAVURES_LIVRE[pageJour?.chapitre_num ? ["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"][pageJour.chapitre_num-1] : "commencement"];
+
+  // ── COUVERTURE ────────────────────────────────────────────────────────────
+  if (vue === "couverture") return (
+    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem", position: "relative", overflow: "hidden" }}>
+      {/* Fond texture */}
+      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 70% 60% at 50% 40%, ${chap.couleur}10 0%, transparent 70%)`, pointerEvents: "none" }} />
+
+      {/* Couverture livre */}
+      <div style={{ position: "relative", width: "min(280px, 80vw)", animation: "fadeUp 0.8s ease forwards" }}>
+        {/* Livre — face avant */}
+        <div style={{
+          background: `linear-gradient(160deg, #1A1510, #0D0A08)`,
+          border: `1px solid ${chap.couleur}40`,
+          borderRadius: "4px 10px 10px 4px",
+          padding: "3rem 2.5rem",
+          boxShadow: `4px 6px 30px rgba(0,0,0,0.7), inset 1px 0 0 ${chap.couleur}20, -4px 0 8px rgba(0,0,0,0.4)`,
+          position: "relative",
+          minHeight: 360,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}>
+          {/* Tranche livre */}
+          <div style={{ position: "absolute", left: -6, top: 6, bottom: 6, width: 6, background: `linear-gradient(to right, #0A0806, #1A1510)`, borderRadius: "4px 0 0 4px", boxShadow: "-2px 0 6px rgba(0,0,0,0.5)" }} />
+
+          {/* Filigrane gravure */}
+          <div style={{ position: "absolute", right: "1.5rem", bottom: "4rem", opacity: 0.08 }}>
+            <svg width={80} height={80} viewBox="0 0 48 48" fill="none" stroke={chap.couleur} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} dangerouslySetInnerHTML={{ __html: GRAVURES_LIVRE[["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"][chap.num-1]] || GRAVURES_LIVRE.commencement }} />
+          </div>
+
+          {/* Contenu couverture */}
+          <div>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${chap.couleur}88`, marginBottom: "2rem" }}>
+              Chapitre {chap.num} — {chap.titre}
+            </div>
+            <div style={{ width: 30, height: 1, background: `linear-gradient(to right, ${chap.couleur}88, transparent)`, marginBottom: "1.8rem" }} />
+            <h1 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.6rem, 6vw, 2rem)", color: T.orPale, lineHeight: 1.4, letterSpacing: "0.04em", margin: 0 }}>
+              Ce que<br/>l'aube sait
+            </h1>
+          </div>
+
+          <div>
+            <div style={{ width: 24, height: 1, background: `${chap.couleur}44`, marginBottom: "1.2rem" }} />
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}55` }}>
+              ALBA · {new Date().getFullYear()}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div style={{ marginTop: "2.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.8rem", width: "100%", maxWidth: 280 }}>
+        <button onClick={chargerPage} disabled={loading} style={{
+          width: "100%", padding: "0.9rem",
+          background: `${chap.couleur}22`, border: `1px solid ${chap.couleur}55`,
+          borderRadius: "6px", cursor: "pointer",
+          fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem",
+          color: chap.couleur, transition: "all 0.3s",
+        }}>
+          {loading ? "Un instant…" : "Lire la page du jour"}
+        </button>
+        <button onClick={chargerArchive} style={{
+          background: "none", border: "none", cursor: "pointer",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem",
+          letterSpacing: "0.3em", textTransform: "uppercase",
+          color: `${T.brume}55`,
+        }}>
+          {isPremium ? "Voir les 30 dernières pages" : "✦ Archive — abonnés"}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── PAGE DU JOUR ──────────────────────────────────────────────────────────
+  if (vue === "page" && pageJour) {
+    const couleur = pageJour.chapitre_couleur || chap.couleur;
+    const gravIdx = (pageJour.chapitre_num || 1) - 1;
+    const gravKey = ["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"][gravIdx];
+    const dateFormatee = new Date(pageJour.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+
+    return (
+      <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+        <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}55`, marginBottom: "2.5rem", padding: 0, textTransform: "uppercase" }}>← Le Livre</button>
+
+        {/* En-tête page */}
+        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+          {/* Gravure */}
+          <div style={{ position: "relative", width: 64, height: 64, margin: "0 auto 1.5rem" }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 46, color: `${couleur}09`, fontFamily: T.serif, lineHeight: 1 }}>
+              {String.fromCharCode(64 + (pageJour.chapitre_num || 1))}
+            </div>
+            <svg width={64} height={64} viewBox="0 0 48 48" fill="none" stroke={couleur} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }} dangerouslySetInnerHTML={{ __html: GRAVURES_LIVRE[gravKey] || GRAVURES_LIVRE.commencement }} />
+          </div>
+
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${couleur}77`, marginBottom: "0.5rem" }}>
+            {TYPE_LABELS[pageJour.type] || pageJour.type}
+          </div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.brume}35`, marginBottom: "1.2rem" }}>
+            {dateFormatee}
+          </div>
+
+          <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: T.orPale, margin: "0 0 0.5rem", lineHeight: 1.4 }}>
+            {pageJour.titre_page}
+          </h2>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.3em", color: `${couleur}55`, textTransform: "uppercase" }}>
+            {pageJour.chapitre_titre}
+          </div>
+        </div>
+
+        {/* Séparateur */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "2.5rem" }}>
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${couleur}33)` }} />
+          <div style={{ color: `${couleur}55`, fontSize: "0.6rem" }}>✦</div>
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${couleur}33)` }} />
+        </div>
+
+        {/* Contenu */}
+        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.95rem, 3.5vw, 1.05rem)", color: `${T.aube}EE`, lineHeight: 2.1, whiteSpace: "pre-line" }}>
+          {pageJour.contenu}
+        </div>
+
+        {/* Pied de page */}
+        <div style={{ marginTop: "3rem", display: "flex", alignItems: "center", gap: "0.8rem" }}>
+          <div style={{ flex: 1, height: 1, background: `${couleur}20` }} />
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.3em", color: `${T.brume}33`, textTransform: "uppercase" }}>
+            Ce que l'aube sait
+          </div>
+          <div style={{ flex: 1, height: 1, background: `${couleur}20` }} />
+        </div>
+      </div>
+    );
+  }
+
+  // ── ARCHIVE ───────────────────────────────────────────────────────────────
+  if (vue === "archive") return (
+    <div style={{ padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}55`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Le Livre</button>
+      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "1.5rem" }}>30 dernières pages</div>
+      {archiveLoading ? (
+        <div style={{ textAlign: "center", color: `${T.brume}55`, fontFamily: T.serif, fontStyle: "italic", padding: "2rem" }}>Chargement…</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+          {archive.map((p, i) => (
+            <button key={i} onClick={() => { setPageJour(p); setVue("page"); }} style={{
+              background: `${T.nuit2}88`, border: `1px solid ${T.brume}10`,
+              borderRadius: "6px", padding: "0.9rem 1.1rem", cursor: "pointer",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              textAlign: "left", transition: "all 0.2s",
+            }}
+              onMouseOver={e => e.currentTarget.style.background = `${p.chapitre_couleur || T.or}0A`}
+              onMouseOut={e => e.currentTarget.style.background = `${T.nuit2}88`}
+            >
+              <div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, marginBottom: "0.2rem" }}>{p.titre_page}</div>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.25em", color: `${T.brume}55`, textTransform: "uppercase" }}>
+                  {TYPE_LABELS[p.type]} · {new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                </div>
+              </div>
+              <div style={{ color: `${p.chapitre_couleur || T.or}66`, fontSize: "0.6rem", flexShrink: 0, marginLeft: "0.5rem" }}>→</div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return null;
+};
+
+
 // ─── PAGE B2B ENTREPRISES ─────────────────────────────────────────────────────
 
 const PricingB2B = ({ onRetour }) => {
@@ -13745,6 +13979,7 @@ function AlbaInner() {
     { id: "cle",          label: "Ma Clé" },
     { id: "ciel",         label: "Le Ciel" },
     { id: "trouvailles",  label: "Trouvailles" },
+    { id: "livre",        label: "Le Livre" },
     { id: "profil",       label: "Profil" },
   ];
 
@@ -13976,6 +14211,7 @@ function AlbaInner() {
               {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
+              {tab === "livre"       && <LivreAlba isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
               {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} onShowPricing={() => setShowPricingProfil(true)} />}
