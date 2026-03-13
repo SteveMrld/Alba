@@ -8761,15 +8761,10 @@ const LataifScreen = ({ onBack }) => {
   return null;
 };
 
-const Evasion = ({ data, isPremium = false, onShowPaywall }) => {
-  const [showLataif, setShowLataif] = useState(false);
-  const [showThemes, setShowThemes] = useState(false);
+const Evasion = ({ data, isPremium = false, onShowPaywall, onShowLataif, onShowThemes }) => {
   const [actif, setActif] = useState(0);
   const touchStart = useRef(null);
   const videoRef = useRef(null);
-
-  if (showLataif) return <LataifScreen onBack={() => setShowLataif(false)} />;
-  if (showThemes) return <ThemesScreen onBack={() => setShowThemes(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />;
   const item = VIDEOS[actif] || VIDEOS[0];
 
   // Passe automatiquement à la suivante quand la vidéo se termine
@@ -8834,8 +8829,8 @@ const Evasion = ({ data, isPremium = false, onShowPaywall }) => {
 
       {/* Boutons accès Latâ'if et Thèmes */}
       <div style={{ position: "absolute", bottom: 100, left: "50%", transform: "translateX(-50%)", zIndex: 20, display: "flex", gap: "0.75rem" }}>
-        <button onClick={() => setShowLataif(true)} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}44`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.or, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Latâ'if</button>
-        <button onClick={() => setShowThemes(true)} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}33`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.or}cc`, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Thèmes</button>
+        <button onClick={() => onShowLataif?.()} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}44`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.or, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Latâ'if</button>
+        <button onClick={() => onShowThemes?.()} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}33`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.or}cc`, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Thèmes</button>
       </div>
 
       {/* Vidéo plein écran — pas de loop, enchaînement automatique */}
@@ -13446,6 +13441,8 @@ function AlbaInner() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTuto, setShowTuto] = useState(false);
   const [showAide, setShowAide] = useState(false);
+  const [showLataifApp, setShowLataifApp] = useState(false);
+  const [showThemesApp, setShowThemesApp] = useState(false);
   const [userData, setUserData] = useState(null);
   const [tab, setTab] = useState("compagnon");
   const [tabHistory, setTabHistory] = useState([]);
@@ -13819,6 +13816,10 @@ function AlbaInner() {
       <Grain />
       <Horizon />
 
+      {/* ── LATAIF / THEMES ── */}
+      {showLataifApp && <div style={{ position:"fixed", inset:0, zIndex:150, background:T.nuit, overflowY:"auto" }}><LataifScreen onBack={() => setShowLataifApp(false)} /></div>}
+      {showThemesApp && <div style={{ position:"fixed", inset:0, zIndex:150, background:T.nuit, overflowY:"auto" }}><ThemesScreen onBack={() => setShowThemesApp(false)} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
+
       {/* ── CGU ── */}
       {showCGU && <CGUScreen onRetour={() => setShowCGU(false)} />}
 
@@ -13977,7 +13978,7 @@ function AlbaInner() {
                   } catch {}
                 }} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} /></div>}
               {tab === "ardoise"   && <Ardoise data={userData} db={db} onPostitAjoute={() => incrementStat("postitsTotal")} onBilanGenere={() => incrementStat("bilansTotal")} onPostitsChange={setAllPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
-              {tab === "evasion"   && <Evasion data={userData} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+              {tab === "evasion"   && <Evasion data={userData} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} onShowLataif={() => setShowLataifApp(true)} onShowThemes={() => setShowThemesApp(true)} />}
 
               {tab === "sagesses"  && <BibliothequeSagesses cleActive={cleActive} />}
               {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
