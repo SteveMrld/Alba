@@ -46,19 +46,22 @@ const TypedPhrase = ({ text, style = {}, speed = 22, className = "" }) => {
 // Chaque acte dans l'app génère des éclats. Silencieux. Mystérieux.
 // L'utilisateur ne voit jamais le total exact — juste que le chemin avance.
 const ECLATS_PAR_ACTE = {
-  rituel_matin:      3,  // Rituel du matin accompli
-  fragment:          2,  // Fragment posé dans l'Ardoise
-  miroir:            4,  // Miroir utilisé
-  souffle:           3,  // Exercice de souffle
-  bilan:             5,  // Bilan crépuscule rempli
-  tempete_nommee:    4,  // Tempête nommée dans la Boîte
-  tempete_traversee: 8,  // Tempête marquée comme traversée
-  jour_actif:        2,  // Chaque nouveau jour de présence
+  rituel_matin:        3,  // Rituel du matin accompli
+  fragment:            2,  // Fragment posé dans l'Ardoise
+  miroir:              4,  // Session Miroir complète
+  souffle:             3,  // Exercice de souffle
+  bilan:               5,  // Bilan crépuscule rempli
+  tempete_nommee:      4,  // Tempête nommée
+  tempete_traversee:   8,  // Tempête traversée
+  jour_actif:          2,  // Chaque nouveau jour de présence
+  invitation_1:        1,  // Invitation 1 éclat complétée
+  invitation_3:        3,  // Invitation 3 éclats complétée
+  invitation_5:        5,  // Invitation 5 éclats complétée
+  invitation_echec:    3,  // Invitation tentée honnêtement mais pas réussie
 };
 
-// Seuils d'éclats pour ouvrir chaque Porte (Clé II → VI)
-// Clé I est toujours ouverte — le premier pas ne se mérite pas, il se fait.
-const SEUILS_PORTES = [0, 15, 35, 65, 100, 150];
+// 12 Portes — seuils d'éclats
+const SEUILS_PORTES = [0, 10, 25, 50, 80, 120, 170, 230, 300, 400, 550, 800];
 
 // Symboles des 6 Clés — la mythologie d'ALBA
 const PICTOS_INLINE = {
@@ -3287,13 +3290,17 @@ const NavItem = ({ icon, label, active, onClick }) => (
 
 const calcEclats = (stats) => {
   return (
-    ((stats.joursActifs    || 0) * ECLATS_PAR_ACTE.jour_actif) +
-    ((stats.postitsTotal   || 0) * ECLATS_PAR_ACTE.fragment) +
+    ((stats.joursActifs        || 0) * ECLATS_PAR_ACTE.jour_actif) +
+    ((stats.postitsTotal       || 0) * ECLATS_PAR_ACTE.fragment) +
     ((stats.conversationsTotal || 0) * ECLATS_PAR_ACTE.miroir) +
-    ((stats.souffleTotal   || 0) * ECLATS_PAR_ACTE.souffle) +
-    ((stats.bilansTotal    || 0) * ECLATS_PAR_ACTE.bilan) +
-    ((stats.tempetesNommees  || 0) * ECLATS_PAR_ACTE.tempete_nommee) +
-    ((stats.tempetesTraversees || 0) * ECLATS_PAR_ACTE.tempete_traversee)
+    ((stats.souffleTotal       || 0) * ECLATS_PAR_ACTE.souffle) +
+    ((stats.bilansTotal        || 0) * ECLATS_PAR_ACTE.bilan) +
+    ((stats.tempetesNommees    || 0) * ECLATS_PAR_ACTE.tempete_nommee) +
+    ((stats.tempetesTraversees || 0) * ECLATS_PAR_ACTE.tempete_traversee) +
+    ((stats.invitations1       || 0) * ECLATS_PAR_ACTE.invitation_1) +
+    ((stats.invitations3       || 0) * ECLATS_PAR_ACTE.invitation_3) +
+    ((stats.invitations5       || 0) * ECLATS_PAR_ACTE.invitation_5) +
+    ((stats.invitationsEchec   || 0) * ECLATS_PAR_ACTE.invitation_echec)
   );
 };
 
@@ -3328,6 +3335,30 @@ const getConditionsCle = (idx, stats) => {
     [ // Clé VI
       { label: "20 jours actifs",                done: joursActifs >= 20, val: Math.min(joursActifs,20), max: 20 },
       { label: "Toutes les clés précédentes",    done: bilansTotal >= 3 && joursActifs >= 20, val: bilansTotal >= 3 && joursActifs >= 20 ? 1 : 0, max: 1 },
+    ],
+    [ // Clé VII
+      { label: "30 sessions Miroir",             done: conversationsTotal >= 30, val: Math.min(conversationsTotal,30), max: 30 },
+      { label: "30 jours actifs",                done: joursActifs >= 30, val: Math.min(joursActifs,30), max: 30 },
+    ],
+    [ // Clé VIII
+      { label: "40 sessions Miroir",             done: conversationsTotal >= 40, val: Math.min(conversationsTotal,40), max: 40 },
+      { label: "45 jours actifs",                done: joursActifs >= 45, val: Math.min(joursActifs,45), max: 45 },
+    ],
+    [ // Clé IX
+      { label: "55 sessions Miroir",             done: conversationsTotal >= 55, val: Math.min(conversationsTotal,55), max: 55 },
+      { label: "60 jours actifs",                done: joursActifs >= 60, val: Math.min(joursActifs,60), max: 60 },
+    ],
+    [ // Clé X
+      { label: "75 sessions Miroir",             done: conversationsTotal >= 75, val: Math.min(conversationsTotal,75), max: 75 },
+      { label: "90 jours actifs",                done: joursActifs >= 90, val: Math.min(joursActifs,90), max: 90 },
+    ],
+    [ // Clé XI
+      { label: "100 sessions Miroir",            done: conversationsTotal >= 100, val: Math.min(conversationsTotal,100), max: 100 },
+      { label: "120 jours actifs",               done: joursActifs >= 120, val: Math.min(joursActifs,120), max: 120 },
+    ],
+    [ // Clé XII
+      { label: "150 sessions Miroir",            done: conversationsTotal >= 150, val: Math.min(conversationsTotal,150), max: 150 },
+      { label: "365 jours depuis l'inscription", done: joursActifs >= 200, val: Math.min(joursActifs,200), max: 200 },
     ],
   ];
   return conditions[idx] || null;
@@ -4008,7 +4039,106 @@ const AnneauxJour = ({ compact = false }) => {
 };
 
 // ─── ACCUEIL ─────────────────────────────────────────────────────────────────
-const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
+// ─── INVITATIONS DU JOUR ─────────────────────────────────────────────────────
+const INVITATIONS_ALBA = [
+  { id:"P01", theme:"Pardon", eclats:5, titre:"La lettre non envoyée", invitation:"Écris une lettre à la personne qui t'a blessé. Une seule condition : tu ne l'enverras pas. Écris ce que tu n'as jamais pu dire.", retour:"Comment tu te sens après avoir écrit cette lettre ?", note:"L'acte d'écrire suffit. Ce qui compte, c'est que les mots ont existé.", declencheur:["séparation","trahison","rupture","conflit"] },
+  { id:"P02", theme:"Pardon", eclats:3, titre:"Ce que cette personne m'a appris", invitation:"Pense à quelqu'un qui t'a fait du mal. Demande-toi : qu'est-ce que cette douleur m'a appris sur moi-même ? Écris une phrase. Une seule.", retour:"Qu'est-ce que tu as trouvé ?", note:"Pardonner ne signifie pas que c'était acceptable.", declencheur:["colère","rancœur"] },
+  { id:"P03", theme:"Pardon", eclats:5, titre:"La lettre à toi-même", invitation:"Écris une lettre à la personne que tu étais au moment où tu as fait quelque chose dont tu n'es pas fier. Pas pour t'excuser. Pour lui expliquer ce que tu comprends aujourd'hui.", retour:"Qu'est-ce que tu lui as dit ?", note:"Se pardonner à soi-même est souvent plus difficile que pardonner aux autres.", declencheur:["culpabilité","regret","honte"] },
+  { id:"R01", theme:"Relations", eclats:3, titre:"Le coup de fil que tu repousses", invitation:"Il y a quelqu'un à qui tu penses parfois mais à qui tu n'as pas parlé depuis longtemps. Cette semaine, appelle-le ou envoie-lui un message. Juste : 'Je pensais à toi.'", retour:"Tu l'as fait ? Comment ça s'est passé ?", note:"Les relations ne meurent pas d'un seul acte. Elles meurent du silence accumulé.", declencheur:["solitude","isolement"] },
+  { id:"R04", theme:"Relations", eclats:1, titre:"Dire ce qu'on ne dit pas", invitation:"Pense à quelqu'un dans ta vie à qui tu n'as jamais dit clairement à quel point il compte pour toi. Cette semaine, dis-le lui.", retour:"Tu l'as fait ?", note:"On remet souvent à plus tard les mots les plus simples.", declencheur:["gratitude","amitié"] },
+  { id:"I01", theme:"Identité", eclats:3, titre:"Trois choses que tu sais sur toi", invitation:"Écris trois choses que tu sais être vraies sur toi-même. Pas ce que les autres disent. Ce que toi tu sais.", retour:"Qu'est-ce que tu as écrit ?", note:"Se connaître, c'est aussi savoir ce qu'on ne peut pas nier de soi-même.", declencheur:["doute","confusion"] },
+  { id:"C01", theme:"Émotions", eclats:3, titre:"Sous la colère, qu'est-ce qu'il y a ?", invitation:"La prochaine fois que tu sens la colère monter, pause. Avant de réagir, demande-toi : sous cette colère, est-ce qu'il y a de la peur ? De la tristesse ? Un besoin non exprimé ?", retour:"Qu'est-ce que tu as trouvé sous la colère ?", note:"La colère est souvent la première émotion. Rarement la seule.", declencheur:["colère","frustration"] },
+  { id:"C02", theme:"Émotions", eclats:1, titre:"Laisser la tristesse exister", invitation:"Accorde-toi 10 minutes pour être triste — vraiment. Juste assis avec ce que tu ressens. Sans essayer de le résoudre.", retour:"Comment tu te sens après ces 10 minutes ?", note:"La tristesse qu'on laisse exister dure moins longtemps que celle qu'on refoule.", declencheur:["tristesse","mélancolie"] },
+  { id:"A01", theme:"Ambition", eclats:3, titre:"Le projet que tu repousses", invitation:"Il y a quelque chose que tu veux faire depuis longtemps mais que tu n'as pas commencé. Cette semaine, fais juste la première étape — la plus petite possible.", retour:"Quelle était cette première étape ? Tu l'as faite ?", note:"Le début est la seule partie qui dépend entièrement de toi.", declencheur:["rêve","projet"] },
+  { id:"B01", theme:"Corps", eclats:1, titre:"5 minutes pour ton corps", invitation:"Accorde à ton corps 5 minutes d'attention complète — marcher pieds nus, s'étirer, respirer lentement. Pas d'écran.", retour:"Comment ton corps a répondu ?", note:"Le corps garde la mémoire de tout ce que la tête essaie d'oublier.", declencheur:["stress","tension"] },
+  { id:"G01", theme:"Gratitude", eclats:1, titre:"La chose que tu tiens pour acquise", invitation:"Pense à quelque chose dans ta vie que tu tiens pour acquise et qui serait dévastateur de perdre. Prends un moment pour en être vraiment conscient.", retour:"À quoi as-tu pensé ?", note:"On voit souvent mieux ce qu'on a quand on imagine ce qu'on pourrait perdre.", declencheur:["reconnaissance"] },
+  { id:"S01", theme:"Solitude", eclats:3, titre:"Une heure avec toi-même", invitation:"Offre-toi une heure de solitude volontaire — sans chercher à la remplir. Juste pour être avec toi-même et voir ce qui remonte.", retour:"Qu'est-ce qui est remonté ?", note:"Être seul et se sentir seul sont deux choses très différentes.", declencheur:["solitude","silence"] },
+  { id:"L01", theme:"Liberté", eclats:5, titre:"Ce que je fais par peur, pas par choix", invitation:"Identifie une chose dans ta vie que tu fais par peur du jugement ou de la déception des autres. Écris-la. Tu n'as pas à changer quoi que ce soit aujourd'hui. Juste la voir.", retour:"Tu l'as identifiée ?", note:"Voir la prison est la première étape pour décider si tu veux en sortir.", declencheur:["contrainte","obligation"] },
+  { id:"PA01", theme:"Parentalité", eclats:3, titre:"Ce que je voudrais faire autrement", invitation:"Pense à un moment avec ton enfant où tu n'as pas été la version de toi que tu voulais être. Qu'est-ce que tu ferais différemment aujourd'hui ?", retour:"Qu'est-ce que tu ferais autrement ?", note:"Reconnaître ses erreurs devant soi-même est le premier pas.", declencheur:["culpabilité parentale"] },
+  { id:"CO01", theme:"Couple", eclats:3, titre:"Ce que j'ai arrêté de faire", invitation:"Dans ton couple, identifie quelque chose que tu faisais au début et que tu as arrêté — pas par manque d'amour, mais par habitude.", retour:"Qu'est-ce que tu as identifié ?", note:"Les couples ne meurent pas de grandes crises. Ils meurent des petits abandons quotidiens.", declencheur:["routine","distance"] },
+  { id:"AR01", theme:"Argent", eclats:3, titre:"Ce que l'argent représente vraiment", invitation:"Qu'est-ce qu'on t'a appris sur l'argent quand tu étais enfant ? Est-ce que tu crois encore ça ?", retour:"Quelle était cette croyance ?", note:"L'argent est neutre. Ce qu'on lui fait représenter ne l'est pas.", declencheur:["argent","honte financière"] },
+  { id:"TE03", theme:"Temps", eclats:3, titre:"Si je n'avais qu'un an", invitation:"Si tu apprenais que tu n'avais qu'un an à vivre, qu'est-ce que tu ferais différemment cette semaine ? Pas dans ta vie entière — juste cette semaine.", retour:"Qu'est-ce que tu ferais différemment ?", note:"On n'a pas besoin de n'avoir qu'un an pour commencer à vivre comme ça compte.", declencheur:["temps","urgence"] },
+  { id:"SP01", theme:"Spiritualité", eclats:3, titre:"Ce en quoi je crois vraiment", invitation:"Au-delà des étiquettes, qu'est-ce que tu crois vraiment — sur la vie, sur ce qui existe au-delà de ce qu'on voit ? Écris-le sans te censurer.", retour:"Qu'est-ce que tu as écrit ?", note:"La foi n'est pas forcément religieuse.", declencheur:["sens","croyance"] },
+  { id:"W02", theme:"Vocation", eclats:5, titre:"Ce pour quoi j'aurais pu tout laisser", invitation:"Il y a peut-être quelque chose que tu aurais voulu faire de ta vie — une vocation, un appel — que tu n'as pas suivi. Est-ce qu'il en reste quelque chose à nourrir autrement ?", retour:"Il en reste quelque chose ?", note:"Une vocation non suivie peut quand même être honorée, autrement.", declencheur:["sens","mission"] },
+  { id:"RA01", theme:"Racines", eclats:3, titre:"Ce que mes origines m'ont donné", invitation:"Qu'est-ce que ta culture, ton pays, ta terre d'origine t'a donné que tu portes en toi — une façon d'être, une valeur, une force particulière ?", retour:"Qu'est-ce que tu as trouvé ?", note:"Les origines ne sont pas un destin. Elles sont une fondation.", declencheur:["identité","origines"] },
+];
+
+const getInvitationDuJour = (data) => {
+  const seed = new Date().getFullYear() * 1000 + new Date().getMonth() * 31 + new Date().getDate();
+  // 1 fois sur 3 : contextuel selon intention
+  if (data && seed % 3 !== 0) {
+    const intention = (data.intention || "").toLowerCase();
+    const situation = (data.situation || "").toLowerCase();
+    const estParent = data.estParent === "oui" || data.estParent === "beau-parent";
+    const estSepare = situation.includes("sép");
+    if (estSepare && estParent) {
+      const inv = INVITATIONS_ALBA.find(i => i.id === "PA01");
+      if (inv) return inv;
+    }
+    if (intention.includes("pardon") || intention.includes("rupture")) {
+      const candidates = INVITATIONS_ALBA.filter(i => i.theme === "Pardon");
+      if (candidates.length) return candidates[seed % candidates.length];
+    }
+  }
+  return INVITATIONS_ALBA[seed % INVITATIONS_ALBA.length];
+};
+
+const InvitationDuJour = ({ data, onComplete, onEchec }) => {
+  const inv = getInvitationDuJour(data);
+  const storageKey = `alba_invitation_${new Date().toDateString()}`;
+  const [statut, setStatut] = React.useState(() => {
+    try { return localStorage.getItem(storageKey) || "pending"; } catch { return "pending"; }
+  });
+  const [showRetour, setShowRetour] = React.useState(false);
+  const [reponse, setReponse] = React.useState("");
+
+  if (statut === "done") return (
+    <div style={{ textAlign:"center", padding:"1.5rem", background:`${T.or}08`, borderRadius:8, border:`1px solid ${T.or}18` }}>
+      <p style={{ fontFamily:T.sans, fontSize:"0.45rem", letterSpacing:"0.4em", textTransform:"uppercase", color:`${T.or}88`, marginBottom:"0.5rem" }}>INVITATION DU JOUR — ACCOMPLIE</p>
+      <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:`${T.brume}77` }}>{inv.note}</p>
+    </div>
+  );
+
+  if (showRetour) return (
+    <div style={{ padding:"1.5rem", background:`${T.or}06`, borderRadius:8, border:`1px solid ${T.or}15` }}>
+      <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.9rem", color:T.brume, marginBottom:"1rem" }}>{inv.retour}</p>
+      <textarea value={reponse} onChange={e => setReponse(e.target.value)} placeholder="Tu peux répondre ici…" rows={3}
+        style={{ width:"100%", background:"transparent", border:`1px solid ${T.or}22`, borderRadius:6, color:T.aube, fontFamily:T.serif, fontStyle:"italic", fontSize:"0.9rem", padding:"0.6rem", resize:"none", outline:"none" }} />
+      <div style={{ display:"flex", gap:"0.8rem", marginTop:"1rem", justifyContent:"center" }}>
+        <button onClick={() => {
+          try { localStorage.setItem(storageKey, "done"); } catch {}
+          setStatut("done");
+          if (onComplete) onComplete(inv.eclats);
+        }} style={{ background:`${T.or}22`, border:`1px solid ${T.or}66`, borderRadius:24, padding:"0.5rem 1.3rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:T.or, cursor:"pointer" }}>
+          {"✦".repeat(inv.eclats)} J'ai fait ça
+        </button>
+        <button onClick={() => {
+          try { localStorage.setItem(storageKey, "done"); } catch {}
+          setStatut("done");
+          if (onEchec) onEchec();
+        }} style={{ background:"transparent", border:`1px solid ${T.brume}22`, borderRadius:24, padding:"0.5rem 1.3rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"0.85rem", color:`${T.brume}66`, cursor:"pointer" }}>
+          Je n'ai pas réussi
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div style={{ padding:"1.5rem", background:`${T.or}06`, borderRadius:8, border:`1px solid ${T.or}15` }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"0.8rem" }}>
+        <p style={{ fontFamily:T.sans, fontSize:"0.42rem", letterSpacing:"0.4em", textTransform:"uppercase", color:`${T.or}77`, margin:0 }}>INVITATION DU JOUR</p>
+        <p style={{ fontFamily:T.sans, fontSize:"0.42rem", letterSpacing:"0.3em", textTransform:"uppercase", color:`${T.brume}44`, margin:0 }}>{"✦".repeat(inv.eclats)} {inv.eclats} éclat{inv.eclats > 1 ? "s" : ""}</p>
+      </div>
+      <p style={{ fontFamily:T.serif, fontWeight:300, fontSize:"clamp(1rem,3.5vw,1.1rem)", color:T.orPale, lineHeight:1.8, marginBottom:"0.6rem" }}>{inv.titre}</p>
+      <p style={{ fontFamily:T.serif, fontStyle:"italic", fontSize:"0.9rem", color:`${T.brume}88`, lineHeight:1.7, marginBottom:"1.2rem" }}>{inv.invitation}</p>
+      <button onClick={() => setShowRetour(true)} style={{ background:"transparent", border:`1px solid ${T.or}44`, borderRadius:24, padding:"0.55rem 1.4rem", fontFamily:T.serif, fontStyle:"italic", fontSize:"0.9rem", color:T.or, cursor:"pointer" }}>
+        J'accepte cette invitation
+      </button>
+    </div>
+  );
+};
+
+const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationComplete, onInvitationEchec }) => {
   if (!data) return null;
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
@@ -4316,6 +4446,11 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
             }}
           />
         </div>
+      </div>
+
+      {/* ── INVITATION DU JOUR ── */}
+      <div style={{ margin: "1rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0 }}>
+        <InvitationDuJour data={data} onComplete={onInvitationComplete} onEchec={onInvitationEchec} />
       </div>
 
       {/* ── MIROIR DE LA SEMAINE ── (visible uniquement si assez de données) */}
@@ -11523,7 +11658,7 @@ function AlbaInner() {
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
               style={{ padding: "0 0" }}
             >
-              {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} />}
+              {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} onInvitationComplete={(niveau) => incrementStat(niveau === 5 ? "invitations5" : niveau === 3 ? "invitations3" : "invitations1")} onInvitationEchec={() => incrementStat("invitationsEchec")} />}
               {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} onSessionComplete={() => incrementStat("conversationsTotal")} onSaveToArdoise={(txt) => {
                   try {
                     const todayKey = new Date().toISOString().split("T")[0];
