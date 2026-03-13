@@ -13041,25 +13041,41 @@ const TYPE_LABELS = {
 };
 
 const LivreAlba = ({ isPremium, onShowPaywall }) => {
-  const [vue, setVue] = useState("couverture"); // couverture | page | archive
+  const [vue, setVue] = useState("couverture");
   const [pageJour, setPageJour] = useState(null);
   const [loading, setLoading] = useState(false);
   const [archive, setArchive] = useState([]);
   const [archiveLoading, setArchiveLoading] = useState(false);
+  const [pageSelectionnee, setPageSelectionnee] = useState(null);
+  const [pageIdx, setPageIdx] = useState(0); // index dans l'archive chargée
 
   const chapitreActuel = () => {
     const mois = new Date().getMonth() + 1;
-    return { num: mois, mois, titre: ["Ce qui commence","Ce qu'on porte","Le corps sait","Les liens","Ce qui résiste","L'été intérieur","Le silence","Ce qu'on traverse","Revenir à soi","Ce qui part","La gratitude sauvage","Ce qui reste"][mois-1], couleur: ["#C8A96E","#9898C8","#78A878","#C87878","#C8A040","#E8A870","#7898A8","#A87858","#88A888","#B89870","#C8B098","#A898C8"][mois-1] };
+    const titres = ["Ce qui commence","Ce qu'on porte","Le corps sait","Les liens","Ce qui résiste","L'été intérieur","Le silence","Ce qu'on traverse","Revenir à soi","Ce qui part","La gratitude sauvage","Ce qui reste"];
+    const couleurs = ["#C8A96E","#9898C8","#78A878","#C87878","#C8A040","#E8A870","#7898A8","#A87858","#88A888","#B89870","#C8B098","#A898C8"];
+    return { num: mois, mois, titre: titres[mois-1], couleur: couleurs[mois-1] };
   };
 
   const chargerPage = async () => {
     setLoading(true);
     try {
-      const r = await fetch("/api/livre-du-jour");
-      const d = await r.json();
-      setPageJour(d);
+      // Charger aussi l'archive pour avoir la navigation
+      const [rJour, rArchive] = await Promise.all([
+        fetch("/api/livre-du-jour"),
+        fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=30`, {
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+        })
+      ]);
+      const dJour = await rJour.json();
+      setPageJour(dJour);
+      setPageSelectionnee(dJour);
+      if (rArchive.ok) {
+        const dArchive = await rArchive.json();
+        setArchive(dArchive);
+        setPageIdx(0);
+      }
       setVue("page");
-    } catch { }
+    } catch {}
     setLoading(false);
   };
 
@@ -13076,62 +13092,54 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
     setVue("archive");
   };
 
+  const allerPage = (direction) => {
+    const newIdx = pageIdx + direction;
+    if (newIdx < 0 || newIdx >= archive.length) return;
+    setPageIdx(newIdx);
+    setPageSelectionnee(archive[newIdx]);
+  };
+
   const chap = chapitreActuel();
-  const gravurePaths = GRAVURES_LIVRE[pageJour?.chapitre_num ? ["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"][pageJour.chapitre_num-1] : "commencement"];
+  const pageActive = pageSelectionnee || pageJour;
+  const numeroPage = pageActive ? (() => {
+    const debut = new Date(pageActive.date + 'T00:00:00');
+    const debutAnnee = new Date(debut.getFullYear(), 0, 1);
+    return Math.ceil((debut - debutAnnee) / (1000 * 60 * 60 * 24)) + 1;
+  })() : 1;
+
+  const gravIdx = pageActive?.chapitre_num ? pageActive.chapitre_num - 1 : chap.num - 1;
+  const gravKeys = ["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"];
+  const gravKey = gravKeys[gravIdx] || "commencement";
+  const couleur = pageActive?.chapitre_couleur || chap.couleur;
 
   // ── COUVERTURE ────────────────────────────────────────────────────────────
   if (vue === "couverture") return (
-    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem", position: "relative", overflow: "hidden" }}>
-      {/* Fond texture */}
-      <div style={{ position: "absolute", inset: 0, background: `radial-gradient(ellipse 70% 60% at 50% 40%, ${chap.couleur}10 0%, transparent 70%)`, pointerEvents: "none" }} />
+    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem" }}>
 
-      {/* Couverture livre */}
-      <div style={{ position: "relative", width: "min(280px, 80vw)", animation: "fadeUp 0.8s ease forwards" }}>
-        {/* Livre — face avant */}
+      {/* Couverture avec vraie image */}
+      <div style={{ position: "relative", width: "min(260px, 75vw)", animation: "fadeUp 0.8s ease forwards", cursor: "pointer" }}
+        onClick={chargerPage}
+      >
         <div style={{
-          background: `linear-gradient(160deg, #1A1510, #0D0A08)`,
-          border: `1px solid ${chap.couleur}40`,
           borderRadius: "4px 10px 10px 4px",
-          padding: "3rem 2.5rem",
-          boxShadow: `4px 6px 30px rgba(0,0,0,0.7), inset 1px 0 0 ${chap.couleur}20, -4px 0 8px rgba(0,0,0,0.4)`,
+          overflow: "hidden",
+          boxShadow: "6px 8px 40px rgba(0,0,0,0.8), -5px 0 10px rgba(0,0,0,0.5)",
           position: "relative",
-          minHeight: 360,
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
         }}>
-          {/* Tranche livre */}
-          <div style={{ position: "absolute", left: -6, top: 6, bottom: 6, width: 6, background: `linear-gradient(to right, #0A0806, #1A1510)`, borderRadius: "4px 0 0 4px", boxShadow: "-2px 0 6px rgba(0,0,0,0.5)" }} />
-
-          {/* Filigrane gravure */}
-          <div style={{ position: "absolute", right: "1.5rem", bottom: "4rem", opacity: 0.08 }}>
-            <svg width={80} height={80} viewBox="0 0 48 48" fill="none" stroke={chap.couleur} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.2} dangerouslySetInnerHTML={{ __html: GRAVURES_LIVRE[["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"][chap.num-1]] || GRAVURES_LIVRE.commencement }} />
-          </div>
-
-          {/* Contenu couverture */}
-          <div>
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${chap.couleur}88`, marginBottom: "2rem" }}>
-              Chapitre {chap.num} — {chap.titre}
-            </div>
-            <div style={{ width: 30, height: 1, background: `linear-gradient(to right, ${chap.couleur}88, transparent)`, marginBottom: "1.8rem" }} />
-            <h1 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.6rem, 6vw, 2rem)", color: T.orPale, lineHeight: 1.4, letterSpacing: "0.04em", margin: 0 }}>
-              Ce que<br/>l'aube sait
-            </h1>
-          </div>
-
-          <div>
-            <div style={{ width: 24, height: 1, background: `${chap.couleur}44`, marginBottom: "1.2rem" }} />
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}55` }}>
-              ALBA · {new Date().getFullYear()}
-            </div>
-          </div>
+          {/* Tranche */}
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: "linear-gradient(to right, #0A0806, #1A1510, #0A0806)", zIndex: 2 }} />
+          {/* Image de couverture */}
+          <img src="/couverture-livre.png" alt="Ce que l'aube sait" style={{ width: "100%", display: "block" }} />
         </div>
       </div>
 
-      {/* Actions */}
-      <div style={{ marginTop: "2.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.8rem", width: "100%", maxWidth: 280 }}>
+      {/* Tagline */}
+      <div style={{ marginTop: "2rem", textAlign: "center", maxWidth: 280, animation: "fadeUp 0.8s ease 0.3s forwards", opacity: 0 }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88`, lineHeight: 1.8, margin: "0 0 1.5rem" }}>
+          Chaque jour à minuit, une nouvelle page.<br/>Une année intérieure.
+        </p>
         <button onClick={chargerPage} disabled={loading} style={{
-          width: "100%", padding: "0.9rem",
+          width: "100%", padding: "0.85rem",
           background: `${chap.couleur}22`, border: `1px solid ${chap.couleur}55`,
           borderRadius: "6px", cursor: "pointer",
           fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem",
@@ -13140,78 +13148,112 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
           {loading ? "Un instant…" : "Lire la page du jour"}
         </button>
         <button onClick={chargerArchive} style={{
-          background: "none", border: "none", cursor: "pointer",
+          marginTop: "0.8rem", background: "none", border: "none", cursor: "pointer",
           fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem",
-          letterSpacing: "0.3em", textTransform: "uppercase",
-          color: `${T.brume}55`,
+          letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}44`,
         }}>
-          {isPremium ? "Voir les 30 dernières pages" : "✦ Archive — abonnés"}
+          {isPremium ? "Pages précédentes" : "✦ Pages précédentes — abonnés"}
         </button>
       </div>
     </div>
   );
 
-  // ── PAGE DU JOUR ──────────────────────────────────────────────────────────
-  if (vue === "page" && pageJour) {
-    const couleur = pageJour.chapitre_couleur || chap.couleur;
-    const gravIdx = (pageJour.chapitre_num || 1) - 1;
-    const gravKey = ["commencement","porter","corps","lien","resistance","ete","silence","traversee","retour","depart","gratitude","reste"][gravIdx];
-    const dateFormatee = new Date(pageJour.date).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  // ── PAGE DU LIVRE ─────────────────────────────────────────────────────────
+  if (vue === "page" && pageActive) {
+    const dateFormatee = new Date(pageActive.date + 'T00:00:00').toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+    const peutAllerAvant = pageIdx < archive.length - 1;
+    const peutAllerArriere = pageIdx > 0;
 
     return (
-      <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
-        <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}55`, marginBottom: "2.5rem", padding: 0, textTransform: "uppercase" }}>← Le Livre</button>
+      <div style={{ minHeight: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto", position: "relative" }}>
 
-        {/* En-tête page */}
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          {/* Gravure */}
-          <div style={{ position: "relative", width: 64, height: 64, margin: "0 auto 1.5rem" }}>
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 46, color: `${couleur}09`, fontFamily: T.serif, lineHeight: 1 }}>
-              {String.fromCharCode(64 + (pageJour.chapitre_num || 1))}
+        {/* Header navigation livre */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.2rem 1.5rem 0" }}>
+          <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.45rem", letterSpacing: "0.3em", color: `${T.brume}44`, padding: 0, textTransform: "uppercase" }}>
+            ← Couverture
+          </button>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.3em", color: `${couleur}66`, textTransform: "uppercase" }}>
+            {pageActive.chapitre_titre || chap.titre}
+          </div>
+          <div style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: `${T.brume}44` }}>
+            {numeroPage}
+          </div>
+        </div>
+
+        {/* Séparateur haut */}
+        <div style={{ margin: "0.8rem 1.5rem", height: 1, background: `linear-gradient(to right, transparent, ${couleur}33, transparent)` }} />
+
+        {/* Contenu page */}
+        <div style={{ padding: "1rem 2rem 2rem" }}>
+
+          {/* Gravure + type */}
+          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+            <div style={{ position: "relative", width: 56, height: 56, margin: "0 auto 1rem" }}>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: `${couleur}08`, fontFamily: T.serif }}>
+                {String.fromCharCode(64 + (pageActive.chapitre_num || 1))}
+              </div>
+              <svg width={56} height={56} viewBox="0 0 48 48" fill="none" stroke={couleur} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.65 }} dangerouslySetInnerHTML={{ __html: GRAVURES_LIVRE[gravKey] || GRAVURES_LIVRE.commencement }} />
             </div>
-            <svg width={64} height={64} viewBox="0 0 48 48" fill="none" stroke={couleur} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }} dangerouslySetInnerHTML={{ __html: GRAVURES_LIVRE[gravKey] || GRAVURES_LIVRE.commencement }} />
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.45em", textTransform: "uppercase", color: `${couleur}77`, marginBottom: "0.4rem" }}>
+              {TYPE_LABELS[pageActive.type] || pageActive.type}
+            </div>
+            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.3em", color: `${T.brume}30`, textTransform: "uppercase" }}>
+              {dateFormatee}
+            </div>
           </div>
 
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${couleur}77`, marginBottom: "0.5rem" }}>
-            {TYPE_LABELS[pageJour.type] || pageJour.type}
-          </div>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.brume}35`, marginBottom: "1.2rem" }}>
-            {dateFormatee}
-          </div>
-
-          <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 5vw, 1.7rem)", color: T.orPale, margin: "0 0 0.5rem", lineHeight: 1.4 }}>
-            {pageJour.titre_page}
+          {/* Titre */}
+          <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 5vw, 1.6rem)", color: T.orPale, margin: "0 0 1.5rem", lineHeight: 1.4, textAlign: "center" }}>
+            {pageActive.titre_page}
           </h2>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.3em", color: `${couleur}55`, textTransform: "uppercase" }}>
-            {pageJour.chapitre_titre}
+
+          {/* Filet */}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "2rem" }}>
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${couleur}33)` }} />
+            <div style={{ color: `${couleur}55`, fontSize: "0.55rem" }}>✦</div>
+            <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${couleur}33)` }} />
+          </div>
+
+          {/* Texte */}
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.92rem, 3.2vw, 1rem)", color: `${T.aube}EE`, lineHeight: 2.1, whiteSpace: "pre-line" }}>
+            {pageActive.contenu
+              .replace(/#{1,3}\s*/g, "")
+              .replace(/\*\*([^*]+)\*\*/g, "$1")
+              .replace(/\*([^*]+)\*/g, "$1")
+              .replace(/^[-–—]\s+/gm, "")
+              .trim()
+            }
           </div>
         </div>
 
-        {/* Séparateur */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "2.5rem" }}>
-          <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${couleur}33)` }} />
-          <div style={{ color: `${couleur}55`, fontSize: "0.6rem" }}>✦</div>
-          <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${couleur}33)` }} />
-        </div>
+        {/* Pied de page avec navigation */}
+        <div style={{ padding: "1.5rem 1.5rem 6rem" }}>
+          <div style={{ margin: "0 0 1.5rem", height: 1, background: `${couleur}18` }} />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
-        {/* Contenu */}
-        <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.95rem, 3.5vw, 1.05rem)", color: `${T.aube}EE`, lineHeight: 2.1, whiteSpace: "pre-line" }}>
-          {pageJour.contenu
-            .replace(/#{1,3}\s*/g, "")
-            .replace(/\*\*([^*]+)\*\*/g, "$1")
-            .replace(/\*([^*]+)\*/g, "$1")
-            .replace(/^[-–—]\s+/gm, "")
-            .trim()
-          }
-        </div>
+            {/* Page précédente */}
+            <button
+              onClick={() => allerPage(1)}
+              disabled={!peutAllerAvant}
+              style={{ background: "none", border: "none", cursor: peutAllerAvant ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerAvant ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0, display: "flex", alignItems: "center", gap: "0.4rem" }}
+            >
+              ← Jour précédent
+            </button>
 
-        {/* Pied de page */}
-        <div style={{ marginTop: "3rem", display: "flex", alignItems: "center", gap: "0.8rem" }}>
-          <div style={{ flex: 1, height: 1, background: `${couleur}20` }} />
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.3em", color: `${T.brume}33`, textTransform: "uppercase" }}>
-            Ce que l'aube sait
+            {/* Numéro de page centré */}
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "0.8rem", color: `${T.brume}33` }}>
+              — {numeroPage} —
+            </div>
+
+            {/* Page suivante */}
+            <button
+              onClick={() => allerPage(-1)}
+              disabled={!peutAllerArriere}
+              style={{ background: "none", border: "none", cursor: peutAllerArriere ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerArriere ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0, display: "flex", alignItems: "center", gap: "0.4rem" }}
+            >
+              Jour suivant →
+            </button>
           </div>
-          <div style={{ flex: 1, height: 1, background: `${couleur}20` }} />
         </div>
       </div>
     );
@@ -13220,31 +13262,35 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
   // ── ARCHIVE ───────────────────────────────────────────────────────────────
   if (vue === "archive") return (
     <div style={{ padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
-      <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}55`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Le Livre</button>
-      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "1.5rem" }}>30 dernières pages</div>
+      <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}55`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Couverture</button>
+      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "1.5rem" }}>Pages précédentes</div>
       {archiveLoading ? (
         <div style={{ textAlign: "center", color: `${T.brume}55`, fontFamily: T.serif, fontStyle: "italic", padding: "2rem" }}>Chargement…</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-          {archive.map((p, i) => (
-            <button key={i} onClick={() => { setPageJour(p); setVue("page"); }} style={{
-              background: `${T.nuit2}88`, border: `1px solid ${T.brume}10`,
-              borderRadius: "6px", padding: "0.9rem 1.1rem", cursor: "pointer",
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              textAlign: "left", transition: "all 0.2s",
-            }}
-              onMouseOver={e => e.currentTarget.style.background = `${p.chapitre_couleur || T.or}0A`}
-              onMouseOut={e => e.currentTarget.style.background = `${T.nuit2}88`}
-            >
-              <div>
-                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, marginBottom: "0.2rem" }}>{p.titre_page}</div>
-                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.25em", color: `${T.brume}55`, textTransform: "uppercase" }}>
-                  {TYPE_LABELS[p.type]} · {new Date(p.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+          {archive.map((p, i) => {
+            const num = (() => {
+              const d = new Date(p.date + 'T00:00:00');
+              return Math.ceil((d - new Date(d.getFullYear(), 0, 1)) / (1000*60*60*24)) + 1;
+            })();
+            return (
+              <button key={i} onClick={() => { setArchive(archive); setPageIdx(i); setPageSelectionnee(p); setVue("page"); }} style={{
+                background: `${T.nuit2}88`, border: `1px solid ${T.brume}10`,
+                borderRadius: "6px", padding: "0.9rem 1.1rem", cursor: "pointer",
+                display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
+              }}>
+                <div>
+                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, marginBottom: "0.2rem" }}>{p.titre_page}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.25em", color: `${T.brume}55`, textTransform: "uppercase" }}>
+                    {TYPE_LABELS[p.type]} · {new Date(p.date + 'T00:00:00').toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                  </div>
                 </div>
-              </div>
-              <div style={{ color: `${p.chapitre_couleur || T.or}66`, fontSize: "0.6rem", flexShrink: 0, marginLeft: "0.5rem" }}>→</div>
-            </button>
-          ))}
+                <div style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: `${T.brume}33`, flexShrink: 0, marginLeft: "0.5rem" }}>
+                  {num}
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
@@ -13252,6 +13298,7 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
 
   return null;
 };
+
 
 
 // ─── PAGE B2B ENTREPRISES ─────────────────────────────────────────────────────
