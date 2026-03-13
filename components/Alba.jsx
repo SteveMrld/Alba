@@ -889,12 +889,134 @@ const PHRASES_MATIN = {
   },
 };
 
+// ─── QUESTION DU JOUR ────────────────────────────────────────────────────────
+const QUESTIONS_DU_JOUR = [
+  "Qu'est-ce que tu continues à porter alors que personne ne te le demande ?",
+  "Si quelqu'un t'observait aujourd'hui, qu'est-ce qu'il comprendrait de ce que tu traverses ?",
+  "Quelle émotion as-tu évitée cette semaine ?",
+  "Qu'est-ce que tu as fait aujourd'hui qui ressemblait à la personne que tu veux être ?",
+  "À qui as-tu pensé aujourd'hui que tu n'as pas appelé ?",
+  "Qu'est-ce que tu repoussais depuis longtemps et que tu pourrais commencer demain ?",
+  "Si ton corps pouvait parler, que dirait-il ce soir ?",
+  "Quelle version de toi a disparu que tu regrettes parfois ?",
+  "Qu'est-ce que tu ferais différemment si tu savais que personne ne te jugerait ?",
+  "Qu'est-ce qui te pèse en ce moment sans que tu saches vraiment pourquoi ?",
+  "Qu'est-ce que tu as reçu cette semaine que tu n'as pas reconnu comme un cadeau ?",
+  "De quoi as-tu besoin que tu n'as pas demandé ?",
+  "À quoi ressemble ta vie dans 5 ans si tu continues comme maintenant ?",
+  "Qu'est-ce que tu dirais à la personne que tu étais il y a 10 ans ?",
+  "Quelle conversation as-tu besoin d'avoir et que tu repousses ?",
+  "Qu'est-ce que tu as fait par habitude aujourd'hui plutôt que par choix ?",
+  "Qu'est-ce qui te manque que tu n'oses pas nommer ?",
+  "À quoi ressemble ton silence intérieur en ce moment ?",
+  "Qu'est-ce que tu aurais aimé entendre aujourd'hui ?",
+  "Quelle part de toi cherche à exister et n'y arrive pas encore ?",
+  "Qu'est-ce que tu portes pour quelqu'un d'autre sans qu'on te l'ait demandé ?",
+  "Qu'est-ce qui te fait encore croire en quelque chose ?",
+  "Si tu devais décrire où tu en es en un seul mot, lequel serait-il ?",
+  "Qu'est-ce que tu t'es interdit cette semaine ?",
+  "Quelle émotion as-tu du mal à montrer aux autres ?",
+  "Qu'est-ce que tu aurais voulu faire autrement cette semaine ?",
+  "À quel moment as-tu été vraiment toi-même aujourd'hui ?",
+  "Qu'est-ce qui te donne encore de l'élan quand tout semble lourd ?",
+  // Nouvelles — thèmes enrichis
+  "Qu'est-ce que tu as appris sur toi en observant comment tu réagis quand ça va mal ?",
+  "Est-ce que tu te traites avec la même bienveillance que tu offrirais à quelqu'un que tu aimes ?",
+  "Qu'est-ce que tu n'as jamais dit à voix haute et qui existe pourtant ?",
+  "Quelle décision tu sais que tu dois prendre et que tu repousses encore ?",
+  "Qu'est-ce que le travail t'a pris cette semaine que tu ne lui avais pas donné ?",
+  "Si tu pouvais changer une seule chose dans ta façon de te parler à toi-même, ce serait laquelle ?",
+  "Qu'est-ce que tu fais encore par peur de décevoir quelqu'un ?",
+  "À quel moment as-tu senti que tu n'étais pas à ta place — et qu'est-ce que ça dit ?",
+  "Qu'est-ce que tu as honte d'avoir envie ?",
+  "Qu'est-ce que tu transmets en ce moment sans le choisir ?",
+  "Où est passée la curiosité que tu avais enfant ?",
+  "Qu'est-ce que tu ferais si tu savais que tu ne pouvais pas échouer ?",
+  "Quelle relation dans ta vie mérite plus d'attention que tu ne lui en donnes ?",
+  "Qu'est-ce qui te définissait il y a cinq ans et qui ne te définit plus ?",
+  "Qu'est-ce que ton argent dit de tes vraies priorités ?",
+  "Quand as-tu fait quelque chose uniquement pour toi, sans justification ?",
+  "Qu'est-ce que la fatigue que tu portes essaie de te dire ?",
+  "Si tu te regardais avec les yeux de quelqu'un qui t'aime, que verrais-tu ?",
+  "Qu'est-ce que tu attends de la vie en ce moment — et à qui tu ne l'as pas dit ?",
+  "Quelle part de toi n'a pas encore eu le droit de s'exprimer ?",
+  "Qu'est-ce que tu garderais de ta vie actuelle si tu devais tout recommencer ?",
+];
+
+// Questions contextuelles selon la situation de vie
+const QUESTIONS_SITUATION = {
+  "séparé": [
+    "Qu'est-ce que cette séparation t'a appris sur ce dont tu as vraiment besoin ?",
+    "Qu'est-ce que tu portes encore de cette relation que tu pourrais poser ?",
+    "Comment tu prends soin de toi en ce moment, honnêtement ?",
+    "Qu'est-ce que cette période t'apprend sur la personne que tu veux devenir ?",
+    "Qu'est-ce qui t'a surpris dans ta façon de traverser cette séparation ?",
+    "Y a-t-il quelque chose que tu regrettes de ne pas avoir dit avant la fin ?",
+  ],
+  "parent": [
+    "Qu'est-ce que tu voudrais que tes enfants retiennent de toi cette semaine ?",
+    "À quel moment as-tu vraiment été présent pour eux aujourd'hui ?",
+    "Qu'est-ce que tu ne leur dis pas et qui compte ?",
+    "Est-ce que tu es en train de leur transmettre ce que tu voulais leur transmettre ?",
+    "Qu'est-ce que ton enfant t'apprend sur toi-même en ce moment ?",
+  ],
+  "parent-séparé": [
+    "Comment tu protèges tes enfants de ce que tu traverses, sans les en couper complètement ?",
+    "Qu'est-ce que tu veux absolument que tes enfants sachent de ton amour pour eux malgré tout ?",
+    "À quel moment as-tu été présent pour eux cette semaine, vraiment présent ?",
+    "Qu'est-ce que tu portes en tant que parent séparé que tu n'oses pas dire ?",
+  ],
+  "couple": [
+    "Qu'est-ce que tu n'arrives pas à dire à ton partenaire en ce moment ?",
+    "Qu'est-ce que vous avez arrêté de faire ensemble que vous faisiez au début ?",
+    "À quel moment as-tu senti une vraie connexion avec ton partenaire cette semaine ?",
+    "Qu'est-ce que tu attends de cette relation que tu n'as pas demandé ?",
+  ],
+  "transition": [
+    "Qu'est-ce que tu laisses derrière toi dans cette transition ?",
+    "De quoi as-tu besoin pour avancer que tu n'as pas encore ?",
+    "Qu'est-ce que cette période t'apprend sur toi ?",
+    "À quoi ressemble la personne que tu es en train de devenir ?",
+  ],
+};
+
 const getPhraseduJour = (cleActive = 0) => {
-  const jour = new Date().getDay(); // 0–6
-  // 1 fois sur 4 : phrase liée à la clé. Les autres fois : phrase du pool
+  const jour = new Date().getDay();
   if (jour % 4 === 0) return PHRASES_MATIN.cle[cleActive] || PHRASES_MATIN.default[0];
   const idx = (new Date().getDate() + cleActive) % PHRASES_MATIN.default.length;
   return PHRASES_MATIN.default[idx];
+};
+
+const getQuestionDuJour = (data = null) => {
+  const today = new Date();
+  const seed = today.getFullYear() * 1000 + today.getMonth() * 31 + today.getDate();
+
+  // Contextuel selon situation de vie (1 fois sur 3)
+  if (data && seed % 3 === 0) {
+    const situation = (data.situation || "").toLowerCase();
+    const estParent = data.estParent === "oui" || data.estParent === true;
+    const estSepare = situation.includes("sép") || situation.includes("sépar");
+    const estCouple = situation.includes("couple");
+    const estTransition = situation.includes("transition");
+
+    if (estSepare && estParent && QUESTIONS_SITUATION["parent-séparé"]) {
+      return QUESTIONS_SITUATION["parent-séparé"][seed % QUESTIONS_SITUATION["parent-séparé"].length];
+    }
+    if (estSepare && QUESTIONS_SITUATION["séparé"]) {
+      return QUESTIONS_SITUATION["séparé"][seed % QUESTIONS_SITUATION["séparé"].length];
+    }
+    if (estParent && QUESTIONS_SITUATION["parent"]) {
+      return QUESTIONS_SITUATION["parent"][seed % QUESTIONS_SITUATION["parent"].length];
+    }
+    if (estCouple && QUESTIONS_SITUATION["couple"]) {
+      return QUESTIONS_SITUATION["couple"][seed % QUESTIONS_SITUATION["couple"].length];
+    }
+    if (estTransition && QUESTIONS_SITUATION["transition"]) {
+      return QUESTIONS_SITUATION["transition"][seed % QUESTIONS_SITUATION["transition"].length];
+    }
+  }
+
+  return QUESTIONS_DU_JOUR[seed % QUESTIONS_DU_JOUR.length];
 };
 
 // ─── RECOMMANDATIONS ─────────────────────────────────────────────────────────
@@ -1968,7 +2090,7 @@ const AhaMoment = ({ prenom, onContinue }) => {
 const Step = ({ num, label, children, onNext, onBack, canNext }) => (
   <Screen centered>
     <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-      <BreadcrumbDots current={num - 1} total={6} />
+      <BreadcrumbDots current={num - 1} total={8} />
       <Label>{label}</Label>
       {children}
 
@@ -2058,6 +2180,8 @@ const Onboarding = ({ onComplete }) => {
   const [autreTexte, setAutreTexte] = useState("");
   const [signe, setSigne] = useState("");
   const [couleurPred, setCouleurPred] = useState("");
+  const [situation, setSituation] = useState("");
+  const [estParent, setEstParent] = useState("");
 
   const SIGNES = [
     { id: "belier",     label: "Bélier",      svg: <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 28 C20 28 20 18 20 15"/><path d="M20 15 C20 8 12 5 10 10 C8 15 12 18 16 16"/><path d="M20 15 C20 8 28 5 30 10 C32 15 28 18 24 16"/><circle cx="13" cy="10" r="3.5" fill="none"/><circle cx="27" cy="10" r="3.5" fill="none"/><path d="M17 28 L23 28" strokeWidth="1.2"/></svg> },
@@ -2156,7 +2280,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 1) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <BreadcrumbDots current={1} total={6} />
+        <BreadcrumbDots current={1} total={8} />
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 4vw, 1.7rem)", color: T.orPale, textAlign: "center", marginBottom: "0.6rem", lineHeight: 1.3 }}>
           Comment tu te situes, {prenom} ?
         </div>
@@ -2285,7 +2409,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 3) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <BreadcrumbDots current={3} total={6} />
+        <BreadcrumbDots current={3} total={8} />
 
         <Label>Qu'est-ce qui t'amène ici, {prenom} ?</Label>
 
@@ -2382,7 +2506,7 @@ const Onboarding = ({ onComplete }) => {
   if (step === 4) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <BreadcrumbDots current={4} total={6} />
+        <BreadcrumbDots current={4} total={8} />
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
           Ton signe, {prenom} ?
         </div>
@@ -2420,7 +2544,7 @@ const Onboarding = ({ onComplete }) => {
           })}
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-          <Btn onClick={() => setStep(5)} canNext={!!signe} disabled={!signe} style={{ opacity: signe ? 1 : 0.4 }}>Continuer</Btn>
+          <Btn onClick={() => setStep(6)} canNext={!!signe} disabled={!signe} style={{ opacity: signe ? 1 : 0.4 }}>Continuer</Btn>
           <Btn secondary small onClick={() => setStep(3)}>Revenir</Btn>
         </div>
       </div>
@@ -2428,10 +2552,88 @@ const Onboarding = ({ onComplete }) => {
   );
 
   // ── ÉTAPE 5 — Couleur de prédilection ────────────────────────────────────
+  // ── ÉTAPE 6 — Situation de vie ───────────────────────────────────────────
+  if (step === 6) return (
+    <Screen centered>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+        <BreadcrumbDots current={6} total={8} />
+        <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+          Ta vie en ce moment, {prenom} ?
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, textAlign: "center", marginBottom: "2rem" }}>
+          Pour qu'ALBA t'accompagne selon ce que tu traverses vraiment.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", marginBottom: "2rem" }}>
+          {[
+            { id: "couple", label: "En couple" },
+            { id: "séparé récemment", label: "Séparé(e) récemment" },
+            { id: "célibataire", label: "Célibataire" },
+            { id: "famille recomposée", label: "En famille recomposée" },
+            { id: "transition", label: "En transition, je cherche" },
+          ].map(opt => (
+            <button key={opt.id} onClick={() => setSituation(opt.id)} style={{
+              background: situation === opt.id ? `${T.or}18` : "transparent",
+              border: `1px solid ${situation === opt.id ? T.or + "88" : T.brume + "22"}`,
+              borderRadius: "8px", padding: "0.9rem 1.2rem",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", color: situation === opt.id ? T.orPale : T.brume,
+              cursor: "pointer", textAlign: "left", transition: "all 0.3s",
+            }}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+          {situation && <Btn onClick={() => setStep(7)}>Continuer</Btn>}
+          <Btn secondary small onClick={() => setStep(4)}>Revenir</Btn>
+        </div>
+      </div>
+    </Screen>
+  );
+
+  // ── ÉTAPE 7 — Parentalité ────────────────────────────────────────────────
+  if (step === 7) return (
+    <Screen centered>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
+        <BreadcrumbDots current={7} total={8} />
+        <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
+          Es-tu parent ?
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, textAlign: "center", marginBottom: "2rem" }}>
+          Cette réponse restera entre nous.
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", marginBottom: "2rem" }}>
+          {[
+            { id: "oui", label: "Oui" },
+            { id: "non", label: "Non" },
+            { id: "beau-parent", label: "Beau-parent" },
+            { id: "en attente", label: "J'attends un enfant" },
+          ].map(opt => (
+            <button key={opt.id} onClick={() => setEstParent(opt.id)} style={{
+              background: estParent === opt.id ? `${T.or}18` : "transparent",
+              border: `1px solid ${estParent === opt.id ? T.or + "88" : T.brume + "22"}`,
+              borderRadius: "8px", padding: "0.9rem 1.2rem",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", color: estParent === opt.id ? T.orPale : T.brume,
+              cursor: "pointer", textAlign: "left", transition: "all 0.3s",
+            }}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+          {estParent && <Btn onClick={() => setStep(5)}>Continuer</Btn>}
+          <Btn secondary small onClick={() => setStep(6)}>Revenir</Btn>
+        </div>
+      </div>
+    </Screen>
+  );
+
+  // ── ÉTAPE 5 — Couleur ─────────────────────────────────────────────────────
   if (step === 5) return (
     <Screen centered>
       <div style={{ width: "100%", maxWidth: 480, animation: "fadeUp 0.8s ease forwards" }}>
-        <BreadcrumbDots current={5} total={6} />
+        <BreadcrumbDots current={5} total={8} />
         <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.2rem, 4vw, 1.6rem)", color: T.orPale, textAlign: "center", marginBottom: "0.5rem", lineHeight: 1.3 }}>
           Ta couleur, {prenom} ?
         </div>
@@ -2471,9 +2673,11 @@ const Onboarding = ({ onComplete }) => {
               sensibilite,
               signe,
               couleur: couleurPred,
+              situation: situation || "",
+              estParent: estParent || "non",
             });
           }}>Entrer dans l'aube</Btn>}
-          <Btn secondary small onClick={() => setStep(4)}>Revenir</Btn>
+          <Btn secondary small onClick={() => setStep(7)}>Revenir</Btn>
         </div>
       </div>
     </Screen>
@@ -3817,7 +4021,7 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
   const salut = heure < 6 ? "Tu veilles encore" : heure < 12 ? "Bonjour" : heure < 18 ? "Bon après-midi" : "Bonsoir";
   const momentLabel = heure < 6 ? "En pleine nuit" : heure < 12 ? "Ce matin" : heure < 18 ? "Cet après-midi" : "Ce soir";
   const isMatin = heure >= 5 && heure < 12;
-  const phraseDuJour = getPhraseduJour(cleActive);
+  const phraseDuJour = getQuestionDuJour(data);
 
   // ── Rythme circadien ─────────────────────────────────────────────────────
   const CIRCADIEN = heure >= 5 && heure < 11 ? {
