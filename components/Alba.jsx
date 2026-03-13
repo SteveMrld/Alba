@@ -3710,16 +3710,6 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats }) => {
           />
         )}
 
-        {/* Carte miniature flottante */}
-        <div style={{
-          position: "absolute", right: 1.5 + "rem", top: "50%",
-          transform: "translateY(-50%)",
-          animation: "float 6s ease-in-out infinite, fadeIn 1s ease forwards 0.4s",
-          opacity: 0,
-        }}>
-          <CarteAme data={data} small />
-        </div>
-      </div>
 
       {/* ── RYTHME CIRCADIEN ── */}
       <div style={{
