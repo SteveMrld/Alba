@@ -4714,6 +4714,7 @@ const PARCOURS = [
 const ParcoursDuJour = ({ data, isPremium, onShowPaywall }) => {
   const [vue, setVue] = useState("liste"); // liste | detail | actif
   const [parcoursChoisi, setParcoursChoisi] = useState(null);
+  const [faitAujd, setFaitAujd] = useState(false);
 
   const getEtatParcours = (parcoursId) => {
     try {
@@ -4835,7 +4836,7 @@ const ParcoursDuJour = ({ data, isPremium, onShowPaywall }) => {
     const jourActuel = getJourActuel(parcoursChoisi.id);
     const jourData = parcoursChoisi.jours.find(j => j.jour === jourActuel);
     const dejaFait = estComplete(parcoursChoisi.id, jourActuel);
-    const [fait, setFait] = useState(dejaFait);
+    const fait = faitAujd || dejaFait;
 
     if (!jourData) return null;
     return (
@@ -4852,7 +4853,7 @@ const ParcoursDuJour = ({ data, isPremium, onShowPaywall }) => {
         </p>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}66`, textAlign: "center", lineHeight: 1.7, marginBottom: "2rem" }}>{jourData.note}</p>
         {!fait ? (
-          <button onClick={() => { marquerComplete(parcoursChoisi.id, jourActuel); setFait(true); }}
+          <button onClick={() => { marquerComplete(parcoursChoisi.id, jourActuel); setFaitAujd(true); }}
             style={{ width: "100%", padding: "0.9rem", background: "none", border: `1px solid ${parcoursChoisi.couleur}55`, borderRadius: "6px", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: parcoursChoisi.couleur }}>
             ✓ J'ai fait ça aujourd'hui
           </button>
