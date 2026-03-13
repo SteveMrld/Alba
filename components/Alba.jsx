@@ -8763,6 +8763,8 @@ const LataifScreen = ({ onBack }) => {
 
 const Evasion = ({ data, isPremium = false, onShowPaywall, onShowLataif, onShowThemes }) => {
   const [actif, setActif] = useState(0);
+  const [nextActif, setNextActif] = useState(null);
+  const [fadeOut, setFadeOut] = useState(false);
   const [showSpotify, setShowSpotify] = useState(false);
   const touchStart = useRef(null);
   const videoRef = useRef(null);
@@ -8772,13 +8774,20 @@ const Evasion = ({ data, isPremium = false, onShowPaywall, onShowLataif, onShowT
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    const onEnded = () => setActif(a => (a + 1) % VIDEOS.length);
+    const onEnded = () => navigate(1);
     v.addEventListener("ended", onEnded);
     return () => v.removeEventListener("ended", onEnded);
   }, [actif]);
 
   const navigate = (dir) => {
-    setActif(a => (a + dir + VIDEOS.length) % VIDEOS.length);
+    const next = (actif + dir + VIDEOS.length) % VIDEOS.length;
+    setFadeOut(true);
+    setNextActif(next);
+    setTimeout(() => {
+      setActif(next);
+      setNextActif(null);
+      setFadeOut(false);
+    }, 600);
   };
 
   const handleTouchStart = (e) => { touchStart.current = e.touches[0].clientX; };
@@ -8844,11 +8853,7 @@ const Evasion = ({ data, isPremium = false, onShowPaywall, onShowLataif, onShowT
         </button>
       </div>
 
-      {/* Boutons accès Latâ'if et Thèmes */}
-      <div style={{ position: "absolute", bottom: 100, left: "50%", transform: "translateX(-50%)", zIndex: 20, display: "flex", gap: "0.75rem" }}>
-        <button onClick={() => onShowLataif?.()} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}44`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: T.or, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Latâ'if</button>
-        <button onClick={() => onShowThemes?.()} style={{ background: `${T.nuit}cc`, border: `1px solid ${T.or}33`, borderRadius: "20px", padding: "0.5rem 1.2rem", fontFamily: T.sans, fontWeight: 300, fontSize: "0.5rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.or}cc`, cursor: "pointer", backdropFilter: "blur(8px)", WebkitTapHighlightColor: "transparent" }}>✦ Thèmes</button>
-      </div>
+
 
       {/* Vidéo plein écran — pas de loop, enchaînement automatique */}
       <video
@@ -8859,6 +8864,8 @@ const Evasion = ({ data, isPremium = false, onShowPaywall, onShowLataif, onShowT
           position: "absolute", inset: 0,
           width: "100%", height: "100%",
           objectFit: "cover",
+          opacity: fadeOut ? 0 : 1,
+          transition: "opacity 0.6s ease",
         }}
       >
         <source src={item.src} type="video/mp4"/>
