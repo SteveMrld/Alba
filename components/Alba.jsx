@@ -7896,7 +7896,235 @@ const TerritoireCle = ({ cleActive = 0, progressStats = {}, allPostits = {} }) =
   );
 };
 
+// ── LES 7 LATÂ'IF SOUFIS ─────────────────────────────────────────────────────
+const LATAIF = [
+  {
+    id: "qalb",
+    nom: "Qalb",
+    traduction: "Le Cœur",
+    couleur: "#C87878",
+    position: "Centre de la poitrine",
+    intro: "Dans la tradition soufie, le Qalb est le centre de tout. Non pas le cœur organique, mais le cœur spirituel — le lieu en toi où se décident les orientations profondes, où naît l'amour vrai, où réside la conscience de soi. Les maîtres soufis disent : si le cœur est pur, tout l'être est pur. Si le cœur est voilé, même les actes nobles perdent leur lumière. Le Qalb est le siège de la foi, de l'amour et de la présence. C'est là que tu ressens ce qui est juste — avant même de le comprendre.",
+    dansLeFlux: "Quand le Qalb est ouvert, tu aimes sans calcul. Tu reçois les autres sans les juger. Tu ressens une forme de paix intérieure qui ne dépend pas des circonstances. Tu es capable de pardonner — non pas parce que l'autre le mérite, mais parce que tu ne veux plus porter ce poids. Tu es présent(e) à toi-même.",
+    quandCaResiste: "Quand le Qalb est voilé, tu ressens une sécheresse intérieure. Les émotions arrivent mais ne touchent pas vraiment. Tu peux fonctionner, accomplir, produire — mais tu ne ressens plus grand-chose. Ou au contraire, les émotions débordent sans direction. Tu aimes de façon conditionnelle, tu attends en retour, tu te refermes à la première blessure.",
+    pratiques: [
+      { titre: "L'inventaire du cœur", texte: "Assieds-toi en silence quelques minutes. Pose une main sur ta poitrine. Demande-toi honnêtement : est-ce qu'il y a quelqu'un ou quelque chose envers qui je nourris de la rancœur ? Ne juge pas la réponse. Juste la regarder est déjà un premier acte d'ouverture." },
+      { titre: "Un acte d'amour sans raison", texte: "Aujourd'hui, fais quelque chose de gentil pour quelqu'un — sans qu'il le sache, sans en attendre quoi que ce soit. Pas pour être bon(ne). Juste pour entraîner le cœur à donner librement." },
+      { titre: "Le pardon à petites doses", texte: "Le pardon complet peut prendre du temps. Mais on peut commencer par une intention : décider qu'on ne veut plus être prisonnier(e) de cette histoire. Pas effacer — mais desserrer. Écris une phrase qui commence par : 'Je choisis de ne plus laisser cela occuper autant de place en moi.'" },
+    ],
+  },
+  {
+    id: "ruh",
+    nom: "Rûh",
+    traduction: "L'Esprit",
+    couleur: "#9878C8",
+    position: "Côté droit de la poitrine",
+    intro: "Le Rûh est le souffle divin insufflé dans l'être humain — ce qui te distingue de la matière pure. Dans la tradition soufie, le Rûh est plus subtil que l'âme ordinaire. Il est le lien entre toi et ce qui te dépasse. Les maîtres soufis décrivent le Rûh comme une lumière que rien ne peut éteindre — même sous les couches de distraction, de douleur ou d'oubli. Prendre soin du Rûh, c'est entretenir cette connexion avec quelque chose de plus grand que soi, quelle que soit la forme que prend cette transcendance pour toi.",
+    dansLeFlux: "Quand le Rûh est vivant, tu ressens une forme de sens dans ce que tu fais — pas nécessairement de la joie, mais quelque chose de juste. Tu n'as pas besoin que tout soit expliqué. Tu supportes l'incertitude parce que tu fais confiance à une direction plus profonde. Il y a en toi une légèreté, même dans les moments difficiles.",
+    quandCaResiste: "Quand le Rûh est étouffé, la vie perd sa saveur. Tu accomplis les choses, tu coches les cases, mais il manque quelque chose d'essentiel. Un vide que rien ne comble vraiment — ni les distractions, ni les succès, ni les relations. Tu peux ressentir une fatigue profonde, pas physique — une fatigue de l'âme.",
+    pratiques: [
+      { titre: "Reconnaître les moments de présence", texte: "Pense à un moment récent où tu t'es senti(e) pleinement vivant(e) — même une seconde. Pas nécessairement heureux(se). Juste présent(e), juste. Écris ce moment. Qu'est-ce qui était différent ?" },
+      { titre: "Nourrir l'esprit délibérément", texte: "Le Rûh se nourrit de ce qui élève — la beauté, la prière, la nature, la musique qui touche, la lecture qui transforme. Fais aujourd'hui une chose uniquement pour nourrir cette partie de toi. Pas pour être productif(ve). Juste pour être vivant(e)." },
+      { titre: "La question du sens", texte: "Pose-toi cette question sans chercher une réponse définitive : qu'est-ce qui donne du sens à ma vie en ce moment ? Pas ce qui devrait. Ce qui, concrètement, te fait sentir que tu es là pour quelque chose." },
+    ],
+  },
+  {
+    id: "sirr",
+    nom: "Sirr",
+    traduction: "Le Secret",
+    couleur: "#7898C8",
+    position: "Centre gauche de la poitrine",
+    intro: "Le Sirr est le centre le plus intime — celui que les maîtres soufis appellent 'le secret'. C'est la partie de toi qui n'a jamais été blessée, jamais compromise, jamais diminuée par l'histoire de ta vie. C'est ton essence la plus profonde. Le Sirr ne peut pas être vu par les autres — et souvent, à peine par toi-même. Il se laisse entrevoir dans les moments de grande sincérité, dans le silence total, dans ces instants où tu sais exactement qui tu es sans avoir besoin de l'expliquer.",
+    dansLeFlux: "Quand le Sirr est accessible, tu n'as pas besoin de te justifier. Tu sais qui tu es — pas parfaitement, mais suffisamment. Tu peux être seul(e) sans te sentir vide. Tu ne cherches pas l'approbation des autres pour te sentir réel(le). Il y a en toi quelque chose de stable que les circonstances ne peuvent pas atteindre.",
+    quandCaResiste: "Quand le Sirr est inaccessible, tu te perds dans les rôles que tu joues pour les autres. Tu ne sais plus ce que tu veux vraiment — ce que tu veux toi, pas ce que les autres attendent. Tu peux te sentir étrange à toi-même, comme si tu regardais ta vie de l'extérieur sans vraiment l'habiter.",
+    pratiques: [
+      { titre: "Ce que personne ne sait de toi", texte: "Écris quelque chose de vrai sur toi que tu n'as jamais dit à personne — une peur, un désir, une conviction. Pas pour le partager. Juste pour te rappeler que cette vérité existe et qu'elle t'appartient." },
+      { titre: "Cinq minutes sans rôle", texte: "Aujourd'hui, trouve un moment où tu n'es ni parent, ni conjoint(e), ni collègue, ni ami(e). Juste toi. Assieds-toi. Respire. Ne fais rien d'utile. Observe ce qui reste quand tu enlèves tous les rôles." },
+      { titre: "La question de l'authenticité", texte: "Y a-t-il quelque chose que tu fais régulièrement qui ne te ressemble pas vraiment ? Pas parce que c'est mal — juste parce que ce n'est pas toi. Nomme-le sans te juger." },
+    ],
+  },
+  {
+    id: "khafi",
+    nom: "Khafî",
+    traduction: "Le Caché",
+    couleur: "#78A8A8",
+    position: "Côté droit du front",
+    intro: "Khafî signifie 'le caché' ou 'le subtil'. Dans la tradition soufie, c'est le centre de la perception intérieure — la capacité à sentir ce qui est là sans que ce soit visible. C'est le siège de l'intuition profonde, de la lecture fine des situations, de cette connaissance qui vient avant les mots. Développer Khafî, c'est apprendre à faire confiance à ce que tu perçois au-delà de ce que tu peux prouver. Non pas la superstition — mais l'écoute affinée.",
+    dansLeFlux: "Quand Khafî est actif, tu lis les situations avec justesse. Tu sens quand quelque chose ne va pas avant que les faits le confirment. Tu fais confiance à ta perception sans avoir besoin de tout vérifier. Tu sais quand parler et quand te taire. Tu choisis les bonnes personnes — pas celles qui semblent bonnes, celles qui le sont vraiment.",
+    quandCaResiste: "Quand Khafî est voilé, tu ignores régulièrement ce que tu sens pour écouter ce que tu penses devoir faire. Tu te laisses convaincre par des arguments logiques qui vont contre ce que tu ressentais. Tu te retrouves souvent dans des situations où tu te dis 'je savais bien'.",
+    pratiques: [
+      { titre: "Le journal des signaux faibles", texte: "Pendant trois jours, note chaque fois que tu ressens quelque chose — une légère résistance, un malaise discret, un élan inexpliqué — avant de pouvoir l'expliquer. Ne l'analyse pas. Juste le noter. Observe les patterns." },
+      { titre: "La décision sans délibération", texte: "La prochaine fois que tu dois faire un choix peu important, décide en moins de dix secondes. Sans peser le pour et le contre. Juste ce qui vient en premier. Observe comment tu te sens ensuite." },
+      { titre: "L'écoute du corps avant la tête", texte: "Face à une décision qui t'occupe, ferme les yeux et imagine chaque option. Observe ce que ton corps fait — tension, détente, serrement, légèreté. Le corps perçoit souvent avant la tête." },
+    ],
+  },
+  {
+    id: "akhfa",
+    nom: "Akhfâ",
+    traduction: "Le Très Caché",
+    couleur: "#A878C8",
+    position: "Centre du front",
+    intro: "Akhfâ est le plus subtil des centres — celui que les maîtres soufis décrivent comme presque impossible à saisir directement. C'est le lieu de la connexion avec le divin, du dépassement de l'ego, de l'expérience mystique. C'est là que réside la conscience pure — avant que les pensées, les émotions et les identités ne la colorent. Les soufis parlent d'Akhfâ comme du lieu où l'être humain touche à ce qui est éternel en lui. Ce n'est pas un état qu'on atteint une fois pour toutes — c'est un espace qu'on visite dans les moments de plus grande clarté.",
+    dansLeFlux: "Quand Akhfâ est touché, il y a une paix qui n'a pas d'explication. Une clarté soudaine sur ce qui compte vraiment. Une dissolution temporaire des petites préoccupations. Ces moments sont rares mais marquants — tu sais quand ils arrivent. Ils laissent une trace.",
+    quandCaResiste: "Quand Akhfâ est inaccessible — et c'est son état le plus courant — l'ego prend toute la place. Tu t'identifies complètement à tes pensées, tes peurs, tes désirs, tes statuts. Il n'y a pas d'espace entre toi et ce que tu vis. Tout est urgent, tout est personnel, tout est une menace ou une promesse.",
+    pratiques: [
+      { titre: "La pratique du désidentification", texte: "Quand une émotion forte arrive — colère, peur, tristesse — essaie de dire mentalement : 'Il y a de la colère en moi' plutôt que 'Je suis en colère'. Cette petite différence crée un espace. Tu observes l'émotion au lieu d'être l'émotion." },
+      { titre: "Le silence comme pratique", texte: "Consacre dix minutes aujourd'hui à un silence intentionnel. Pas de méditation guidée, pas de musique. Juste le silence. Laisse les pensées passer sans les suivre. Si tu arrives à trente secondes de vraie quietude intérieure, c'est déjà quelque chose." },
+      { titre: "La question de l'impermanence", texte: "Pense à quelque chose qui te préoccupe fortement en ce moment. Demande-toi honnêtement : est-ce que ça existera encore dans dix ans ? Pas pour minimiser — pour recalibrer. Ce qui est urgent n'est pas toujours important." },
+    ],
+  },
+  {
+    id: "nafs",
+    nom: "Nafs",
+    traduction: "L'Âme",
+    couleur: "#C8A040",
+    position: "Bas-ventre",
+    intro: "La Nafs est l'âme dans son sens le plus humain — celle qui désire, qui résiste, qui lutte, qui grandit. Dans la tradition soufie, la Nafs traverse plusieurs stades d'évolution : de l'âme qui commande (al-nafs al-ammara) — celle qui suit les pulsions sans réfléchir — à l'âme apaisée (al-nafs al-mutma'inna) — celle qui est en paix avec elle-même et avec ce qui la dépasse. Travailler sur la Nafs, c'est le cœur du travail intérieur soufi. Ce n'est pas la mortifier ou la nier — c'est l'éduquer, la raffiner, la conduire vers plus de conscience.",
+    dansLeFlux: "Quand la Nafs est équilibrée, tu connais tes désirs sans en être l'esclave. Tu peux dire non quand c'est juste. Tu n'agis pas sous l'impulsion de la peur ou de la colère. Tu es en mesure de différer une satisfaction immédiate pour quelque chose de plus profond. Il y a une forme de cohérence entre ce que tu veux et ce que tu fais.",
+    quandCaResiste: "Quand la Nafs prend le dessus, tu réagis plus que tu n'agis. Tu fais des choses que tu regretteras. Tu cherches des satisfactions immédiates pour calmer une anxiété qui revient toujours. Tu te juges beaucoup — ou au contraire, tu te justifies tout. Il peut y avoir un sentiment diffus de honte ou d'insatisfaction chronique.",
+    pratiques: [
+      { titre: "Observer avant d'agir", texte: "La prochaine fois que tu ressens une impulsion forte — répondre sèchement, manger par stress, éviter quelque chose — prends trente secondes avant d'agir. Juste observer l'impulsion sans la suivre immédiatement. Tu n'as pas à la supprimer. Juste à créer un espace." },
+      { titre: "L'inventaire honnête", texte: "Qu'est-ce que tu fais régulièrement que tu sais ne pas être bon pour toi — et que tu continues quand même ? Pas pour te juger. Pour regarder honnêtement. La conscience est le début du changement." },
+      { titre: "Un acte en accord avec tes valeurs", texte: "Aujourd'hui, fais une chose qui soit parfaitement en accord avec ce que tu prétends être — même si c'est difficile, même si personne ne le verra. La Nafs se raffine dans les actes, pas dans les intentions." },
+    ],
+  },
+  {
+    id: "sultan",
+    nom: "Sultan al-Adhkâr",
+    traduction: "Le Centre de la Présence",
+    couleur: "#7BA87B",
+    position: "Sommet de la tête",
+    intro: "Le septième centre n'a pas de nom unique dans toutes les traditions soufies, mais il est souvent désigné comme le lieu de la présence totale — là où le dhikr (la remémoration de Dieu) devient naturel, où la conscience est à la fois pleinement incarnée et pleinement ouverte. C'est le centre de l'intégration — celui qui unifie tous les autres. Quand les six autres centres sont en travail, celui-ci commence à s'éveiller. Il ne s'agit pas de perfection mais d'unité intérieure — être le même en public et en privé, en action et en silence, dans la joie et dans l'épreuve.",
+    dansLeFlux: "Quand ce centre est actif, il y a une cohérence dans ta vie que tu n'as pas besoin d'expliquer. Tu es reconnaissable — pour les autres et pour toi-même. Tes actes, tes paroles et tes valeurs s'alignent naturellement. Tu n'es pas parfait(e) mais tu es entier(e). Il y a une sérénité qui vient non pas de l'absence de problèmes, mais de l'accord profond avec qui tu es.",
+    quandCaResiste: "Quand ce centre est endormi, tu vis en fragments. Le toi du travail ne connaît pas le toi intime. Ce que tu dis ne correspond pas à ce que tu fais. Tu cherches à être plusieurs personnes pour plusieurs publics et tu t'y perds. Il peut y avoir un sentiment de dispersion, de manque d'ancrage, de ne pas savoir vraiment qui tu es.",
+    pratiques: [
+      { titre: "L'audit de cohérence", texte: "Est-ce que la personne que tu es en public est la même que celle que tu es seul(e) ? Pas en termes de performance — en termes de valeurs, d'intentions, de façon d'être. Où y a-t-il un écart ? Pas pour te condamner — pour voir." },
+      { titre: "Une journée d'alignement", texte: "Choisis une valeur qui te tient à cœur — l'honnêteté, la bienveillance, la simplicité. Essaie de laisser cette valeur guider chaque décision de la journée, même les petites. Observe comment ça change l'expérience de ta journée." },
+      { titre: "La question de l'intégrité", texte: "Y a-t-il quelque chose dans ta vie que tu continues à faire alors que ça contredit ce que tu crois être ? Une relation, une habitude, un compromis. Pas besoin de tout résoudre d'un coup. Juste de regarder en face." },
+    ],
+  },
+];
+
+const LataifScreen = ({ onBack }) => {
+  const [vue, setVue] = useState("intro"); // intro | liste | fiche
+  const [lataifChoisi, setLataifChoisi] = useState(null);
+
+  // ── INTRO ──
+  if (vue === "intro") return (
+    <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Retour</button>
+      <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.55em", textTransform: "uppercase", color: `${T.or}66`, marginBottom: "1rem" }}>Les Latâ'if</div>
+        <div style={{ width: 1, height: 40, background: `linear-gradient(to bottom, transparent, ${T.or}44, transparent)`, margin: "0 auto 1.5rem" }} />
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem, 3vw, 1.15rem)", color: T.orPale, lineHeight: 2, marginBottom: "1.5rem" }}>
+          Les centres subtils de la conscience
+        </p>
+      </div>
+      <div style={{ background: `${T.nuit2}cc`, border: `1px solid ${T.or}22`, borderLeft: `3px solid ${T.or}44`, borderRadius: "4px", padding: "1.4rem 1.6rem", marginBottom: "2rem" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>
+          Dans la tradition soufie, les maîtres de l'intériorité ont cartographié l'être humain à travers les Latâ'if — des centres subtils de conscience, chacun correspondant à une dimension de la vie intérieure. On retrouve une cartographie similaire dans d'autres traditions : les hindous les appellent chakras, d'autres mystiques ont leurs propres noms. La forme change. La réalité intérieure qu'elle décrit est universelle.
+        </p>
+      </div>
+      <div style={{ background: `${T.nuit2}88`, border: `1px solid ${T.brume}18`, borderRadius: "4px", padding: "1.2rem 1.4rem", marginBottom: "2.5rem" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}99`, lineHeight: 1.9, margin: 0 }}>
+          Ces sept centres ne sont pas des organes physiques. Ce sont des espaces de conscience — des dimensions de ton être intérieur. Certains sont actifs en toi, d'autres attendent d'être touchés. Explorer les Latâ'if, c'est se donner une carte pour comprendre ce qui se passe en soi.
+        </p>
+      </div>
+      <button onClick={() => setVue("liste")} style={{ width: "100%", padding: "1rem", background: `${T.or}22`, border: `1px solid ${T.or}55`, borderRadius: "6px", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.45em", textTransform: "uppercase", color: T.or }}>
+        Explorer les 7 centres
+      </button>
+    </div>
+  );
+
+  // ── LISTE ──
+  if (vue === "liste") return (
+    <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+      <button onClick={() => setVue("intro")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Retour</button>
+      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.55em", textTransform: "uppercase", color: `${T.or}66`, marginBottom: "1.5rem" }}>Les 7 Latâ'if</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        {LATAIF.map((l, i) => (
+          <div key={l.id} onClick={() => { setLataifChoisi(l); setVue("fiche"); }}
+            style={{ background: `${T.nuit2}cc`, border: `1px solid ${l.couleur}33`, borderLeft: `3px solid ${l.couleur}66`, borderRadius: "6px", padding: "1.1rem 1.2rem", cursor: "pointer", animation: `fadeUp 0.5s ease forwards ${0.05 + i * 0.07}s`, opacity: 0 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, marginBottom: "0.2rem" }}>{l.nom} — {l.traduction}</div>
+                <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.3em", textTransform: "uppercase", color: l.couleur }}>{l.position}</div>
+              </div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}55` }}>{i + 1}/7</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // ── FICHE ──
+  if (vue === "fiche" && lataifChoisi) {
+    const l = lataifChoisi;
+    const idx = LATAIF.findIndex(x => x.id === l.id);
+    return (
+      <div style={{ minHeight: "calc(100vh - 120px)", padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
+        <button onClick={() => setVue("liste")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Les 7 centres</button>
+
+        {/* En-tête */}
+        <div style={{ borderLeft: `3px solid ${l.couleur}88`, paddingLeft: "1.2rem", marginBottom: "2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: l.couleur, marginBottom: "0.4rem" }}>{idx + 1} · {l.position}</div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.2rem,4vw,1.4rem)", color: T.orPale, marginBottom: "0.2rem" }}>{l.nom}</div>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: `${T.brume}99` }}>{l.traduction}</div>
+        </div>
+
+        {/* Ce que c'est */}
+        <div style={{ marginBottom: "2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${l.couleur}99`, marginBottom: "0.8rem" }}>Ce centre</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}cc`, lineHeight: 2, margin: 0 }}>{l.intro}</p>
+        </div>
+
+        <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${l.couleur}33, transparent)`, margin: "1.5rem 0" }} />
+
+        {/* Dans le flux */}
+        <div style={{ marginBottom: "1.5rem", background: `${l.couleur}08`, border: `1px solid ${l.couleur}22`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: l.couleur, marginBottom: "0.7rem" }}>Dans le flux</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>{l.dansLeFlux}</p>
+        </div>
+
+        {/* Quand ça résiste */}
+        <div style={{ marginBottom: "2rem", background: `${T.brume}08`, border: `1px solid ${T.brume}18`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${T.brume}77`, marginBottom: "0.7rem" }}>Quand ça résiste</div>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}99`, lineHeight: 1.9, margin: 0 }}>{l.quandCaResiste}</p>
+        </div>
+
+        <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${l.couleur}33, transparent)`, margin: "0 0 2rem" }} />
+
+        {/* Pratiques */}
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.4em", textTransform: "uppercase", color: `${l.couleur}99`, marginBottom: "1.2rem" }}>Ce que tu peux faire</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          {l.pratiques.map((p, i) => (
+            <div key={i} style={{ background: `${T.nuit2}cc`, border: `1px solid ${l.couleur}22`, borderRadius: "6px", padding: "1.2rem 1.4rem" }}>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: l.couleur, marginBottom: "0.6rem" }}>{p.titre}</div>
+              <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}cc`, lineHeight: 1.9, margin: 0 }}>{p.texte}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation entre Lataif */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "3rem" }}>
+          <button onClick={() => idx > 0 && setLataifChoisi(LATAIF[idx - 1])} disabled={idx === 0}
+            style={{ background: "none", border: `1px solid ${idx === 0 ? T.brume + "22" : l.couleur + "44"}`, borderRadius: "6px", padding: "0.6rem 1.2rem", cursor: idx === 0 ? "default" : "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: idx === 0 ? `${T.brume}33` : l.couleur }}>← Précédent</button>
+          <button onClick={() => idx < LATAIF.length - 1 && setLataifChoisi(LATAIF[idx + 1])} disabled={idx === LATAIF.length - 1}
+            style={{ background: "none", border: `1px solid ${idx === LATAIF.length - 1 ? T.brume + "22" : l.couleur + "44"}`, borderRadius: "6px", padding: "0.6rem 1.2rem", cursor: idx === LATAIF.length - 1 ? "default" : "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: idx === LATAIF.length - 1 ? `${T.brume}33` : l.couleur }}>Suivant →</button>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
 const Evasion = ({ data }) => {
+  const [showLataif, setShowLataif] = useState(false);
+
+  if (showLataif) return <LataifScreen onBack={() => setShowLataif(false)} />;
+
   const [actif, setActif] = useState(0);
   const touchStart = useRef(null);
   const videoRef = useRef(null);
@@ -7934,6 +8162,17 @@ const Evasion = ({ data }) => {
         overflow: "hidden",
       }}
     >
+      {/* Bouton accès Latâ'if */}
+      <button onClick={() => setShowLataif(true)} style={{
+        position: "absolute", bottom: 100, left: "50%", transform: "translateX(-50%)",
+        zIndex: 20, background: `${T.nuit}cc`, border: `1px solid ${T.or}44`,
+        borderRadius: "20px", padding: "0.5rem 1.4rem",
+        fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
+        letterSpacing: "0.4em", textTransform: "uppercase", color: T.or,
+        cursor: "pointer", backdropFilter: "blur(8px)",
+        WebkitTapHighlightColor: "transparent",
+      }}>✦ Les Latâ'if</button>
+
       {/* Vidéo plein écran — pas de loop, enchaînement automatique */}
       <video
         key={item.src}
