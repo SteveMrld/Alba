@@ -8805,7 +8805,7 @@ const Evasion = ({ data, isPremium = false, onShowPaywall }) => {
       }}
     >
       {/* Bouton Spotify */}
-      <div style={{ position: "absolute", bottom: 152, left: "50%", transform: "translateX(-50%)", zIndex: 20 }}>
+      <div style={{ position: "absolute", bottom: 218, left: "50%", transform: "translateX(-50%)", zIndex: 20 }}>
         <a
           href="https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0"
           target="_blank"
