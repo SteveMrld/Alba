@@ -2987,26 +2987,22 @@ const CarteAme = ({ data, small }) => {
 
 // ─── PORTRAIT D'ÂME ───────────────────────────────────────────────────────────
 const Portrait = ({ data, onContinue }) => {
-  if (!data) return null;
-  const cdv = cheminDeVie(data.naissance);
+  // ── Phases cinématiques ──────────────────────────────────────────────────
+  const [phase, setPhase] = useState(0);
+
+  // Hooks AVANT tout return conditionnel
+  const cdv = data ? cheminDeVie(data.naissance) : 0;
   const chemin = CHEMINS[cdv] || CHEMINS[9];
-  const { blessure } = getContextProfil(data);
+  const { blessure } = data ? getContextProfil(data) : { blessure: { nom: "Abandon" } };
   const livre     = LIVRES[blessure.nom] || LIVRES["Abandon"];
   const citation  = CITATIONS[cdv % CITATIONS.length];
   const cle       = CLES[0];
-  const sens      = data.sensibilite || "intuitif";
+  const sens      = data?.sensibilite || "intuitif";
   const isRationnel = sens === "rationnel";
   const labelChemin  = isRationnel ? "Profil psychologique" : "Chemin de vie";
   const labelBlessure = isRationnel ? "Zone de vulnérabilité" : "Blessure à traverser";
 
-  // ── Phases cinématiques ──────────────────────────────────────────────────
-  // 0 = écran noir avec "Attends un instant"
-  // 1 = prénom + étoile dorée  
-  // 2 = carte + archétype
-  // 3 = blessure
-  // 4 = citation
-  // 5 = portrait complet + bouton
-  const [phase, setPhase] = useState(0);
+  if (!data) return null;
 
   useEffect(() => {
     const delays = [3200, 3400, 3800, 3600, 4000];
