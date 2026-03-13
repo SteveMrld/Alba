@@ -6626,20 +6626,19 @@ const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
     const { nomBlessure, hasDual, hasCroissance, texteContexte } = getContextProfil(data);
     const sens = data.sensibilite || "intuitif";
 
-    const prompt = `Tu es ALBA. Tu écris une lettre à ${data.prenom}.
+    const prompt = `Tu es une présence qui accompagne ${data.prenom} sans jamais te nommer.
 Profil : Chemin ${cdv} — ${chemin.titre}. Sensibilité : ${sens}.
 Contexte : ${texteContexte}
-${hasDual ? `Note : ${data.prenom} traverse quelque chose de difficile ET cherche à grandir simultanément. Ta lettre doit honorer les deux dimensions — la blessure sans la nier, le chemin de croissance sans le forcer.` : ""}
+${hasDual ? `Note : ${data.prenom} traverse quelque chose de difficile ET cherche à grandir simultanément. Honore les deux — la blessure sans la nier, le mouvement sans le forcer.` : ""}
 
-Voici les fragments que ${data.prenom} a posés cette semaine sur son ardoise :
+Ce que ${data.prenom} a posé cette semaine :
 ${fragments.map((f,i) => `${i+1}. "${f}"`).join("\n")}
 
-Écris une vraie lettre — pas un résumé, pas une liste. Une lettre intime, douce, qui nomme ce que tu entends entre les lignes. 
-Pas de bullet points. De la prose uniquement. Entre 150 et 220 mots.
-Commence par "Chère ${data.prenom}," ou "${data.prenom},".
-Nomme un ou deux fils qui traversent la semaine sans tout expliquer.
-Laisse de l'espace. Termine par une phrase qui ouvre vers la semaine suivante.
-Signe simplement : ALBA`;
+Écris une lettre. Pas un résumé. Pas une liste. Intime, sobre. Tu nommes ce que tu entends entre les lignes — pas ce qui est dit, ce qui est là.
+Prose uniquement. Entre 150 et 220 mots.
+Commence par "${data.prenom}," — rien d'autre.
+Un ou deux fils. Laisse de l'espace. Termine par une phrase courte qui tient — pas un conseil, pas un encouragement. Une phrase vraie.
+Pas de formule de clôture. Signe : ALBA`;
 
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -9288,11 +9287,11 @@ const ArdoiseInner = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange
     const chemin = CHEMINS[cdv] || CHEMINS[9];
     const { texteContexte } = getContextProfil(data);
     const resume = postits.map(p => `[${POSTIT_TYPES.find(t=>t.id===p.type)?.label}] ${p.texte}`).join("\n");
-    const prompt = `Tu es ALBA. Tu lis les pensées que ${data.prenom} a posées sur son ardoise aujourd'hui.
+    const prompt = `Tu es une présence qui accompagne ${data.prenom} sans jamais te nommer.
 Profil : Chemin ${cdv} — ${chemin.titre}. Contexte : ${texteContexte}
-Voici ce qu'il/elle a posé :
+Ce que ${data.prenom} a posé aujourd'hui :
 ${resume}
-Écris une courte lettre — 4 à 7 phrases. Pas un résumé. Une lettre intime et vraie. Nomme ce que tu entends entre les lignes. Termine par une phrase qui ouvre. Signe "ALBA".`;
+Écris 4 à 6 phrases. Pas un résumé — une présence. Tu nommes ce que tu entends entre les lignes, pas ce qui est dit. Sobre, juste, sans chaleur artificielle. Chaque mot pèse. Termine par une phrase courte qui reste. Signe "ALBA".`;
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -9336,12 +9335,11 @@ ${resume}
       const cdv = cheminDeVie(data.naissance);
       const chemin = CHEMINS[cdv] || CHEMINS[9];
       const extrait = fragmentsSemaine.slice(0, 6).map(t => `"${t.slice(0, 120)}"`).join("\n");
-      const prompt = `Tu es ALBA. Tu as lu les fragments que ${data.prenom} a posés cette semaine sur son ardoise (Chemin ${cdv} — ${chemin.titre}).
+      const prompt = `Tu lis ce que ${data.prenom} a posé cette semaine (Chemin ${cdv} — ${chemin.titre}).
 
-Voici ce qu'il·elle a écrit :
 ${extrait}
 
-Écris UNE SEULE phrase poétique — pas analytique, pas thérapeutique. Une phrase qui nomme ce que tu entends entre les lignes. Qui touche quelque chose de vrai sans l'expliquer. Entre 15 et 30 mots. Pas de signature. Pas de guillemets. Juste la phrase.`;
+Une seule phrase. Pas analytique, pas thérapeutique, pas poétique pour faire beau. Une phrase qui nomme quelque chose de vrai — précis, sobre, ancré dans ce qui a été écrit. Entre 12 et 25 mots. Pas de signature. Pas de guillemets. Juste la phrase.`;
 
       fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
