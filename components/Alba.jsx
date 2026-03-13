@@ -2131,7 +2131,7 @@ const Onboarding = ({ onComplete }) => {
 
   // ── ÉTAPE 0 — Prénom ──────────────────────────────────────────────────────
   if (step === 0) return (
-    <Step num={1} label="Comment t'appelles-tu ?" onNext={() => { setShowAha(true); }} canNext={prenom.length > 1}>
+    <Step num={1} label="Comment t'appelles-tu ?" onNext={() => { setStep(1); }} canNext={prenom.length > 1}>
       <input style={inputStyle} placeholder="Ton prénom…" value={prenom}
         onChange={e => setPrenom(e.target.value)}
         onFocus={e => e.target.style.borderColor = T.or}
