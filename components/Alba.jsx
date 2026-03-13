@@ -7530,6 +7530,9 @@ const POSTIT_TYPES = [
   { id: "gratitude", label: "Gratitude", couleur: "#7BA88A", papier: "#101E12", bord: "#7BA88A" },
   { id: "question",  label: "Question",  couleur: "#7B9EA8", papier: "#101518", bord: "#7B9EA8" },
   { id: "victoire",  label: "Victoire",  couleur: "#A87BC8", papier: "#150E1E", bord: "#A87BC8" },
+  { id: "miroir",    label: "Miroir",    couleur: "#8898B8", papier: "#0E1018", bord: "#8898B8" },
+  { id: "bilan",     label: "Bilan",     couleur: "#A8986E", papier: "#181510", bord: "#A8986E" },
+  { id: "matin",     label: "Matin",     couleur: "#C8A06E", papier: "#1A1408", bord: "#C8A06E" },
 ];
 
 const Ardoise = ({ data, db, onPostitAjoute, onBilanGenere, onPostitsChange, isPremium, onShowPaywall }) => {
@@ -8098,7 +8101,7 @@ ${extrait}
           gap: "0.8rem",
         }}>
           {postits.map((p, i) => {
-            const t = POSTIT_TYPES.find(t => t.id === p.type);
+            const t = POSTIT_TYPES.find(t => t.id === p.type) || POSTIT_TYPES[0];
             const rot = getRotation(p.id % 1000);
             const size = getSize(p.texte);
             const isLarge = size === "large";
