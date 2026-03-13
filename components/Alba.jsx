@@ -4802,14 +4802,24 @@ const ParcoursDuJour = ({ data, isPremium, onShowPaywall }) => {
         </div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}cc`, lineHeight: 1.8, marginBottom: "1.5rem" }}>{parcoursChoisi.description}</p>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          {parcoursChoisi.jours.map(j => (
-            <div key={j.jour} style={{ display: "flex", alignItems: "center", gap: "0.75rem", opacity: jourActuel && j.jour > jourActuel ? 0.3 : 1 }}>
-              <div style={{ width: 20, height: 20, borderRadius: "50%", border: `1px solid ${estComplete(parcoursChoisi.id, j.jour) ? parcoursChoisi.couleur : T.brume + "44"}`, background: estComplete(parcoursChoisi.id, j.jour) ? parcoursChoisi.couleur + "33" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {estComplete(parcoursChoisi.id, j.jour) && <span style={{ color: parcoursChoisi.couleur, fontSize: "0.55rem" }}>✓</span>}
+          {parcoursChoisi.jours.map(j => {
+            const fait = estComplete(parcoursChoisi.id, j.jour);
+            const locked = jourActuel && j.jour > jourActuel;
+            return (
+              <div key={j.jour} style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", opacity: locked ? 0.3 : 1 }}>
+                <div style={{ width: 22, height: 22, borderRadius: "50%", border: `1px solid ${fait ? parcoursChoisi.couleur : T.brume + "44"}`, background: fait ? parcoursChoisi.couleur + "33" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "0.15rem" }}>
+                  {fait
+                    ? <span style={{ color: parcoursChoisi.couleur, fontSize: "0.5rem" }}>✓</span>
+                    : <span style={{ color: `${T.brume}55`, fontSize: "0.38rem", fontFamily: T.sans }}>{j.jour}</span>
+                  }
+                </div>
+                <div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${parcoursChoisi.couleur}77`, marginBottom: "0.2rem" }}>Jour {j.jour}</div>
+                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: fait ? `${T.brume}88` : `${T.brume}cc`, lineHeight: 1.6 }}>{j.invitation}</div>
+                </div>
               </div>
-              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}99` }}>Jour {j.jour}</div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         <button onClick={() => demarrerParcours(parcoursChoisi)}
           style={{ width: "100%", padding: "0.9rem", background: etat ? `${parcoursChoisi.couleur}22` : parcoursChoisi.couleur + "33", border: `1px solid ${parcoursChoisi.couleur}55`, borderRadius: "6px", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.4em", textTransform: "uppercase", color: parcoursChoisi.couleur }}>
