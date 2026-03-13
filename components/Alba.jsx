@@ -5157,11 +5157,9 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
   const fragmentMémoire = getFragmentMémoire();
 
   const ENTREES = [
-    { id: "presence",     label: "Miroir",       desc: "Un reflet intérieur",       couleur: "#7B9EA8" },
-    { id: "ardoise",      label: "Ardoise",       desc: "Poser ce qui traverse",     couleur: "#C8A96E" },
     { id: "evasion",      label: "Évasion",       desc: "Un espace de beauté",       couleur: "#9EC8B4" },
-    { id: "sagesses",     label: "Sagesses",      desc: "Les sagesses du monde",     couleur: "#A89060" },
     { id: "souffle",      label: "Souffle",       desc: "Respirer",                  couleur: "#D4856A" },
+    { id: "sagesses",     label: "Sagesses",      desc: "Les sagesses du monde",     couleur: "#A89060" },
   ];
 
   // Vidéo selon l'heure
