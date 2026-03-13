@@ -60,6 +60,16 @@ export async function POST(req) {
           stripe_subscription_id: object.subscription,
           updated_at: new Date().toISOString(),
         });
+        // Mettre à jour is_premium dans alba_profiles
+        const key = SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        await fetch(`${SUPABASE_URL}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(userKey)}`, {
+          method: "PATCH",
+          headers: {
+            apikey: key, Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json", Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ is_premium: true }),
+        });
       }
       break;
     }
@@ -75,9 +85,20 @@ export async function POST(req) {
       );
       const rows = await r.json();
       if (rows?.[0]?.user_key) {
+        const isActive = sub.status === "active";
         await upsertSubscription(rows[0].user_key, {
-          status: sub.status === "active" ? "active" : "inactive",
+          status: isActive ? "active" : "inactive",
           updated_at: new Date().toISOString(),
+        });
+        // Sync is_premium dans alba_profiles
+        const uk = rows[0].user_key;
+        await fetch(`${SUPABASE_URL}/rest/v1/alba_profiles?user_key=eq.${encodeURIComponent(uk)}`, {
+          method: "PATCH",
+          headers: {
+            apikey: key, Authorization: `Bearer ${key}`,
+            "Content-Type": "application/json", Prefer: "return=minimal",
+          },
+          body: JSON.stringify({ is_premium: isActive }),
         });
       }
       break;
