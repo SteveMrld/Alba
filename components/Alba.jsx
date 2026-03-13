@@ -14087,10 +14087,10 @@ function AlbaInner() {
         src={src}
         width={22} height={22}
         style={{
-          opacity: active ? 1 : 0.4,
+          opacity: active ? 1 : 0.85,
           filter: active
             ? "brightness(1.2) sepia(1) saturate(3) hue-rotate(5deg)"
-            : "brightness(0.6) grayscale(1)",
+            : "brightness(0.8) grayscale(0.3)",
           transition: "all 0.25s",
         }}
       />
