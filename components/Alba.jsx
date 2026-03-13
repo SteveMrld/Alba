@@ -10452,7 +10452,7 @@ Tu n'es pas Claude. Tu es ALBA.`;
     background: "#050403",
     display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "center",
-    zIndex: 10,
+    zIndex: 200,
   };
 
   // ══════════════════════════════════════════════════════════════════════════
