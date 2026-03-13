@@ -10611,7 +10611,7 @@ const SalleDesTrouvailles = ({ data }) => {
           La Salle des
         </div>
         <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1.4rem, 4.5vw, 1.8rem)", color: T.orPale, fontWeight: 300, marginBottom: "0.6rem" }}>
-          Trouvailles
+          Perles
         </div>
         <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: T.brume, lineHeight: 1.8, maxWidth: 340, margin: "0 auto" }}>
           Certaines choses dans la vie nous sont données par d'autres.<br/>
@@ -12807,7 +12807,7 @@ const AideAlba = ({ onClose, onTuto, tab }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           max_tokens: 120,
-          system: `Tu es l'aide d'ALBA — une app de bien-être intérieur. Tu réponds aux questions sur l'application de façon sobre et directe, en 2-3 phrases maximum. Onglet actif: ${tab}. Fonctionnalités: Miroir (conversation intérieure), Ardoise (notes quotidiennes), Éclats d'aube (points qui ouvrent les Portes), 12 Portes (chemin intérieur), Sagesses (22 traditions mondiales), Le Ciel (offrandes partagées), Évasion (vidéos contemplatives), Souffle (respiration guidée), Trouvailles (bibliothèque), Parcours thématiques. Ne parle pas en dehors de l'application.`,
+          system: `Tu es l'aide d'ALBA — une app de bien-être intérieur. Tu réponds aux questions sur l'application de façon sobre et directe, en 2-3 phrases maximum. Onglet actif: ${tab}. Fonctionnalités: Miroir (conversation intérieure), Ardoise (notes quotidiennes), Éclats d'aube (points qui ouvrent les Portes), 12 Portes (chemin intérieur), Sagesses (22 traditions mondiales), Le Ciel (offrandes partagées), Évasion (vidéos contemplatives), Souffle (respiration guidée), Perles (bibliothèque), Parcours thématiques. Ne parle pas en dehors de l'application.`,
           messages: [{ role: "user", content: question.trim() }],
         }),
       });
@@ -13477,7 +13477,7 @@ const PricingPage = ({ onCommencer, onRetour, onConnexion, onB2B }) => {
     "Les 28 Thèmes intérieurs avec pratiques",
     "Ma Clé — les 12 Portes intérieures",
     "L'Évasion — cinéma contemplatif",
-    "Les Trouvailles — bibliothèque vivante",
+    "Les Perles — bibliothèque vivante",
   ];
 
   return (
