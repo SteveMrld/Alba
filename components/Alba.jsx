@@ -4070,6 +4070,226 @@ const AnneauxJour = ({ compact = false }) => {
 
 // ─── ACCUEIL ─────────────────────────────────────────────────────────────────
 // ─── INVITATIONS DU JOUR ─────────────────────────────────────────────────────
+// ── PARCOURS THÉMATIQUES ──────────────────────────────────────────────────────
+const PARCOURS = [
+  {
+    id: "silence-apres",
+    titre: "Le Silence après",
+    sousTitre: "Traverser une fin",
+    duree: 7,
+    couleur: "#8898C8",
+    description: "Pour quand quelque chose s'est terminé et que le silence est trop grand.",
+    jours: [
+      { jour: 1, invitation: "Aujourd'hui, ne cherche pas à comprendre. Assieds-toi avec ce qui est là, sans lui donner de nom.", note: "Le premier jour, la seule tâche c'est d'exister." },
+      { jour: 2, invitation: "Écris trois choses que tu as perdues. Pas des personnes — des versions de toi-même.", note: "Ce qu'on perd, c'est souvent qui on était avec l'autre." },
+      { jour: 3, invitation: "Trouve un objet qui te rappelle ce que tu traverses. Tiens-le dans tes mains quelques secondes, puis pose-le.", note: "Le corps comprend ce que les mots ne peuvent pas dire." },
+      { jour: 4, invitation: "Permets-toi d'être en colère. Pas de l'exprimer — juste de reconnaître qu'elle est là.", note: "La colère est souvent de la douleur qui ne sait pas comment exister." },
+      { jour: 5, invitation: "Écris une phrase qui commence par : 'Ce que j'aurais voulu...'", note: "Le regret, regardé en face, perd une partie de son pouvoir." },
+      { jour: 6, invitation: "Fais quelque chose de petit que tu faisais avant, seul(e). Un café, une marche, un livre.", note: "Tu existes en dehors de ce qui s'est passé." },
+      { jour: 7, invitation: "Écris une lettre à la personne que tu seras dans un an. Dis-lui que tu es en chemin.", note: "Seven jours ne guérissent pas. Ils commencent." },
+    ],
+  },
+  {
+    id: "revenir-au-corps",
+    titre: "Revenir au corps",
+    sousTitre: "Retrouver l'ancrage",
+    duree: 5,
+    couleur: "#7BA87B",
+    description: "Quand on s'est coupé de soi-même et qu'on ne sait plus ce qu'on ressent.",
+    jours: [
+      { jour: 1, invitation: "Pendant deux minutes, sens tes pieds sur le sol. C'est tout. Rien d'autre.", note: "Le sol est toujours là. Même quand tout le reste vacille." },
+      { jour: 2, invitation: "Mange un repas sans écran, sans musique. Juste toi et ce que tu manges.", note: "La présence commence par les sens les plus simples." },
+      { jour: 3, invitation: "Note trois sensations physiques que tu ressens en ce moment. Pas des émotions — des sensations.", note: "Chaud, froid, tension, légèreté. Le corps parle une langue directe." },
+      { jour: 4, invitation: "Bouge ton corps d'une façon qui ne soit pas utile. Danse seul(e), étire-toi par plaisir, marche sans destination.", note: "Le corps n'a pas besoin de raison pour exister." },
+      { jour: 5, invitation: "Pose une main sur ta poitrine et dis à voix haute ou en silence : 'Je suis là.'", note: "Revenir à soi, c'est souvent juste ça." },
+    ],
+  },
+  {
+    id: "ce-que-je-porte",
+    titre: "Ce que je porte",
+    sousTitre: "Nommer l'invisible",
+    duree: 10,
+    couleur: "#C8A040",
+    description: "Explorer ce qu'on traine sans pouvoir le nommer — les poids silencieux.",
+    jours: [
+      { jour: 1, invitation: "Qu'est-ce que tu portes en ce moment que personne ne voit ?", note: "Il n'est pas nécessaire de répondre complètement. Commencer suffit." },
+      { jour: 2, invitation: "Pense à une chose que tu répètes dans ta vie — une situation, une dynamique. Écris-la sans te juger.", note: "Les patterns se répètent jusqu'à ce qu'on les regarde." },
+      { jour: 3, invitation: "Qu'est-ce que tu t'interdis de ressentir ? Nomme-le.", note: "Interdire une émotion ne la fait pas disparaître." },
+      { jour: 4, invitation: "De qui as-tu hérité ce poids ? Un parent, une histoire familiale, une blessure transmise ?", note: "Ce qu'on porte n'est pas toujours le nôtre." },
+      { jour: 5, invitation: "Écris une phrase qui commence par : 'Depuis que je suis enfant, je crois que...'", note: "Les croyances les plus profondes ont une enfance." },
+      { jour: 6, invitation: "Aujourd'hui, observe une fois où tu t'es mis(e) de côté pour les autres. Juste observer.", note: "Voir est déjà une forme d'action." },
+      { jour: 7, invitation: "Qu'est-ce que tu aurais besoin qu'on te dise, et que tu n'as jamais entendu ?", note: "On peut se dire à soi-même ce dont on a besoin." },
+      { jour: 8, invitation: "Imagine que ce poids avait une forme, une couleur, un poids réel. Décris-le.", note: "Rendre concret ce qui est abstrait permet de le tenir autrement." },
+      { jour: 9, invitation: "Y a-t-il quelque chose que tu peux poser aujourd'hui, même temporairement ?", note: "On n'a pas à tout résoudre. Juste un peu plus léger." },
+      { jour: 10, invitation: "Écris ce que tu veux garder de ce que tu as traversé. Pas tout — juste ce qui vaut quelque chose.", note: "Certains poids contiennent quelque chose de précieux." },
+    ],
+  },
+  {
+    id: "recommencer",
+    titre: "Recommencer",
+    sousTitre: "Une nouvelle page",
+    duree: 7,
+    couleur: "#B87050",
+    description: "Quand une page se tourne et qu'on ne sait pas encore écrire la suivante.",
+    jours: [
+      { jour: 1, invitation: "Qu'est-ce qui se termine vraiment ? Nomme-le avec précision.", note: "Commencer demande d'abord de finir." },
+      { jour: 2, invitation: "Qu'est-ce que tu ne veux plus emmener dans cette nouvelle étape ? Écris-le.", note: "Recommencer c'est choisir ce qu'on laisse derrière." },
+      { jour: 3, invitation: "Qu'est-ce que tu as appris sur toi-même dans ce qui vient de se passer ?", note: "Les fins sont souvent les meilleurs professeurs." },
+      { jour: 4, invitation: "Imagine la personne que tu veux devenir. Décris une seule de ses habitudes.", note: "On ne devient pas quelqu'un d'un coup. On commence par un geste." },
+      { jour: 5, invitation: "Fais une chose aujourd'hui que cette nouvelle version de toi ferait.", note: "L'identité se construit dans les actes, pas dans les intentions." },
+      { jour: 6, invitation: "Qu'est-ce que tu es prêt(e) à ne pas encore savoir ?", note: "Recommencer demande de tenir l'incertitude sans la fuir." },
+      { jour: 7, invitation: "Écris la première ligne de cette nouvelle page. Une seule phrase. La tienne.", note: "Tu n'as pas à savoir la suite. Juste la première ligne." },
+    ],
+  },
+];
+
+const ParcoursDuJour = ({ data, isPremium, onShowPaywall }) => {
+  const [vue, setVue] = useState("liste"); // liste | detail | actif
+  const [parcoursChoisi, setParcoursChoisi] = useState(null);
+
+  const getEtatParcours = (parcoursId) => {
+    try {
+      return JSON.parse(localStorage.getItem(`alba_parcours_${parcoursId}`) || "null");
+    } catch { return null; }
+  };
+
+  const demarrerParcours = (parcours) => {
+    if (!isPremium) { onShowPaywall?.(); return; }
+    const etat = getEtatParcours(parcours.id);
+    if (!etat) {
+      const nouvelEtat = { debut: new Date().toDateString(), jourActuel: 1, completes: [] };
+      localStorage.setItem(`alba_parcours_${parcours.id}`, JSON.stringify(nouvelEtat));
+    }
+    setParcoursChoisi(parcours);
+    setVue("actif");
+  };
+
+  const getJourActuel = (parcoursId) => {
+    const etat = getEtatParcours(parcoursId);
+    if (!etat) return null;
+    const debut = new Date(etat.debut);
+    const aujourdhui = new Date();
+    const diffJours = Math.floor((aujourdhui - debut) / (1000 * 60 * 60 * 24));
+    return Math.min(diffJours + 1, PARCOURS.find(p => p.id === parcoursId)?.duree || 1);
+  };
+
+  const marquerComplete = (parcoursId, jour) => {
+    try {
+      const etat = JSON.parse(localStorage.getItem(`alba_parcours_${parcoursId}`) || "{}");
+      if (!etat.completes) etat.completes = [];
+      if (!etat.completes.includes(jour)) etat.completes.push(jour);
+      localStorage.setItem(`alba_parcours_${parcoursId}`, JSON.stringify(etat));
+    } catch {}
+  };
+
+  const estComplete = (parcoursId, jour) => {
+    const etat = getEtatParcours(parcoursId);
+    return etat?.completes?.includes(jour) || false;
+  };
+
+  // ── VUE LISTE ──
+  if (vue === "liste") return (
+    <div style={{ marginTop: "0.5rem" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.or}77` }}>
+          Parcours
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        {PARCOURS.map((p, i) => {
+          const etat = getEtatParcours(p.id);
+          const jourActuel = etat ? getJourActuel(p.id) : null;
+          const progres = etat ? Math.round(((etat.completes?.length || 0) / p.duree) * 100) : 0;
+          return (
+            <div key={p.id} onClick={() => { setParcoursChoisi(p); setVue("detail"); }}
+              style={{ background: `${T.nuit2}cc`, border: `1px solid ${etat ? p.couleur + "44" : T.brume + "22"}`, borderRadius: "8px", padding: "1.1rem 1.2rem", cursor: "pointer", animation: `fadeUp 0.5s ease forwards ${0.1 + i * 0.08}s`, opacity: 0, position: "relative", overflow: "hidden" }}>
+              {etat && <div style={{ position: "absolute", bottom: 0, left: 0, width: `${progres}%`, height: "2px", background: `linear-gradient(to right, ${p.couleur}88, ${p.couleur})` }} />}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: T.orPale, marginBottom: "0.25rem" }}>{p.titre}</div>
+                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.3em", textTransform: "uppercase", color: p.couleur }}>{p.sousTitre}</div>
+                </div>
+                <div style={{ fontFamily: T.sans, fontSize: "0.6rem", color: `${T.brume}66`, whiteSpace: "nowrap", paddingLeft: "0.5rem" }}>
+                  {etat ? `Jour ${jourActuel}/${p.duree}` : `${p.duree} jours`}
+                </div>
+              </div>
+              {!etat && <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}88`, lineHeight: 1.6, marginTop: "0.6rem", marginBottom: 0 }}>{p.description}</p>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── VUE DETAIL ──
+  if (vue === "detail" && parcoursChoisi) {
+    const etat = getEtatParcours(parcoursChoisi.id);
+    const jourActuel = etat ? getJourActuel(parcoursChoisi.id) : null;
+    return (
+      <div style={{ animation: "fadeUp 0.5s ease forwards" }}>
+        <button onClick={() => setVue("liste")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "1.5rem", padding: 0, textTransform: "uppercase" }}>← Retour</button>
+        <div style={{ borderLeft: `2px solid ${parcoursChoisi.couleur}55`, paddingLeft: "1rem", marginBottom: "1.5rem" }}>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1.2rem", color: T.orPale, marginBottom: "0.3rem" }}>{parcoursChoisi.titre}</div>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.35em", textTransform: "uppercase", color: parcoursChoisi.couleur }}>{parcoursChoisi.sousTitre} · {parcoursChoisi.duree} jours</div>
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}cc`, lineHeight: 1.8, marginBottom: "1.5rem" }}>{parcoursChoisi.description}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
+          {parcoursChoisi.jours.map(j => (
+            <div key={j.jour} style={{ display: "flex", alignItems: "center", gap: "0.75rem", opacity: jourActuel && j.jour > jourActuel ? 0.3 : 1 }}>
+              <div style={{ width: 20, height: 20, borderRadius: "50%", border: `1px solid ${estComplete(parcoursChoisi.id, j.jour) ? parcoursChoisi.couleur : T.brume + "44"}`, background: estComplete(parcoursChoisi.id, j.jour) ? parcoursChoisi.couleur + "33" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {estComplete(parcoursChoisi.id, j.jour) && <span style={{ color: parcoursChoisi.couleur, fontSize: "0.55rem" }}>✓</span>}
+              </div>
+              <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.82rem", color: `${T.brume}99` }}>Jour {j.jour}</div>
+            </div>
+          ))}
+        </div>
+        <button onClick={() => demarrerParcours(parcoursChoisi)}
+          style={{ width: "100%", padding: "0.9rem", background: etat ? `${parcoursChoisi.couleur}22` : parcoursChoisi.couleur + "33", border: `1px solid ${parcoursChoisi.couleur}55`, borderRadius: "6px", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.6rem", letterSpacing: "0.4em", textTransform: "uppercase", color: parcoursChoisi.couleur }}>
+          {etat ? `Continuer — Jour ${jourActuel}` : isPremium ? "Commencer ce parcours" : "✦ Accès Premium"}
+        </button>
+      </div>
+    );
+  }
+
+  // ── VUE ACTIF ──
+  if (vue === "actif" && parcoursChoisi) {
+    const etat = getEtatParcours(parcoursChoisi.id);
+    const jourActuel = getJourActuel(parcoursChoisi.id);
+    const jourData = parcoursChoisi.jours.find(j => j.jour === jourActuel);
+    const dejaFait = estComplete(parcoursChoisi.id, jourActuel);
+    const [fait, setFait] = useState(dejaFait);
+
+    if (!jourData) return null;
+    return (
+      <div style={{ animation: "fadeUp 0.6s ease forwards" }}>
+        <button onClick={() => setVue("detail")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.55rem", letterSpacing: "0.3em", color: `${T.brume}66`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← {parcoursChoisi.titre}</button>
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.48rem", letterSpacing: "0.5em", textTransform: "uppercase", color: parcoursChoisi.couleur, marginBottom: "0.5rem" }}>
+            Jour {jourActuel} · {parcoursChoisi.duree}
+          </div>
+          <div style={{ width: "100%", height: 1, background: `linear-gradient(to right, transparent, ${parcoursChoisi.couleur}44, transparent)`, margin: "0.75rem 0" }} />
+        </div>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(1rem,3.5vw,1.15rem)", color: T.orPale, lineHeight: 2.1, textAlign: "center", marginBottom: "2rem", animation: "albaDev 1.2s ease forwards", opacity: 0 }}>
+          {jourData.invitation}
+        </p>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}66`, textAlign: "center", lineHeight: 1.7, marginBottom: "2rem" }}>{jourData.note}</p>
+        {!fait ? (
+          <button onClick={() => { marquerComplete(parcoursChoisi.id, jourActuel); setFait(true); }}
+            style={{ width: "100%", padding: "0.9rem", background: "none", border: `1px solid ${parcoursChoisi.couleur}55`, borderRadius: "6px", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.58rem", letterSpacing: "0.4em", textTransform: "uppercase", color: parcoursChoisi.couleur }}>
+            ✓ J'ai fait ça aujourd'hui
+          </button>
+        ) : (
+          <div style={{ textAlign: "center", padding: "1rem", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: parcoursChoisi.couleur }}>
+            Reviens demain pour le jour {Math.min(jourActuel + 1, parcoursChoisi.duree)}.
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return null;
+};
+
 const INVITATIONS_ALBA = [
   { id:"P01", theme:"Pardon", eclats:5, titre:"La lettre non envoyée", invitation:"Écris une lettre à la personne qui t'a blessé. Une seule condition : tu ne l'enverras pas. Écris ce que tu n'as jamais pu dire.", retour:"Comment tu te sens après avoir écrit cette lettre ?", note:"L'acte d'écrire suffit. Ce qui compte, c'est que les mots ont existé.", declencheur:["séparation","trahison","rupture","conflit"] },
   { id:"P02", theme:"Pardon", eclats:3, titre:"Ce que cette personne m'a appris", invitation:"Pense à quelqu'un qui t'a fait du mal. Demande-toi : qu'est-ce que cette douleur m'a appris sur moi-même ? Écris une phrase. Une seule.", retour:"Qu'est-ce que tu as trouvé ?", note:"Pardonner ne signifie pas que c'était acceptable.", declencheur:["colère","rancœur"] },
@@ -4168,7 +4388,7 @@ const InvitationDuJour = ({ data, onComplete, onEchec }) => {
   );
 };
 
-const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationComplete, onInvitationEchec }) => {
+const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationComplete, onInvitationEchec, isPremium, onShowPaywall }) => {
   if (!data) return null;
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
@@ -4481,6 +4701,11 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
       {/* ── INVITATION DU JOUR ── */}
       <div style={{ margin: "1rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.4s", opacity: 0 }}>
         <InvitationDuJour data={data} onComplete={onInvitationComplete} onEchec={onInvitationEchec} />
+      </div>
+
+      {/* ── PARCOURS THÉMATIQUES ── */}
+      <div style={{ margin: "1.5rem 1.5rem 0", animation: "fadeUp 0.7s ease forwards 0.5s", opacity: 0 }}>
+        <ParcoursDuJour data={data} isPremium={isPremium} onShowPaywall={onShowPaywall} />
       </div>
 
       {/* ── MIROIR DE LA SEMAINE ── (visible uniquement si assez de données) */}
@@ -11868,7 +12093,7 @@ function AlbaInner() {
               transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
               style={{ padding: "0 0" }}
             >
-              {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} onInvitationComplete={(niveau) => incrementStat(niveau === 5 ? "invitations5" : niveau === 3 ? "invitations3" : "invitations1")} onInvitationEchec={() => incrementStat("invitationsEchec")} />}
+              {tab === "compagnon" && <Accueil data={userData} onNavigate={goTab} cleActive={cleActive} progressStats={{...progressStats, allPostits: allPostitsApp}} onInvitationComplete={(niveau) => incrementStat(niveau === 5 ? "invitations5" : niveau === 3 ? "invitations3" : "invitations1")} onInvitationEchec={() => incrementStat("invitationsEchec")} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "presence"  && <div style={{padding:"0 1.5rem"}}><Presence data={userData} onStart={() => incrementStat("conversationsTotal")} onSessionComplete={() => incrementStat("conversationsTotal")} onSaveToArdoise={(txt) => {
                   try {
                     const todayKey = new Date().toISOString().split("T")[0];
