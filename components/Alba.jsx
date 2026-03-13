@@ -11520,7 +11520,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             background: "none", border: "none", cursor: "pointer",
             fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
-            color: `${T.brume}44`, display: "block", margin: "0 auto 1rem",
+            color: `${T.brume}BB`, display: "block", margin: "0 auto 1rem",
           }}>Se déconnecter</button>
         )}
         {!resetConfirm ? (
@@ -11528,7 +11528,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
             background: "none", border: "none", cursor: "pointer",
             fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem",
             letterSpacing: "0.4em", textTransform: "uppercase",
-            color: `${T.brume}28`,
+            color: `${T.brume}66`,
           }}>Recommencer depuis le début</button>
         ) : (
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
@@ -11555,7 +11555,7 @@ const Profil = ({ data, onUpdateData, progressStats, onSignOut, isPremium, onSho
           { label: "Données & vie privée", action: () => onShowCGU?.() },
           { label: "Mentions légales", action: () => onShowCGU?.() },
         ].map((l, i) => (
-          <button key={i} onClick={l.action} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}28`, textDecoration: "underline", textDecorationColor: `${T.brume}15` }}>
+          <button key={i} onClick={l.action} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.2em", textTransform: "uppercase", color: `${T.brume}66`, textDecoration: "underline", textDecorationColor: `${T.brume}33` }}>
             {l.label}
           </button>
         ))}
