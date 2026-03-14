@@ -13113,6 +13113,160 @@ const CGUBloc = ({ titre, texte }) => (
 );
 
 
+// ─── KINDLE VIEW ─────────────────────────────────────────────────────────────
+
+const KindleView = ({ pageActive, archive, pageIdx, marquePage, onClose, onNavigue, onMarque }) => {
+  const peutAllerAvant = pageIdx < archive.length - 1;
+  const peutAllerArriere = pageIdx > 0;
+
+  const texte = (pageActive?.contenu || "")
+    .replace(/#{1,3} */g, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/^- /gm, "")
+    .trim();
+
+  const allerPage = (dir) => {
+    const newIdx = pageIdx + dir;
+    if (newIdx < 0 || newIdx >= archive.length) return;
+    onNavigue(newIdx, archive[newIdx]);
+  };
+
+  const numeroPage = (() => {
+    if (!pageActive || archive.length === 0) return 1;
+    const pos = archive.findIndex(p => p.date === pageActive.date);
+    return pos === -1 ? 1 : archive.length - pos;
+  })();
+
+  const BG = "#F5F0E8";
+  const TEXT = "#2C2416";
+  const MUTED = "#8C7B5E";
+  const BORDER = "#D4C9B0";
+
+  const TYPE_LABELS = {
+    "saviez-vous":   "Le saviez-vous",
+    "corps-cerveau": "Corps & cerveau",
+    "conte":         "Conte",
+    "pratique":      "Pratique oubliée",
+    "phrase":        "Une phrase",
+  };
+
+  if (!pageActive) return null;
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 300,
+      background: BG,
+      display: "flex", flexDirection: "column",
+      fontFamily: "Georgia, 'Times New Roman', serif",
+    }}>
+      {/* Barre haute */}
+      <div style={{
+        background: BG, borderBottom: `1px solid ${BORDER}`,
+        padding: "0.7rem 1.2rem",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexShrink: 0,
+      }}>
+        <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", color: MUTED, fontFamily: "Georgia, serif", padding: 0 }}>
+          ← Bibliothèque
+        </button>
+        <div style={{ fontSize: "0.62rem", color: MUTED, letterSpacing: "0.04em", textAlign: "center" }}>
+          {pageActive.chapitre_titre}
+        </div>
+        <div style={{ fontSize: "0.72rem", color: MUTED }}>
+          {numeroPage}
+        </div>
+      </div>
+
+      {/* Corps scrollable */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        <div style={{ maxWidth: 540, margin: "0 auto", width: "100%", padding: "2.5rem 1.8rem 1.5rem" }}>
+
+          {/* Type */}
+          <div style={{ textAlign: "center", marginBottom: "1.8rem" }}>
+            <span style={{ display: "inline-block", border: `1px solid ${BORDER}`, borderRadius: "2px", padding: "0.2rem 0.8rem", fontSize: "0.58rem", letterSpacing: "0.3em", textTransform: "uppercase", color: MUTED, fontFamily: "Jost, sans-serif" }}>
+              {TYPE_LABELS[pageActive.type] || pageActive.type}
+            </span>
+          </div>
+
+          {/* Titre */}
+          <h1 style={{ fontSize: "clamp(1.4rem, 5vw, 1.9rem)", fontWeight: 400, color: TEXT, lineHeight: 1.35, textAlign: "center", margin: "0 0 0.6rem", fontStyle: "italic" }}>
+            {pageActive.titre_page}
+          </h1>
+
+          {/* Date */}
+          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+            <span style={{ fontSize: "0.7rem", color: MUTED }}>
+              {new Date(pageActive.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+            </span>
+          </div>
+
+          {/* Ornement */}
+          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+            <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke={BORDER} strokeWidth="0.8">
+              <line x1="0" y1="6" x2="22" y2="6"/>
+              <circle cx="30" cy="6" r="3"/>
+              <line x1="38" y1="6" x2="60" y2="6"/>
+            </svg>
+          </div>
+
+          {/* Texte */}
+          <div style={{ fontSize: "clamp(1rem, 3.2vw, 1.08rem)", color: TEXT, lineHeight: 1.95, textAlign: "justify" }}>
+            {texte.split(/\n\n+/).map((para, i) => (
+              <p key={i} style={{ margin: "0 0 1.4em", textIndent: i === 0 ? 0 : "1.5em" }}>
+                {para.replace(/\n/g, " ")}
+              </p>
+            ))}
+          </div>
+
+          {/* Ornement bas */}
+          <div style={{ textAlign: "center", margin: "3rem 0 1.5rem" }}>
+            <svg width={40} height={8} viewBox="0 0 40 8" fill="none" stroke={BORDER} strokeWidth="0.8">
+              <line x1="0" y1="4" x2="16" y2="4"/>
+              <circle cx="20" cy="4" r="2"/>
+              <line x1="24" y1="4" x2="40" y2="4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* Barre basse */}
+      <div style={{
+        background: BG, borderTop: `1px solid ${BORDER}`,
+        padding: "0.7rem 1.5rem calc(0.7rem + env(safe-area-inset-bottom))",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexShrink: 0,
+      }}>
+        <button onClick={() => allerPage(1)} disabled={!peutAllerAvant} style={{
+          background: "none", border: "none",
+          cursor: peutAllerAvant ? "pointer" : "default",
+          color: peutAllerAvant ? MUTED : BORDER,
+          fontSize: "0.8rem", fontFamily: "Georgia, serif", padding: "0.3rem 0.4rem",
+        }}>← Précédent</button>
+
+        <button onClick={() => onMarque(pageActive)} style={{
+          background: marquePage?.date === pageActive?.date ? "#E8D9B5" : "none",
+          border: `1px solid ${BORDER}`, borderRadius: "3px",
+          padding: "0.3rem 0.9rem", cursor: "pointer",
+          color: MUTED, fontSize: "0.62rem",
+          fontFamily: "Jost, sans-serif", letterSpacing: "0.1em",
+          transition: "all 0.2s",
+        }}>
+          {marquePage?.date === pageActive?.date ? "🔖 Marqué" : "Marquer"}
+        </button>
+
+        <button onClick={() => allerPage(-1)} disabled={!peutAllerArriere} style={{
+          background: "none", border: "none",
+          cursor: peutAllerArriere ? "pointer" : "default",
+          color: peutAllerArriere ? MUTED : BORDER,
+          fontSize: "0.8rem", fontFamily: "Georgia, serif", padding: "0.3rem 0.4rem",
+        }}>Suivant →</button>
+      </div>
+    </div>
+  );
+};
+
+
 // ─── LE LIVRE D'ALBA ──────────────────────────────────────────────────────────
 
 const GRAVURES_LIVRE = {
@@ -13138,7 +13292,7 @@ const TYPE_LABELS = {
   "phrase":        "Une phrase",
 };
 
-const LivreAlba = ({ isPremium, onShowPaywall }) => {
+const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
   const [vue, setVue] = useState("couverture");
   const [pageJour, setPageJour] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -13339,16 +13493,12 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
     </div>
   );
 
-  // ── PAGE DU LIVRE — MODE KINDLE ───────────────────────────────────────────
+  // ── PAGE DU LIVRE — ouvre KindleView au niveau app ────────────────────────
   if (vue === "page" && pageActive) {
-    const peutAllerAvant = pageIdx < archive.length - 1;
-    const peutAllerArriere = pageIdx > 0;
-    const texteNettoye = pageActive.contenu
-      .replace(/#{1,3} */g, "")
-      .replace(/\*\*([^*]+)\*\*/g, "$1")
-      .replace(/\*([^*]+)\*/g, "$1")
-      .replace(/^- /gm, "")
-      .trim();
+    if (onShowKindle) onShowKindle({ page: pageActive, archive, idx: pageIdx, marquePage });
+    const peutAllerAvant = false;
+    const peutAllerArriere = false;
+    const texteNettoye = "";
 
     const BG = "#F5F0E8";
     const TEXT = "#2C2416";
@@ -13928,6 +14078,7 @@ function AlbaInner() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTuto, setShowTuto] = useState(false);
   const [showLettreBienvenue, setShowLettreBienvenue] = useState(false);
+  const [kindleData, setKindleData] = useState(null); // { page, archive, idx }
   const [showSpotify, setShowSpotify] = useState(false);
   const [showAide, setShowAide] = useState(false);
   const [showLataifApp, setShowLataifApp] = useState(false);
@@ -14411,6 +14562,7 @@ function AlbaInner() {
           {/* ── HEADER ── */}
           <div style={{
             position: "sticky", top: 0, zIndex: 50,
+            display: kindleData ? "none" : undefined,
             background: `${T.nuit}ee`,
             backdropFilter: "blur(12px)",
             borderBottom: `1px solid ${T.brume}18`,
@@ -14540,12 +14692,29 @@ function AlbaInner() {
               {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
-              {tab === "livre"       && <LivreAlba isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
+              {tab === "livre"       && <LivreAlba isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} onShowKindle={(data) => setKindleData(data)} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
               {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} onShowPricing={() => setShowPricingProfil(true)} />}
             </motion.div>
           </AnimatePresence>
+
+          {/* ── KINDLE VIEW — niveau app pour éviter Framer Motion ── */}
+          {kindleData && (
+            <KindleView
+              pageActive={kindleData.page}
+              archive={kindleData.archive}
+              pageIdx={kindleData.idx}
+              marquePage={kindleData.marquePage}
+              onClose={() => setKindleData(null)}
+              onNavigue={(newIdx, newPage) => setKindleData(d => ({ ...d, idx: newIdx, page: newPage }))}
+              onMarque={(page) => {
+                const marque = { date: page.date, titre: page.titre_page };
+                setKindleData(d => ({ ...d, marquePage: marque }));
+                try { localStorage.setItem("alba_livre_marque", JSON.stringify(marque)); } catch {}
+              }}
+            />
+          )}
 
           {/* ── BOTTOM NAV ── */}
           <div style={{
@@ -14554,7 +14723,8 @@ function AlbaInner() {
             background: `${T.nuit}f2`,
             backdropFilter: "blur(16px)",
             borderTop: `1px solid ${T.brume}20`,
-            display: "flex", justifyContent: "space-around", alignItems: "center",
+            display: kindleData ? "none" : "flex",
+            justifyContent: "space-around", alignItems: "center",
             padding: "0.6rem 0 calc(0.6rem + env(safe-area-inset-bottom))",
             zIndex: 50,
           }}>
