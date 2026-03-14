@@ -13115,6 +13115,36 @@ const CGUBloc = ({ titre, texte }) => (
 
 // ─── KINDLE VIEW ─────────────────────────────────────────────────────────────
 
+const jouerSonPage = () => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const dur = 0.18;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      // Bruit blanc filtré — frottement de papier doux
+      const t = i / ctx.sampleRate;
+      const env = Math.exp(-t * 18) * (1 - Math.exp(-t * 80));
+      data[i] = (Math.random() * 2 - 1) * env * 0.18;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    // Filtre passe-bande pour le craquement papier
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 2800;
+    filter.Q.value = 0.8;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.6;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    src.start();
+    src.stop(ctx.currentTime + dur);
+    setTimeout(() => ctx.close(), 400);
+  } catch {}
+};
+
 const KindleView = ({ pageActive, archive, pageIdx, marquePage, onClose, onNavigue, onMarque }) => {
   const peutAllerAvant = pageIdx < archive.length - 1;
   const peutAllerArriere = pageIdx > 0;
@@ -13129,6 +13159,7 @@ const KindleView = ({ pageActive, archive, pageIdx, marquePage, onClose, onNavig
   const allerPage = (dir) => {
     const newIdx = pageIdx + dir;
     if (newIdx < 0 || newIdx >= archive.length) return;
+    jouerSonPage();
     onNavigue(newIdx, archive[newIdx]);
   };
 
