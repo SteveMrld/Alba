@@ -13520,29 +13520,35 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
 
   const chargerMarquePage = async () => {
     if (!marquePage) return;
+    // Si on a la page complète stockée, ouvrir directement
+    if (marquePage.page && onShowKindle) {
+      onShowKindle({ page: marquePage.page, archive: [marquePage.page], idx: 0, marquePage });
+      // Charger l'archive en arrière-plan pour la navigation
+      fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      }).then(r => r.ok ? r.json() : []).then(allPages => {
+        if (allPages.length > 0) {
+          const idx = allPages.findIndex(p => p.date === marquePage.date);
+          onShowKindle({ page: marquePage.page, archive: allPages, idx: idx !== -1 ? idx : 0, marquePage });
+        }
+      }).catch(() => {});
+      return;
+    }
+    // Fallback : fetch par date
     setLoading(true);
     try {
-      // Charger l'archive complète
-      const rAll = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      });
-      // Charger la page spécifique par date
       const rPage = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&date=eq.${marquePage.date}&limit=1`, {
         headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
       });
-      const allPages = rAll.ok ? await rAll.json() : [];
       const pageData = rPage.ok ? await rPage.json() : [];
-      const page = pageData[0] || allPages[0];
-      if (page && onShowKindle) {
-        const idx = allPages.findIndex(p => p.date === page.date);
-        onShowKindle({ page, archive: allPages, idx: idx !== -1 ? idx : 0, marquePage });
-      }
-    } catch(e) { console.error("chargerMarquePage:", e); }
+      const page = pageData[0];
+      if (page && onShowKindle) onShowKindle({ page, archive: [page], idx: 0, marquePage });
+    } catch(e) {}
     setLoading(false);
   };
 
   const sauvegarderMarque = (page) => {
-    const marque = { date: page.date, titre: page.titre_page };
+    const marque = { date: page.date, titre: page.titre_page, page: page };
     setMarquePage(marque);
     try { localStorage.setItem("alba_livre_marque", JSON.stringify(marque)); } catch {}
   };
@@ -14713,7 +14719,7 @@ function AlbaInner() {
               onClose={() => setKindleData(null)}
               onNavigue={(newIdx, newPage) => setKindleData(d => ({ ...d, idx: newIdx, page: newPage }))}
               onMarque={(page) => {
-                const marque = { date: page.date, titre: page.titre_page };
+                const marque = { date: page.date, titre: page.titre_page, page: page };
                 setKindleData(d => ({ ...d, marquePage: marque }));
                 try { localStorage.setItem("alba_livre_marque", JSON.stringify(marque)); } catch {}
               }}
