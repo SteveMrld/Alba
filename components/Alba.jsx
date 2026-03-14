@@ -12397,8 +12397,11 @@ class AlbaErrorBoundary extends React.Component {
           <div style={{ fontSize:"1.1rem", fontStyle:"italic", marginBottom:"0.8rem" }}>
             Quelque chose s'est interrompu.
           </div>
-          <div style={{ fontSize:"0.8rem", color:"#7A7060", marginBottom:"2.5rem", maxWidth:280, lineHeight:1.8, fontStyle:"italic" }}>
+          <div style={{ fontSize:"0.8rem", color:"#7A7060", marginBottom:"1rem", maxWidth:280, lineHeight:1.8, fontStyle:"italic" }}>
             Ton profil et tes données sont intacts.
+          </div>
+          <div style={{ fontSize:"0.65rem", color:"#4A8A5A", marginBottom:"1.5rem", maxWidth:320, fontFamily:"monospace", wordBreak:"break-all" }}>
+            {this.state.error?.message}
           </div>
           <button
             onClick={() => this.setState({ error: null })}
