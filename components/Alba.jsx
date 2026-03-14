@@ -9466,13 +9466,6 @@ Une seule phrase. Pas analytique, pas thérapeutique, pas poétique pour faire b
 
   const stats = POSTIT_TYPES.map(t => ({ ...t, count: postits.filter(p => p.type === t.id).length })).filter(t => t.count > 0);
 
-  // ── THEMES SCREEN ──
-  if (showThemesCle) return (
-    <div style={{ minHeight: "calc(100vh - 120px)", padding: "1.5rem 1.5rem 6rem" }}>
-      <ThemesScreen onBack={() => setShowThemesCle(false)} isPremium={isPremium} onShowPaywall={onShowPaywall} />
-    </div>
-  );
-
   return (
     <div style={{ padding: "0 0 6rem" }}>
 
