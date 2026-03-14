@@ -13484,7 +13484,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
         }}>
           {loading ? "Un instant…" : "Lire la page du jour"}
         </button>
-        {/* Marque-page — reprendre où on en était */}
+        {/* Marque-page */}
         {marquePage && (
           <button onClick={chargerMarquePage} disabled={loading} style={{
             marginTop: "0.8rem", width: "100%", padding: "0.7rem",
@@ -13497,27 +13497,13 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
             Reprendre — {marquePage.titre}
           </button>
         )}
-
-        {/* Commencer depuis le début */}
-        <button onClick={chargerDepuisDebut} disabled={loading} style={{
-          marginTop: "0.6rem", background: "none", border: "none", cursor: "pointer",
+        <button onClick={() => setVue("sommaire")} style={{
+          marginTop: "0.7rem", background: "none", border: "none", cursor: "pointer",
           fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
-          letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}44`,
+          letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66`,
         }}>
-          Commencer depuis la page 1
+          Sommaire
         </button>
-
-        <button onClick={chargerArchive} style={{
-          marginTop: "0.4rem", background: "none", border: "none", cursor: "pointer",
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
-          letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}33`,
-        }}>
-          {isPremium ? "Toutes les pages" : "✦ Toutes les pages — abonnés"}
-        </button>
-        <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.8rem", justifyContent: "center" }}>
-          <button onClick={() => setVue("prologue")} style={{ background: "none", border: `1px solid ${T.brume}33`, borderRadius:"20px", padding:"0.3rem 0.9rem", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}BB` }}>Prologue</button>
-          <button onClick={() => setVue("introduction")} style={{ background: "none", border: `1px solid ${T.brume}33`, borderRadius:"20px", padding:"0.3rem 0.9rem", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}BB` }}>Introduction</button>
-        </div>
       </div>
     </div>
   );
@@ -13557,11 +13543,78 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
     </div>
   );
 
+  // ── SOMMAIRE ─────────────────────────────────────────────────────────────
+  if (vue === "sommaire") return (
+    <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
+      {/* Header */}
+      <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
+        <button onClick={() => setVue("couverture")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Couverture</button>
+        <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
+        <div style={{ width:40 }} />
+      </div>
+
+      <div style={{ maxWidth:520, margin:"0 auto", padding:"2.5rem 2rem 5rem" }}>
+        {/* Titre sommaire */}
+        <div style={{ textAlign:"center", marginBottom:"3rem" }}>
+          <div style={{ fontSize:"0.58rem", letterSpacing:"0.4em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif", marginBottom:"1rem" }}>Sommaire</div>
+          <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
+        </div>
+
+        {/* Entrées avant-texte */}
+        {[
+          { label: "Prologue", page: "i", action: () => setVue("prologue") },
+          { label: "Introduction", page: "ii", action: () => setVue("introduction") },
+        ].map((e, i) => (
+          <button key={i} onClick={e.action} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.7rem 0", borderBottom:"1px dotted #D4C9B0" }}>
+            <span style={{ fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:"0.95rem", color:"#2C2416" }}>{e.label}</span>
+            <span style={{ fontFamily:"Georgia, serif", fontSize:"0.75rem", color:"#8C7B5E" }}>{e.page}</span>
+          </button>
+        ))}
+
+        {/* Chapitres */}
+        <div style={{ marginTop:"1.5rem" }}>
+          {[
+            { num:"I",    titre:"Ce qui commence",      mois:"Janvier",    couleur:"#C8A96E" },
+            { num:"II",   titre:"Ce qu'on porte",       mois:"Février",    couleur:"#9898C8" },
+            { num:"III",  titre:"Le corps sait",         mois:"Mars",       couleur:"#78A878" },
+            { num:"IV",   titre:"Les liens",             mois:"Avril",      couleur:"#C87878" },
+            { num:"V",    titre:"Ce qui résiste",        mois:"Mai",        couleur:"#C8A040" },
+            { num:"VI",   titre:"L'été intérieur",       mois:"Juin",       couleur:"#E8A870" },
+            { num:"VII",  titre:"Le silence",            mois:"Juillet",    couleur:"#7898A8" },
+            { num:"VIII", titre:"Ce qu'on traverse",     mois:"Août",       couleur:"#A87858" },
+            { num:"IX",   titre:"Revenir à soi",         mois:"Septembre",  couleur:"#88A888" },
+            { num:"X",    titre:"Ce qui part",           mois:"Octobre",    couleur:"#B89870" },
+            { num:"XI",   titre:"La gratitude sauvage",  mois:"Novembre",   couleur:"#C8B098" },
+            { num:"XII",  titre:"Ce qui reste",          mois:"Décembre",   couleur:"#A898C8" },
+          ].map((c, i) => (
+            <button key={i} onClick={chargerPage} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.8rem 0", borderBottom:"1px dotted #D4C9B0" }}>
+              <div style={{ display:"flex", gap:"1rem", alignItems:"baseline" }}>
+                <span style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E", width:"2.2rem", textAlign:"left" }}>{c.num}</span>
+                <div style={{ textAlign:"left" }}>
+                  <div style={{ fontFamily:"Georgia, serif", fontSize:"0.95rem", color:"#2C2416" }}>{c.titre}</div>
+                  <div style={{ fontFamily:"Jost, sans-serif", fontSize:"0.55rem", letterSpacing:"0.2em", textTransform:"uppercase", color:"#8C7B5E", marginTop:"0.15rem" }}>{c.mois}</div>
+                </div>
+              </div>
+              <div style={{ width:8, height:8, borderRadius:"50%", background:c.couleur, opacity:0.6, flexShrink:0 }} />
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Barre basse */}
+      <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"center", position:"sticky", bottom:0 }}>
+        <button onClick={chargerPage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.8rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>
+          {loading ? "Un instant…" : "Lire la page du jour →"}
+        </button>
+      </div>
+    </div>
+  );
+
   // ── PROLOGUE — mode Kindle ──────────────────────────────────────────────
   if (vue === "prologue") return (
     <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
       <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
-        <button onClick={() => setVue("couverture")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Bibliothèque</button>
+        <button onClick={() => setVue("sommaire")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Sommaire</button>
         <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
         <div style={{ fontSize:"0.72rem", color:"#8C7B5E" }}>i</div>
       </div>
@@ -13597,7 +13650,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
   if (vue === "introduction") return (
     <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
       <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
-        <button onClick={() => setVue("prologue")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Prologue</button>
+        <button onClick={() => setVue("sommaire")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Sommaire</button>
         <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
         <div style={{ fontSize:"0.72rem", color:"#8C7B5E" }}>ii</div>
       </div>
@@ -13627,8 +13680,8 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
       <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", bottom:0 }}>
         <button onClick={() => setVue("prologue")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>← Prologue</button>
         <div style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E" }}>— ii —</div>
-        <button onClick={chargerPage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>
-          {loading ? "Un instant…" : "Commencer →"}
+        <button onClick={chargerPage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", fontStyle:"italic" }}>
+          {loading ? "Un instant…" : "Lire la page du jour →"}
         </button>
       </div>
     </div>
