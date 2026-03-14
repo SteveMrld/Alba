@@ -13522,17 +13522,22 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
     if (!marquePage) return;
     setLoading(true);
     try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
+      // Charger l'archive complète
+      const rAll = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
         headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
       });
-      if (r.ok) {
-        const pages = await r.json();
-        const idx = pages.findIndex(p => p.date === marquePage.date);
-        const page = idx !== -1 ? pages[idx] : pages[0];
-        const realIdx = idx !== -1 ? idx : 0;
-        if (page && onShowKindle) onShowKindle({ page, archive: pages, idx: realIdx, marquePage });
+      // Charger la page spécifique par date
+      const rPage = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&date=eq.${marquePage.date}&limit=1`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      const allPages = rAll.ok ? await rAll.json() : [];
+      const pageData = rPage.ok ? await rPage.json() : [];
+      const page = pageData[0] || allPages[0];
+      if (page && onShowKindle) {
+        const idx = allPages.findIndex(p => p.date === page.date);
+        onShowKindle({ page, archive: allPages, idx: idx !== -1 ? idx : 0, marquePage });
       }
-    } catch {}
+    } catch(e) { console.error("chargerMarquePage:", e); }
     setLoading(false);
   };
 
