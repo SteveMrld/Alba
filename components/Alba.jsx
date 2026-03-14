@@ -13298,6 +13298,136 @@ const KindleView = ({ pageActive, archive, pageIdx, marquePage, onClose, onNavig
 };
 
 
+// ─── LIVRE PLEIN ÉCRAN — Sommaire, Prologue, Introduction ──────────────────────
+
+const LivreSommaire = ({ onNavigate, onClose, onLirePage, loading }) => (
+  <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
+    <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
+      <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Couverture</button>
+      <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
+      <div style={{ width:40 }} />
+    </div>
+    <div style={{ maxWidth:520, margin:"0 auto", padding:"2.5rem 2rem 5rem" }}>
+      <div style={{ textAlign:"center", marginBottom:"3rem" }}>
+        <div style={{ fontSize:"0.58rem", letterSpacing:"0.4em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif", marginBottom:"1rem" }}>Sommaire</div>
+        <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
+      </div>
+      {[
+        { label:"Prologue", page:"i", vue:"prologue" },
+        { label:"Introduction", page:"ii", vue:"introduction" },
+      ].map((e,i) => (
+        <button key={i} onClick={() => onNavigate(e.vue)} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.7rem 0", borderBottom:"1px dotted #D4C9B0" }}>
+          <span style={{ fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:"0.95rem", color:"#2C2416" }}>{e.label}</span>
+          <span style={{ fontFamily:"Georgia, serif", fontSize:"0.75rem", color:"#8C7B5E" }}>{e.page}</span>
+        </button>
+      ))}
+      <div style={{ marginTop:"1.5rem" }}>
+        {[
+          { num:"I",    titre:"Ce qui commence",       mois:"Janvier",   couleur:"#C8A96E" },
+          { num:"II",   titre:"Ce qu'on porte",        mois:"Février",   couleur:"#9898C8" },
+          { num:"III",  titre:"Le corps sait",          mois:"Mars",      couleur:"#78A878" },
+          { num:"IV",   titre:"Les liens",              mois:"Avril",     couleur:"#C87878" },
+          { num:"V",    titre:"Ce qui résiste",         mois:"Mai",       couleur:"#C8A040" },
+          { num:"VI",   titre:"L'été intérieur",        mois:"Juin",      couleur:"#E8A870" },
+          { num:"VII",  titre:"Le silence",             mois:"Juillet",   couleur:"#7898A8" },
+          { num:"VIII", titre:"Ce qu'on traverse",      mois:"Août",      couleur:"#A87858" },
+          { num:"IX",   titre:"Revenir à soi",          mois:"Septembre", couleur:"#88A888" },
+          { num:"X",    titre:"Ce qui part",            mois:"Octobre",   couleur:"#B89870" },
+          { num:"XI",   titre:"La gratitude sauvage",   mois:"Novembre",  couleur:"#C8B098" },
+          { num:"XII",  titre:"Ce qui reste",           mois:"Décembre",  couleur:"#A898C8" },
+        ].map((c,i) => (
+          <button key={i} onClick={onLirePage} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.8rem 0", borderBottom:"1px dotted #D4C9B0" }}>
+            <div style={{ display:"flex", gap:"1rem", alignItems:"baseline" }}>
+              <span style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E", width:"2.2rem", textAlign:"left" }}>{c.num}</span>
+              <div style={{ textAlign:"left" }}>
+                <div style={{ fontFamily:"Georgia, serif", fontSize:"0.95rem", color:"#2C2416" }}>{c.titre}</div>
+                <div style={{ fontFamily:"Jost, sans-serif", fontSize:"0.55rem", letterSpacing:"0.2em", textTransform:"uppercase", color:"#8C7B5E", marginTop:"0.15rem" }}>{c.mois}</div>
+              </div>
+            </div>
+            <div style={{ width:8, height:8, borderRadius:"50%", background:c.couleur, opacity:0.6, flexShrink:0 }} />
+          </button>
+        ))}
+      </div>
+    </div>
+    <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"center", position:"sticky", bottom:0 }}>
+      <button onClick={onLirePage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.8rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>
+        {loading ? "Un instant…" : "Lire la page du jour →"}
+      </button>
+    </div>
+  </div>
+);
+
+const LivrePrologue = ({ onNavigate, onClose }) => (
+  <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
+    <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
+      <button onClick={() => onNavigate("sommaire")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Sommaire</button>
+      <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
+      <div style={{ fontSize:"0.72rem", color:"#8C7B5E" }}>i</div>
+    </div>
+    <div style={{ maxWidth:520, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
+      <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
+        <span style={{ display:"inline-block", border:"1px solid #D4C9B0", borderRadius:"2px", padding:"0.2rem 0.8rem", fontSize:"0.58rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif" }}>Prologue</span>
+      </div>
+      <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
+        <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
+      </div>
+      <div style={{ fontSize:"clamp(1rem,3.2vw,1.08rem)", color:"#2C2416", lineHeight:1.95, textAlign:"justify" }}>
+        <p style={{ margin:"0 0 1.4em" }}>Il existe une heure que la plupart des gens ne connaissent pas. Elle précède le lever du jour d'une quinzaine de minutes, et elle n'appartient à aucun des deux mondes — ni à la nuit qui résiste, ni au matin qui n'est pas encore là. Les marins l'appellent l'aube nautique. Les moines la connaissent depuis toujours. Les oiseaux commencent à chanter dedans, avant même que la lumière soit visible.</p>
+        <p style={{ margin:"0 0 1.4em" }}>C'est dans cette heure que ce livre existe.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Pas comme un guide. Pas comme une méthode. Comme quelque chose qu'on ouvre quand on cherche un appui — non pas pour savoir quoi faire, mais pour ne pas être seul avec ce qu'on traverse.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Chaque page a été écrite pour un jour précis. Pour ce que ce jour peut apporter — une question, une découverte, un récit court, un fait sur le corps ou le cerveau. Rien d'exhaustif. Rien de définitif. Juste quelque chose de vrai, posé là.</p>
+        <p style={{ margin:0 }}>Tu n'as pas à tout lire. Tu n'as pas à être prêt. Il suffit d'ouvrir.</p>
+      </div>
+      <div style={{ textAlign:"center", margin:"2.5rem 0" }}>
+        <svg width={40} height={8} viewBox="0 0 40 8" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="4" x2="16" y2="4"/><circle cx="20" cy="4" r="2"/><line x1="24" y1="4" x2="40" y2="4"/></svg>
+      </div>
+    </div>
+    <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", bottom:0 }}>
+      <div style={{ width:80 }} />
+      <div style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E" }}>— i —</div>
+      <button onClick={() => onNavigate("introduction")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>Introduction →</button>
+    </div>
+  </div>
+);
+
+const LivreIntroduction = ({ onNavigate, onClose, onLirePage, loading }) => (
+  <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
+    <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
+      <button onClick={() => onNavigate("sommaire")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Sommaire</button>
+      <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
+      <div style={{ fontSize:"0.72rem", color:"#8C7B5E" }}>ii</div>
+    </div>
+    <div style={{ maxWidth:520, margin:"0 auto", padding:"2rem 2rem 4rem" }}>
+      <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
+        <span style={{ display:"inline-block", border:"1px solid #D4C9B0", borderRadius:"2px", padding:"0.2rem 0.8rem", fontSize:"0.58rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif" }}>Introduction</span>
+      </div>
+      <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
+        <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
+      </div>
+      <div style={{ fontSize:"clamp(1rem,3.2vw,1.08rem)", color:"#2C2416", lineHeight:1.95, textAlign:"justify" }}>
+        <p style={{ margin:"0 0 1.4em" }}>Ce livre fonctionne comme une année. Douze chapitres, douze mois, douze dimensions de la vie intérieure. Chaque chapitre a son territoire — ce qui commence, ce qu'on porte, le corps et ses mémoires, les liens, ce qui résiste, l'été intérieur, le silence, ce qu'on traverse, le retour à soi, ce qui part, la gratitude sauvage, ce qui reste.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Chaque jour, une page. Elle prend l'une de cinq formes possibles.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Certains jours, c'est un savoir — un concept de psychologie, de neuroscience, de philosophie. Pas pour informer. Pour déplacer quelque chose dans la façon de se regarder.</p>
+        <p style={{ margin:"0 0 1.4em" }}>D'autres jours, c'est un fait sur le corps ou le cerveau. Court, dense, concret. Parce que comprendre ce qui se passe en nous physiologiquement change ce qu'on croit être de la faiblesse ou du caractère.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Certains mercredis, c'est un conte. Une histoire courte, inventée, qui porte une vérité sans la nommer. On ne l'explique pas. On la laisse faire son travail.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Les samedis ouvrent sur une pratique oubliée — un rituel, une tradition, un geste ancien. Ce que des gens ont inventé pour traverser ce que nous traversons aussi.</p>
+        <p style={{ margin:"0 0 1.4em" }}>Et le dimanche, une phrase. Juste une. Et ce qu'elle laisse.</p>
+        <p style={{ margin:0 }}>Tu peux commencer le premier janvier ou le premier jour où tu ouvres ce livre. Ce qui compte, c'est de revenir. Une page. Un jour. Ce n'est pas grand-chose. C'est tout.</p>
+      </div>
+      <div style={{ textAlign:"center", margin:"2.5rem 0" }}>
+        <svg width={40} height={8} viewBox="0 0 40 8" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="4" x2="16" y2="4"/><circle cx="20" cy="4" r="2"/><line x1="24" y1="4" x2="40" y2="4"/></svg>
+      </div>
+    </div>
+    <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", bottom:0 }}>
+      <button onClick={() => onNavigate("prologue")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>← Prologue</button>
+      <div style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E" }}>— ii —</div>
+      <button onClick={onLirePage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", fontStyle:"italic" }}>
+        {loading ? "…" : "Commencer →"}
+      </button>
+    </div>
+  </div>
+);
+
 // ─── LE LIVRE D'ALBA ──────────────────────────────────────────────────────────
 
 const GRAVURES_LIVRE = {
@@ -13449,254 +13579,9 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
   const gravKey = gravKeys[gravIdx] || "commencement";
   const couleur = pageActive?.chapitre_couleur || chap.couleur;
 
-  // Signaler l'état plein écran à l'app
-  useEffect(() => {
-    if (["sommaire","prologue","introduction"].includes(vue)) {
-      onPleinEcran?.(vue);
-    } else {
-      onFermerPleinEcran?.();
-    }
-  }, [vue]);
-
-  // ── COUVERTURE ────────────────────────────────────────────────────────────
-  if (vue === "couverture") return (
-    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem" }}>
-
-      {/* Couverture avec vraie image */}
-      <div style={{ position: "relative", width: "min(260px, 75vw)", animation: "fadeUp 0.8s ease forwards", cursor: "pointer" }}
-        onClick={chargerPage}
-      >
-        <div style={{
-          borderRadius: "4px 10px 10px 4px",
-          overflow: "hidden",
-          boxShadow: "6px 8px 40px rgba(0,0,0,0.8), -5px 0 10px rgba(0,0,0,0.5)",
-          position: "relative",
-        }}>
-          {/* Tranche */}
-          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: "linear-gradient(to right, #0A0806, #1A1510, #0A0806)", zIndex: 2 }} />
-          {/* Image de couverture */}
-          <img src="/couverture-livre.png" alt="Ce que l'aube sait" style={{ width: "100%", display: "block" }} />
-        </div>
-      </div>
-
-      {/* Tagline */}
-      <div style={{ marginTop: "2rem", textAlign: "center", maxWidth: 280, animation: "fadeUp 0.8s ease 0.3s forwards", opacity: 0 }}>
-        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}88`, lineHeight: 1.8, margin: "0 0 1.5rem" }}>
-          Chaque jour à minuit, une nouvelle page.<br/>Une année intérieure.
-        </p>
-        <button onClick={chargerPage} disabled={loading} style={{
-          width: "100%", padding: "0.85rem",
-          background: `${chap.couleur}22`, border: `1px solid ${chap.couleur}55`,
-          borderRadius: "6px", cursor: "pointer",
-          fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem",
-          color: chap.couleur, transition: "all 0.3s",
-        }}>
-          {loading ? "Un instant…" : "Lire la page du jour"}
-        </button>
-        {/* Marque-page */}
-        {marquePage && (
-          <button onClick={chargerMarquePage} disabled={loading} style={{
-            marginTop: "0.8rem", width: "100%", padding: "0.7rem",
-            background: `${chap.couleur}12`, border: `1px solid ${chap.couleur}33`,
-            borderRadius: "6px", cursor: "pointer",
-            fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem",
-            color: `${chap.couleur}CC`, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
-          }}>
-            <span style={{ fontSize: "0.7rem" }}>🔖</span>
-            Reprendre — {marquePage.titre}
-          </button>
-        )}
-        <button onClick={() => { setVue("sommaire"); onPleinEcran?.("sommaire"); }} style={{
-          marginTop: "0.7rem", background: "none", border: "none", cursor: "pointer",
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
-          letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66`,
-        }}>
-          Sommaire
-        </button>
-      </div>
-    </div>
-  );
-
-  // (vue "page" gérée directement via onShowKindle dans les boutons)
-  // ── ARCHIVE ───────────────────────────────────────────────────────────────
-  if (vue === "archive") return (
-    <div style={{ padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
-      <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.5rem", letterSpacing: "0.3em", color: `${T.brume}55`, marginBottom: "2rem", padding: 0, textTransform: "uppercase" }}>← Couverture</button>
-      <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${T.brume}55`, marginBottom: "1.5rem" }}>Pages précédentes</div>
-      {archiveLoading ? (
-        <div style={{ textAlign: "center", color: `${T.brume}55`, fontFamily: T.serif, fontStyle: "italic", padding: "2rem" }}>Chargement…</div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
-          {archive.map((p, i) => {
-            const num = archive.length - i;
-            return (
-              <button key={i} onClick={() => { if (onShowKindle) onShowKindle({ page: p, archive, idx: i, marquePage }); }} style={{
-                background: `${T.nuit2}88`, border: `1px solid ${T.brume}10`,
-                borderRadius: "6px", padding: "0.9rem 1.1rem", cursor: "pointer",
-                display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
-              }}>
-                <div>
-                  <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.orPale, marginBottom: "0.2rem" }}>{p.titre_page}</div>
-                  <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.25em", color: `${T.brume}55`, textTransform: "uppercase" }}>
-                    {TYPE_LABELS[p.type]} · {new Date(p.date + 'T00:00:00').toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
-                  </div>
-                </div>
-                <div style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: `${T.brume}33`, flexShrink: 0, marginLeft: "0.5rem" }}>
-                  {num}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-
-  // ── SOMMAIRE ─────────────────────────────────────────────────────────────
-  if (vue === "sommaire") return (
-    <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
-      {/* Header */}
-      <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
-        <button onClick={() => setVue("couverture")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Couverture</button>
-        <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
-        <div style={{ width:40 }} />
-      </div>
-
-      <div style={{ maxWidth:520, margin:"0 auto", padding:"2.5rem 2rem 5rem" }}>
-        {/* Titre sommaire */}
-        <div style={{ textAlign:"center", marginBottom:"3rem" }}>
-          <div style={{ fontSize:"0.58rem", letterSpacing:"0.4em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif", marginBottom:"1rem" }}>Sommaire</div>
-          <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
-        </div>
-
-        {/* Entrées avant-texte */}
-        {[
-          { label: "Prologue", page: "i", action: () => setVue("prologue") },
-          { label: "Introduction", page: "ii", action: () => setVue("introduction") },
-        ].map((e, i) => (
-          <button key={i} onClick={e.action} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.7rem 0", borderBottom:"1px dotted #D4C9B0" }}>
-            <span style={{ fontFamily:"Georgia, serif", fontStyle:"italic", fontSize:"0.95rem", color:"#2C2416" }}>{e.label}</span>
-            <span style={{ fontFamily:"Georgia, serif", fontSize:"0.75rem", color:"#8C7B5E" }}>{e.page}</span>
-          </button>
-        ))}
-
-        {/* Chapitres */}
-        <div style={{ marginTop:"1.5rem" }}>
-          {[
-            { num:"I",    titre:"Ce qui commence",      mois:"Janvier",    couleur:"#C8A96E" },
-            { num:"II",   titre:"Ce qu'on porte",       mois:"Février",    couleur:"#9898C8" },
-            { num:"III",  titre:"Le corps sait",         mois:"Mars",       couleur:"#78A878" },
-            { num:"IV",   titre:"Les liens",             mois:"Avril",      couleur:"#C87878" },
-            { num:"V",    titre:"Ce qui résiste",        mois:"Mai",        couleur:"#C8A040" },
-            { num:"VI",   titre:"L'été intérieur",       mois:"Juin",       couleur:"#E8A870" },
-            { num:"VII",  titre:"Le silence",            mois:"Juillet",    couleur:"#7898A8" },
-            { num:"VIII", titre:"Ce qu'on traverse",     mois:"Août",       couleur:"#A87858" },
-            { num:"IX",   titre:"Revenir à soi",         mois:"Septembre",  couleur:"#88A888" },
-            { num:"X",    titre:"Ce qui part",           mois:"Octobre",    couleur:"#B89870" },
-            { num:"XI",   titre:"La gratitude sauvage",  mois:"Novembre",   couleur:"#C8B098" },
-            { num:"XII",  titre:"Ce qui reste",          mois:"Décembre",   couleur:"#A898C8" },
-          ].map((c, i) => (
-            <button key={i} onClick={chargerPage} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.8rem 0", borderBottom:"1px dotted #D4C9B0" }}>
-              <div style={{ display:"flex", gap:"1rem", alignItems:"baseline" }}>
-                <span style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E", width:"2.2rem", textAlign:"left" }}>{c.num}</span>
-                <div style={{ textAlign:"left" }}>
-                  <div style={{ fontFamily:"Georgia, serif", fontSize:"0.95rem", color:"#2C2416" }}>{c.titre}</div>
-                  <div style={{ fontFamily:"Jost, sans-serif", fontSize:"0.55rem", letterSpacing:"0.2em", textTransform:"uppercase", color:"#8C7B5E", marginTop:"0.15rem" }}>{c.mois}</div>
-                </div>
-              </div>
-              <div style={{ width:8, height:8, borderRadius:"50%", background:c.couleur, opacity:0.6, flexShrink:0 }} />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Barre basse */}
-      <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"center", position:"sticky", bottom:0 }}>
-        <button onClick={chargerPage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.8rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>
-          {loading ? "Un instant…" : "Lire la page du jour →"}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ── PROLOGUE — mode Kindle ──────────────────────────────────────────────
-  if (vue === "prologue") return (
-    <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
-      <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
-        <button onClick={() => setVue("sommaire")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Sommaire</button>
-        <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
-        <div style={{ fontSize:"0.72rem", color:"#8C7B5E" }}>i</div>
-      </div>
-      <div style={{ maxWidth: 520, margin: "0 auto", padding: "2rem 2rem 4rem" }}>
-        <div style={{ display:"none" }}>placeholder
-        </div>
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <span style={{ display:"inline-block", border:"1px solid #D4C9B0", borderRadius:"2px", padding:"0.2rem 0.8rem", fontSize:"0.58rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif" }}>Prologue</span>
-        </div>
-        <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
-          <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
-        </div>
-        <div style={{ fontSize: "clamp(1rem, 3.2vw, 1.08rem)", color: "#2C2416", lineHeight: 1.95, textAlign:"justify" }}>
-        <p>Il existe une heure que la plupart des gens ne connaissent pas. Elle précède le lever du jour d'une quinzaine de minutes, et elle n'appartient à aucun des deux mondes — ni à la nuit qui résiste, ni au matin qui n'est pas encore là. Les marins l'appellent l'aube nautique. Les moines la connaissent depuis toujours. Les oiseaux commencent à chanter dedans, avant même que la lumière soit visible.</p>
-        <p style={{ marginTop: "1.8rem" }}>C'est dans cette heure que ce livre existe.</p>
-        <p style={{ marginTop: "1.8rem" }}>Pas comme un guide. Pas comme une méthode. Comme quelque chose qu'on ouvre quand on cherche un appui — non pas pour savoir quoi faire, mais pour ne pas être seul avec ce qu'on traverse.</p>
-        <p style={{ marginTop: "1.8rem" }}>Chaque page a été écrite pour un jour précis. Pour ce que ce jour peut apporter — une question, une découverte, un récit court, un fait sur le corps ou le cerveau. Rien d'exhaustif. Rien de définitif. Juste quelque chose de vrai, posé là.</p>
-        <p style={{ marginTop: "1.8rem" }}>Tu n'as pas à tout lire. Tu n'as pas à être prêt. Il suffit d'ouvrir.</p>
-      </div>
-        <div style={{ textAlign:"center", margin:"2.5rem 0" }}>
-          <svg width={40} height={8} viewBox="0 0 40 8" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="4" x2="16" y2="4"/><circle cx="20" cy="4" r="2"/><line x1="24" y1="4" x2="40" y2="4"/></svg>
-        </div>
-      </div>
-      <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", bottom:0 }}>
-        <div style={{ fontSize:"0.75rem", color:"#D4C9B0" }} />
-        <div style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E" }}>— i —</div>
-        <button onClick={() => setVue("introduction")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>Introduction →</button>
-      </div>
-    </div>
-  );
-
-  // ── INTRODUCTION — mode Kindle ──────────────────────────────────────────
-  if (vue === "introduction") return (
-    <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
-      <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
-        <button onClick={() => setVue("sommaire")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Sommaire</button>
-        <div style={{ fontSize:"0.62rem", color:"#8C7B5E", letterSpacing:"0.04em" }}>Ce que l'aube sait</div>
-        <div style={{ fontSize:"0.72rem", color:"#8C7B5E" }}>ii</div>
-      </div>
-      <div style={{ maxWidth: 520, margin: "0 auto", padding: "2rem 2rem 4rem" }}>
-        <div style={{ display:"none" }}>placeholder
-        </div>
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <span style={{ display:"inline-block", border:"1px solid #D4C9B0", borderRadius:"2px", padding:"0.2rem 0.8rem", fontSize:"0.58rem", letterSpacing:"0.3em", textTransform:"uppercase", color:"#8C7B5E", fontFamily:"Jost, sans-serif" }}>Introduction</span>
-        </div>
-        <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
-          <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/></svg>
-        </div>
-        <div style={{ fontSize: "clamp(1rem, 3.2vw, 1.08rem)", color: "#2C2416", lineHeight: 1.95, textAlign:"justify" }}>
-        <p>Ce livre fonctionne comme une année. Douze chapitres, douze mois, douze dimensions de la vie intérieure. Chaque chapitre a son territoire — ce qui commence, ce qu'on porte, le corps et ses mémoires, les liens, ce qui résiste, l'été intérieur, le silence, ce qu'on traverse, le retour à soi, ce qui part, la gratitude sauvage, ce qui reste.</p>
-        <p style={{ marginTop: "1.8rem" }}>Chaque jour, une page. Elle prend l'une de cinq formes possibles.</p>
-        <p style={{ marginTop: "1.8rem" }}>Certains jours, c'est un savoir — un concept de psychologie, de neuroscience, de philosophie. Pas pour informer. Pour déplacer quelque chose dans la façon de se regarder.</p>
-        <p style={{ marginTop: "1.8rem" }}>D'autres jours, c'est un fait sur le corps ou le cerveau. Court, dense, concret. Parce que comprendre ce qui se passe en nous physiologiquement change ce qu'on croit être de la faiblesse ou du caractère.</p>
-        <p style={{ marginTop: "1.8rem" }}>Certains mercredis, c'est un conte. Une histoire courte, inventée, qui porte une vérité sans la nommer. On ne l'explique pas. On la laisse faire son travail.</p>
-        <p style={{ marginTop: "1.8rem" }}>Les samedis ouvrent sur une pratique oubliée — un rituel, une tradition, un geste ancien. Ce que des gens ont inventé pour traverser ce que nous traversons aussi.</p>
-        <p style={{ marginTop: "1.8rem" }}>Et le dimanche, une phrase. Juste une. Et ce qu'elle laisse.</p>
-        <p style={{ marginTop: "1.8rem" }}>Tu peux commencer le premier janvier ou le premier jour où tu ouvres ce livre. Ce qui compte, c'est de revenir. Une page. Un jour. Ce n'est pas grand-chose. C'est tout.</p>
-      </div>
-        <div style={{ textAlign:"center", margin:"2.5rem 0" }}>
-          <svg width={40} height={8} viewBox="0 0 40 8" fill="none" stroke="#D4C9B0" strokeWidth="0.8"><line x1="0" y1="4" x2="16" y2="4"/><circle cx="20" cy="4" r="2"/><line x1="24" y1="4" x2="40" y2="4"/></svg>
-        </div>
-      </div>
-      <div style={{ background:"#F5F0E8", borderTop:"1px solid #D4C9B0", padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", bottom:0 }}>
-        <button onClick={() => setVue("prologue")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif" }}>← Prologue</button>
-        <div style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E" }}>— ii —</div>
-        <button onClick={chargerPage} disabled={loading} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", fontStyle:"italic" }}>
-          {loading ? "Un instant…" : "Lire la page du jour →"}
-        </button>
-      </div>
-    </div>
-  );
 
   return null;
+
 };
 
 
@@ -14738,6 +14623,30 @@ function AlbaInner() {
               {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} onShowPricing={() => setShowPricingProfil(true)} />}
             </motion.div>
           </AnimatePresence>
+
+          {/* ── LIVRE — Sommaire / Prologue / Introduction ── */}
+          {livrePleinEcran === "sommaire" && (
+            <LivreSommaire
+              onNavigate={(v) => setLivrePleinEcran(v)}
+              onClose={() => setLivrePleinEcran(null)}
+              onLirePage={() => { setLivrePleinEcran(null); }}
+              loading={false}
+            />
+          )}
+          {livrePleinEcran === "prologue" && (
+            <LivrePrologue
+              onNavigate={(v) => setLivrePleinEcran(v)}
+              onClose={() => setLivrePleinEcran(null)}
+            />
+          )}
+          {livrePleinEcran === "introduction" && (
+            <LivreIntroduction
+              onNavigate={(v) => setLivrePleinEcran(v)}
+              onClose={() => setLivrePleinEcran(null)}
+              onLirePage={() => { setLivrePleinEcran(null); }}
+              loading={false}
+            />
+          )}
 
           {/* ── KINDLE VIEW — niveau app pour éviter Framer Motion ── */}
           {kindleData && (
