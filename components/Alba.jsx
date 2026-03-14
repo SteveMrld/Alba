@@ -12508,37 +12508,43 @@ const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
           </p>
         </div>
 
-        {/* Phase 3 — Logo ALBA */}
+        {/* Phase 3 — Logo ALBA + acronyme animé */}
         <div style={{ marginTop: "3.2rem", ...fade(phase >= 3) }}>
+          <style>{`
+            @keyframes albaLetterIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+            @keyframes albaWordIn   { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+          `}</style>
           {/* Séparateur doré */}
-          <div style={{
-            width: 28, height: 1,
-            background: `linear-gradient(90deg, transparent, ${T.or}, transparent)`,
-            margin: "0 auto 2rem",
-            animation: phase >= 3 ? "albaLineGrow 1.2s ease 0.3s both" : "none",
-            transformOrigin: "center",
-          }} />
+          <div style={{ width:28, height:1, background:`linear-gradient(90deg, transparent, ${T.or}, transparent)`, margin:"0 auto 2rem", animation: phase>=3 ? "albaLineGrow 1.2s ease 0.3s both" : "none", transformOrigin:"center" }} />
           {/* Étoile */}
-          <div style={{
-            fontSize: "0.85rem", color: T.or,
-            animation: "albaStarFloat 10s linear infinite",
-            display: "inline-block", marginBottom: "1.2rem",
-          }}>✦</div>
-          {/* Titre */}
-          <div style={{
-            fontFamily: T.serif, fontWeight: 300,
-            fontSize: "clamp(2.4rem, 10vw, 3.8rem)",
-            color: T.orPale, letterSpacing: "0.22em",
-            lineHeight: 1, marginBottom: "0.6rem",
-          }}>
-            ALBA
+          <div style={{ fontSize:"0.85rem", color:T.or, animation:"albaStarFloat 10s linear infinite", display:"inline-block", marginBottom:"1.2rem" }}>✦</div>
+
+          {/* Lettres A-L-B-A animées */}
+          <div style={{ display:"flex", justifyContent:"center", gap:"0.15em", marginBottom:"1.6rem" }}>
+            {["A","L","B","A"].map((letter, i) => (
+              <div key={i} style={{ fontFamily:T.serif, fontWeight:300, fontSize:"clamp(2.4rem,10vw,3.8rem)", color:T.orPale, lineHeight:1, animation:`albaLetterIn 0.5s ease ${0.2 + i*0.12}s both`, opacity:0 }}>
+                {letter}
+              </div>
+            ))}
           </div>
-          <div style={{
-            fontFamily: T.sans, fontWeight: 300,
-            fontSize: "0.62rem", letterSpacing: "0.55em",
-            textTransform: "uppercase", color: `${T.brume}99`,
-            ...fade(phase >= 3, 0.5),
-          }}>
+
+          {/* Acronyme */}
+          <div style={{ display:"flex", flexDirection:"column", gap:"0.55rem", maxWidth:240, margin:"0 auto 1.4rem" }}>
+            {[
+              { l:"A", mot:"Ancrage",       delay:0.7 },
+              { l:"L", mot:"Lumière",       delay:0.95 },
+              { l:"B", mot:"Bienveillance", delay:1.2 },
+              { l:"A", mot:"Aube",          delay:1.45 },
+            ].map((item,i) => (
+              <div key={i} style={{ display:"flex", alignItems:"center", gap:"0.6rem", animation:`albaWordIn 0.45s ease ${item.delay}s both`, opacity:0 }}>
+                <span style={{ fontFamily:T.serif, fontWeight:300, fontSize:"0.85rem", color:T.or, width:"0.8rem", textAlign:"center", flexShrink:0 }}>{item.l}</span>
+                <span style={{ width:1, height:10, background:`${T.or}40`, flexShrink:0 }} />
+                <span style={{ fontFamily:T.sans, fontWeight:300, fontSize:"0.48rem", letterSpacing:"0.38em", textTransform:"uppercase", color:`${T.brume}77` }}>{item.mot}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontFamily:T.sans, fontWeight:300, fontSize:"0.62rem", letterSpacing:"0.55em", textTransform:"uppercase", color:`${T.brume}66`, animation:"albaWordIn 0.5s ease 1.9s both", opacity:0 }}>
             l'aube en toi
           </div>
         </div>
@@ -12603,6 +12609,99 @@ const WelcomeSilencieux = ({ onCommencer, onConnexion }) => {
     </div>
   );
 };
+
+// ─── LETTRE DE BIENVENUE ──────────────────────────────────────────────────────
+
+const LettreBienvenue = ({ prenom, onClose }) => {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 600);
+    const t2 = setTimeout(() => setPhase(2), 1400);
+    const t3 = setTimeout(() => setPhase(3), 2400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+
+  const fade = (visible, delay = 0) => ({
+    opacity: visible ? 1 : 0,
+    transform: visible ? "translateY(0)" : "translateY(12px)",
+    transition: `opacity 1.2s ease ${delay}s, transform 1.2s ease ${delay}s`,
+  });
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 300,
+      background: "#0D0A10",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      padding: "2rem",
+      overflowY: "auto",
+    }}>
+      <div style={{ maxWidth: 360, width: "100%", position: "relative" }}>
+
+        {/* En-tête lettre */}
+        <div style={{ ...fade(phase >= 1), marginBottom: "2.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "2rem" }}>
+            <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "0.85rem", letterSpacing: "0.15em", color: `${T.brume}55` }}>
+              {new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+            </div>
+            <div style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "0.7rem", letterSpacing: "0.2em", color: `${T.or}66` }}>
+              ALBA
+            </div>
+          </div>
+          <div style={{ height: 1, background: `linear-gradient(to right, ${T.or}44, transparent)`, marginBottom: "2rem" }} />
+          <div style={{ fontFamily: T.serif, fontSize: "1.15rem", color: T.orPale, marginBottom: "0.3rem" }}>
+            {prenom},
+          </div>
+        </div>
+
+        {/* Corps de la lettre */}
+        <div style={{ ...fade(phase >= 2), marginBottom: "2.5rem" }}>
+          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.9rem, 3.5vw, 1rem)", color: `${T.aube}DD`, lineHeight: 2.1 }}>
+            <p style={{ margin: "0 0 1.4rem" }}>
+              Tu n'es pas là par hasard. Quelque chose en toi a cherché — un espace, une écoute, un endroit où poser ce qu'on ne pose nulle part ailleurs. C'est cet endroit que tu viens d'ouvrir.
+            </p>
+            <p style={{ margin: "0 0 1.4rem" }}>
+              ALBA n'est pas une application de productivité. Elle ne te dira pas quoi faire, ni comment t'améliorer. Elle ne mesure pas ta performance intérieure. Ce qu'elle fait, c'est tenir un espace — chaque matin, chaque soir, dans les moments de traversée comme dans ceux de légèreté.
+            </p>
+            <p style={{ margin: "0 0 1.4rem" }}>
+              Le Miroir t'écoutera sans te juger. L'Ardoise gardera ce que tu n'as pas dit ailleurs. Les Portes s'ouvriront à mesure que tu reviens. Et chaque jour, une page du livre t'attendra.
+            </p>
+            <p style={{ margin: 0 }}>
+              Il n'y a rien à faire bien. Il n'y a rien à terminer. Il suffit de revenir.
+            </p>
+          </div>
+        </div>
+
+        {/* Signature + bouton */}
+        <div style={{ ...fade(phase >= 3) }}>
+          <div style={{ marginBottom: "2.5rem" }}>
+            <div style={{ height: 1, background: `linear-gradient(to right, ${T.or}33, transparent)`, marginBottom: "1.5rem" }} />
+            <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: `${T.or}99` }}>
+              ALBA
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              width: "100%", padding: "0.95rem",
+              background: `${T.or}18`, border: `1px solid ${T.or}44`,
+              borderRadius: "6px", cursor: "pointer",
+              fontFamily: T.serif, fontStyle: "italic",
+              fontSize: "1rem", color: T.orPale,
+              transition: "all 0.3s",
+            }}
+            onMouseOver={e => e.currentTarget.style.background = `${T.or}28`}
+            onMouseOut={e => e.currentTarget.style.background = `${T.or}18`}
+          >
+            Entrer dans ALBA
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 // ─── TUTO STORIES ────────────────────────────────────────────────────────────
 
@@ -13779,6 +13878,7 @@ function AlbaInner() {
   const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTuto, setShowTuto] = useState(false);
+  const [showLettreBienvenue, setShowLettreBienvenue] = useState(false);
   const [showSpotify, setShowSpotify] = useState(false);
   const [showAide, setShowAide] = useState(false);
   const [showLataifApp, setShowLataifApp] = useState(false);
@@ -14175,6 +14275,14 @@ function AlbaInner() {
       {/* ── PRICING DEPUIS PROFIL ── */}
       {showPricingProfil && <PricingPage onCommencer={() => { setShowPricingProfil(false); setShowPaywall(true); }} onRetour={() => setShowPricingProfil(false)} onConnexion={() => setShowPricingProfil(false)} onB2B={() => { setShowPricingProfil(false); setShowB2B(true); }} />}
 
+      {/* ── LETTRE DE BIENVENUE ── */}
+      {showLettreBienvenue && (
+        <LettreBienvenue
+          prenom={userData?.prenom || ""}
+          onClose={() => { setShowLettreBienvenue(false); setTimeout(() => setShowTuto(true), 400); }}
+        />
+      )}
+
       {/* ── TUTO ── */}
       {showTuto && <TutoStories onClose={() => setShowTuto(false)} />}
 
@@ -14240,7 +14348,7 @@ function AlbaInner() {
           </motion.div>
         </AnimatePresence>
       )}
-      {view === "portrait" && <Portrait data={userData} onContinue={() => { setView("app"); setTimeout(() => setShowTuto(true), 800); }} />}
+      {view === "portrait" && <Portrait data={userData} onContinue={() => { setView("app"); setTimeout(() => setShowLettreBienvenue(true), 600); }} />}
 
       {view === "app" && (
         <motion.div
