@@ -13339,106 +13339,87 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
     </div>
   );
 
-  // ── PAGE DU LIVRE ─────────────────────────────────────────────────────────
+  // ── PAGE DU LIVRE — MODE KINDLE ───────────────────────────────────────────
   if (vue === "page" && pageActive) {
-    const dateFormatee = new Date(pageActive.date + 'T00:00:00').toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
     const peutAllerAvant = pageIdx < archive.length - 1;
     const peutAllerArriere = pageIdx > 0;
+    const texteNettoye = pageActive.contenu
+      .replace(/#{1,3} */g, "")
+      .replace(/\*\*([^*]+)\*\*/g, "$1")
+      .replace(/\*([^*]+)\*/g, "$1")
+      .replace(/^- /gm, "")
+      .trim();
+
+    const BG = "#F5F0E8";
+    const TEXT = "#2C2416";
+    const MUTED = "#8C7B5E";
+    const BORDER = "#D4C9B0";
 
     return (
-      <div style={{ minHeight: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto", position: "relative" }}>
+      <div style={{ position:"fixed", inset:0, zIndex:50, background:BG, display:"flex", flexDirection:"column", fontFamily:"Georgia, 'Times New Roman', serif", overflowY:"auto" }}>
 
-        {/* Header navigation livre */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "1.2rem 1.5rem 0" }}>
-          <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.45rem", letterSpacing: "0.3em", color: `${T.brume}44`, padding: 0, textTransform: "uppercase" }}>
-            ← Couverture
-          </button>
-          <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.42rem", letterSpacing: "0.3em", color: `${couleur}66`, textTransform: "uppercase" }}>
-            {pageActive.chapitre_titre || chap.titre}
-          </div>
-          <div style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: `${T.brume}44` }}>
-            {numeroPage}
-          </div>
+        {/* Barre haute */}
+        <div style={{ position:"sticky", top:0, zIndex:10, background:BG, borderBottom:`1px solid ${BORDER}`, padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <button onClick={() => setVue("couverture")} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.75rem", color:MUTED, fontFamily:"Georgia, serif" }}>← Bibliothèque</button>
+          <div style={{ fontSize:"0.62rem", color:MUTED, letterSpacing:"0.04em", textAlign:"center" }}>{pageActive.chapitre_titre}</div>
+          <div style={{ fontSize:"0.72rem", color:MUTED }}>{numeroPage}</div>
         </div>
 
-        {/* Séparateur haut */}
-        <div style={{ margin: "0.8rem 1.5rem", height: 1, background: `linear-gradient(to right, transparent, ${couleur}33, transparent)` }} />
+        {/* Corps */}
+        <div style={{ flex:1, maxWidth:540, margin:"0 auto", width:"100%", padding:"2.5rem 1.8rem 1.5rem" }}>
 
-        {/* Contenu page */}
-        <div style={{ padding: "1rem 2rem 2rem" }}>
-
-          {/* Gravure + type */}
-          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-            <div style={{ position: "relative", width: 56, height: 56, margin: "0 auto 1rem" }}>
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, color: `${couleur}08`, fontFamily: T.serif }}>
-                {String.fromCharCode(64 + (pageActive.chapitre_num || 1))}
-              </div>
-              <svg width={56} height={56} viewBox="0 0 48 48" fill="none" stroke={couleur} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.65 }} dangerouslySetInnerHTML={{ __html: GRAVURES_LIVRE[gravKey] || GRAVURES_LIVRE.commencement }} />
-            </div>
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.45em", textTransform: "uppercase", color: `${couleur}77`, marginBottom: "0.4rem" }}>
+          {/* Type */}
+          <div style={{ textAlign:"center", marginBottom:"1.8rem" }}>
+            <span style={{ display:"inline-block", border:`1px solid ${BORDER}`, borderRadius:"2px", padding:"0.2rem 0.8rem", fontSize:"0.58rem", letterSpacing:"0.3em", textTransform:"uppercase", color:MUTED, fontFamily:"Jost, sans-serif" }}>
               {TYPE_LABELS[pageActive.type] || pageActive.type}
-            </div>
-            <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.38rem", letterSpacing: "0.3em", color: `${T.brume}30`, textTransform: "uppercase" }}>
-              {dateFormatee}
-            </div>
+            </span>
           </div>
 
           {/* Titre */}
-          <h2 style={{ fontFamily: T.serif, fontWeight: 300, fontSize: "clamp(1.3rem, 5vw, 1.6rem)", color: T.orPale, margin: "0 0 1.5rem", lineHeight: 1.4, textAlign: "center" }}>
+          <h1 style={{ fontSize:"clamp(1.4rem,5vw,1.9rem)", fontWeight:400, color:TEXT, lineHeight:1.35, textAlign:"center", margin:"0 0 0.6rem", fontStyle:"italic" }}>
             {pageActive.titre_page}
-          </h2>
+          </h1>
 
-          {/* Filet */}
-          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "2rem" }}>
-            <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, ${couleur}33)` }} />
-            <div style={{ color: `${couleur}55`, fontSize: "0.55rem" }}>✦</div>
-            <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, ${couleur}33)` }} />
+          {/* Date */}
+          <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
+            <span style={{ fontSize:"0.7rem", color:MUTED }}>
+              {new Date(pageActive.date + "T00:00:00").toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long" })}
+            </span>
+          </div>
+
+          {/* Ornement */}
+          <div style={{ textAlign:"center", marginBottom:"2.5rem" }}>
+            <svg width={60} height={12} viewBox="0 0 60 12" fill="none" stroke={BORDER} strokeWidth="0.8">
+              <line x1="0" y1="6" x2="22" y2="6"/><circle cx="30" cy="6" r="3"/><line x1="38" y1="6" x2="60" y2="6"/>
+            </svg>
           </div>
 
           {/* Texte */}
-          <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.92rem, 3.2vw, 1rem)", color: `${T.aube}EE`, lineHeight: 2.1, whiteSpace: "pre-line" }}>
-            {pageActive.contenu
-              .replace(/#{1,3}\s*/g, "")
-              .replace(/\*\*([^*]+)\*\*/g, "$1")
-              .replace(/\*([^*]+)\*/g, "$1")
-              .replace(/^[-–—]\s+/gm, "")
-              .trim()
-            }
+          <div style={{ fontSize:"clamp(1rem,3.2vw,1.08rem)", color:TEXT, lineHeight:1.95, textAlign:"justify", hyphens:"auto" }}>
+            {texteNettoye.split("\n\n").map((para, i) => (
+              <p key={i} style={{ margin:"0 0 1.4em", textIndent: i===0 ? 0 : "1.5em" }}>{para}</p>
+            ))}
+          </div>
+
+          {/* Ornement bas */}
+          <div style={{ textAlign:"center", margin:"3rem 0 1.5rem" }}>
+            <svg width={40} height={8} viewBox="0 0 40 8" fill="none" stroke={BORDER} strokeWidth="0.8">
+              <line x1="0" y1="4" x2="16" y2="4"/><circle cx="20" cy="4" r="2"/><line x1="24" y1="4" x2="40" y2="4"/>
+            </svg>
           </div>
         </div>
 
-        {/* Pied de page avec navigation */}
-        <div style={{ padding: "1.5rem 1.5rem 6rem" }}>
-          <div style={{ margin: "0 0 1.5rem", height: 1, background: `${couleur}18` }} />
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <button onClick={() => allerPage(1)} disabled={!peutAllerAvant}
-              style={{ background: "none", border: "none", cursor: peutAllerAvant ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerAvant ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0 }}>
-              ← Précédent
-            </button>
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "0.8rem", color: `${T.brume}33` }}>— {numeroPage} —</div>
-            <button onClick={() => allerPage(-1)} disabled={!peutAllerArriere}
-              style={{ background: "none", border: "none", cursor: peutAllerArriere ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerArriere ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0 }}>
-              Suivant →
-            </button>
-          </div>
-          {/* Marque-page */}
-          <div style={{ textAlign: "center", marginTop: "1.2rem" }}>
-            <button onClick={() => sauvegarderMarque(pageActive)} style={{
-              background: "none", border: `1px solid ${couleur}25`, borderRadius: "20px",
-              padding: "0.4rem 1rem", cursor: "pointer",
-              fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem",
-              letterSpacing: "0.25em", textTransform: "uppercase",
-              color: marquePage?.date === pageActive?.date ? couleur : `${T.brume}44`,
-              transition: "all 0.2s",
-            }}>
-              {marquePage?.date === pageActive?.date ? "🔖 Page marquée" : "Marquer cette page"}
-            </button>
-          </div>
+        {/* Barre basse */}
+        <div style={{ position:"sticky", bottom:0, background:BG, borderTop:`1px solid ${BORDER}`, padding:"0.65rem 1.5rem calc(0.65rem + env(safe-area-inset-bottom))", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <button onClick={() => allerPage(1)} disabled={!peutAllerAvant} style={{ background:"none", border:"none", cursor:peutAllerAvant?"pointer":"default", color:peutAllerAvant?MUTED:BORDER, fontSize:"0.78rem", fontFamily:"Georgia, serif", padding:"0.3rem 0.4rem" }}>← Précédent</button>
+          <button onClick={() => sauvegarderMarque(pageActive)} style={{ background:marquePage?.date===pageActive?.date?"#E8D9B5":"none", border:`1px solid ${BORDER}`, borderRadius:"3px", padding:"0.3rem 0.8rem", cursor:"pointer", color:MUTED, fontSize:"0.62rem", fontFamily:"Jost, sans-serif", letterSpacing:"0.1em" }}>
+            {marquePage?.date===pageActive?.date ? "🔖 Marqué" : "Marquer"}
+          </button>
+          <button onClick={() => allerPage(-1)} disabled={!peutAllerArriere} style={{ background:"none", border:"none", cursor:peutAllerArriere?"pointer":"default", color:peutAllerArriere?MUTED:BORDER, fontSize:"0.78rem", fontFamily:"Georgia, serif", padding:"0.3rem 0.4rem" }}>Suivant →</button>
         </div>
       </div>
     );
   }
-
   // ── ARCHIVE ───────────────────────────────────────────────────────────────
   if (vue === "archive") return (
     <div style={{ padding: "2rem 1.5rem 6rem", maxWidth: 520, margin: "0 auto" }}>
