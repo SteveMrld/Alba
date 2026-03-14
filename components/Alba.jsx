@@ -13146,7 +13146,10 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
   const [archiveLoading, setArchiveLoading] = useState(false);
   const [pageSelectionnee, setPageSelectionnee] = useState(null);
   const [pageIdx, setPageIdx] = useState(0);
-  const [vueAvantTexte, setVueAvantTexte] = useState(null); // "prologue" | "introduction" // index dans l'archive chargée
+  const [vueAvantTexte, setVueAvantTexte] = useState(null);
+  const [marquePage, setMarquePage] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("alba_livre_marque") || "null"); } catch { return null; }
+  }); // index dans l'archive chargée
 
   const chapitreActuel = () => {
     const mois = new Date().getMonth() + 1;
@@ -13158,10 +13161,9 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
   const chargerPage = async () => {
     setLoading(true);
     try {
-      // Charger aussi l'archive pour avoir la navigation
       const [rJour, rArchive] = await Promise.all([
         fetch("/api/livre-du-jour"),
-        fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=30`, {
+        fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
           headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
         })
       ]);
@@ -13176,6 +13178,54 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
       setVue("page");
     } catch {}
     setLoading(false);
+  };
+
+  const chargerDepuisDebut = async () => {
+    setLoading(true);
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.asc&limit=90`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (r.ok) {
+        const pages = await r.json();
+        if (pages.length > 0) {
+          // Archive en desc pour la navigation
+          const archiveDesc = [...pages].reverse();
+          setArchive(archiveDesc);
+          setPageIdx(archiveDesc.length - 1); // première page = dernière dans archive desc
+          setPageSelectionnee(pages[0]);
+          setVue("page");
+        }
+      }
+    } catch {}
+    setLoading(false);
+  };
+
+  const chargerMarquePage = async () => {
+    if (!marquePage) return;
+    setLoading(true);
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+      });
+      if (r.ok) {
+        const pages = await r.json();
+        setArchive(pages);
+        const idx = pages.findIndex(p => p.date === marquePage.date);
+        if (idx !== -1) {
+          setPageIdx(idx);
+          setPageSelectionnee(pages[idx]);
+          setVue("page");
+        }
+      }
+    } catch {}
+    setLoading(false);
+  };
+
+  const sauvegarderMarque = (page) => {
+    const marque = { date: page.date, titre: page.titre_page };
+    setMarquePage(marque);
+    try { localStorage.setItem("alba_livre_marque", JSON.stringify(marque)); } catch {}
   };
 
   const chargerArchive = async () => {
@@ -13251,20 +13301,39 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
         }}>
           {loading ? "Un instant…" : "Lire la page du jour"}
         </button>
-        <button onClick={chargerArchive} style={{
-          marginTop: "0.8rem", background: "none", border: "none", cursor: "pointer",
-          fontFamily: T.sans, fontWeight: 300, fontSize: "0.45rem",
+        {/* Marque-page — reprendre où on en était */}
+        {marquePage && (
+          <button onClick={chargerMarquePage} disabled={loading} style={{
+            marginTop: "0.8rem", width: "100%", padding: "0.7rem",
+            background: `${chap.couleur}12`, border: `1px solid ${chap.couleur}33`,
+            borderRadius: "6px", cursor: "pointer",
+            fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem",
+            color: `${chap.couleur}CC`, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+          }}>
+            <span style={{ fontSize: "0.7rem" }}>🔖</span>
+            Reprendre — {marquePage.titre}
+          </button>
+        )}
+
+        {/* Commencer depuis le début */}
+        <button onClick={chargerDepuisDebut} disabled={loading} style={{
+          marginTop: "0.6rem", background: "none", border: "none", cursor: "pointer",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
           letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}44`,
         }}>
-          {isPremium ? "Pages précédentes" : "✦ Pages précédentes — abonnés"}
+          Commencer depuis la page 1
         </button>
-        <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem", justifyContent: "center" }}>
-          <button onClick={() => setVue("prologue")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55` }}>
-            Prologue
-          </button>
-          <button onClick={() => setVue("introduction")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55` }}>
-            Introduction
-          </button>
+
+        <button onClick={chargerArchive} style={{
+          marginTop: "0.4rem", background: "none", border: "none", cursor: "pointer",
+          fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
+          letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}33`,
+        }}>
+          {isPremium ? "Toutes les pages" : "✦ Toutes les pages — abonnés"}
+        </button>
+        <div style={{ display: "flex", gap: "1.5rem", marginTop: "0.8rem", justifyContent: "center" }}>
+          <button onClick={() => setVue("prologue")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}44` }}>Prologue</button>
+          <button onClick={() => setVue("introduction")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.75rem", color: `${T.brume}44` }}>Introduction</button>
         </div>
       </div>
     </div>
@@ -13342,28 +13411,27 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
         <div style={{ padding: "1.5rem 1.5rem 6rem" }}>
           <div style={{ margin: "0 0 1.5rem", height: 1, background: `${couleur}18` }} />
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-
-            {/* Page précédente */}
-            <button
-              onClick={() => allerPage(1)}
-              disabled={!peutAllerAvant}
-              style={{ background: "none", border: "none", cursor: peutAllerAvant ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerAvant ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0, display: "flex", alignItems: "center", gap: "0.4rem" }}
-            >
-              ← Jour précédent
+            <button onClick={() => allerPage(1)} disabled={!peutAllerAvant}
+              style={{ background: "none", border: "none", cursor: peutAllerAvant ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerAvant ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0 }}>
+              ← Précédent
             </button>
-
-            {/* Numéro de page centré */}
-            <div style={{ fontFamily: "Georgia, serif", fontSize: "0.8rem", color: `${T.brume}33` }}>
-              — {numeroPage} —
-            </div>
-
-            {/* Page suivante */}
-            <button
-              onClick={() => allerPage(-1)}
-              disabled={!peutAllerArriere}
-              style={{ background: "none", border: "none", cursor: peutAllerArriere ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerArriere ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0, display: "flex", alignItems: "center", gap: "0.4rem" }}
-            >
-              Jour suivant →
+            <div style={{ fontFamily: "Georgia, serif", fontSize: "0.8rem", color: `${T.brume}33` }}>— {numeroPage} —</div>
+            <button onClick={() => allerPage(-1)} disabled={!peutAllerArriere}
+              style={{ background: "none", border: "none", cursor: peutAllerArriere ? "pointer" : "default", fontFamily: T.sans, fontSize: "0.42rem", letterSpacing: "0.25em", color: peutAllerArriere ? `${T.brume}66` : `${T.brume}20`, textTransform: "uppercase", padding: 0 }}>
+              Suivant →
+            </button>
+          </div>
+          {/* Marque-page */}
+          <div style={{ textAlign: "center", marginTop: "1.2rem" }}>
+            <button onClick={() => sauvegarderMarque(pageActive)} style={{
+              background: "none", border: `1px solid ${couleur}25`, borderRadius: "20px",
+              padding: "0.4rem 1rem", cursor: "pointer",
+              fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem",
+              letterSpacing: "0.25em", textTransform: "uppercase",
+              color: marquePage?.date === pageActive?.date ? couleur : `${T.brume}44`,
+              transition: "all 0.2s",
+            }}>
+              {marquePage?.date === pageActive?.date ? "🔖 Page marquée" : "Marquer cette page"}
             </button>
           </div>
         </div>
