@@ -13497,7 +13497,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
             Reprendre — {marquePage.titre}
           </button>
         )}
-        <button onClick={() => onPleinEcran?.("sommaire")} style={{
+        <button onClick={() => { setVue("sommaire"); onPleinEcran?.("sommaire"); }} style={{
           marginTop: "0.7rem", background: "none", border: "none", cursor: "pointer",
           fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
           letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66`,
