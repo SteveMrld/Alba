@@ -13449,6 +13449,15 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
   const gravKey = gravKeys[gravIdx] || "commencement";
   const couleur = pageActive?.chapitre_couleur || chap.couleur;
 
+  // Signaler l'état plein écran à l'app
+  useEffect(() => {
+    if (["sommaire","prologue","introduction"].includes(vue)) {
+      onPleinEcran?.(vue);
+    } else {
+      onFermerPleinEcran?.();
+    }
+  }, [vue]);
+
   // ── COUVERTURE ────────────────────────────────────────────────────────────
   if (vue === "couverture") return (
     <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem" }}>
@@ -13544,14 +13553,6 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
   );
 
   // ── SOMMAIRE ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (["sommaire","prologue","introduction"].includes(vue)) {
-      onPleinEcran?.(vue);
-    } else {
-      onFermerPleinEcran?.();
-    }
-  }, [vue]);
-
   if (vue === "sommaire") return (
     <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
       {/* Header */}
