@@ -13300,7 +13300,7 @@ const KindleView = ({ pageActive, archive, pageIdx, marquePage, onClose, onNavig
 
 // ─── LIVRE PLEIN ÉCRAN — Sommaire, Prologue, Introduction ──────────────────────
 
-const LivreSommaire = ({ onNavigate, onClose, onLirePage, loading }) => (
+const LivreSommaire = ({ onNavigate, onClose, onLirePage, onOuvrirChapitre, loading }) => (
   <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
     <div style={{ background:"#F5F0E8", borderBottom:"1px solid #D4C9B0", padding:"0.65rem 1.2rem", display:"flex", alignItems:"center", justifyContent:"space-between", position:"sticky", top:0 }}>
       <button onClick={onClose} style={{ background:"none", border:"none", cursor:"pointer", fontSize:"0.78rem", color:"#8C7B5E", fontFamily:"Georgia, serif", padding:0 }}>← Couverture</button>
@@ -13336,7 +13336,7 @@ const LivreSommaire = ({ onNavigate, onClose, onLirePage, loading }) => (
           { num:"XI",   titre:"La gratitude sauvage",   mois:"Novembre",  couleur:"#C8B098" },
           { num:"XII",  titre:"Ce qui reste",           mois:"Décembre",  couleur:"#A898C8" },
         ].map((c,i) => (
-          <button key={i} onClick={onLirePage} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.8rem 0", borderBottom:"1px dotted #D4C9B0" }}>
+          <button key={i} onClick={() => onOuvrirChapitre ? onOuvrirChapitre(i+1) : onLirePage()} style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", width:"100%", background:"none", border:"none", cursor:"pointer", padding:"0.8rem 0", borderBottom:"1px dotted #D4C9B0" }}>
             <div style={{ display:"flex", gap:"1rem", alignItems:"baseline" }}>
               <span style={{ fontFamily:"Georgia, serif", fontSize:"0.72rem", color:"#8C7B5E", width:"2.2rem", textAlign:"left" }}>{c.num}</span>
               <div style={{ textAlign:"left" }}>
@@ -13527,9 +13527,10 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
       });
       if (r.ok) {
         const pages = await r.json();
-        setArchive(pages);
         const idx = pages.findIndex(p => p.date === marquePage.date);
-        if (idx !== -1 && onShowKindle) onShowKindle({ page: pages[idx], archive: pages, idx, marquePage });
+        const page = idx !== -1 ? pages[idx] : pages[0];
+        const realIdx = idx !== -1 ? idx : 0;
+        if (page && onShowKindle) onShowKindle({ page, archive: pages, idx: realIdx, marquePage });
       }
     } catch {}
     setLoading(false);
@@ -13597,7 +13598,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
         </button>
         {marquePage && (
           <button onClick={chargerMarquePage} disabled={loading} style={{ marginTop: "0.8rem", width: "100%", padding: "0.7rem", background: `${chap.couleur}12`, border: `1px solid ${chap.couleur}33`, borderRadius: "6px", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${chap.couleur}CC`, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "0.7rem" }}>🔖</span> Reprendre — {marquePage.titre}
+            <span style={{ fontSize: "0.7rem" }}>🔖</span> Reprendre là où j'en étais
           </button>
         )}
         <button onClick={() => onPleinEcran?.("sommaire")} style={{ marginTop: "0.7rem", background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66` }}>
@@ -14655,6 +14656,31 @@ function AlbaInner() {
               onClose={() => setLivrePleinEcran(null)}
               onLirePage={() => { setLivrePleinEcran(null); }}
               loading={false}
+              onOuvrirChapitre={async (moisNum) => {
+                setLivrePleinEcran(null);
+                try {
+                  const r = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&chapitre_num=eq.${moisNum}&order=date.asc&limit=1`, {
+                    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+                  });
+                  const rAll = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, {
+                    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+                  });
+                  if (r.ok && rAll.ok) {
+                    const pages = await r.json();
+                    const allPages = await rAll.json();
+                    if (pages.length > 0) {
+                      const page = pages[0];
+                      const idx = allPages.findIndex(p => p.date === page.date);
+                      setKindleData({ page, archive: allPages, idx: idx !== -1 ? idx : 0, marquePage: null });
+                    } else {
+                      // Pas encore de pages pour ce chapitre — ouvrir page du jour
+                      const rJour = await fetch("/api/livre-du-jour");
+                      const dJour = await rJour.json();
+                      setKindleData({ page: dJour, archive: allPages, idx: 0, marquePage: null });
+                    }
+                  }
+                } catch {}
+              }}
             />
           )}
           {livrePleinEcran === "prologue" && (
