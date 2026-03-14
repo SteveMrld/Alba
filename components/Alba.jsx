@@ -13360,7 +13360,13 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
         setArchive(dArchive);
         setPageIdx(0);
       }
-      setVue("page");
+      // Ouvrir directement le Kindle
+      if (onShowKindle) {
+        const dJour2 = await (async () => { try { const r = await fetch("/api/livre-du-jour"); return await r.json(); } catch { return null; } })();
+        const archiveRes = await fetch(`${SUPABASE_URL}/rest/v1/alba_livre_pages?select=*&order=date.desc&limit=90`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+        const arch = archiveRes.ok ? await archiveRes.json() : [];
+        if (dJour2) onShowKindle({ page: dJour2, archive: arch, idx: 0, marquePage });
+      }
     } catch {}
     setLoading(false);
   };
@@ -13374,12 +13380,8 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
       if (r.ok) {
         const pages = await r.json();
         if (pages.length > 0) {
-          // Archive en desc pour la navigation
           const archiveDesc = [...pages].reverse();
-          setArchive(archiveDesc);
-          setPageIdx(archiveDesc.length - 1); // première page = dernière dans archive desc
-          setPageSelectionnee(pages[0]);
-          setVue("page");
+          if (onShowKindle) onShowKindle({ page: pages[0], archive: archiveDesc, idx: archiveDesc.length - 1, marquePage });
         }
       }
     } catch {}
@@ -13397,11 +13399,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
         const pages = await r.json();
         setArchive(pages);
         const idx = pages.findIndex(p => p.date === marquePage.date);
-        if (idx !== -1) {
-          setPageIdx(idx);
-          setPageSelectionnee(pages[idx]);
-          setVue("page");
-        }
+        if (idx !== -1 && onShowKindle) onShowKindle({ page: pages[idx], archive: pages, idx, marquePage });
       }
     } catch {}
     setLoading(false);
@@ -13524,20 +13522,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
     </div>
   );
 
-  // ── PAGE DU LIVRE — useEffect pour éviter boucle infinie ─────────────────
-  useEffect(() => {
-    if (vue === "page" && pageActive && onShowKindle) {
-      onShowKindle({ page: pageActive, archive, idx: pageIdx, marquePage });
-      setVue("couverture"); // reset pour éviter re-trigger
-    }
-  }, [vue, pageActive?.date]);
-
-  if (vue === "page") return null; // transitoire
-
-  if (false) {
-    const peutAllerAvant = false;
-    const peutAllerArriere = false;
-    const texteNettoye = "";
+  // (vue "page" gérée directement via onShowKindle dans les boutons)
 
     const BG = "#F5F0E8";
     const TEXT = "#2C2416";
@@ -13621,7 +13606,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
           {archive.map((p, i) => {
             const num = archive.length - i;
             return (
-              <button key={i} onClick={() => { setArchive(archive); setPageIdx(i); setPageSelectionnee(p); setVue("page"); }} style={{
+              <button key={i} onClick={() => { if (onShowKindle) onShowKindle({ page: p, archive, idx: i, marquePage }); }} style={{
                 background: `${T.nuit2}88`, border: `1px solid ${T.brume}10`,
                 borderRadius: "6px", padding: "0.9rem 1.1rem", cursor: "pointer",
                 display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
