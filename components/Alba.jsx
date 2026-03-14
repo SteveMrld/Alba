@@ -13524,9 +13524,17 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
     </div>
   );
 
-  // ── PAGE DU LIVRE — ouvre KindleView au niveau app ────────────────────────
-  if (vue === "page" && pageActive) {
-    if (onShowKindle) onShowKindle({ page: pageActive, archive, idx: pageIdx, marquePage });
+  // ── PAGE DU LIVRE — useEffect pour éviter boucle infinie ─────────────────
+  useEffect(() => {
+    if (vue === "page" && pageActive && onShowKindle) {
+      onShowKindle({ page: pageActive, archive, idx: pageIdx, marquePage });
+      setVue("couverture"); // reset pour éviter re-trigger
+    }
+  }, [vue, pageActive?.date]);
+
+  if (vue === "page") return null; // transitoire
+
+  if (false) {
     const peutAllerAvant = false;
     const peutAllerArriere = false;
     const texteNettoye = "";
