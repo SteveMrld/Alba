@@ -13053,7 +13053,8 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
   const [archive, setArchive] = useState([]);
   const [archiveLoading, setArchiveLoading] = useState(false);
   const [pageSelectionnee, setPageSelectionnee] = useState(null);
-  const [pageIdx, setPageIdx] = useState(0); // index dans l'archive chargée
+  const [pageIdx, setPageIdx] = useState(0);
+  const [vueAvantTexte, setVueAvantTexte] = useState(null); // "prologue" | "introduction" // index dans l'archive chargée
 
   const chapitreActuel = () => {
     const mois = new Date().getMonth() + 1;
@@ -13165,6 +13166,14 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
         }}>
           {isPremium ? "Pages précédentes" : "✦ Pages précédentes — abonnés"}
         </button>
+        <div style={{ display: "flex", gap: "1.5rem", marginTop: "1rem", justifyContent: "center" }}>
+          <button onClick={() => setVue("prologue")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55` }}>
+            Prologue
+          </button>
+          <button onClick={() => setVue("introduction")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55` }}>
+            Introduction
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -13301,6 +13310,59 @@ const LivreAlba = ({ isPremium, onShowPaywall }) => {
           })}
         </div>
       )}
+    </div>
+  );
+
+  // ── PROLOGUE ────────────────────────────────────────────────────────────
+  if (vue === "prologue") return (
+    <div style={{ minHeight: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto", padding: "2rem 2rem 6rem" }}>
+      <button onClick={() => setVue("couverture")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.45rem", letterSpacing: "0.3em", color: `${T.brume}44`, padding: 0, textTransform: "uppercase", marginBottom: "3rem" }}>← Couverture</button>
+      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${chap.couleur}77`, marginBottom: "0.8rem" }}>Prologue</div>
+        <div style={{ width: 30, height: 1, background: `linear-gradient(to right, transparent, ${chap.couleur}55, transparent)`, margin: "0 auto" }} />
+      </div>
+      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.95rem, 3.2vw, 1.05rem)", color: `${T.aube}EE`, lineHeight: 2.2 }}>
+        <p>Il existe une heure que la plupart des gens ne connaissent pas. Elle précède le lever du jour d'une quinzaine de minutes, et elle n'appartient à aucun des deux mondes — ni à la nuit qui résiste, ni au matin qui n'est pas encore là. Les marins l'appellent l'aube nautique. Les moines la connaissent depuis toujours. Les oiseaux commencent à chanter dedans, avant même que la lumière soit visible.</p>
+        <p style={{ marginTop: "1.8rem" }}>C'est dans cette heure que ce livre existe.</p>
+        <p style={{ marginTop: "1.8rem" }}>Pas comme un guide. Pas comme une méthode. Comme quelque chose qu'on ouvre quand on cherche un appui — non pas pour savoir quoi faire, mais pour ne pas être seul avec ce qu'on traverse.</p>
+        <p style={{ marginTop: "1.8rem" }}>Chaque page a été écrite pour un jour précis. Pour ce que ce jour peut apporter — une question, une découverte, un récit court, un fait sur le corps ou le cerveau. Rien d'exhaustif. Rien de définitif. Juste quelque chose de vrai, posé là.</p>
+        <p style={{ marginTop: "1.8rem" }}>Tu n'as pas à tout lire. Tu n'as pas à être prêt. Il suffit d'ouvrir.</p>
+      </div>
+      <div style={{ margin: "3rem 0 0", height: 1, background: `${chap.couleur}20` }} />
+      <div style={{ textAlign: "center", marginTop: "1.5rem", fontFamily: "Georgia, serif", fontSize: "0.75rem", color: `${T.brume}33` }}>— i —</div>
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        <button onClick={() => setVue("introduction")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}55` }}>
+          Introduction →
+        </button>
+      </div>
+    </div>
+  );
+
+  // ── INTRODUCTION ─────────────────────────────────────────────────────────
+  if (vue === "introduction") return (
+    <div style={{ minHeight: "calc(100vh - 120px)", maxWidth: 520, margin: "0 auto", padding: "2rem 2rem 6rem" }}>
+      <button onClick={() => setVue("prologue")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "0.45rem", letterSpacing: "0.3em", color: `${T.brume}44`, padding: 0, textTransform: "uppercase", marginBottom: "3rem" }}>← Prologue</button>
+      <div style={{ textAlign: "center", marginBottom: "3rem" }}>
+        <div style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.4rem", letterSpacing: "0.5em", textTransform: "uppercase", color: `${chap.couleur}77`, marginBottom: "0.8rem" }}>Introduction</div>
+        <div style={{ width: 30, height: 1, background: `linear-gradient(to right, transparent, ${chap.couleur}55, transparent)`, margin: "0 auto" }} />
+      </div>
+      <div style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "clamp(0.95rem, 3.2vw, 1.05rem)", color: `${T.aube}EE`, lineHeight: 2.2 }}>
+        <p>Ce livre fonctionne comme une année. Douze chapitres, douze mois, douze dimensions de la vie intérieure. Chaque chapitre a son territoire — ce qui commence, ce qu'on porte, le corps et ses mémoires, les liens, ce qui résiste, l'été intérieur, le silence, ce qu'on traverse, le retour à soi, ce qui part, la gratitude sauvage, ce qui reste.</p>
+        <p style={{ marginTop: "1.8rem" }}>Chaque jour, une page. Elle prend l'une de cinq formes possibles.</p>
+        <p style={{ marginTop: "1.8rem" }}>Certains jours, c'est un savoir — un concept de psychologie, de neuroscience, de philosophie. Pas pour informer. Pour déplacer quelque chose dans la façon de se regarder.</p>
+        <p style={{ marginTop: "1.8rem" }}>D'autres jours, c'est un fait sur le corps ou le cerveau. Court, dense, concret. Parce que comprendre ce qui se passe en nous physiologiquement change ce qu'on croit être de la faiblesse ou du caractère.</p>
+        <p style={{ marginTop: "1.8rem" }}>Certains mercredis, c'est un conte. Une histoire courte, inventée, qui porte une vérité sans la nommer. On ne l'explique pas. On la laisse faire son travail.</p>
+        <p style={{ marginTop: "1.8rem" }}>Les samedis ouvrent sur une pratique oubliée — un rituel, une tradition, un geste ancien. Ce que des gens ont inventé pour traverser ce que nous traversons aussi.</p>
+        <p style={{ marginTop: "1.8rem" }}>Et le dimanche, une phrase. Juste une. Et ce qu'elle laisse.</p>
+        <p style={{ marginTop: "1.8rem" }}>Tu peux commencer le premier janvier ou le premier jour où tu ouvres ce livre. Ce qui compte, c'est de revenir. Une page. Un jour. Ce n'est pas grand-chose. C'est tout.</p>
+      </div>
+      <div style={{ margin: "3rem 0 0", height: 1, background: `${chap.couleur}20` }} />
+      <div style={{ textAlign: "center", marginTop: "1.5rem", fontFamily: "Georgia, serif", fontSize: "0.75rem", color: `${T.brume}33` }}>— ii —</div>
+      <div style={{ textAlign: "center", marginTop: "2rem" }}>
+        <button onClick={chargerPage} disabled={loading} style={{ background: `${chap.couleur}22`, border: `1px solid ${chap.couleur}55`, borderRadius: "6px", padding: "0.75rem 1.8rem", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.95rem", color: chap.couleur }}>
+          {loading ? "Un instant…" : "Commencer le livre →"}
+        </button>
+      </div>
     </div>
   );
 
