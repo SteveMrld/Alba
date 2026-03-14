@@ -6291,16 +6291,6 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
     try { return localStorage.getItem("alba_rituel_" + new Date().toISOString().split("T")[0]) === "1"; } catch { return false; }
   });
 
-  // Déjà fait aujourd'hui
-  if (rituelFait && etape === 0) return (
-    <div style={{ margin: "1rem 1.5rem 0", padding: "1rem 1.4rem", border: `1px solid ${T.or}15`, borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.7rem" }}>
-      <span style={{ color: T.or, fontSize: "0.9rem" }}>✦</span>
-      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}DD`, margin: 0 }}>
-        Rituel du matin accompli. Bonne journée, {data.prenom}.
-      </p>
-    </div>
-  );
-
   const marquerFait = () => {
     try { localStorage.setItem("alba_rituel_" + new Date().toISOString().split("T")[0], "1"); } catch {}
     if (onComplete) onComplete();
@@ -6370,6 +6360,15 @@ const RituelMatin = ({ data, cleActive = 0, onComplete }) => {
   );
 
   // ── ÉTAPE 0 : Intro ──────────────────────────────────────────────────────────
+  if (rituelFait && etape === 0) return (
+    <div style={{ margin: "1rem 1.5rem 0", padding: "1rem 1.4rem", border: `1px solid ${T.or}15`, borderRadius: "8px", display: "flex", alignItems: "center", gap: "0.7rem" }}>
+      <span style={{ color: T.or, fontSize: "0.9rem" }}>✦</span>
+      <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}DD`, margin: 0 }}>
+        Rituel du matin accompli. Bonne journée, {data.prenom}.
+      </p>
+    </div>
+  );
+
   if (etape === 0) return (
     <div style={cardStyle}>
       <div style={{ position: "absolute", top: -40, right: -40, width: 150, height: 150, borderRadius: "50%", background: `radial-gradient(circle, ${T.or}10, transparent 70%)`, pointerEvents: "none" }} />
