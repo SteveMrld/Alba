@@ -6715,6 +6715,27 @@ const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
     return joursEcoules < 7;
   };
 
+  // Ancienneté dans l'app (jours depuis premier lancement)
+  const getAnciennete = () => {
+    try {
+      const firstDay = localStorage.getItem("alba_first_day");
+      if (!firstDay) return 0;
+      return Math.floor((Date.now() - new Date(firstDay).getTime()) / (1000 * 60 * 60 * 24));
+    } catch { return 0; }
+  };
+
+  // Collecte tous les post-its des 30 derniers jours (mois en cours)
+  const getPostitsMois = () => {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
+    const tous = [];
+    Object.entries(allPostits || {}).forEach(([dateKey, posts]) => {
+      if (new Date(dateKey + "T00:00:00") >= cutoff) {
+        posts.forEach(p => tous.push(p.texte));
+      }
+    });
+    return tous;
+  };
+
   // Collecte tous les post-its des 7 derniers jours
   const getPostits7Jours = () => {
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
@@ -6727,9 +6748,14 @@ const LettresAlba = ({ data, allPostits, isPremium, onShowPaywall }) => {
     return tous;
   };
 
+  const anciennete = getAnciennete();
+  const fragmentsMois = getPostitsMois();
+  const MIN_JOURS = 10;
+  const MIN_FRAGMENTS = 5;
+
   const genererLettre = async () => {
-    const fragments = getPostits7Jours();
-    if (fragments.length < 2) return;
+    const fragments = fragmentsMois.length > 0 ? fragmentsMois : getPostits7Jours();
+    if (fragments.length < MIN_FRAGMENTS) return;
     setGeneration(true);
 
     const cdv = cheminDeVie(data.naissance);
@@ -6776,7 +6802,9 @@ Pas de formule de clôture. Signe : ALBA`;
     setGeneration(false);
   };
 
-  const peutGenerer = getPostits7Jours().length >= 2 && !lettreDejaGeneree();
+  const peutGenerer = anciennete >= MIN_JOURS && fragmentsMois.length >= MIN_FRAGMENTS && !lettreDejaGeneree();
+  const fragmentsManquants = Math.max(0, MIN_FRAGMENTS - fragmentsMois.length);
+  const joursManquants = Math.max(0, MIN_JOURS - anciennete);
   const semaineFmt = (iso) => {
     const d = new Date(iso);
     return d.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -6818,14 +6846,24 @@ Pas de formule de clôture. Signe : ALBA`;
       )}
 
       {!peutGenerer && !lettreDejaGeneree() && (
-        <div style={{
-          padding: "1.2rem", marginBottom: "1.5rem",
-          background: `${T.nuit2}`,
-          border: `1px solid ${T.brume}15`,
-          borderRadius: "6px",
-        }}>
-          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.9rem", color: T.brume, lineHeight: 1.8 }}>
-            Pose encore quelques fragments dans ton ardoise — ALBA aura besoin d'au moins deux moments pour t'écrire.
+        <div style={{ padding: "1.2rem", marginBottom: "1.5rem", background: `${T.nuit2}`, border: `1px solid ${T.brume}15`, borderRadius: "6px" }}>
+          <p style={{ fontFamily: T.sans, fontWeight: 300, fontSize: "0.55rem", letterSpacing: "0.35em", textTransform: "uppercase", color: `${T.brume}66`, marginBottom: "0.8rem" }}>
+            Quand arrive ta première lettre ?
+          </p>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.88rem", color: `${T.brume}CC`, lineHeight: 1.9, margin: 0 }}>
+            ALBA t'écrit quand elle a quelque chose à dire. Pour ça, deux conditions :
+            {joursManquants > 0 && (
+              <span> laisser passer <strong style={{ color: T.or, fontStyle: "normal" }}>{joursManquants} jour{joursManquants > 1 ? "s" : ""}</strong> de plus —</span>
+            )}
+            {joursManquants === 0 && <span> l'ancienneté est là —</span>}
+            {" "}
+            {fragmentsManquants > 0
+              ? <span>et poser encore <strong style={{ color: T.or, fontStyle: "normal" }}>{fragmentsManquants} fragment{fragmentsManquants > 1 ? "s" : ""}</strong> dans l'Ardoise ce mois-ci.</span>
+              : <span>l'Ardoise est prête.</span>
+            }
+          </p>
+          <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.78rem", color: `${T.brume}55`, lineHeight: 1.7, marginTop: "0.8rem" }}>
+            Ce n'est pas une contrainte. C'est ce qui fait qu'une lettre vaut quelque chose — elle a de quoi parler.
           </p>
         </div>
       )}
