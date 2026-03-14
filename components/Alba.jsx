@@ -13323,7 +13323,7 @@ const TYPE_LABELS = {
   "phrase":        "Une phrase",
 };
 
-const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
+const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFermerPleinEcran }) => {
   const [vue, setVue] = useState("couverture");
   const [pageJour, setPageJour] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -13497,7 +13497,7 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
             Reprendre — {marquePage.titre}
           </button>
         )}
-        <button onClick={() => setVue("sommaire")} style={{
+        <button onClick={() => onPleinEcran?.("sommaire")} style={{
           marginTop: "0.7rem", background: "none", border: "none", cursor: "pointer",
           fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem",
           letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66`,
@@ -13544,6 +13544,14 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle }) => {
   );
 
   // ── SOMMAIRE ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (["sommaire","prologue","introduction"].includes(vue)) {
+      onPleinEcran?.(vue);
+    } else {
+      onFermerPleinEcran?.();
+    }
+  }, [vue]);
+
   if (vue === "sommaire") return (
     <div style={{ position:"fixed", inset:0, zIndex:50, background:"#F5F0E8", overflowY:"auto", fontFamily:"Georgia, 'Times New Roman', serif" }}>
       {/* Header */}
@@ -14108,7 +14116,8 @@ function AlbaInner() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [showTuto, setShowTuto] = useState(false);
   const [showLettreBienvenue, setShowLettreBienvenue] = useState(false);
-  const [kindleData, setKindleData] = useState(null); // { page, archive, idx }
+  const [kindleData, setKindleData] = useState(null);
+  const [livrePleinEcran, setLivrePleinEcran] = useState(null); // "sommaire" | "prologue" | "introduction" // { page, archive, idx }
   const [showSpotify, setShowSpotify] = useState(false);
   const [showAide, setShowAide] = useState(false);
   const [showLataifApp, setShowLataifApp] = useState(false);
@@ -14592,7 +14601,7 @@ function AlbaInner() {
           {/* ── HEADER ── */}
           <div style={{
             position: "sticky", top: 0, zIndex: 50,
-            display: kindleData ? "none" : undefined,
+            display: (kindleData || livrePleinEcran) ? "none" : undefined,
             background: `${T.nuit}ee`,
             backdropFilter: "blur(12px)",
             borderBottom: `1px solid ${T.brume}18`,
@@ -14722,7 +14731,7 @@ function AlbaInner() {
               {tab === "cle"       && <TerritoireCle cleActive={cleActive} progressStats={progressStats} allPostits={allPostitsApp} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} />}
               {tab === "ciel"      && <CielCairn userId={authUser?.id} db={db} />}
               {tab === "trouvailles" && <SalleDesTrouvailles data={userData} />}
-              {tab === "livre"       && <LivreAlba isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} onShowKindle={(data) => setKindleData(data)} />}
+              {tab === "livre"       && <LivreAlba isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} onShowKindle={(data) => setKindleData(data)} onPleinEcran={(vue) => setLivrePleinEcran(vue)} onFermerPleinEcran={() => setLivrePleinEcran(null)} />}
               {tab === "lumiere"   && <LumiereDuJour />}
               {tab === "souffle"   && <div style={{padding:"0 1.5rem"}}><Souffle onComplete={() => incrementStat("souffleTotal")} /></div>}
               {tab === "profil"    && <Profil data={userData} progressStats={progressStats} onUpdateData={(d) => { setUserData(d); if (db) db.saveProfile(d); }} onSignOut={handleSignOut} isPremium={isPremium} onShowPaywall={() => setShowPaywall(true)} authUserKey={localStorage.getItem("alba_user_key") || authUser?.id} cleActive={cleActive} onShowCGU={() => setShowCGU(true)} onShowPricing={() => setShowPricingProfil(true)} />}
@@ -14753,7 +14762,7 @@ function AlbaInner() {
             background: `${T.nuit}f2`,
             backdropFilter: "blur(16px)",
             borderTop: `1px solid ${T.brume}20`,
-            display: kindleData ? "none" : "flex",
+            display: (kindleData || livrePleinEcran) ? "none" : "flex",
             justifyContent: "space-around", alignItems: "center",
             padding: "0.6rem 0 calc(0.6rem + env(safe-area-inset-bottom))",
             zIndex: 50,
