@@ -13579,9 +13579,33 @@ const LivreAlba = ({ isPremium, onShowPaywall, onShowKindle, onPleinEcran, onFer
   const gravKey = gravKeys[gravIdx] || "commencement";
   const couleur = pageActive?.chapitre_couleur || chap.couleur;
 
-
-  return null;
-
+  // ── COUVERTURE ──────────────────────────────────────────────────────────────
+  return (
+    <div style={{ minHeight: "calc(100vh - 120px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1.5rem 6rem" }}>
+      <div style={{ position: "relative", width: "min(260px, 75vw)", animation: "fadeUp 0.8s ease forwards", cursor: "pointer" }} onClick={chargerPage}>
+        <div style={{ borderRadius: "4px 10px 10px 4px", overflow: "hidden", boxShadow: "6px 8px 40px rgba(0,0,0,0.8), -5px 0 10px rgba(0,0,0,0.5)", position: "relative" }}>
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 8, background: "linear-gradient(to right, #0A0806, #1A1510, #0A0806)", zIndex: 2 }} />
+          <img src="/couverture-livre.png" alt="Ce que l'aube sait" style={{ width: "100%", display: "block" }} />
+        </div>
+      </div>
+      <div style={{ marginTop: "2rem", textAlign: "center", maxWidth: 280, width: "100%" }}>
+        <p style={{ fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${T.brume}77`, lineHeight: 1.8, margin: "0 0 1.5rem" }}>
+          Chaque jour à minuit, une nouvelle page.<br/>Une année intérieure.
+        </p>
+        <button onClick={chargerPage} disabled={loading} style={{ width: "100%", padding: "0.85rem", background: `${chap.couleur}22`, border: `1px solid ${chap.couleur}55`, borderRadius: "6px", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "1rem", color: chap.couleur, transition: "all 0.3s" }}>
+          {loading ? "Un instant…" : "Lire la page du jour"}
+        </button>
+        {marquePage && (
+          <button onClick={chargerMarquePage} disabled={loading} style={{ marginTop: "0.8rem", width: "100%", padding: "0.7rem", background: `${chap.couleur}12`, border: `1px solid ${chap.couleur}33`, borderRadius: "6px", cursor: "pointer", fontFamily: T.serif, fontStyle: "italic", fontSize: "0.85rem", color: `${chap.couleur}CC`, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+            <span style={{ fontSize: "0.7rem" }}>🔖</span> Reprendre — {marquePage.titre}
+          </button>
+        )}
+        <button onClick={() => onPleinEcran?.("sommaire")} style={{ marginTop: "0.7rem", background: "none", border: "none", cursor: "pointer", fontFamily: T.sans, fontWeight: 300, fontSize: "0.43rem", letterSpacing: "0.3em", textTransform: "uppercase", color: `${T.brume}66` }}>
+          Sommaire
+        </button>
+      </div>
+    </div>
+  );
 };
 
 
