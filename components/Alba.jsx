@@ -3002,9 +3002,8 @@ const Portrait = ({ data, onContinue }) => {
   const labelChemin  = isRationnel ? "Profil psychologique" : "Chemin de vie";
   const labelBlessure = isRationnel ? "Zone de vulnérabilité" : "Blessure à traverser";
 
-  if (!data) return null;
-
   useEffect(() => {
+    if (!data) return;
     const delays = [3200, 3400, 3800, 3600, 4000];
     let t;
     const advance = (p) => {
@@ -3015,7 +3014,9 @@ const Portrait = ({ data, onContinue }) => {
     };
     advance(0);
     return () => clearTimeout(t);
-  }, []);
+  }, [data]);
+
+  if (!data) return null;
 
   const fade = (visible, delay = 0) => ({
     opacity: visible ? 1 : 0,
@@ -5021,7 +5022,10 @@ const InvitationDuJour = ({ data, onComplete, onEchec }) => {
 };
 
 const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationComplete, onInvitationEchec, isPremium, onShowPaywall }) => {
+  const [heroVideo] = useState(() => getVideoAmbiance());
+
   if (!data) return null;
+
   const cdv = cheminDeVie(data.naissance);
   const chemin = CHEMINS[cdv] || CHEMINS[9];
   const cle = CLES[cleActive] || CLES[0];
@@ -5171,7 +5175,6 @@ const Accueil = ({ data, onNavigate, cleActive = 0, progressStats, onInvitationC
   ];
 
   // Vidéo selon l'heure
-  const [heroVideo] = useState(() => getVideoAmbiance());
 
   return (
     <div style={{ paddingBottom: "6rem" }}>
